@@ -1,0 +1,990 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/design/app_primitives.dart';
+import '../../../data/models/mission.dart';
+
+// ─── ClientCandidatesCard ─────────────────────────────────────────────────────
+
+class ClientCandidatesCard extends StatelessWidget {
+  final int count;
+  final VoidCallback onViewCandidates;
+
+  const ClientCandidatesCard({
+    super.key,
+    required this.count,
+    required this.onViewCandidates,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Candidatures',
+            style: GoogleFonts.inter(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111111),
+            ),
+          ),
+          AppGap.h16,
+          Row(
+            children: [
+              SizedBox(
+                width: 74,
+                height: 32,
+                child: Stack(
+                  children: List.generate(3, (index) {
+                    final visible = index < count && count > 0;
+                    return Positioned(
+                      left: index * 18.0,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: visible
+                              ? const Color(0xFFF4F5F7)
+                              : const Color(0xFFF8F9FB),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: Icon(
+                          Icons.person_outline_rounded,
+                          size: 15,
+                          color: visible
+                              ? const Color(0xFF111111)
+                              : const Color(0xFFC4CAD2),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              AppGap.w12,
+              Expanded(
+                child: Text(
+                  count > 0
+                      ? '$count candidat${count > 1 ? 's' : ''} interesse${count > 1 ? 's' : ''}'
+                      : 'Aucune candidature pour le moment',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppGap.h18,
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: count > 0 ? onViewCandidates : null,
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: const Color(0xFF000000),
+                disabledBackgroundColor:
+                    const Color(0xFF000000).withValues(alpha: 0.12),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(54),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                textStyle: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: const Text('Voir les candidatures'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── ClientPrestaCard ─────────────────────────────────────────────────────────
+
+class ClientPrestaCard extends StatelessWidget {
+  final PrestaInfo presta;
+  final MissionStatus status;
+  final int? rating;
+  final VoidCallback? onPhone;
+  final VoidCallback? onChat;
+  final VoidCallback? onViewProfile;
+
+  const ClientPrestaCard({
+    super.key,
+    required this.presta,
+    required this.status,
+    this.rating,
+    this.onPhone,
+    this.onChat,
+    this.onViewProfile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final agreedPrice = presta.acceptedPrice ?? '100 €';
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.check_rounded, size: 18, color: Color(0xFF4A4F55)),
+              AppGap.w8,
+              Text(
+                'Prestataire choisi',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF181B1F),
+                ),
+              ),
+            ],
+          ),
+          AppGap.h20,
+          Center(
+            child: GestureDetector(
+              onTap: onViewProfile,
+              child: Column(
+                children: [
+                  Container(
+                    width: 82,
+                    height: 82,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFFFFFFF),
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: presta.avatarUrl.isNotEmpty
+                        ? Image.network(
+                            presta.avatarUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _PrestaAvatarFallback(name: presta.name),
+                          )
+                        : _PrestaAvatarFallback(name: presta.name),
+                  ),
+                  AppGap.h12,
+                  Text(
+                    presta.name,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF111111),
+                    ),
+                  ),
+                  AppGap.h6,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 14,
+                        color: Color(0xFF9AA1A8),
+                      ),
+                      AppGap.w4,
+                      Text(
+                        '${presta.rating.toStringAsFixed(1)} rating',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF9AA1A8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AppGap.h18,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F6F7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Tarif convenu:',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF98A1AC),
+                    ),
+                  ),
+                ),
+                Text(
+                  agreedPrice,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+                AppGap.w6,
+                const Icon(
+                  Icons.check_rounded,
+                  size: 15,
+                  color: Color(0xFF1C8C55),
+                ),
+              ],
+            ),
+          ),
+          AppGap.h14,
+          Text(
+            'Paiement securise • Service garanti',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF9AA1A8),
+            ),
+          ),
+          if (onPhone != null || onChat != null) ...[
+            AppGap.h16,
+            Row(
+              children: [
+                if (onPhone != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onPhone,
+                      icon: const Icon(Icons.phone_rounded, size: 16),
+                      label: const Text('Appeler'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF111111),
+                        side: const BorderSide(color: Color(0xFFE1E6EB)),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (onPhone != null && onChat != null) AppGap.w10,
+                if (onChat != null)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onChat,
+                      icon: const Icon(Icons.chat_bubble_rounded, size: 16),
+                      label: const Text('Contacter'),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF111111),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class ClientTrackingCard extends StatelessWidget {
+  final Mission mission;
+  final VoidCallback? onOpenTracking;
+
+  const ClientTrackingCard({
+    super.key,
+    required this.mission,
+    this.onOpenTracking,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final prestaName = mission.assignedPresta?.name ?? 'Votre prestataire';
+    final startCode = mission.startCode;
+    final config = switch (mission.status) {
+      MissionStatus.confirmed => (
+          icon: Icons.schedule_send_rounded,
+          title: 'Code de demarrage pret',
+          subtitle:
+              'Communiquez ce code a $prestaName uniquement quand il arrive pour lancer la mission.',
+          accent: const Color(0xFF98A1AC),
+          cta: 'Voir le suivi',
+        ),
+      MissionStatus.onTheWay => (
+          icon: Icons.navigation_rounded,
+          title: '$prestaName est en route',
+          subtitle:
+              'Le suivi en direct doit vous permettre de voir sa progression jusqu a l adresse.',
+          accent: AppColors.iosBlue,
+          cta: 'Ouvrir le suivi',
+        ),
+      MissionStatus.inProgress => (
+          icon: Icons.my_location_rounded,
+          title: 'Prestataire sur place',
+          subtitle:
+              '$prestaName est actuellement sur la mission. Le suivi reste visible pendant l intervention.',
+          accent: AppColors.primary,
+          cta: 'Voir la position',
+        ),
+      MissionStatus.completionRequested => (
+          icon: Icons.task_alt_rounded,
+          title: 'Le prestataire a signale la fin',
+          subtitle:
+              'Verifiez la prestation puis confirmez la mission ou signalez un probleme.',
+          accent: AppColors.warning,
+          cta: 'Verifier la mission',
+        ),
+      _ => (
+          icon: Icons.location_disabled_rounded,
+          title: 'Suivi indisponible',
+          subtitle: 'Aucune position live a afficher pour cette mission.',
+          accent: const Color(0xFF98A1AC),
+          cta: null,
+        ),
+    };
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: config.accent.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(config.icon, size: 20, color: config.accent),
+              ),
+              AppGap.w12,
+              Expanded(
+                child: Text(
+                  config.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppGap.h14,
+          Text(
+            config.subtitle,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: const Color(0xFF6E7781),
+            ),
+          ),
+          if (startCode != null &&
+              (mission.status == MissionStatus.confirmed ||
+                  mission.status == MissionStatus.onTheWay)) ...[
+            AppGap.h16,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF111111),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Code de demarrage',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.72),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        AppGap.h8,
+                        Text(
+                          '${startCode.substring(0, 3)} ${startCode.substring(3)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 2.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AppGap.w12,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: startCode),
+                        );
+                        if (context.mounted) {
+                          showAppSnackBar(
+                            context,
+                            'Code de demarrage copie',
+                            icon: Icons.copy_rounded,
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                            AppGap.w6,
+                            Text(
+                              'Copier',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          AppGap.h16,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F8FA),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  mission.status == MissionStatus.confirmed
+                      ? Icons.hourglass_top_rounded
+                      : Icons.location_searching_rounded,
+                  size: 16,
+                  color: config.accent,
+                ),
+                AppGap.w8,
+                Expanded(
+                  child: Text(
+                    mission.status == MissionStatus.confirmed
+                        ? 'Le suivi apparaitra automatiquement quand le prestataire demarrera le trajet.'
+                        : mission.status == MissionStatus.completionRequested
+                            ? 'La mission est en attente de votre retour avant de passer au paiement.'
+                            : 'Le tracking live est prevu ici pour suivre le trajet du prestataire.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF4C5661),
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (config.cta != null) ...[
+            AppGap.h16,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onOpenTracking,
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: const Color(0xFF000000),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: Text(config.cta!),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class ClientCompletionRequestedCard extends StatelessWidget {
+  final Mission mission;
+  final VoidCallback onConfirm;
+  final VoidCallback onDispute;
+
+  const ClientCompletionRequestedCard({
+    super.key,
+    required this.mission,
+    required this.onConfirm,
+    required this.onDispute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final prestaName = mission.assignedPresta?.name ?? 'Le prestataire';
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.task_alt_rounded,
+                  size: 20,
+                  color: AppColors.warning,
+                ),
+              ),
+              AppGap.w12,
+              Expanded(
+                child: Text(
+                  'Fin de mission signalee',
+                  style: GoogleFonts.inter(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppGap.h14,
+          Text(
+            '$prestaName a signale avoir termine la mission. Confirmez la fin si tout est bon ou signalez un probleme.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: const Color(0xFF6E7781),
+            ),
+          ),
+          AppGap.h16,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F8FA),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.schedule_rounded,
+                  size: 16,
+                  color: AppColors.warning,
+                ),
+                AppGap.w8,
+                Expanded(
+                  child: Text(
+                    'Sans action de votre part, le paiement pourra ensuite etre libere automatiquement.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF4C5661),
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AppGap.h16,
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onDispute,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF111111),
+                    side: const BorderSide(color: Color(0xFFE1E6EB)),
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: const Text('Signaler'),
+                ),
+              ),
+              AppGap.w10,
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF000000),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: const Text('Confirmer'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrestaAvatarFallback extends StatelessWidget {
+  final String name;
+
+  const _PrestaAvatarFallback({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
+    return Container(
+      color: const Color(0xFFF0F2F4),
+      alignment: Alignment.center,
+      child: Text(
+        initials.isEmpty ? '?' : initials,
+        style: GoogleFonts.inter(
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF8C95A0),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── ClientActionSheet ────────────────────────────────────────────────────────
+
+class ClientActionSheet extends StatelessWidget {
+  final bool canModify;
+  final bool canCancel;
+  final VoidCallback onEdit;
+  final VoidCallback onShare;
+  final VoidCallback onCancel;
+
+  const ClientActionSheet({
+    super.key,
+    required this.canModify,
+    required this.canCancel,
+    required this.onEdit,
+    required this.onShare,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    return AppSheetSurface(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(18, 0, 18, 18 + bottomPad),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppBottomSheetHandle(),
+            AppGap.h18,
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: const Color(0xFFF0F1F3), width: 0.8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (canModify) ...[
+                    _SheetRow(
+                      icon: Icons.edit_outlined,
+                      label: 'Modifier la mission',
+                      onTap: onEdit,
+                    ),
+                    const _SheetDivider(),
+                  ],
+                  _SheetRow(
+                    icon: Icons.ios_share_outlined,
+                    label: 'Partager la mission',
+                    onTap: onShare,
+                  ),
+                  if (canCancel) ...[
+                    const _SheetDivider(),
+                    _SheetRow(
+                      icon: Icons.delete_outline,
+                      label: 'Annuler la mission',
+                      trailingIcon: Icons.delete_outline,
+                      trailingColor: const Color(0xFFB45C5C),
+                      showLeadingIcon: false,
+                      onTap: onCancel,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final IconData? trailingIcon;
+  final Color? trailingColor;
+  final bool showLeadingIcon;
+
+  const _SheetRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.trailingIcon,
+    this.trailingColor,
+    this.showLeadingIcon = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          child: Row(
+            children: [
+              if (showLeadingIcon) ...[
+                Icon(icon, size: 18, color: const Color(0xFF111111)),
+                AppGap.w14,
+              ],
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ),
+              Icon(
+                trailingIcon ?? Icons.chevron_right_rounded,
+                size: trailingIcon != null ? 17 : 18,
+                color: trailingColor ?? const Color(0xFFB5BDC7),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetDivider extends StatelessWidget {
+  const _SheetDivider();
+
+  @override
+  Widget build(BuildContext context) => const Divider(
+    height: 1,
+    color: Color(0xFFF0F1F3),
+    indent: 18,
+    endIndent: 18,
+  );
+}
+
+// ─── ClientCancelSheet ────────────────────────────────────────────────────────
+
+class ClientCancelSheet extends StatefulWidget {
+  final String missionTitle;
+  final VoidCallback onConfirm;
+
+  const ClientCancelSheet({
+    super.key,
+    required this.missionTitle,
+    required this.onConfirm,
+  });
+
+  @override
+  State<ClientCancelSheet> createState() => _ClientCancelSheetState();
+}
+
+class _ClientCancelSheetState extends State<ClientCancelSheet> {
+  bool _loading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    return AppSheetSurface(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AppBottomSheetHandle(),
+            AppGap.h20,
+            Text(
+              'Annuler la mission ?',
+              style: context.text.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            AppGap.h4,
+            Text(
+              widget.missionTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.bodyMedium?.copyWith(
+                color: context.colors.textTertiary,
+              ),
+            ),
+            AppGap.h24,
+            Divider(color: context.colors.divider, height: 1),
+            AppGap.h24,
+            AppButton(
+              label: 'Confirmer l\'annulation',
+              variant: ButtonVariant.destructive,
+              isLoading: _loading,
+              onPressed: _loading
+                  ? null
+                  : () {
+                      HapticFeedback.heavyImpact();
+                      setState(() => _loading = true);
+                      widget.onConfirm();
+                    },
+            ),
+            AppGap.h14,
+            Padding(
+              padding: EdgeInsets.only(bottom: 16 + bottomPad),
+              child: Center(
+                child: AppTextAction(
+                  label: 'Garder la mission',
+                  onTap: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

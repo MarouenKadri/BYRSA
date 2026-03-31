@@ -1,0 +1,345 @@
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/design/app_design_system.dart';
+import '../../../../core/design/app_primitives.dart';
+import '../../../../features/mission/data/models/service_category.dart';
+import '../../data/models/story.dart';
+import '../pages/story_composer_page.dart';
+
+class StoriesBar extends StatelessWidget {
+  final List<StoryGroup> groups;
+  final bool isFreelancer;
+  final Set<String> viewedIds;
+  final void Function(int index) onTap;
+  final VoidCallback? onAddTap;
+
+  const StoriesBar({
+    super.key,
+    required this.groups,
+    this.isFreelancer = false,
+    required this.viewedIds,
+    required this.onTap,
+    this.onAddTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final addSlot = isFreelancer ? 1 : 0;
+    final total = groups.length + addSlot;
+
+    if (total == 0) return const SizedBox.shrink();
+
+    return Container(
+      color: context.colors.surface,
+      child: Column(
+        children: [
+          const SizedBox(height: 2),
+          SizedBox(
+            height: 104,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: AppInsets.h12v8,
+              itemCount: total,
+              itemBuilder: (context, i) {
+                if (isFreelancer && i == 0) {
+                  return _StoryCircle(
+                    isAdd: true,
+                    label: 'Ma story',
+                    onTap: onAddTap ?? () {},
+                  );
+                }
+                final idx = isFreelancer ? i - 1 : i;
+                final group = groups[idx];
+                final viewed = viewedIds.contains(group.groupId);
+                return _StoryCircle(
+                  avatarUrl: group.isAuthorGroup ? group.avatarUrl : null,
+                  categoryId: group.isAuthorGroup ? null : group.categoryId,
+                  label: group.groupName,
+                  viewed: viewed,
+                  onTap: () => onTap(idx),
+                );
+              },
+            ),
+          ),
+          Divider(height: 1, color: context.colors.divider),
+        ],
+      ),
+    );
+  }
+}
+
+// Circle adapts to author group (avatar) or category group (icon)
+class _StoryCircle extends StatelessWidget {
+  final String? avatarUrl;   // non-null → author group (show avatar)
+  final String? categoryId;  // non-null → category group (show icon)
+  final String label;
+  final bool viewed;
+  final bool isAdd;
+  final VoidCallback onTap;
+
+  const _StoryCircle({
+    this.avatarUrl,
+    this.categoryId,
+    required this.label,
+    this.viewed = false,
+    this.isAdd = false,
+    required this.onTap,
+  });
+
+  TextStyle _storyLabelStyle(BuildContext context, {required bool viewed}) =>
+      viewed ? context.storyViewedLabelStyle : context.storyLabelStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final cat = categoryId != null ? ServiceCategory.findById(categoryId!) : null;
+    const storySize = 68.0;
+    const storyRingWidth = 1.4;
+    const avatarInset = 2.0;
+    const addIconSize = 22.0;
+    const categoryIconSize = 28.0;
+    const labelWidth = 78.0;
+    final ringGradient = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFF7D37A), Color(0xFFE6A0C4)],
+    );
+    final categoryTone = cat?.themedColor(context) ?? context.colors.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: storySize,
+              height: storySize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: (!isAdd && !viewed) ? ringGradient : null,
+                color: isAdd ? Colors.white : viewed ? context.colors.border : null,
+                border: isAdd
+                    ? Border.all(color: context.colors.divider, width: 1)
+                    : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isAdd ? 0.04 : 0.08),
+                    blurRadius: isAdd ? 8 : 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(isAdd ? 0 : storyRingWidth),
+              child: isAdd
+                  ? Center(
+                      child: Icon(
+                        Icons.add,
+                        color: context.colors.textTertiary,
+                        size: addIconSize,
+                      ),
+                    )
+                  : avatarUrl != null
+                      ? Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(avatarInset),
+                          child: ClipOval(
+                            child: avatarUrl!.isNotEmpty
+                                ? Image.network(
+                                    avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _fallback(context, categoryTone),
+                                  )
+                                : _fallback(context, categoryTone),
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: viewed
+                                ? context.colors.surfaceAlt
+                                : categoryTone.withValues(alpha: 0.10),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              cat?.icon ?? Icons.photo_library_rounded,
+                              size: categoryIconSize,
+                              color: viewed
+                                  ? context.colors.textTertiary
+                                  : categoryTone,
+                            ),
+                          ),
+                        ),
+            ),
+            AppGap.h4,
+            SizedBox(
+              width: labelWidth,
+              child: Text(
+                label,
+                style: _storyLabelStyle(context, viewed: viewed),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _fallback(BuildContext context, Color color) => Container(
+    color: color.withValues(alpha: AppStoryMetrics.fallbackAlpha),
+    child: Center(child: Text(
+      label.isNotEmpty ? label[0].toUpperCase() : '?',
+      style: context.storyFallbackStyle.copyWith(color: color),
+    )),
+  );
+}
+
+/// Reusable media picker sheet for stories
+class StoryMediaPickerSheet extends StatelessWidget {
+  const StoryMediaPickerSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppBottomSheetHandle(),
+              AppGap.h12,
+              Padding(
+                padding: AppInsets.h20,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Ajouter une story',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFFAFAFA),
+                    ),
+                  ),
+                ),
+              ),
+              AppGap.h8,
+              _StoryPickerTile(
+                icon: Icons.photo_camera_outlined,
+                title: 'Prendre une photo',
+                subtitle: 'Utiliser la caméra',
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+              _StoryPickerTile(
+                icon: Icons.photo_library_outlined,
+                title: 'Choisir depuis la galerie',
+                subtitle: 'Sélectionner une photo',
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+              SizedBox(height: 12 + bottom),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StoryPickerTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _StoryPickerTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 21, color: const Color(0xFFD5DADE)),
+            AppGap.w14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFFAFAFA),
+                    ),
+                  ),
+                  AppGap.h2,
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF808080),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Helper function to pick and navigate to composer
+Future<void> pickAndOpenComposer(BuildContext context) async {
+  final source = await showAppBottomSheet<ImageSource>(
+    context: context,
+    wrapWithSurface: false,
+    child: const StoryMediaPickerSheet(),
+  );
+  if (source == null || !context.mounted) return;
+  final picked = await ImagePicker().pickImage(source: source, imageQuality: 85);
+  if (picked == null || !context.mounted) return;
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => StoryComposerPage(mediaFile: File(picked.path)),
+    ),
+  );
+}

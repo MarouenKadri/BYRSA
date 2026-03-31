@@ -1,0 +1,402 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/design/app_primitives.dart';
+import '../../../../auth/data/models/service_type.dart';
+import 'user_common_widgets.dart';
+
+void showFreelancerProfileBottomSheet(BuildContext context) {
+  showAppBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    wrapWithSurface: false,
+    child: const _FreelancerProfileSheet(),
+  );
+}
+
+class _FreelancerProfileSheet extends StatefulWidget {
+  const _FreelancerProfileSheet();
+
+  @override
+  State<_FreelancerProfileSheet> createState() => _FreelancerProfileSheetState();
+}
+
+class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
+  final Set<ServiceType> _selectedSkills = {
+    ServiceType.menage,
+    ServiceType.jardinage,
+    ServiceType.bricolage,
+  };
+
+  final _tarifCtrl = TextEditingController(text: '25');
+  final _bioCtrl = TextEditingController(
+    text: "Prestataire serieux avec 5 ans d'experience dans les services a domicile.",
+  );
+  double _radius = 15;
+
+  @override
+  void dispose() {
+    _tarifCtrl.dispose();
+    _bioCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.6,
+      maxChildSize: 0.95,
+      builder: (_, scrollController) => AppSheetSurface(
+        color: const Color(0xFFFAFAFA),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Column(
+                children: [
+                  const AppBottomSheetHandle(),
+                  AppGap.h20,
+                  Text(
+                    "Mon activité",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: AppFontSize.title,
+                      fontWeight: FontWeight.w300,
+                      color: context.colors.textPrimary,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  AppGap.h16,
+                  Divider(color: context.colors.divider, height: 1),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+                children: [
+                  _buildAboutSection(),
+                  const SizedBox(height: 28),
+                  _buildSkillsSection(),
+                  const SizedBox(height: 28),
+                  _buildRayonSection(),
+                  const SizedBox(height: 28),
+                  _buildTarifSection(),
+                ],
+              ),
+            ),
+            Divider(color: context.colors.divider, height: 1),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                child: Column(
+                  children: [
+                    ProfileSheetPrimaryAction(
+                      onPressed: _submit,
+                      label: "Enregistrer",
+                    ),
+                    AppGap.h12,
+                    Center(
+                      child: ProfileSheetSecondaryAction(
+                        label: "Annuler",
+                        onTap: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return _ActivitySection(
+      title: 'A propos',
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _bioCtrl,
+          maxLines: 5,
+          maxLength: 300,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            height: 1.6,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF20252B),
+          ),
+          decoration: InputDecoration(
+            hintText: 'Parlez de votre experience, de votre approche et de vos specialites.',
+            hintStyle: GoogleFonts.inter(
+              fontSize: 14,
+              height: 1.6,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF9AA1A8),
+            ),
+            counterStyle: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF9AA1A8),
+            ),
+            contentPadding: const EdgeInsets.all(18),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkillsSection() {
+    return _ActivitySection(
+      title: 'Competences',
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: ServiceType.values.map((skill) {
+          final selected = _selectedSkills.contains(skill);
+          return GestureDetector(
+            onTap: () => setState(() {
+              selected ? _selectedSkills.remove(skill) : _selectedSkills.add(skill);
+            }),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: selected ? const Color(0xFF111111) : const Color(0xFFF2F2F2),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _mapSkillIcon(skill),
+                    size: 14,
+                    color: selected ? Colors.white : const Color(0xFF565D65),
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    skill.label,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      color: selected ? Colors.white : const Color(0xFF50565D),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildRayonSection() {
+    return _ActivitySection(
+      title: 'Rayon',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Rayon d'intervention",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF20252B),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF111111),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${_radius.toInt()} km',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 2,
+              activeTrackColor: const Color(0xFF111111),
+              inactiveTrackColor: const Color(0xFFD9DEE3),
+              thumbColor: const Color(0xFF111111),
+              overlayColor: const Color(0xFF111111).withValues(alpha: 0.08),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            ),
+            child: Slider(
+              value: _radius,
+              min: 1,
+              max: 100,
+              divisions: 99,
+              onChanged: (value) => setState(() => _radius = value),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '1 km',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF7E858C),
+                ),
+              ),
+              Text(
+                '100 km',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF7E858C),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTarifSection() {
+    return _ActivitySection(
+      title: 'Tarif',
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 18,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: TextFormField(
+          controller: _tarifCtrl,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          style: GoogleFonts.inter(
+            fontSize: 28,
+            fontWeight: FontWeight.w300,
+            color: const Color(0xFF111111),
+            letterSpacing: -0.8,
+          ),
+          decoration: InputDecoration(
+            hintText: '0',
+            hintStyle: GoogleFonts.inter(
+              fontSize: 28,
+              fontWeight: FontWeight.w300,
+              color: const Color(0xFFB4BAC1),
+            ),
+            suffixText: '€ / h',
+            suffixStyle: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF7E858C),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _mapSkillIcon(ServiceType skill) {
+    switch (skill) {
+      case ServiceType.menage:
+        return Icons.cleaning_services_outlined;
+      case ServiceType.jardinage:
+        return Icons.yard_outlined;
+      case ServiceType.bricolage:
+        return Icons.handyman_outlined;
+      case ServiceType.gardeEnfants:
+        return Icons.child_care_outlined;
+      case ServiceType.electricite:
+        return Icons.bolt_outlined;
+      case ServiceType.plomberie:
+        return Icons.plumbing_outlined;
+      case ServiceType.peinture:
+        return Icons.format_paint_outlined;
+      case ServiceType.demenagement:
+        return Icons.local_shipping_outlined;
+      case ServiceType.coursesLivraison:
+        return Icons.shopping_bag_outlined;
+      case ServiceType.animaux:
+        return Icons.pets_outlined;
+      case ServiceType.informatique:
+        return Icons.computer_outlined;
+      case ServiceType.couture:
+        return Icons.content_cut_outlined;
+      case ServiceType.cuisine:
+        return Icons.restaurant_outlined;
+      case ServiceType.autre:
+        return Icons.auto_awesome_outlined;
+    }
+  }
+
+  void _submit() {
+    Navigator.pop(context);
+    showAppSnackBar(context, 'Activite mise a jour', type: SnackBarType.success);
+  }
+}
+
+class _ActivitySection extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _ActivitySection({
+    required this.title,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF20252B),
+          ),
+        ),
+        const SizedBox(height: 14),
+        child,
+      ],
+    );
+  }
+}

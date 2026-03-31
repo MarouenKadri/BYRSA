@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+
+import 'service_category.dart';
+import 'mission_address.dart';
+import 'budget_info.dart';
+import 'user_models.dart';
+
+// Ré-exporte les types dépendants pour que les consommateurs n'aient qu'un seul import
+export 'service_category.dart';
+export 'mission_address.dart';
+export 'budget_info.dart';
+export 'user_models.dart';
+
+/// ═══════════════════════════════════════════════════════════════════════════
+/// 🎯 Inkern - Modèle Mission
+/// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── Statuts ─────────────────────────────────────────────────────────────────
+
+enum MissionStatus {
+  draft,              // Brouillon (création en cours)
+  waitingCandidates,  // Publiée, aucune candidature
+  candidateReceived,  // ≥1 candidature reçue
+  prestaChosen,       // Client a choisi, attente confirmation freelancer
+  confirmed,          // Les deux ont confirmé → prêt à démarrer
+  onTheWay,           // Freelancer en route
+  inProgress,         // Mission démarrée (timer actif)
+  completed,          // Freelancer a cliqué "Terminer"
+  waitingPayment,     // Attente validation client (48h max)
+  closed,             // Payé, archivé
+  cancelled,          // Annulée
+  dispute,            // Litige ouvert
+  expired,            // Pas de candidat dans le délai
+}
+
+extension MissionStatusX on MissionStatus {
+  String get label => switch (this) {
+    MissionStatus.draft            => 'Brouillon',
+    MissionStatus.waitingCandidates => 'En attente',
+    MissionStatus.candidateReceived => 'Candidatures',
+    MissionStatus.prestaChosen     => 'Presta choisi',
+    MissionStatus.confirmed        => 'Confirmée',
+    MissionStatus.onTheWay         => 'En route',
+    MissionStatus.inProgress       => 'En cours',
+    MissionStatus.completed        => 'Terminée',
+    MissionStatus.waitingPayment   => 'Validation requise',
+    MissionStatus.closed           => 'Clôturée',
+    MissionStatus.cancelled        => 'Annulée',
+    MissionStatus.dispute          => 'Litige',
+    MissionStatus.expired          => 'Expirée',
+  };
+
+  Color get color => switch (this) {
+    MissionStatus.draft            => const Color(0xFFAA7700),
+    MissionStatus.waitingCandidates => const Color(0xFFFF9500),
+    MissionStatus.candidateReceived => const Color(0xFF007AFF),
+    MissionStatus.prestaChosen     => const Color(0xFF5856D6),
+    MissionStatus.confirmed        => const Color(0xFF34C759),
+    MissionStatus.onTheWay         => const Color(0xFF007AFF),
+    MissionStatus.inProgress       => const Color(0xFF5856D6),
+    MissionStatus.completed        => const Color(0xFF34C759),
+    MissionStatus.waitingPayment   => const Color(0xFFFF9500),
+    MissionStatus.closed           => const Color(0xFF8E8E93),
+    MissionStatus.cancelled        => const Color(0xFFFF3B30),
+    MissionStatus.dispute          => const Color(0xFFFF3B30),
+    MissionStatus.expired          => const Color(0xFF8E8E93),
+  };
+
+  IconData get icon => switch (this) {
+    MissionStatus.draft            => Icons.edit_note_rounded,
+    MissionStatus.waitingCandidates => Icons.hourglass_empty_rounded,
+    MissionStatus.candidateReceived => Icons.people_rounded,
+    MissionStatus.prestaChosen     => Icons.handshake_rounded,
+    MissionStatus.confirmed        => Icons.check_circle_rounded,
+    MissionStatus.onTheWay         => Icons.directions_car_rounded,
+    MissionStatus.inProgress       => Icons.play_circle_rounded,
+    MissionStatus.completed        => Icons.done_all_rounded,
+    MissionStatus.waitingPayment   => Icons.pending_rounded,
+    MissionStatus.closed           => Icons.inventory_2_rounded,
+    MissionStatus.cancelled        => Icons.cancel_rounded,
+    MissionStatus.dispute          => Icons.flag_rounded,
+    MissionStatus.expired          => Icons.timer_off_rounded,
+  };
+
+  bool get isActive =>
+      this == MissionStatus.waitingCandidates ||
+      this == MissionStatus.candidateReceived ||
+      this == MissionStatus.prestaChosen ||
+      this == MissionStatus.confirmed ||
+      this == MissionStatus.onTheWay ||
+      this == MissionStatus.inProgress ||
+      this == MissionStatus.completed ||
+      this == MissionStatus.waitingPayment;
+}
+
+// ─── Mission ──────────────────────────────────────────────────────────────────
+
+class Mission {
+  final String id;
+  final String title;
+  final String description;
+  final String categoryId;
+  final DateTime date;
+  final String timeSlot;
+  final MissionAddress address;
+  final BudgetInfo budget;
+  final MissionStatus status;
+  final List<String> images;
+  final DateTime createdAt;
+  final ClientInfo? client;
+  final PrestaInfo? assignedPresta;
+  final int candidatesCount;
+  final int? rating;
+
+  const Mission({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.categoryId,
+    required this.date,
+    required this.timeSlot,
+    required this.address,
+    required this.budget,
+    this.status = MissionStatus.waitingCandidates,
+    this.images = const [],
+    required this.createdAt,
+    this.client,
+    this.assignedPresta,
+    this.candidatesCount = 0,
+    this.rating,
+  });
+
+  ServiceCategory? get category => ServiceCategory.findById(categoryId);
+  String get categoryName => category?.name ?? 'Autre';
+  IconData get categoryIcon => category?.icon ?? Icons.help_outline;
+  Color get categoryColor => category?.color ?? Colors.grey;
+
+  String get duration {
+    if (budget.type == BudgetType.hourly && budget.estimatedHours != null) {
+      final h = budget.estimatedHours!;
+      return h == h.truncateToDouble() ? '${h.toInt()}h' : '${h.toStringAsFixed(1)}h';
+    }
+    return '-';
+  }
+
+  String get postedAtText {
+    final diff = DateTime.now().difference(createdAt);
+    if (diff.inMinutes < 1) return 'À l\'instant';
+    if (diff.inMinutes < 60) return 'Il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'Il y a ${diff.inHours}h';
+    if (diff.inDays == 1) return 'Hier';
+    if (diff.inDays < 7) return 'Il y a ${diff.inDays}j';
+    return 'Il y a ${(diff.inDays / 7).floor()} sem.';
+  }
+
+  /// Heure de début calculée depuis date + timeSlot (ex. "14h00 - 18h00" → 14:00)
+  DateTime get scheduledStart {
+    if (timeSlot.isEmpty) return date;
+    final startStr = timeSlot.split(' - ').first.trim(); // "14h00"
+    final parts = startStr.split('h');
+    if (parts.length != 2) return date;
+    final hour = int.tryParse(parts[0]) ?? 0;
+    final minute = int.tryParse(parts[1]) ?? 0;
+    return DateTime(date.year, date.month, date.day, hour, minute);
+  }
+
+  String get formattedDate {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final missionDay = DateTime(date.year, date.month, date.day);
+    final diff = missionDay.difference(today).inDays;
+    if (diff == 0) return 'Aujourd\'hui';
+    if (diff == 1) return 'Demain';
+    const mois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    if (diff < 0) return '${date.day} ${mois[date.month - 1]}';
+    if (diff < 7) {
+      const jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+      return jours[date.weekday - 1];
+    }
+    return '${date.day} ${mois[date.month - 1]}';
+  }
+
+  Mission copyWith({
+    String? id, String? title, String? description, String? categoryId,
+    DateTime? date, String? timeSlot,
+    MissionAddress? address, BudgetInfo? budget, MissionStatus? status,
+    List<String>? images, DateTime? createdAt,
+    ClientInfo? client, PrestaInfo? assignedPresta,
+    int? candidatesCount, int? rating,
+  }) {
+    return Mission(
+      id: id ?? this.id, title: title ?? this.title,
+      description: description ?? this.description,
+      categoryId: categoryId ?? this.categoryId,
+      date: date ?? this.date, timeSlot: timeSlot ?? this.timeSlot,
+      address: address ?? this.address, budget: budget ?? this.budget,
+      status: status ?? this.status,
+      images: images ?? this.images,
+      createdAt: createdAt ?? this.createdAt,
+      client: client ?? this.client,
+      assignedPresta: assignedPresta ?? this.assignedPresta,
+      candidatesCount: candidatesCount ?? this.candidatesCount,
+      rating: rating ?? this.rating,
+    );
+  }
+}

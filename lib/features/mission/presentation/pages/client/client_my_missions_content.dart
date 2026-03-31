@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../../core/design/app_design_system.dart';
+import '../../../data/models/mission.dart';
+import '../../mission_provider.dart';
+import '../../widgets/shared/mission_shared_widgets.dart';
+import '../../widgets/shared/mission_status_ui.dart';
+import '../../widgets/cards/variants/mission_summary_card.dart';
+import 'client_mission_detail_page.dart';
+import '../../../../../app/app_bar/app_section_bar.dart';
+import '../../../../../app/widgets/cigale_tab_bar.dart';
+
+/// ═══════════════════════════════════════════════════════════════════════════
+/// 📋 Inkern - Page Mes Missions (Client)
+/// Tabs : Publiées · En cours
+/// ═══════════════════════════════════════════════════════════════════════════
+
+class ClientMyMissionsContent extends StatelessWidget {
+  final VoidCallback? onGoToAccount;
+  const ClientMyMissionsContent({super.key, this.onGoToAccount});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        appBar: AppSectionBar(
+          pageTitle: 'Mes missions',
+          onGoToAccount: onGoToAccount,
+          bottom: const CigaleTabBar(
+            tabs: [
+              CigaleTab(icon: Icons.campaign_rounded, label: 'Publiées'),
+              CigaleTab(icon: Icons.play_circle_outline_rounded, label: 'En cours'),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            _ClientMissionTab(filter: _ClientTabFilter.published),
+            _ClientMissionTab(filter: _ClientTabFilter.inProgress),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _ClientTabFilter { published, inProgress }
+
+extension _ClientTabFilterX on _ClientTabFilter {
+  MissionUiTab get uiTab => switch (this) {
+    _ClientTabFilter.published => MissionUiTab.published,
+    _ClientTabFilter.inProgress => MissionUiTab.inProgress,
+  };
+}
+
+class _ClientMissionTab extends StatefulWidget {
+  final _ClientTabFilter filter;
+  const _ClientMissionTab({required this.filter});
+
+  @override
+  State<_ClientMissionTab> createState() => _ClientMissionTabState();
+}
+
+class _ClientMissionTabState extends State<_ClientMissionTab> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) setState(() => _isLoading = false);
+    });
+  }
+
+  List<Mission> _filter(List<Mission> all) {
+    return all.where((m) => MissionStatusUi.belongsToTab(
+      status: m.status,
+      role: MissionUiRole.client,
+      tab: widget.filter.uiTab,
+    )).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) return const SkeletonList(key: ValueKey('skeleton'));
+
+    final missions = _filter(context.watch<MissionProvider>().clientMissions);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      child: missions.isEmpty
+          ? EmptyState(
+              key: const ValueKey('empty'),
+              icon: _emptyIcon,
+              title: _emptyTitle,
+              subtitle: _emptySubtitle,
+            )
+          : ListView.builder(
+              key: const ValueKey('list'),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+              itemCount: missions.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: MissionSummaryCard(
+                  mission: missions[index],
+                  role: MissionUiRole.client,
+                  showDescription: true,
+                  showAddress: true,
+                  onTap: () => Navigator.push(
+                    context,
+                    slideUpRoute(page: ClientMissionDetailPage(mission: missions[index])),
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
+  IconData get _emptyIcon => switch (widget.filter) {
+    _ClientTabFilter.published   => Icons.assignment_outlined,
+    _ClientTabFilter.inProgress  => Icons.work_outline_rounded,
+  };
+
+  String get _emptyTitle => switch (widget.filter) {
+    _ClientTabFilter.published   => 'Aucune mission publiée',
+    _ClientTabFilter.inProgress  => 'Aucune mission en cours',
+  };
+
+  String get _emptySubtitle => switch (widget.filter) {
+    _ClientTabFilter.published   => 'Créez une mission pour trouver un prestataire',
+    _ClientTabFilter.inProgress  => 'Vos missions acceptées apparaîtront ici',
+  };
+}
+

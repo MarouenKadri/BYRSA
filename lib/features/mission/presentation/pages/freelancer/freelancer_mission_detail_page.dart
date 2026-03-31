@@ -1,0 +1,413 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/design/app_primitives.dart';
+import '../../../data/models/mission.dart';
+import '../../mission_provider.dart';
+import '../../widgets/detail/mission_detail_primitives.dart';
+import '../../widgets/detail/mission_detail_template.dart';
+import '../../widgets/shared/mission_status_ui.dart';
+import '../../../../messaging/presentation/pages/chat_page.dart';
+import '../../widgets/detail/freelancer_detail_sections.dart';
+import 'freelancer_tracking_page.dart';
+
+/// ═══════════════════════════════════════════════════════════════════════════
+/// FreelancerMissionDetailPage — rôle freelancer
+/// Extends MissionDetailBase (Template Method) + délègue les sections à
+/// freelancer_detail_sections.dart
+/// ═══════════════════════════════════════════════════════════════════════════
+
+class FreelancerMissionDetailPage extends StatefulWidget {
+  final Mission mission;
+
+  /// true = mission du freelancer (postulée / en cours / archivée)
+  /// false = mission publique depuis l'explorer → peut postuler
+  final bool isOwn;
+
+  const FreelancerMissionDetailPage({
+    super.key,
+    required this.mission,
+    this.isOwn = false,
+  });
+
+  @override
+  State<FreelancerMissionDetailPage> createState() =>
+      _FreelancerMissionDetailPageState();
+}
+
+class _FreelancerMissionDetailPageState
+    extends MissionDetailBase<FreelancerMissionDetailPage> {
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  // ─── Computed flags ─────────────────────────────────────────────────────────
+
+  bool get _isAccepted => const {
+    MissionStatus.prestaChosen,
+    MissionStatus.confirmed,
+    MissionStatus.onTheWay,
+    MissionStatus.inProgress,
+    MissionStatus.completionRequested,
+    MissionStatus.waitingPayment,
+    MissionStatus.completed,
+    MissionStatus.closed,
+  }.contains(mission.status);
+
+  bool get _isArchived => const {
+    MissionStatus.completed,
+    MissionStatus.waitingPayment,
+    MissionStatus.closed,
+    MissionStatus.cancelled,
+    MissionStatus.dispute,
+    MissionStatus.expired,
+  }.contains(mission.status);
+
+  // ─── Lifecycle ───────────────────────────────────────────────────────────
+
+  @override
+  void initState() {
+    super.initState();
+    _priceController.text = mission.budget.averageAmount.toInt().toString();
+  }
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  // ─── MissionDetailBase — abstract overrides ──────────────────────────────
+
+  @override
+  Mission get widgetMission => widget.mission;
+
+  @override
+  Mission syncMission(BuildContext ctx) {
+    if (!widget.isOwn) return mission;
+    return ctx.watch<MissionProvider>().freelancerMissions.firstWhere(
+      (m) => m.id == widget.mission.id,
+      orElse: () => mission,
+    );
+  }
+
+  @override
+  bool get showTimeline => widget.isOwn;
+
+  @override
+  bool get isBottomHidden => false;
+
+  @override
+  Widget? buildHeroMenu(BuildContext ctx) {
+    return DetailCircleBtn(
+      icon: Icons.more_horiz_rounded,
+      onTap: _showReportSheet,
+    );
+  }
+
+  @override
+  Widget buildTagsPrice(BuildContext ctx) {
+    final daysLeft = mission.date.difference(DateTime.now()).inDays;
+    final daysLabel = daysLeft > 0 ? '+$daysLeft jours' : "Aujourd'hui";
+    final secondaryLabel = widget.isOwn
+        ? MissionStatusUi.badgeLabel(
+            status: mission.status,
+            role: MissionUiRole.freelancer,
+          )
+        : '${mission.candidatesCount} reaction${mission.candidatesCount > 1 ? 's' : ''}';
+
+    return Row(
+      children: [
+        DetailLuxuryPill(label: daysLabel),
+        AppGap.w10,
+        DetailLuxuryPill(label: secondaryLabel),
+        const Spacer(),
+        Text(
+          mission.budget.displayText,
+          style: GoogleFonts.inter(
+            fontSize: 30,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.8,
+            color: const Color(0xFF111111),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  StatusBannerConfig? resolveBanner() {
+    switch (mission.status) {
+      case MissionStatus.prestaChosen:
+        return StatusBannerConfig(
+          color: AppColors.primary,
+          icon: Icons.celebration_rounded,
+          title: 'Vous avez ete selectionne',
+          subtitle:
+              'La mission vous est reservee. Confirmez votre disponibilite pour continuer.',
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.onTheWay:
+        return StatusBannerConfig(
+          color: AppColors.iosBlue,
+          icon: Icons.directions_car_rounded,
+          title: 'Vous etes en route',
+          subtitle: 'Le client suit votre arrivee depuis son detail mission.',
+          pulse: true,
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.inProgress:
+        return StatusBannerConfig(
+          color: AppColors.primary,
+          icon: Icons.handyman_rounded,
+          title: 'Mission en cours',
+          subtitle:
+              'Continuez la prestation puis marquez-la comme terminee une fois finie.',
+          pulse: true,
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.completionRequested:
+        return StatusBannerConfig(
+          color: AppColors.warning,
+          icon: Icons.hourglass_top_rounded,
+          title: 'Fin signalee au client',
+          subtitle:
+              'Le client doit maintenant confirmer la mission ou signaler un probleme.',
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.completed:
+      case MissionStatus.waitingPayment:
+        return StatusBannerConfig(
+          color: AppColors.warning,
+          icon: Icons.hourglass_top_rounded,
+          title: 'Paiement en attente',
+          subtitle:
+              'Deblocage automatique sous 12h sauf contestation du client.',
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.closed:
+        return StatusBannerConfig(
+          color: AppColors.primary,
+          icon: Icons.check_circle_outline_rounded,
+          title: 'Mission terminee',
+          subtitle:
+              'Le paiement a ete envoye et la mission est maintenant cloturee.',
+          style: DetailBannerStyle.card,
+        );
+      case MissionStatus.cancelled:
+      case MissionStatus.dispute:
+      case MissionStatus.expired:
+        return StatusBannerConfig(
+          color: AppColors.error,
+          icon: Icons.close_rounded,
+          title: 'Mission annulee',
+          subtitle:
+              "Cette mission est closee et aucune action supplementaire n'est attendue.",
+          style: DetailBannerStyle.card,
+        );
+      default:
+        return null;
+    }
+  }
+
+  @override
+  Widget buildRoleSection(BuildContext ctx) {
+    if (mission.client == null) return const SizedBox.shrink();
+
+    final contactable =
+        widget.isOwn && _isAccepted && !_isArchived;
+    final children = <Widget>[
+      FreelancerClientCard(
+        client: mission.client!,
+        onPhone: contactable ? _openPhoneClient : null,
+        onChat: contactable ? _openChat : null,
+      ),
+    ];
+
+    if (widget.isOwn &&
+        (mission.status == MissionStatus.confirmed ||
+            mission.status == MissionStatus.onTheWay ||
+            mission.status == MissionStatus.inProgress)) {
+      children.add(
+        FreelancerLocationShareCard(
+          status: mission.status,
+          onOpenMissionPilot: () => Navigator.push(
+            ctx,
+            MaterialPageRoute(
+              builder: (_) => FreelancerTrackingPage(mission: mission),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(children: children);
+  }
+
+  @override
+  Widget buildBottom(BuildContext ctx) {
+    final alreadyApplied =
+        !widget.isOwn &&
+        ctx.watch<MissionProvider>().freelancerMissions.any(
+          (m) => m.id == mission.id,
+        );
+
+    // Archivée
+    if (_isArchived) {
+      final (
+        IconData icon,
+        String label,
+        String caption,
+      ) = switch (mission.status) {
+        MissionStatus.completed || MissionStatus.waitingPayment => (
+          Icons.hourglass_top_rounded,
+          'Paiement en attente',
+          'Deblocage automatique sous 12h sauf contestation du client',
+        ),
+        MissionStatus.closed => (
+          Icons.check_circle_outline_rounded,
+          'Mission terminee',
+          mission.rating != null
+              ? 'Note recue : ${mission.rating}/5'
+              : 'Paiement envoye et mission cloturee',
+        ),
+        _ => (
+          Icons.close_rounded,
+          'Mission annulee',
+          'Cette mission est maintenant closee',
+        ),
+      };
+      return DetailBottomArea(
+        caption: caption,
+        child: DetailReadonlyBadge(icon: icon, label: label),
+      );
+    }
+
+    // Candidature déjà envoyée (explorer) ou isOwn en attente
+    if (alreadyApplied || (widget.isOwn && !_isAccepted)) {
+      return DetailBottomArea(
+        caption: 'En attente de la decision du client',
+        child: Container(
+          width: double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.button),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.check_rounded,
+                color: Color(0xFF4A4F55),
+                size: 18,
+              ),
+              AppGap.w8,
+              Text(
+                'Candidature envoyee',
+                style: ctx.text.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111111),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Mission déjà pourvue — aucune action disponible
+    if (_isAccepted) return const SizedBox.shrink();
+
+    // Default : Réagir à cette mission
+    return DetailBottomArea(
+      caption:
+          'Il y a ${mission.candidatesCount} réaction${mission.candidatesCount > 1 ? 's' : ''} pour cette mission',
+      child: DetailTealButton(
+        label: 'Réagir à cette mission',
+        onTap: _openProposalSheet,
+      ),
+    );
+  }
+
+  // ─── Actions ─────────────────────────────────────────────────────────────
+
+  void _showReportSheet() {
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: false,
+      child: FreelancerActionSheet(
+        onReport: () {
+          Navigator.pop(context);
+          _confirmReport();
+        },
+      ),
+    );
+  }
+
+  void _confirmReport() {
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: false,
+      child: FreelancerReportConfirmSheet(
+        missionTitle: mission.title,
+        onConfirm: () {
+          Navigator.pop(context);
+          showAppSnackBar(
+            context,
+            'Mission signalee. Merci pour votre retour.',
+          );
+        },
+      ),
+    );
+  }
+
+  void _openChat() {
+    if (mission.client == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatPage(
+          contactName: mission.client!.name,
+          contactAvatar: mission.client!.avatarUrl,
+          isVerified: mission.client!.isVerified,
+          missionTitle: mission.title,
+        ),
+      ),
+    );
+  }
+
+  void _openPhoneClient() {
+    if (mission.client == null) return;
+    showAppSnackBar(
+      context,
+      'Appel vers ${mission.client!.name}...',
+      icon: Icons.phone_rounded,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void _openProposalSheet() {
+    showAppBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      wrapWithSurface: false,
+      child: FreelancerProposalSheet(
+        mission: mission,
+        priceController: _priceController,
+        messageController: _messageController,
+        onSubmit: (double price, String message) {
+          context
+              .read<MissionProvider>()
+              .submitProposal(mission, price: price, message: message)
+              .catchError((e) => debugPrint('submitProposal error: $e'));
+          Navigator.pop(context);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+}
