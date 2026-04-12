@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ─── Primitive : Badge statut ─────────────────────────────────────────────────
 // Responsabilité unique : afficher un badge coloré pour le statut d'une mission.
@@ -76,7 +75,7 @@ class MissionStatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: foreground,

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
 import '../tokens/app_typography.dart';
 import '../tokens/app_radius.dart';
+import '../components/app_text_field.dart';
 
 // ─── 5. THEMES ───────────────────────────────────────────────────────────────
 
@@ -29,71 +29,127 @@ abstract class _Tokens {
 }
 
 class _DarkTokens extends _Tokens {
-  Color get primary      => AppColorsDark.primary;
-  Color get error        => AppColorsDark.error;
-  Color get background   => AppColorsDark.background;
-  Color get surface      => AppColorsDark.surface;
-  Color get surfaceAlt   => AppColorsDark.surfaceAlt;
-  Color get sheetBg      => AppColorsDark.sheetBg;
-  Color get inputFill    => AppColorsDark.inputFill;
-  Color get border       => AppColorsDark.border;
-  Color get divider      => AppColorsDark.divider;
-  Color get textPrimary  => AppColorsDark.textPrimary;
+  @override
+  Color get primary => AppColorsDark.primary;
+  @override
+  Color get error => AppColorsDark.error;
+  @override
+  Color get background => AppColorsDark.background;
+  @override
+  Color get surface => AppColorsDark.surface;
+  @override
+  Color get surfaceAlt => AppColorsDark.surfaceAlt;
+  @override
+  Color get sheetBg => AppColorsDark.sheetBg;
+  @override
+  Color get inputFill => AppColorsDark.inputFill;
+  @override
+  Color get border => AppColorsDark.border;
+  @override
+  Color get divider => AppColorsDark.divider;
+  @override
+  Color get textPrimary => AppColorsDark.textPrimary;
+  @override
   Color get textSecondary => AppColorsDark.textSecondary;
+  @override
   Color get textTertiary => AppColorsDark.textTertiary;
-  Color get textHint     => AppColorsDark.textHint;
-  Color get appBarBg     => AppColorsDark.background;
+  @override
+  Color get textHint => AppColorsDark.textHint;
+  @override
+  Color get appBarBg => AppColorsDark.background;
 }
 
 class _LightTokens extends _Tokens {
-  Color get primary      => AppColorsLight.primary;
-  Color get error        => AppColorsLight.error;
-  Color get background   => AppColorsLight.background;
-  Color get surface      => AppColorsLight.surface;
-  Color get surfaceAlt   => AppColorsLight.surfaceAlt;
-  Color get sheetBg      => AppColorsLight.sheetBg;
-  Color get inputFill    => AppColorsLight.inputFill;
-  Color get border       => AppColorsLight.border;
-  Color get divider      => AppColorsLight.divider;
-  Color get textPrimary  => AppColorsLight.textPrimary;
+  @override
+  Color get primary => AppColorsLight.primary;
+  @override
+  Color get error => AppColorsLight.error;
+  @override
+  Color get background => AppColorsLight.background;
+  @override
+  Color get surface => AppColorsLight.surface;
+  @override
+  Color get surfaceAlt => AppColorsLight.surfaceAlt;
+  @override
+  Color get sheetBg => AppColorsLight.sheetBg;
+  @override
+  Color get inputFill => AppColorsLight.inputFill;
+  @override
+  Color get border => AppColorsLight.border;
+  @override
+  Color get divider => AppColorsLight.divider;
+  @override
+  Color get textPrimary => AppColorsLight.textPrimary;
+  @override
   Color get textSecondary => AppColorsLight.textSecondary;
+  @override
   Color get textTertiary => AppColorsLight.textTertiary;
-  Color get textHint     => AppColorsLight.textHint;
-  Color get appBarBg     => AppColorsLight.surface;
+  @override
+  Color get textHint => AppColorsLight.textHint;
+  @override
+  Color get appBarBg => AppColorsLight.surface;
 }
 
 class _WarmTokens extends _Tokens {
-  Color get primary      => AppColorsWarm.primary;
-  Color get error        => AppColorsWarm.error;
+  @override
+  Color get primary => AppColorsWarm.primary;
+  @override
+  Color get error => AppColorsWarm.error;
+  @override
   Color get background => AppColorsWarm.background;
+  @override
   Color get surface => AppColorsWarm.surface;
+  @override
   Color get surfaceAlt => AppColorsWarm.surfaceAlt;
+  @override
   Color get sheetBg => AppColorsWarm.sheetBg;
+  @override
   Color get inputFill => AppColorsWarm.inputFill;
+  @override
   Color get border => AppColorsWarm.border;
+  @override
   Color get divider => AppColorsWarm.divider;
+  @override
   Color get textPrimary => AppColorsWarm.textPrimary;
+  @override
   Color get textSecondary => AppColorsWarm.textSecondary;
+  @override
   Color get textTertiary => AppColorsWarm.textTertiary;
+  @override
   Color get textHint => AppColorsWarm.textHint;
+  @override
   Color get appBarBg => AppColorsWarm.background;
 }
 
 class _IndeedTokens extends _Tokens {
-  Color get primary       => AppColorsIndeed.primary;
-  Color get error         => AppColorsIndeed.error;
-  Color get background    => AppColorsIndeed.background;
-  Color get surface       => AppColorsIndeed.surface;
-  Color get surfaceAlt    => AppColorsIndeed.surfaceAlt;
-  Color get sheetBg       => AppColorsIndeed.sheetBg;
-  Color get inputFill     => AppColorsIndeed.inputFill;
-  Color get border        => AppColorsIndeed.border;
-  Color get divider       => AppColorsIndeed.divider;
-  Color get textPrimary   => AppColorsIndeed.textPrimary;
+  @override
+  Color get primary => AppColorsIndeed.primary;
+  @override
+  Color get error => AppColorsIndeed.error;
+  @override
+  Color get background => AppColorsIndeed.background;
+  @override
+  Color get surface => AppColorsIndeed.surface;
+  @override
+  Color get surfaceAlt => AppColorsIndeed.surfaceAlt;
+  @override
+  Color get sheetBg => AppColorsIndeed.sheetBg;
+  @override
+  Color get inputFill => AppColorsIndeed.inputFill;
+  @override
+  Color get border => AppColorsIndeed.border;
+  @override
+  Color get divider => AppColorsIndeed.divider;
+  @override
+  Color get textPrimary => AppColorsIndeed.textPrimary;
+  @override
   Color get textSecondary => AppColorsIndeed.textSecondary;
-  Color get textTertiary  => AppColorsIndeed.textTertiary;
-  Color get textHint      => AppColorsIndeed.textHint;
-  Color get appBarBg      => AppColorsIndeed.surface; // AppBar blanc
+  @override
+  Color get textTertiary => AppColorsIndeed.textTertiary;
+  @override
+  Color get textHint => AppColorsIndeed.textHint;
+  @override
+  Color get appBarBg => AppColorsIndeed.surface; // AppBar blanc
 }
 
 enum _ThemeFlavor { dark, light, warm, indeed }
@@ -101,17 +157,17 @@ enum _ThemeFlavor { dark, light, warm, indeed }
 class AppThemeData {
   AppThemeData._();
 
-  static ThemeData get dark   => _build(_ThemeFlavor.dark);
-  static ThemeData get light  => _build(_ThemeFlavor.light);
-  static ThemeData get warm   => _build(_ThemeFlavor.warm);
+  static ThemeData get dark => _build(_ThemeFlavor.dark);
+  static ThemeData get light => _build(_ThemeFlavor.light);
+  static ThemeData get warm => _build(_ThemeFlavor.warm);
   static ThemeData get indeed => _build(_ThemeFlavor.indeed);
 
   static ThemeData _build(_ThemeFlavor flavor) {
     final isDark = flavor == _ThemeFlavor.dark;
     final _Tokens c = switch (flavor) {
-      _ThemeFlavor.dark   => _DarkTokens(),
-      _ThemeFlavor.light  => _LightTokens(),
-      _ThemeFlavor.warm   => _WarmTokens(),
+      _ThemeFlavor.dark => _DarkTokens(),
+      _ThemeFlavor.light => _LightTokens(),
+      _ThemeFlavor.warm => _WarmTokens(),
       _ThemeFlavor.indeed => _IndeedTokens(),
     };
 
@@ -119,9 +175,9 @@ class AppThemeData {
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
       colorScheme: switch (flavor) {
-        _ThemeFlavor.dark   => darkColorScheme,
-        _ThemeFlavor.light  => lightColorScheme,
-        _ThemeFlavor.warm   => warmColorScheme,
+        _ThemeFlavor.dark => darkColorScheme,
+        _ThemeFlavor.light => lightColorScheme,
+        _ThemeFlavor.warm => warmColorScheme,
         _ThemeFlavor.indeed => indeedColorScheme,
       },
       scaffoldBackgroundColor: c.background,
@@ -142,10 +198,14 @@ class AppThemeData {
         scrolledUnderElevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: c.textPrimary),
-        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-        titleTextStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 18, fontWeight: FontWeight.w700,
-          color: c.textPrimary, letterSpacing: -0.2,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: c.textPrimary,
+          letterSpacing: -0.2,
         ),
       ),
 
@@ -162,12 +222,16 @@ class AppThemeData {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.surface,
         indicatorColor: c.primary.withValues(alpha: 0.15),
-        iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
-          color: s.contains(WidgetState.selected) ? c.primary : c.textTertiary,
-        )),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(
+            color: s.contains(WidgetState.selected)
+                ? c.primary
+                : c.textTertiary,
+          ),
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith((s) {
           final sel = s.contains(WidgetState.selected);
-          return GoogleFonts.plusJakartaSans(
+          return TextStyle(
             fontSize: 11,
             fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
             color: sel ? c.primary : c.textTertiary,
@@ -181,8 +245,14 @@ class AppThemeData {
         unselectedLabelColor: c.textTertiary,
         indicatorColor: c.primary,
         indicatorSize: TabBarIndicatorSize.tab,
-        labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500),
+        labelStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         dividerColor: c.divider,
       ),
 
@@ -193,8 +263,13 @@ class AppThemeData {
           foregroundColor: Colors.white,
           elevation: 0,
           minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radiusButton)),
-          textStyle: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDesign.radiusButton),
+          ),
+          textStyle: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -202,14 +277,22 @@ class AppThemeData {
           foregroundColor: c.primary,
           side: BorderSide(color: c.primary),
           minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radiusButton)),
-          textStyle: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDesign.radiusButton),
+          ),
+          textStyle: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: c.primary,
-          textStyle: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600),
+          textStyle: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -228,7 +311,10 @@ class AppThemeData {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
-          borderSide: BorderSide(color: c.primary, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppInputTokens.focusColor,
+            width: AppInputTokens.focusBorderWidth,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
@@ -264,8 +350,14 @@ class AppThemeData {
         backgroundColor: c.surfaceAlt,
         selectedColor: c.primary.withValues(alpha: 0.15),
         side: BorderSide(color: c.border),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radiusChip)),
-        labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500, color: c.textPrimary),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDesign.radiusChip),
+        ),
+        labelStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: c.textPrimary,
+        ),
         padding: AppDesign.paddingChip,
       ),
 
@@ -274,7 +366,9 @@ class AppThemeData {
         backgroundColor: c.sheetBg,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDesign.radiusSheet)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDesign.radiusSheet),
+          ),
         ),
       ),
 
@@ -282,25 +376,43 @@ class AppThemeData {
       dialogTheme: DialogThemeData(
         backgroundColor: c.surface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radius16)),
-        titleTextStyle: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w700, color: c.textPrimary),
-        contentTextStyle: GoogleFonts.plusJakartaSans(fontSize: 14, color: c.textSecondary, height: 1.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDesign.radius16),
+        ),
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: c.textPrimary,
+        ),
+        contentTextStyle: TextStyle(
+          fontSize: 14,
+          color: c.textSecondary,
+          height: 1.5,
+        ),
       ),
 
       // ── SnackBar ─────────────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? c.surfaceAlt : const Color(0xFF111111),
-        contentTextStyle: GoogleFonts.plusJakartaSans(fontSize: 14, color: isDark ? c.textPrimary : Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radiusCard)),
+        backgroundColor: isDark ? c.surfaceAlt : AppColors.ink,
+        contentTextStyle: TextStyle(
+          fontSize: 14,
+          color: isDark ? c.textPrimary : Colors.white,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDesign.radiusCard),
+        ),
         behavior: SnackBarBehavior.floating,
       ),
 
       // ── Switch ───────────────────────────────────────────────────────────
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? Colors.white : c.textTertiary),
-        trackColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? c.primary : c.border),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) =>
+              s.contains(WidgetState.selected) ? Colors.white : c.textTertiary,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.primary : c.border,
+        ),
       ),
 
       // ── List Tile ────────────────────────────────────────────────────────
@@ -366,7 +478,9 @@ class AppDecorations {
   );
 
   static BoxDecoration primaryBadge({bool outlined = false}) => BoxDecoration(
-    color: outlined ? Colors.transparent : AppColors.primary.withValues(alpha: 0.12),
+    color: outlined
+        ? Colors.transparent
+        : AppColors.primary.withValues(alpha: 0.12),
     borderRadius: BorderRadius.circular(AppRadius.badge),
     border: outlined ? Border.all(color: AppColors.primary, width: 1.5) : null,
   );
@@ -397,472 +511,472 @@ extension AppDesignContext on BuildContext {
 
 extension AppAccountTextStyles on BuildContext {
   TextStyle get accountProfileNameStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.h3,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.h3,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get accountProfileMetaStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textSecondary,
+  );
 
   TextStyle get accountSectionStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w700,
-        color: colors.textTertiary,
-        letterSpacing: 1.0,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w700,
+    color: colors.textTertiary,
+    letterSpacing: 1.0,
+  );
 
   TextStyle get accountMenuTitleStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w500,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
 
   TextStyle get accountMenuSubtitleStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get accountStoryLabelStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w500,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w500,
+  );
 
   TextStyle get accountDialogTitleStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.title,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 }
 
 extension AppBarTextStyles on BuildContext {
   TextStyle get appBarTitleStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.xl,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.xl,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarSubtitleStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w500,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w500,
+    color: AppColors.primary,
+  );
 
   TextStyle get appBarPillStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: FontWeight.w800,
-        color: AppColors.primary,
-        letterSpacing: -0.3,
-      );
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w800,
+    color: AppColors.primary,
+    letterSpacing: -0.3,
+  );
 
   TextStyle get appBarAccentTitleStyle => text.headlineLarge!.copyWith(
-        fontSize: AppFontSize.h2Lg,
-        fontWeight: FontWeight.w800,
-        color: colors.textPrimary,
-        letterSpacing: -0.3,
-      );
+    fontSize: AppFontSize.h2Lg,
+    fontWeight: FontWeight.w800,
+    color: colors.textPrimary,
+    letterSpacing: -0.3,
+  );
 
   TextStyle get appBarLocationLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.md,
-        fontWeight: FontWeight.w600,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarAvatarLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w800,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w800,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarBadgeStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.tiny,
-        fontWeight: FontWeight.w700,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.tiny,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
 
   TextStyle get appBarPanelTitleStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.xl,
-        fontWeight: FontWeight.w800,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.xl,
+    fontWeight: FontWeight.w800,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarSectionLabelStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w700,
-        color: colors.textTertiary,
-        letterSpacing: 0.8,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w700,
+    color: colors.textTertiary,
+    letterSpacing: 0.8,
+  );
 
   TextStyle get appBarSheetAccountTitleStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarSheetAccountSubtitleStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.sm,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.sm,
+    color: colors.textTertiary,
+  );
 
   TextStyle get appBarSheetItemTitleStyle => text.titleSmall!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w600,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
 
   TextStyle get appBarSheetItemSubtitleStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get appBarMutedMetaStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textTertiary,
+  );
 
   TextStyle get appBarEmptyStateStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textTertiary,
+  );
 
   TextStyle get appBarSheetActionStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w500,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textTertiary,
+  );
 
   TextStyle get appBarDangerActionStyle => text.titleSmall!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w600,
-        color: AppColors.error,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w600,
+    color: AppColors.error,
+  );
 
   TextStyle get appBarSearchHintStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textHint,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textHint,
+  );
 }
 
 extension AppNavTextStyles on BuildContext {
   TextStyle get navLabelStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w400,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w400,
+    color: colors.textTertiary,
+  );
 
   TextStyle get navLabelSelectedStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w700,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primary,
+  );
 
   TextStyle get navFabLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 
   TextStyle get navTabLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w700,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primary,
+  );
 
   TextStyle get navTabUnselectedLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w500,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+  );
 }
 
 extension AppStoryTextStyles on BuildContext {
   TextStyle get storyLabelStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w500,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
 
   TextStyle get storyViewedLabelStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w500,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w500,
+    color: colors.textTertiary,
+  );
 
   TextStyle get storyFallbackStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: FontWeight.w800,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w800,
+    color: AppColors.primary,
+  );
 
   TextStyle get storySheetTitleStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get storyCategoryPillStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.md,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 
   TextStyle get storyCaptionInputStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        height: 1.4,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.body,
+    height: 1.4,
+    color: Colors.white,
+  );
 
   TextStyle get storyCaptionHintStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        color: Colors.white.withValues(alpha: 0.5),
-      );
+    fontSize: AppFontSize.body,
+    color: Colors.white.withValues(alpha: 0.5),
+  );
 
   TextStyle get storyOverlayCaptionStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        height: 1.5,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.base,
+    height: 1.5,
+    color: Colors.white,
+  );
 
   TextStyle get storyAuthorNameStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 
   TextStyle get storyMetaStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        color: Colors.white.withValues(alpha: 0.7),
-      );
+    fontSize: AppFontSize.xs,
+    color: Colors.white.withValues(alpha: 0.7),
+  );
 
   TextStyle get storyActionStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w700,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
 
   TextStyle get storySheetBodyStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get storyDangerActionStyle => text.titleSmall!.copyWith(
-        fontSize: AppFontSize.title,
-        fontWeight: FontWeight.w600,
-        color: AppColors.error,
-      );
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w600,
+    color: AppColors.error,
+  );
 
   TextStyle get storySheetPrimaryTitleStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get storyEditFieldStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        height: 1.45,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.base,
+    height: 1.45,
+    color: colors.textPrimary,
+  );
 
   TextStyle get storyEditHintStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textHint,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textHint,
+  );
 
   TextStyle get storyEditCounterStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.tiny,
-        color: colors.textHint,
-      );
+    fontSize: AppFontSize.tiny,
+    color: colors.textHint,
+  );
 
   TextStyle get storySectionFieldLabelStyle => text.labelLarge!.copyWith(
-        fontSize: AppFontSize.md,
-        fontWeight: FontWeight.w600,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w600,
+    color: colors.textSecondary,
+  );
 
   TextStyle get storySecondaryActionStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w500,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w500,
+    color: AppColors.primary,
+  );
 
   TextStyle get storyChipLabelStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w600,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w600,
+  );
 
   TextStyle get storyOwnerSheetActionStyle => text.bodyMedium!.copyWith(
-        fontWeight: FontWeight.w500,
-        color: colors.textPrimary,
-      );
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
 
   TextStyle get storyOwnerSheetDangerActionStyle => text.bodyMedium!.copyWith(
-        fontWeight: FontWeight.w500,
-        color: AppColors.error,
-      );
+    fontWeight: FontWeight.w500,
+    color: AppColors.error,
+  );
 }
 
 extension AppReviewTextStyles on BuildContext {
   TextStyle get reviewPageTitleStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.xl,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.xl,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get reviewSummaryScoreStyle => text.displaySmall!.copyWith(
-        fontSize: AppFontSize.d4,
-        fontWeight: FontWeight.w800,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.d4,
+    fontWeight: FontWeight.w800,
+    color: colors.textPrimary,
+  );
 
   TextStyle get reviewSummaryMetaStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get reviewDistributionLabelStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get reviewDistributionCountStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.sm,
+    color: colors.textTertiary,
+  );
 
   TextStyle get reviewEmptyStateStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textSecondary,
+  );
 
   TextStyle get reviewAuthorStyle => text.titleSmall!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get reviewMissionStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.sm,
+    color: colors.textTertiary,
+  );
 
   TextStyle get reviewDateStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.xs,
+    color: colors.textTertiary,
+  );
 
   TextStyle get reviewBadgeStyle => text.labelMedium!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w600,
-        color: AppColors.primary,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w600,
+    color: AppColors.primary,
+  );
 
   TextStyle get reviewCommentStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        color: colors.textSecondary,
-        height: 1.5,
-      );
+    fontSize: AppFontSize.base,
+    color: colors.textSecondary,
+    height: 1.5,
+  );
 }
 
 extension AppProfileTextStyles on BuildContext {
   TextStyle get profilePageTitleStyle => text.titleLarge!.copyWith(
-        fontSize: AppFontSize.xl,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.xl,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profileSectionTitleStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.title,
-        fontWeight: FontWeight.w700,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profilePrimaryLabelStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w600,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profileSecondaryLabelStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.md,
+    color: colors.textSecondary,
+  );
 
   TextStyle get profileMetaStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.sm,
-        color: colors.textSecondary,
-      );
+    fontSize: AppFontSize.sm,
+    color: colors.textSecondary,
+  );
 
   TextStyle get profileTertiaryStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w500,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textTertiary,
+  );
 
   TextStyle get profileTagStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      );
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 
   TextStyle get profileValueStyle => text.bodyMedium!.copyWith(
-        fontWeight: FontWeight.w600,
-        color: colors.textPrimary,
-      );
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profileSheetTitleStyle => text.titleMedium!.copyWith(
-        fontSize: AppFontSize.title,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.6,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.6,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profileSheetFieldLabelStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.md,
-        fontWeight: FontWeight.w400,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w400,
+    color: colors.textTertiary,
+  );
 
   TextStyle get profileSheetFieldValueStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w500,
-        color: colors.textPrimary,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
 
   TextStyle get profileSheetPlaceholderStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.body,
-        fontWeight: FontWeight.w500,
-        color: colors.textHint,
-      );
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textHint,
+  );
 
   TextStyle get profileSheetSectionStyle => text.labelSmall!.copyWith(
-        fontSize: AppFontSize.sm,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.8,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.8,
+    color: colors.textTertiary,
+  );
 
   TextStyle get profileSheetCounterStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        color: colors.textTertiary,
-      );
+    fontSize: AppFontSize.xs,
+    color: colors.textTertiary,
+  );
 
   TextStyle get profileSheetActionStyle => text.bodyMedium!.copyWith(
-        fontSize: AppFontSize.base,
-        fontWeight: FontWeight.w500,
-        color: colors.textSecondary,
-        decoration: TextDecoration.underline,
-        decorationColor: colors.textSecondary,
-      );
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+    decoration: TextDecoration.underline,
+    decorationColor: colors.textSecondary,
+  );
 
   TextStyle get profileErrorStyle => text.bodySmall!.copyWith(
-        fontSize: AppFontSize.xs,
-        color: AppColors.error,
-      );
+    fontSize: AppFontSize.xs,
+    color: AppColors.error,
+  );
 
   TextStyle get profileSliderValueStyle => text.labelSmall!.copyWith(
-        fontWeight: FontWeight.w700,
-        color: Colors.black,
-      );
+    fontWeight: FontWeight.w700,
+    color: Colors.black,
+  );
 }

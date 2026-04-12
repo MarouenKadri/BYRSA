@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -238,7 +237,7 @@ class _StepAddressState extends State<StepAddress> {
                                         children: [
                                           Text(
                                             place.name,
-                                            style: GoogleFonts.inter(fontSize: 14.5, fontWeight: FontWeight.w600, color: const Color(0xFF101418)),
+                                            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.inkDark),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -277,7 +276,7 @@ class _StepAddressState extends State<StepAddress> {
             child: OutlinedButton.icon(
               onPressed: _useCurrentLocation,
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF2C3137),
+                foregroundColor: AppColors.gray700,
                 side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
                 backgroundColor: Colors.white.withValues(alpha: 0.94),
                 minimumSize: const Size(0, 48),
@@ -288,10 +287,10 @@ class _StepAddressState extends State<StepAddress> {
               icon: const Icon(Icons.my_location_outlined, size: 18),
               label: Text(
                 'Utiliser ma position actuelle',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF2C3137),
+                  color: AppColors.gray700,
                 ),
               ),
             ),
@@ -351,9 +350,14 @@ class _SearchBar extends StatelessWidget {
         focusNode: focusNode,
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
+        decoration: AppInputDecorations.formField(
+          context,
           hintText: 'Rechercher une adresse...',
-          hintStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: const Color(0xFF9BA3AB)),
+          hintStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF9BA3AB),
+          ),
           prefixIcon: isSearching
               ? Padding(
                   padding: AppInsets.a14,
@@ -373,9 +377,9 @@ class _SearchBar extends StatelessWidget {
                   onPressed: onClear,
                 )
               : null,
-          border: InputBorder.none,
-          contentPadding:
-              AppInsets.h16v16,
+          contentPadding: AppInsets.h16v16,
+          noBorder: true,
+          fillColor: Colors.transparent,
         ),
       ),
     );
@@ -393,7 +397,7 @@ class _MapPin extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFF1847A8),
+            color: AppColors.stepBlue,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2.5),
             boxShadow: const [
@@ -420,7 +424,7 @@ class _PinTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF1847A8)
+      ..color = AppColors.stepBlue
       ..style = PaintingStyle.fill;
     final path = ui.Path()
       ..moveTo(0, 0)
@@ -464,7 +468,7 @@ class _SelectedAddressCard extends StatelessWidget {
           Container(
             padding: AppInsets.a10,
             decoration: BoxDecoration(
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.check_rounded,
@@ -477,12 +481,12 @@ class _SelectedAddressCard extends StatelessWidget {
               children: [
                 Text(
                   'Adresse sélectionnée',
-                  style: GoogleFonts.inter(fontSize: 11.5, fontWeight: FontWeight.w500, color: const Color(0xFF8E959D)),
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500, color: AppColors.gray600),
                 ),
                 AppGap.h2,
                 Text(
                   address,
-                  style: GoogleFonts.inter(fontSize: 14.5, fontWeight: FontWeight.w600, color: const Color(0xFF101418)),
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.inkDark),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

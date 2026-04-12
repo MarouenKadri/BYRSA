@@ -19,11 +19,13 @@ class StoryProvider extends ChangeNotifier {
   /// Profile view: one circle per service category, filtered by freelancer
   List<StoryGroup> storyGroupsForFreelancer(String authorId) =>
       StoryGroup.fromStoriesByCategory(
-          _stories.where((s) => s.authorId == authorId).toList());
+        _stories.where((s) => s.authorId == authorId).toList(),
+      );
 
   /// Own stories grouped by category (for account page)
-  List<StoryGroup> get myStoryGroups =>
-      StoryGroup.fromStoriesByCategory(_stories.where((s) => s.isOwner).toList());
+  List<StoryGroup> get myStoryGroups => StoryGroup.fromStoriesByCategory(
+    _stories.where((s) => s.isOwner).toList(),
+  );
 
   StoryProvider() {
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
@@ -44,7 +46,9 @@ class StoryProvider extends ChangeNotifier {
       final userId = _userId ?? '';
       final data = await _supabase
           .from('posts')
-          .select('*, author:profiles!author_id(first_name, last_name, avatar_url), post_likes(user_id)')
+          .select(
+            '*, author:profiles!author_id(first_name, last_name, avatar_url), post_likes(user_id)',
+          )
           .order('created_at', ascending: false);
       _stories = (data as List)
           .map<Story?>((j) {
@@ -73,11 +77,16 @@ class StoryProvider extends ChangeNotifier {
     try {
       final bytes = await imageFile.readAsBytes();
       final path = '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      await _supabase.storage.from('post-images').uploadBinary(
-        path,
-        bytes,
-        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
-      );
+      await _supabase.storage
+          .from('post-images')
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
+          );
       final imageUrl = _supabase.storage.from('post-images').getPublicUrl(path);
 
       final data = await _supabase
@@ -86,12 +95,16 @@ class StoryProvider extends ChangeNotifier {
             'author_id': userId,
             'content': caption,
             'images': [imageUrl],
-            'service_category': serviceCategory.isEmpty ? null : serviceCategory,
+            'service_category': serviceCategory.isEmpty
+                ? null
+                : serviceCategory,
           })
-          .select('*, author:profiles!author_id(first_name, last_name, avatar_url)')
+          .select(
+            '*, author:profiles!author_id(first_name, last_name, avatar_url)',
+          )
           .single();
 
-      final story = Story.fromJson(data as Map<String, dynamic>, userId);
+      final story = Story.fromJson(data, userId);
       _stories = [story, ..._stories];
       notifyListeners();
       return story;
@@ -149,7 +162,8 @@ class StoryProvider extends ChangeNotifier {
           .select('user_id')
           .eq('post_id', storyId);
       final freshIds = List<String>.from(
-          (rows as List).map((r) => r['user_id'].toString()));
+        (rows as List).map((r) => r['user_id'].toString()),
+      );
       final currentIdx = _stories.indexWhere((s) => s.id == storyId);
       if (currentIdx >= 0) {
         _stories = List.from(_stories)
@@ -175,10 +189,15 @@ class StoryProvider extends ChangeNotifier {
     final idx = _stories.indexWhere((s) => s.id == id);
     if (idx < 0) return false;
     try {
-      await _supabase.from('posts').update({
-        'content': caption,
-        'service_category': serviceCategory.isEmpty ? null : serviceCategory,
-      }).eq('id', id);
+      await _supabase
+          .from('posts')
+          .update({
+            'content': caption,
+            'service_category': serviceCategory.isEmpty
+                ? null
+                : serviceCategory,
+          })
+          .eq('id', id);
       _stories = List.from(_stories)
         ..[idx] = _stories[idx].copyWith(
           caption: caption,

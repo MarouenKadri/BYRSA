@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -83,7 +82,7 @@ class DetailMetaChip extends StatelessWidget {
         child: Text(
           label,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF66707C),
@@ -111,10 +110,10 @@ class DetailLuxuryPill extends StatelessWidget {
     ),
     child: Text(
       label,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w500,
-        color: const Color(0xFF111111),
+        color: AppColors.ink,
       ),
     ),
   );
@@ -165,7 +164,7 @@ class DetailInfoRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF9AA3AE),
@@ -176,11 +175,11 @@ class DetailInfoRow extends StatelessWidget {
                 text,
                 maxLines: twoLines ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   height: 1.45,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111111),
+                  color: AppColors.ink,
                 ),
               ),
             ],
@@ -198,7 +197,7 @@ class DetailListDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const Divider(height: 1, color: Color(0xFFF0F1F3), indent: 31);
+      const Divider(height: 1, color: AppColors.gray50, indent: 31);
 }
 
 // ─── DetailBottomArea ─────────────────────────────────────────────────────────
@@ -258,7 +257,7 @@ class DetailTealButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = color ?? const Color(0xFF000000);
+    final bg = color ?? Colors.black;
     final fg = textColor ?? Colors.white;
     return GestureDetector(
       onTap: onTap,
@@ -278,7 +277,7 @@ class DetailTealButton extends StatelessWidget {
             ],
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: onTap != null ? fg : const Color(0xFF8F98A3),
@@ -420,16 +419,16 @@ class DetailStatusBanner extends StatelessWidget {
               children: [
                 Text(
                   config.title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111111),
+                    color: AppColors.ink,
                   ),
                 ),
                 AppGap.h4,
                 Text(
                   config.subtitle,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13,
                     height: 1.45,
                     fontWeight: FontWeight.w400,
@@ -557,7 +556,7 @@ class DetailMiniMapPin extends StatelessWidget {
     width: 26,
     height: 26,
     decoration: const BoxDecoration(
-      color: Color(0xFF111111),
+      color: AppColors.ink,
       shape: BoxShape.circle,
       boxShadow: [
         BoxShadow(
@@ -696,7 +695,7 @@ class _Pill extends StatelessWidget {
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: const Color(0xFF111111),
+          color: AppColors.ink,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
@@ -706,7 +705,7 @@ class _Pill extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,

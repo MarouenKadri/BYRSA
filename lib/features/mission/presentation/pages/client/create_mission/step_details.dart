@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/design/app_primitives.dart';
@@ -133,59 +131,48 @@ class _StepDetailsState extends State<StepDetails> {
       wrapWithSurface: false,
       builder: (sheetCtx) {
         final bottom = MediaQuery.of(sheetCtx).padding.bottom;
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const AppBottomSheetHandle(),
-                  AppGap.h12,
-                  Padding(
-                    padding: AppInsets.h20,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Choisir une photo',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFFAFAFA),
-                        ),
-                      ),
+        return AppDarkSheet(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppBottomSheetHandle(),
+              AppGap.h12,
+              Padding(
+                padding: AppInsets.h20,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Choisir une photo',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.snow,
                     ),
                   ),
-                  AppGap.h8,
-                  _PhotoOptionTile(
-                    icon: Icons.photo_camera_outlined,
-                    title: 'Prendre une photo',
-                    subtitle: 'Utiliser la caméra',
-                    onTap: () {
-                      Navigator.pop(sheetCtx);
-                      _takePhoto();
-                    },
-                  ),
-                  const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-                  _PhotoOptionTile(
-                    icon: Icons.photo_library_outlined,
-                    title: 'Choisir depuis la galerie',
-                    subtitle: 'Sélectionner une photo',
-                    onTap: () {
-                      Navigator.pop(sheetCtx);
-                      _pickFromGallery();
-                    },
-                  ),
-                  SizedBox(height: 12 + bottom),
-                ],
+                ),
               ),
-            ),
+              AppGap.h8,
+              _PhotoOptionTile(
+                icon: Icons.photo_camera_outlined,
+                title: 'Prendre une photo',
+                subtitle: 'Utiliser la caméra',
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _takePhoto();
+                },
+              ),
+              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+              _PhotoOptionTile(
+                icon: Icons.photo_library_outlined,
+                title: 'Choisir depuis la galerie',
+                subtitle: 'Sélectionner une photo',
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _pickFromGallery();
+                },
+              ),
+              SizedBox(height: 12 + bottom),
+            ],
           ),
         );
       },
@@ -205,18 +192,18 @@ class _StepDetailsState extends State<StepDetails> {
               children: [
                 Text(
                   'Décrivez votre besoin',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 31,
                     fontWeight: FontWeight.w600,
                     height: 1.16,
-                    color: const Color(0xFF101418),
+                    color: AppColors.inkDark,
                     letterSpacing: -0.6,
                   ),
                 ),
                 AppGap.h10,
                 Text(
                   'Quelques détails bien choisis aideront les freelancers à vous répondre plus précisément.',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w400,
                     height: 1.5,
@@ -241,10 +228,10 @@ class _StepDetailsState extends State<StepDetails> {
       children: [
         Text(
           'DESCRIPTION',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 11.5,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF8E959D),
+            color: AppColors.gray600,
             letterSpacing: 1.8,
           ),
         ),
@@ -259,28 +246,31 @@ class _StepDetailsState extends State<StepDetails> {
             onChanged: widget.onDescriptionChanged,
             maxLines: 6,
             maxLength: 500,
-            style: GoogleFonts.inter(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w400,
               height: 1.55,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
             ),
-            decoration: InputDecoration(
+            decoration: AppInputDecorations.formField(
+              context,
               hintText:
                   "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
-              hintStyle: GoogleFonts.inter(
+              hintStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 height: 1.5,
-                color: const Color(0xFFB0B6BD),
-              ),
-              border: InputBorder.none,
-              counterStyle: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF9BA3AB),
+                color: Color(0xFFB0B6BD),
               ),
               contentPadding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+              noBorder: true,
+              fillColor: Colors.transparent,
+            ).copyWith(
+              counterStyle: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF9BA3AB),
+              ),
             ),
           ),
         ),
@@ -358,10 +348,10 @@ class _StepDetailsState extends State<StepDetails> {
           children: [
             Text(
               'PHOTOS ${widget.photos.length}/10',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF8E959D),
+                color: AppColors.gray600,
                 letterSpacing: 1.8,
               ),
             ),
@@ -376,14 +366,14 @@ class _StepDetailsState extends State<StepDetails> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_border_rounded, size: 14, color: Color(0xFF8E959D)),
+                  const Icon(Icons.star_border_rounded, size: 14, color: AppColors.gray600),
                   AppGap.w4,
                   Text(
                     'Conseillé',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF8E959D),
+                      color: AppColors.gray600,
                     ),
                   ),
                 ],
@@ -395,7 +385,7 @@ class _StepDetailsState extends State<StepDetails> {
                 onTap: _confirmDeleteAll,
                 child: Text(
                   'Tout supprimer',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFFB75C5C),
@@ -446,21 +436,21 @@ class _StepDetailsState extends State<StepDetails> {
               const Icon(
                 Icons.photo_camera_outlined,
                 size: 30,
-                color: Color(0xFF8E959D),
+                color: AppColors.gray600,
               ),
               AppGap.h12,
               Text(
                 'Ajouter des photos',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF101418),
+                  color: AppColors.inkDark,
                 ),
               ),
               AppGap.h4,
               Text(
                 "Camera ou galerie, jusqu'a 10 images",
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF9BA3AB),
@@ -530,11 +520,11 @@ class _StepDetailsState extends State<StepDetails> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.photo_camera_outlined, size: 28, color: Color(0xFF8E959D)),
+              const Icon(Icons.photo_camera_outlined, size: 28, color: AppColors.gray600),
               AppGap.h6,
               Text(
                 'Ajouter',
-                style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.w500, color: const Color(0xFF6E757D)),
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: const Color(0xFF6E757D)),
               ),
             ],
           ),
@@ -701,19 +691,19 @@ class _PhotoOptionTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFFFAFAFA),
+                      color: AppColors.snow,
                     ),
                   ),
                   AppGap.h2,
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF808080),
+                      color: AppColors.gray500,
                     ),
                   ),
                 ],

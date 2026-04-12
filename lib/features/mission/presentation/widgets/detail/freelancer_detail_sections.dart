@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -41,10 +40,10 @@ class FreelancerClientCard extends StatelessWidget {
           children: [
             Text(
               'Publie par',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111111),
+                color: AppColors.ink,
               ),
             ),
             AppGap.h14,
@@ -81,10 +80,10 @@ class FreelancerClientCard extends StatelessWidget {
                             child: Text(
                               client.name,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111111),
+                                color: AppColors.ink,
                               ),
                             ),
                           ),
@@ -93,7 +92,7 @@ class FreelancerClientCard extends StatelessWidget {
                             const Icon(
                               Icons.verified_rounded,
                               size: 16,
-                              color: Color(0xFF111111),
+                              color: AppColors.ink,
                             ),
                           ],
                         ],
@@ -101,7 +100,7 @@ class FreelancerClientCard extends StatelessWidget {
                       AppGap.h6,
                       Text(
                         '${client.rating.toStringAsFixed(1)} · ${client.missionsCount} mission${client.missionsCount > 1 ? 's' : ''}',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           color: const Color(0xFF8F98A3),
@@ -123,13 +122,13 @@ class FreelancerClientCard extends StatelessWidget {
                         icon: const Icon(Icons.phone_rounded, size: 16),
                         label: const Text('Appeler'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF111111),
+                          foregroundColor: AppColors.ink,
                           side: const BorderSide(color: Color(0xFFE1E6EB)),
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          textStyle: GoogleFonts.inter(
+                          textStyle: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -145,13 +144,13 @@ class FreelancerClientCard extends StatelessWidget {
                         label: const Text('Contacter'),
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: const Color(0xFF111111),
+                          backgroundColor: AppColors.ink,
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          textStyle: GoogleFonts.inter(
+                          textStyle: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -249,10 +248,10 @@ class FreelancerLocationShareCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     config.title,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111111),
+                      color: AppColors.ink,
                     ),
                   ),
                 ),
@@ -261,7 +260,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
             AppGap.h14,
             Text(
               config.subtitle,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 height: 1.45,
@@ -287,7 +286,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Le partage live doit etre active depuis le pilotage de mission.',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF4C5661),
@@ -305,13 +304,13 @@ class FreelancerLocationShareCard extends StatelessWidget {
                 onPressed: onOpenMissionPilot,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: const Color(0xFF000000),
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -359,90 +358,52 @@ class FreelancerActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18, 0, 18, 18 + bottomPad),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h18,
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.72),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: const Color(0xFFF0F1F3),
-                  width: 0.8,
-                ),
-              ),
-              child: _FreelancerSheetRow(
-                icon: Icons.flag_outlined,
-                label: 'Signaler cette mission',
-                trailingIcon: Icons.flag_outlined,
-                trailingColor: const Color(0xFFB45C5C),
-                showLeadingIcon: false,
-                onTap: onReport,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FreelancerSheetRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final IconData? trailingIcon;
-  final Color? trailingColor;
-  final bool showLeadingIcon;
-
-  const _FreelancerSheetRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.trailingIcon,
-    this.trailingColor,
-    this.showLeadingIcon = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          child: Row(
-            children: [
-              if (showLeadingIcon) ...[
-                Icon(icon, size: 18, color: const Color(0xFF111111)),
-                AppGap.w14,
-              ],
-              Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111111),
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return AppDarkSheet(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AppBottomSheetHandle(),
+          AppGap.h12,
+          Padding(
+            padding: AppInsets.h20,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Options',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.snow,
+                    ),
                   ),
                 ),
               ),
-              Icon(
-                trailingIcon ?? Icons.chevron_right_rounded,
-                size: 18,
-                color: trailingColor ?? const Color(0xFFB5BDC7),
+              AppGap.h8,
+              InkWell(
+                onTap: onReport,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.flag_outlined, size: 21, color: Color(0xFFE57373)),
+                      AppGap.w14,
+                      Expanded(
+                        child: Text(
+                          'Signaler cette mission',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFFE57373),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+              SizedBox(height: 12 + bottom),
             ],
-          ),
-        ),
       ),
     );
   }
@@ -471,95 +432,97 @@ class _FreelancerReportConfirmSheetState
 
   @override
   Widget build(BuildContext context) {
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return AppDarkSheet(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottomPad),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h20,
-            Text(
-              'Signaler la mission ?',
-              style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111111),
-              ),
-            ),
-            AppGap.h6,
-            Text(
-              widget.missionTitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8F98A3),
-              ),
-            ),
-            AppGap.h18,
-            Text(
-              'Merci de nous aider a garder la plateforme sure. Votre signalement sera examine par notre equipe.',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                height: 1.55,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF5F6975),
-              ),
-            ),
-            AppGap.h24,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _loading
-                    ? null
-                    : () {
-                        setState(() => _loading = true);
-                        widget.onConfirm();
-                      },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF000000),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  textStyle: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppBottomSheetHandle(),
+                AppGap.h20,
+                Text(
+                  'Signaler la mission ?',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.snow,
                   ),
                 ),
-                child: _loading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Signaler'),
-              ),
-            ),
-            AppGap.h12,
-            Center(
-              child: TextButton(
-                onPressed: _loading ? null : () => Navigator.pop(context),
-                child: Text(
-                  'Annuler',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF8F98A3),
+                AppGap.h6,
+                Text(
+                  widget.missionTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gray500,
                   ),
                 ),
-              ),
-            ),
-          ],
+                AppGap.h18,
+                Text(
+                  'Merci de nous aider à garder la plateforme sûre. Votre signalement sera examiné par notre équipe.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.55,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gray500,
+                  ),
+                ),
+                AppGap.h24,
+                const Divider(height: 1, color: Color(0x1FFFFFFF)),
+                AppGap.h24,
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _loading
+                        ? null
+                        : () {
+                            setState(() => _loading = true);
+                            widget.onConfirm();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFFE57373),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      textStyle: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Signaler'),
+                  ),
+                ),
+                AppGap.h12,
+                Center(
+                  child: GestureDetector(
+                    onTap: _loading ? null : () => Navigator.pop(context),
+                    child: Text(
+                      'Annuler',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.gray500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
         ),
       ),
     );
@@ -654,10 +617,10 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                   Expanded(
                     child: Text(
                       'Votre proposition',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                       ),
                     ),
                   ),
@@ -683,7 +646,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       '${widget.mission.title} • ${widget.mission.formattedDate}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF5F6975),
@@ -692,7 +655,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                     AppGap.h24,
                     Text(
                       'Votre tarif',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF7E8792),
@@ -704,30 +667,31 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       keyboardType: TextInputType.number,
                       autofocus: true,
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 38,
                         fontWeight: FontWeight.w300,
                         letterSpacing: -1.2,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                       ),
-                      decoration: InputDecoration(
+                      decoration: AppInputDecorations.formField(
+                        context,
                         hintText: '0',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: const TextStyle(
                           fontSize: 38,
                           fontWeight: FontWeight.w300,
                           letterSpacing: -1.2,
-                          color: const Color(0xFFD5D9DE),
+                          color: Color(0xFFD5D9DE),
                         ),
+                        contentPadding: EdgeInsets.zero,
+                        noBorder: true,
+                        fillColor: Colors.transparent,
+                      ).copyWith(
                         prefixText: '€ ',
-                        prefixStyle: GoogleFonts.inter(
+                        prefixStyle: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w300,
-                          color: const Color(0xFF111111),
+                          color: AppColors.ink,
                         ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
                     AppGap.h8,
@@ -750,18 +714,18 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                             ),
                             decoration: BoxDecoration(
                               color: isActive
-                                  ? const Color(0xFF000000)
+                                  ? Colors.black
                                   : const Color(0xFFF2F4F7),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
                               '$amount €',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: isActive
                                     ? Colors.white
-                                    : const Color(0xFF111111),
+                                    : AppColors.ink,
                               ),
                             ),
                           ),
@@ -773,7 +737,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       children: [
                         Text(
                           'Message au client',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF7E8792),
@@ -782,7 +746,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                         const Spacer(),
                         Text(
                           '$_messageLength/400',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: const Color(0xFFA1A9B3),
@@ -798,38 +762,25 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       buildCounter:
                           (_, {required currentLength, required isFocused, maxLength}) =>
                               null,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 1.5,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                       ),
-                      decoration: InputDecoration(
+                      decoration: AppInputDecorations.formField(
+                        context,
                         hintText:
                             'Présentez-vous, vos atouts, votre expérience...',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: const TextStyle(
                           fontSize: 14,
                           height: 1.5,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFFA4ACB5),
+                          color: Color(0xFFA4ACB5),
                         ),
-                        filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.all(16),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE5E8EC),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF111111),
-                            width: 1,
-                          ),
-                        ),
+                        radius: 18,
                       ),
                     ),
                   ],
@@ -860,15 +811,15 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       : null,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF000000),
+                    backgroundColor: Colors.black,
                     disabledBackgroundColor:
-                        const Color(0xFF000000).withValues(alpha: 0.12),
+                        Colors.black.withValues(alpha: 0.12),
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(56),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    textStyle: GoogleFonts.inter(
+                    textStyle: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),

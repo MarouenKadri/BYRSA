@@ -2,9 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
-import '../tokens/app_radius.dart';
 import '../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -14,10 +12,7 @@ import '../theme/app_theme.dart';
 class AppNavBarSurface extends StatelessWidget {
   final Widget child;
 
-  const AppNavBarSurface({
-    super.key,
-    required this.child,
-  });
+  const AppNavBarSurface({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +67,9 @@ class AppNavItemPill extends StatelessWidget {
       height: 44,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? Colors.white.withValues(alpha: 0.34) : Colors.transparent,
+        color: selected
+            ? Colors.white.withValues(alpha: 0.34)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(22),
       ),
       child: child,

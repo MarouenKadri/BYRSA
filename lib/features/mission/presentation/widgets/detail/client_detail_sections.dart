@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -40,10 +39,10 @@ class ClientCandidatesCard extends StatelessWidget {
         children: [
           Text(
             'Candidatures',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: AppColors.ink,
             ),
           ),
           AppGap.h16,
@@ -71,7 +70,7 @@ class ClientCandidatesCard extends StatelessWidget {
                           Icons.person_outline_rounded,
                           size: 15,
                           color: visible
-                              ? const Color(0xFF111111)
+                              ? AppColors.ink
                               : const Color(0xFFC4CAD2),
                         ),
                       ),
@@ -85,10 +84,10 @@ class ClientCandidatesCard extends StatelessWidget {
                   count > 0
                       ? '$count candidat${count > 1 ? 's' : ''} interesse${count > 1 ? 's' : ''}'
                       : 'Aucune candidature pour le moment',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111111),
+                    color: AppColors.ink,
                   ),
                 ),
               ),
@@ -101,15 +100,15 @@ class ClientCandidatesCard extends StatelessWidget {
               onPressed: count > 0 ? onViewCandidates : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: const Color(0xFF000000),
+                backgroundColor: Colors.black,
                 disabledBackgroundColor:
-                    const Color(0xFF000000).withValues(alpha: 0.12),
+                    Colors.black.withValues(alpha: 0.12),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(54),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
-                textStyle: GoogleFonts.inter(
+                textStyle: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -170,7 +169,7 @@ class ClientPrestaCard extends StatelessWidget {
               AppGap.w8,
               Text(
                 'Prestataire choisi',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF181B1F),
@@ -190,7 +189,7 @@ class ClientPrestaCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFFFFFFFF),
+                        color: Colors.white,
                         width: 1.5,
                       ),
                     ),
@@ -208,10 +207,10 @@ class ClientPrestaCard extends StatelessWidget {
                   Text(
                     presta.name,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF111111),
+                      color: AppColors.ink,
                     ),
                   ),
                   AppGap.h6,
@@ -226,7 +225,7 @@ class ClientPrestaCard extends StatelessWidget {
                       AppGap.w4,
                       Text(
                         '${presta.rating.toStringAsFixed(1)} rating',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: const Color(0xFF9AA1A8),
@@ -251,7 +250,7 @@ class ClientPrestaCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Tarif convenu:',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF98A1AC),
@@ -260,10 +259,10 @@ class ClientPrestaCard extends StatelessWidget {
                 ),
                 Text(
                   agreedPrice,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111),
+                    color: AppColors.ink,
                   ),
                 ),
                 AppGap.w6,
@@ -278,7 +277,7 @@ class ClientPrestaCard extends StatelessWidget {
           AppGap.h14,
           Text(
             'Paiement securise • Service garanti',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF9AA1A8),
@@ -295,13 +294,13 @@ class ClientPrestaCard extends StatelessWidget {
                       icon: const Icon(Icons.phone_rounded, size: 16),
                       label: const Text('Appeler'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF111111),
+                        foregroundColor: AppColors.ink,
                         side: const BorderSide(color: Color(0xFFE1E6EB)),
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        textStyle: GoogleFonts.inter(
+                        textStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -317,13 +316,13 @@ class ClientPrestaCard extends StatelessWidget {
                       label: const Text('Contacter'),
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: const Color(0xFF111111),
+                        backgroundColor: AppColors.ink,
                         foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        textStyle: GoogleFonts.inter(
+                        textStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -428,10 +427,10 @@ class ClientTrackingCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   config.title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111),
+                    color: AppColors.ink,
                   ),
                 ),
               ),
@@ -440,7 +439,7 @@ class ClientTrackingCard extends StatelessWidget {
           AppGap.h14,
           Text(
             config.subtitle,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               height: 1.45,
@@ -455,7 +454,7 @@ class ClientTrackingCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF111111),
+                color: AppColors.ink,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Row(
@@ -466,7 +465,7 @@ class ClientTrackingCard extends StatelessWidget {
                       children: [
                         Text(
                           'Code de demarrage',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.white.withValues(alpha: 0.72),
@@ -476,7 +475,7 @@ class ClientTrackingCard extends StatelessWidget {
                         AppGap.h8,
                         Text(
                           '${startCode.substring(0, 3)} ${startCode.substring(3)}',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -526,7 +525,7 @@ class ClientTrackingCard extends StatelessWidget {
                             AppGap.w6,
                             Text(
                               'Copier',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -566,7 +565,7 @@ class ClientTrackingCard extends StatelessWidget {
                         : mission.status == MissionStatus.completionRequested
                             ? 'La mission est en attente de votre retour avant de passer au paiement.'
                             : 'Le tracking live est prevu ici pour suivre le trajet du prestataire.',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF4C5661),
@@ -585,13 +584,13 @@ class ClientTrackingCard extends StatelessWidget {
                 onPressed: onOpenTracking,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: const Color(0xFF000000),
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -658,10 +657,10 @@ class ClientCompletionRequestedCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Fin de mission signalee',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111),
+                    color: AppColors.ink,
                   ),
                 ),
               ),
@@ -670,7 +669,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
           AppGap.h14,
           Text(
             '$prestaName a signale avoir termine la mission. Confirmez la fin si tout est bon ou signalez un probleme.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               height: 1.45,
@@ -696,7 +695,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Sans action de votre part, le paiement pourra ensuite etre libere automatiquement.',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF4C5661),
@@ -714,7 +713,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onDispute,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF111111),
+                    foregroundColor: AppColors.ink,
                     side: const BorderSide(color: Color(0xFFE1E6EB)),
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(
@@ -730,7 +729,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                   onPressed: onConfirm,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF000000),
+                    backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(
@@ -762,7 +761,7 @@ class _PrestaAvatarFallback extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: const Color(0xFF8C95A0),
@@ -792,53 +791,52 @@ class ClientActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18, 0, 18, 18 + bottomPad),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h18,
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.72),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: const Color(0xFFF0F1F3), width: 0.8),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (canModify) ...[
-                    _SheetRow(
-                      icon: Icons.edit_outlined,
-                      label: 'Modifier la mission',
-                      onTap: onEdit,
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return AppDarkSheet(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AppBottomSheetHandle(),
+          AppGap.h12,
+          Padding(
+            padding: AppInsets.h20,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Options',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.snow,
                     ),
-                    const _SheetDivider(),
-                  ],
-                  _SheetRow(
-                    icon: Icons.ios_share_outlined,
-                    label: 'Partager la mission',
-                    onTap: onShare,
                   ),
-                  if (canCancel) ...[
-                    const _SheetDivider(),
-                    _SheetRow(
-                      icon: Icons.delete_outline,
-                      label: 'Annuler la mission',
-                      trailingIcon: Icons.delete_outline,
-                      trailingColor: const Color(0xFFB45C5C),
-                      showLeadingIcon: false,
-                      onTap: onCancel,
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
+              AppGap.h8,
+              if (canModify) ...[
+                _SheetRow(
+                  icon: Icons.edit_outlined,
+                  label: 'Modifier la mission',
+                  onTap: onEdit,
+                ),
+                const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+              ],
+              _SheetRow(
+                icon: Icons.ios_share_outlined,
+                label: 'Partager la mission',
+                onTap: onShare,
+              ),
+              if (canCancel) ...[
+                const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+                _SheetRow(
+                  icon: Icons.delete_outline,
+                  label: 'Annuler la mission',
+                  isDestructive: true,
+                  onTap: onCancel,
+                ),
+              ],
+              SizedBox(height: 12 + bottom),
+            ],
       ),
     );
   }
@@ -848,67 +846,42 @@ class _SheetRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final IconData? trailingIcon;
-  final Color? trailingColor;
-  final bool showLeadingIcon;
+  final bool isDestructive;
 
   const _SheetRow({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.trailingIcon,
-    this.trailingColor,
-    this.showLeadingIcon = true,
+    this.isDestructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          child: Row(
-            children: [
-              if (showLeadingIcon) ...[
-                Icon(icon, size: 18, color: const Color(0xFF111111)),
-                AppGap.w14,
-              ],
-              Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111111),
-                  ),
+    final color = isDestructive ? const Color(0xFFE57373) : AppColors.snow;
+    final iconColor = isDestructive ? const Color(0xFFE57373) : const Color(0xFFD5DADE);
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 21, color: iconColor),
+            AppGap.w14,
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: color,
                 ),
               ),
-              Icon(
-                trailingIcon ?? Icons.chevron_right_rounded,
-                size: trailingIcon != null ? 17 : 18,
-                color: trailingColor ?? const Color(0xFFB5BDC7),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
-
-class _SheetDivider extends StatelessWidget {
-  const _SheetDivider();
-
-  @override
-  Widget build(BuildContext context) => const Divider(
-    height: 1,
-    color: Color(0xFFF0F1F3),
-    indent: 18,
-    endIndent: 18,
-  );
 }
 
 // ─── ClientCancelSheet ────────────────────────────────────────────────────────
@@ -932,57 +905,65 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return AppDarkSheet(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottom),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h20,
-            Text(
-              'Annuler la mission ?',
-              style: context.text.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            AppGap.h4,
-            Text(
-              widget.missionTitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.bodyMedium?.copyWith(
-                color: context.colors.textTertiary,
-              ),
-            ),
-            AppGap.h24,
-            Divider(color: context.colors.divider, height: 1),
-            AppGap.h24,
-            AppButton(
-              label: 'Confirmer l\'annulation',
-              variant: ButtonVariant.destructive,
-              isLoading: _loading,
-              onPressed: _loading
-                  ? null
-                  : () {
-                      HapticFeedback.heavyImpact();
-                      setState(() => _loading = true);
-                      widget.onConfirm();
-                    },
-            ),
-            AppGap.h14,
-            Padding(
-              padding: EdgeInsets.only(bottom: 16 + bottomPad),
-              child: Center(
-                child: AppTextAction(
-                  label: 'Garder la mission',
-                  onTap: () => Navigator.pop(context),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppBottomSheetHandle(),
+                AppGap.h20,
+                Text(
+                  'Annuler la mission ?',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.snow,
+                  ),
                 ),
-              ),
-            ),
-          ],
+                AppGap.h6,
+                Text(
+                  widget.missionTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gray500,
+                  ),
+                ),
+                AppGap.h24,
+                const Divider(height: 1, color: Color(0x1FFFFFFF)),
+                AppGap.h24,
+                AppButton(
+                  label: 'Confirmer l\'annulation',
+                  variant: ButtonVariant.destructive,
+                  isLoading: _loading,
+                  onPressed: _loading
+                      ? null
+                      : () {
+                          HapticFeedback.heavyImpact();
+                          setState(() => _loading = true);
+                          widget.onConfirm();
+                        },
+                ),
+                AppGap.h14,
+                Center(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Text(
+                      'Garder la mission',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.gray500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
         ),
       ),
     );

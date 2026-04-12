@@ -170,7 +170,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.snow,
       appBar: AppPageAppBar(
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
         actions: [
@@ -287,27 +287,27 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
                         fontSize: 31,
                         fontWeight: FontWeight.w700,
                         height: 1.06,
-                        color: const Color(0xFF101418),
+                        color: AppColors.inkDark,
                       ),
                     ),
                     AppGap.h10,
                     Text(
                       '${_rate.toInt()}€/h',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF101418),
+                        color: AppColors.inkDark,
                         letterSpacing: -0.4,
                       ),
                     ),
                     AppGap.h12,
                     Text(
                       _experienceLabel,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 3.4,
-                        color: const Color(0xFF101418),
+                        color: AppColors.inkDark,
                       ),
                     ),
                     AppGap.h16,
@@ -332,15 +332,15 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
                           AppGap.w6,
                           Text(
                             '${widget.rating.toStringAsFixed(1)}/5',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF101418),
+                              color: AppColors.inkDark,
                             ),
                           ),
                           Text(
                             '  ${widget.reviewsCount} avis',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: const Color(0xFF7A8088),
@@ -366,7 +366,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFFF0F1F3)),
+              border: Border.all(color: AppColors.gray50),
               boxShadow: const [
                 BoxShadow(
                   color: Color.fromRGBO(16, 20, 24, 0.04),
@@ -400,14 +400,14 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFF0F1F3)),
+          border: Border.all(color: AppColors.gray50),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Tarif proposé',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF6E757D),
@@ -415,10 +415,10 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
             ),
             Text(
               widget.proposedPrice!,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF101418),
+                color: AppColors.inkDark,
               ),
             ),
           ],
@@ -458,21 +458,21 @@ class _AboutSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF0F1F3)),
+              border: Border.all(color: AppColors.gray50),
             ),
             child: bio.isNotEmpty
                 ? Text(
                     bio,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       height: 1.7,
-                      color: const Color(0xFF101418),
+                      color: AppColors.inkDark,
                     ),
                   )
                 : Text(
                     "Ce prestataire n'a pas encore rédigé sa présentation.",
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       height: 1.6,
@@ -494,15 +494,15 @@ class _AboutSection extends StatelessWidget {
             child: Column(
               children: [
                 const _VerificationItem(label: "Pièce d'identité vérifiée"),
-                const Divider(height: 24, color: Color(0xFFEDEEF0)),
+                const Divider(height: 24, color: AppColors.gray100),
                 const _VerificationItem(label: 'Adresse e-mail vérifiée'),
-                const Divider(height: 24, color: Color(0xFFEDEEF0)),
+                const Divider(height: 24, color: AppColors.gray100),
                 const _VerificationItem(label: 'Numéro de téléphone vérifié'),
-                const Divider(height: 24, color: Color(0xFFEDEEF0)),
+                const Divider(height: 24, color: AppColors.gray100),
                 _VerificationItem(label: 'Membre depuis $memberSince'),
-                const Divider(height: 24, color: Color(0xFFEDEEF0)),
+                const Divider(height: 24, color: AppColors.gray100),
                 _VerificationItem(label: '$missionsCount missions réalisées'),
-                const Divider(height: 24, color: Color(0xFFEDEEF0)),
+                const Divider(height: 24, color: AppColors.gray100),
                 _VerificationItem(label: cancellationLevel.label),
               ],
             ),
@@ -515,7 +515,7 @@ class _AboutSection extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 address,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF5B626A),
@@ -585,7 +585,7 @@ class _AboutSection extends StatelessWidget {
           AppGap.h10,
           Text(
             "Zone d'intervention : 10 km autour de ${address.isNotEmpty ? address : 'sa position'}",
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF949CA4),
@@ -706,7 +706,7 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                         child: Icon(
                           cat.icon,
                           size: 23,
-                          color: hasStory ? const Color(0xFF2C3137) : const Color(0xFFB1B7BF),
+                          color: hasStory ? AppColors.gray700 : const Color(0xFFB1B7BF),
                         ),
                       ),
                     ),
@@ -716,11 +716,11 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                     width: 72,
                     child: Text(
                       cat.name,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: hasStory ? FontWeight.w600 : FontWeight.w500,
                         letterSpacing: 0.2,
-                        color: hasStory ? const Color(0xFF101418) : const Color(0xFF9EA5AE),
+                        color: hasStory ? AppColors.inkDark : const Color(0xFF9EA5AE),
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -766,19 +766,19 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
             ),
           ),
           AppGap.h4,
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF8E959D),
+              color: AppColors.gray600,
             ),
           ),
         ],
@@ -793,7 +793,7 @@ class _StatDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 34,
-      color: const Color(0xFFEDEEF0),
+      color: AppColors.gray100,
     );
   }
 }
@@ -807,7 +807,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.8,
@@ -829,13 +829,13 @@ class _VerificationItem extends StatelessWidget {
         const Icon(
           Icons.check_rounded,
           size: 18,
-          color: Color(0xFF101418),
+          color: AppColors.inkDark,
         ),
         AppGap.w12,
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF353B43),
@@ -859,7 +859,7 @@ class _MapMarker extends StatelessWidget {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: const Color(0xFF101418),
+            color: AppColors.inkDark,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: const [
@@ -881,7 +881,7 @@ class _MapMarker extends StatelessWidget {
 class _PinTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF101418);
+    final paint = Paint()..color = AppColors.inkDark;
     final path = ui.Path()
       ..moveTo(0, 0)
       ..lineTo(size.width / 2, size.height)

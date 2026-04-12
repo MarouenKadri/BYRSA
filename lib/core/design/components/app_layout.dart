@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
@@ -472,17 +471,17 @@ class AppPageHeaderBlock extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: AppFontSize.h1,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
-            color: const Color(0xFF111111),
+            color: AppColors.ink,
           ),
         ),
         AppGap.h8,
         Text(
           subtitle,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: AppFontSize.body,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF7C8795),
@@ -494,6 +493,73 @@ class AppPageHeaderBlock extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// AppProgressBar — barre de progression réutilisable
+// Utilisée par AppProgressHeader (auth) ET create_mission_page
+// ─────────────────────────────────────────────────────────────────────────────
+
+class AppProgressBar extends StatelessWidget {
+  final int currentStep;
+  final int totalSteps;
+  final String? stepLabel;
+  final EdgeInsetsGeometry padding;
+
+  const AppProgressBar({
+    super.key,
+    required this.currentStep,
+    required this.totalSteps,
+    this.stepLabel,
+    this.padding = const EdgeInsets.fromLTRB(20, 6, 20, 0),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = currentStep / totalSteps;
+    return Padding(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Barre ────────────────────────────────────────────────────────
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: SizedBox(
+              height: 2,
+              child: Stack(
+                children: [
+                  Container(color: const Color(0xFFE7EAEE)),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: progress),
+                    duration: const Duration(milliseconds: 260),
+                    curve: Curves.easeOutCubic,
+                    builder: (_, value, __) => FractionallySizedBox(
+                      widthFactor: value,
+                      child: Container(color: AppColors.ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // ── Label étape ──────────────────────────────────────────────────
+          if (stepLabel != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              stepLabel!,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.stepBlue,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 // AppProgressHeader
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -513,7 +579,6 @@ class AppProgressHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = currentStep / totalSteps;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -522,59 +587,15 @@ class AppProgressHeader extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(4, 8, 20, 0),
           child: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: const Color(0xFF111111),
+            color: AppColors.ink,
             onPressed: onBack,
           ),
         ),
-        // ── Barre de progression continue + label ─────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: SizedBox(
-                  height: 2,
-                  child: Stack(
-                    children: [
-                      Container(color: const Color(0xFFE7EAEE)),
-                      FractionallySizedBox(
-                        widthFactor: progress,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0, end: progress),
-                          duration: const Duration(milliseconds: 260),
-                          curve: Curves.easeOutCubic,
-                          builder: (_, value, __) => FractionallySizedBox(
-                            widthFactor: 1,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Color(0xFF6CA6FF), Color(0xFF1847A8)],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (stepLabel != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  stepLabel!,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1847A8),
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            ],
-          ),
+        // ── Barre + label ─────────────────────────────────────────────────
+        AppProgressBar(
+          currentStep: currentStep,
+          totalSteps: totalSteps,
+          stepLabel: stepLabel,
         ),
       ],
     );
@@ -671,7 +692,7 @@ class AppArrowActionButton extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           shape: shape,
-          color: enabled ? const Color(0xFF000000) : context.colors.divider,
+          color: enabled ? Colors.black : context.colors.divider,
           borderRadius: shape == BoxShape.rectangle
               ? BorderRadius.circular(AppRadius.button)
               : null,

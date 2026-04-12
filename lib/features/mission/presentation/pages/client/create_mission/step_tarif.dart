@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import 'create_mission_models.dart';
 
@@ -68,18 +67,18 @@ class _StepTarifState extends State<StepTarif> {
         children: [
           Text(
             'Quel tarif horaire ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
           AppGap.h10,
           Text(
             'Choisissez ou saisissez un montant adapte a votre mission.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.5,
@@ -114,10 +113,10 @@ class _StepTarifState extends State<StepTarif> {
           const SizedBox(height: 34),
           Text(
             'DUREE ESTIMEE',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF8E959D),
+              color: AppColors.gray600,
               letterSpacing: 1.8,
             ),
           ),
@@ -136,10 +135,10 @@ class _StepTarifState extends State<StepTarif> {
               AppGap.w28,
               Text(
                 '${widget.estimatedHours.toStringAsFixed(widget.estimatedHours == widget.estimatedHours.truncateToDouble() ? 0 : 1)} h',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF101418),
+                  color: AppColors.inkDark,
                 ),
               ),
               AppGap.w28,
@@ -158,7 +157,7 @@ class _StepTarifState extends State<StepTarif> {
             Center(
               child: Text(
                 'Total estime : ${total.round()} EUR',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                   fontStyle: FontStyle.italic,
@@ -181,18 +180,18 @@ class _StepTarifState extends State<StepTarif> {
         children: [
           Text(
             'Quel est votre budget ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
           AppGap.h10,
           Text(
             'Renseignez un montant clair pour recevoir des propositions precises.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.5,
@@ -227,7 +226,7 @@ class _StepTarifState extends State<StepTarif> {
           AppGap.h14,
           Text(
             'Vous pourrez ajuster ce montant plus tard avec votre prestataire.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w400,
               color: const Color(0xFFB0B6BD),
@@ -271,47 +270,37 @@ class _AmountInput extends StatelessWidget {
         controller: controller,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 36,
           fontWeight: FontWeight.w600,
           color: const Color(0xFF16345F),
           letterSpacing: -1,
         ),
-        decoration: InputDecoration(
+        decoration: AppInputDecorations.formField(
+          context,
           hintText: '0',
-          hintStyle: GoogleFonts.inter(
+          hintStyle: TextStyle(
             color: const Color(0xFFD4D9DE),
             fontSize: 36,
             fontWeight: useLightHint ? FontWeight.w300 : FontWeight.w600,
             letterSpacing: -1,
           ),
-          filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.fromLTRB(22, 20, 0, 20),
+          radius: 18,
+        ).copyWith(
           suffixIcon: Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Text(
               suffix,
-              style: GoogleFonts.inter(
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF101418),
+                color: AppColors.inkDark,
               ),
             ),
           ),
           suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
-            borderSide: const BorderSide(color: Color(0xFF1847A8), width: 1.2),
-          ),
         ),
         onChanged: onChanged,
       ),
@@ -338,18 +327,18 @@ class _RateChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF101418) : Colors.transparent,
+          color: selected ? AppColors.inkDark : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xFF101418) : const Color(0xFFE4E8EC),
+            color: selected ? AppColors.inkDark : const Color(0xFFE4E8EC),
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 13.5,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : const Color(0xFF2C3137),
+            color: selected ? Colors.white : AppColors.gray700,
           ),
         ),
       ),
@@ -382,7 +371,7 @@ class _CounterBtn extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: const Color(0xFF101418), size: 18),
+        child: Icon(icon, color: AppColors.inkDark, size: 18),
       ),
     );
   }

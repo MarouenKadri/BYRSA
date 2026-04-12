@@ -2,6 +2,7 @@
 /// 📦 Inkern - Profile Feature Barrel
 /// Profil, paramètres, wallet, sécurité, compétences, vérification identité
 /// ═══════════════════════════════════════════════════════════════════════════
+library;
 
 // ─── Data Models ──────────────────────────────────────────────────────────────
 export 'data/models/transaction.dart';

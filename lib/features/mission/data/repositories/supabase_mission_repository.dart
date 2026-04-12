@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/mission.dart';
-import '../models/mission_address.dart';
-import '../models/budget_info.dart';
-import '../models/user_models.dart';
 import 'mission_repository.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
@@ -29,7 +26,9 @@ class SupabaseMissionRepository implements MissionRepository {
           .select(_select)
           .eq('client_id', _userId!)
           .order('created_at', ascending: false);
-      return (data as List).map<Mission>((e) => _fromJson(e as Map<String, dynamic>)).toList();
+      return (data as List)
+          .map<Mission>((e) => _fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (e, st) {
       debugPrint('fetchClientMissions error: $e\n$st');
       return [];
@@ -50,7 +49,7 @@ class SupabaseMissionRepository implements MissionRepository {
 
       final data = await query.order('created_at', ascending: false);
       debugPrint('fetchPublicMissions: ${(data as List).length} missions');
-      return data.map<Mission>((e) => _fromJson(e as Map<String, dynamic>)).toList();
+      return data.map<Mission>((e) => _fromJson(e)).toList();
     } catch (e, st) {
       debugPrint('fetchPublicMissions error: $e\n$st');
       return [];
@@ -70,7 +69,9 @@ class SupabaseMissionRepository implements MissionRepository {
           .map((r) => r['mission_id'] as String)
           .toList();
 
-      debugPrint('fetchFreelancerMissions: ${candidateMissionIds.length} candidatures');
+      debugPrint(
+        'fetchFreelancerMissions: ${candidateMissionIds.length} candidatures',
+      );
 
       final List<dynamic> data;
       if (candidateMissionIds.isEmpty) {
@@ -83,12 +84,16 @@ class SupabaseMissionRepository implements MissionRepository {
         data = await _supabase
             .from('missions')
             .select(_select)
-            .or('assigned_presta_id.eq.$_userId,id.in.(${candidateMissionIds.join(',')})')
+            .or(
+              'assigned_presta_id.eq.$_userId,id.in.(${candidateMissionIds.join(',')})',
+            )
             .order('created_at', ascending: false);
       }
 
       debugPrint('fetchFreelancerMissions: ${data.length} missions');
-      return data.map<Mission>((e) => _fromJson(e as Map<String, dynamic>)).toList();
+      return data
+          .map<Mission>((e) => _fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (e, st) {
       debugPrint('fetchFreelancerMissions error: $e\n$st');
       return [];
@@ -100,7 +105,8 @@ class SupabaseMissionRepository implements MissionRepository {
   @override
   Future<void> saveMission(Mission mission) async {
     final clientId = _userId;
-    if (clientId == null) throw StateError('saveMission: user not authenticated');
+    if (clientId == null)
+      throw StateError('saveMission: user not authenticated');
     final json = _toJson(mission, clientId);
     debugPrint('saveMission payload: $json');
     try {
@@ -115,7 +121,8 @@ class SupabaseMissionRepository implements MissionRepository {
   @override
   Future<void> updateMission(Mission mission) async {
     final clientId = _userId;
-    if (clientId == null) throw StateError('updateMission: user not authenticated');
+    if (clientId == null)
+      throw StateError('updateMission: user not authenticated');
     final json = _toJson(mission, clientId);
     debugPrint('updateMission payload: $json');
     try {
@@ -150,19 +157,24 @@ class SupabaseMissionRepository implements MissionRepository {
           .eq('mission_id', missionId)
           .order('applied_at', ascending: false);
 
-      debugPrint('fetchCandidates: ${(data as List).length} rows for mission $missionId');
+      debugPrint(
+        'fetchCandidates: ${(data as List).length} rows for mission $missionId',
+      );
 
       if (data.isEmpty) return [];
 
       // Step 2: fetch freelancer profiles separately (avoids FK name issues)
-      final freelancerIds = data.map((r) => r['freelancer_id'] as String).toList();
+      final freelancerIds = data
+          .map((r) => r['freelancer_id'] as String)
+          .toList();
       final profiles = await _supabase
           .from('profiles')
           .select('*')
           .inFilter('id', freelancerIds);
 
       final profileMap = {
-        for (final p in profiles as List) p['id'] as String: p as Map<String, dynamic>,
+        for (final p in profiles as List)
+          p['id'] as String: p as Map<String, dynamic>,
       };
 
       return data.map<Map<String, dynamic>>((row) {
@@ -177,7 +189,11 @@ class SupabaseMissionRepository implements MissionRepository {
   }
 
   @override
-  Future<void> submitProposal(String missionId, double price, String message) async {
+  Future<void> submitProposal(
+    String missionId,
+    double price,
+    String message,
+  ) async {
     if (_userId == null) return;
     try {
       await _supabase.from('candidates').upsert({
@@ -204,7 +220,9 @@ class SupabaseMissionRepository implements MissionRepository {
       title: j['title'] as String,
       description: j['description'] as String? ?? '',
       categoryId: j['service_category_id'] as String? ?? '',
-      date: DateTime.parse(j['scheduled_at'] as String? ?? j['created_at'] as String),
+      date: DateTime.parse(
+        j['scheduled_at'] as String? ?? j['created_at'] as String,
+      ),
       timeSlot: '',
       address: MissionAddress(
         fullAddress: j['full_address'] as String? ?? '',
@@ -272,37 +290,37 @@ class SupabaseMissionRepository implements MissionRepository {
   // ─── Status mapping (Dart enum ↔ DB snake_case) ───────────────────────────
 
   static String _statusToDb(MissionStatus s) => switch (s) {
-    MissionStatus.draft             => 'draft',
+    MissionStatus.draft => 'draft',
     MissionStatus.waitingCandidates => 'waiting_candidates',
     MissionStatus.candidateReceived => 'candidate_received',
-    MissionStatus.prestaChosen      => 'presta_chosen',
-    MissionStatus.confirmed         => 'confirmed',
-    MissionStatus.onTheWay          => 'on_the_way',
-    MissionStatus.inProgress        => 'in_progress',
+    MissionStatus.prestaChosen => 'presta_chosen',
+    MissionStatus.confirmed => 'confirmed',
+    MissionStatus.onTheWay => 'on_the_way',
+    MissionStatus.inProgress => 'in_progress',
     MissionStatus.completionRequested => 'completion_requested',
-    MissionStatus.completed         => 'completed',
-    MissionStatus.waitingPayment    => 'waiting_payment',
-    MissionStatus.closed            => 'closed',
-    MissionStatus.cancelled         => 'cancelled',
-    MissionStatus.dispute           => 'dispute',
-    MissionStatus.expired           => 'expired',
+    MissionStatus.completed => 'completed',
+    MissionStatus.waitingPayment => 'waiting_payment',
+    MissionStatus.closed => 'closed',
+    MissionStatus.cancelled => 'cancelled',
+    MissionStatus.dispute => 'dispute',
+    MissionStatus.expired => 'expired',
   };
 
   static MissionStatus _statusFromDb(String? s) => switch (s) {
-    'draft'              => MissionStatus.draft,
+    'draft' => MissionStatus.draft,
     'waiting_candidates' => MissionStatus.waitingCandidates,
     'candidate_received' => MissionStatus.candidateReceived,
-    'presta_chosen'      => MissionStatus.prestaChosen,
-    'confirmed'          => MissionStatus.confirmed,
-    'on_the_way'         => MissionStatus.onTheWay,
-    'in_progress'        => MissionStatus.inProgress,
+    'presta_chosen' => MissionStatus.prestaChosen,
+    'confirmed' => MissionStatus.confirmed,
+    'on_the_way' => MissionStatus.onTheWay,
+    'in_progress' => MissionStatus.inProgress,
     'completion_requested' => MissionStatus.completionRequested,
-    'completed'          => MissionStatus.completed,
-    'waiting_payment'    => MissionStatus.waitingPayment,
-    'closed'             => MissionStatus.closed,
-    'cancelled'          => MissionStatus.cancelled,
-    'dispute'            => MissionStatus.dispute,
-    'expired'            => MissionStatus.expired,
-    _                    => MissionStatus.waitingCandidates,
+    'completed' => MissionStatus.completed,
+    'waiting_payment' => MissionStatus.waitingPayment,
+    'closed' => MissionStatus.closed,
+    'cancelled' => MissionStatus.cancelled,
+    'dispute' => MissionStatus.dispute,
+    'expired' => MissionStatus.expired,
+    _ => MissionStatus.waitingCandidates,
   };
 }

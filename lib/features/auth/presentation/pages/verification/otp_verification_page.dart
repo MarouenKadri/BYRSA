@@ -27,8 +27,10 @@ class OtpVerificationPage extends StatefulWidget {
 
 class _OtpVerificationPageState extends State<OtpVerificationPage>
     with OtpTimerMixin<OtpVerificationPage> {
-  final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   bool _isLoading = false;
@@ -44,8 +46,12 @@ class _OtpVerificationPageState extends State<OtpVerificationPage>
 
   @override
   void dispose() {
-    for (var c in _controllers) c.dispose();
-    for (var f in _focusNodes) f.dispose();
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -131,7 +137,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage>
   }
 
   void _handleResend() {
-    for (var c in _controllers) c.clear();
+    for (var c in _controllers) {
+      c.clear();
+    }
     startResendTimer();
     _focusNodes[0].requestFocus();
   }
@@ -190,7 +198,7 @@ class _SuccessPage extends StatelessWidget {
                 child: const Icon(
                   Icons.check_circle_rounded,
                   size: 70,
-                  color: AppColors.primary,
+                  color: AppColors.ink,
                 ),
               ),
             ),
@@ -218,11 +226,7 @@ class _SuccessPage extends StatelessWidget {
             AppButton(
               label: 'Commencer',
               onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/',
-                  (_) => false,
-                );
+                Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
               },
               variant: ButtonVariant.black,
               icon: Icons.arrow_forward_rounded,

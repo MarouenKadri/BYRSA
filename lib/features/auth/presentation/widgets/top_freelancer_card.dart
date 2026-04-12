@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/design/app_design_system.dart';
 import '../../data/models/freelancer.dart';
@@ -76,7 +75,7 @@ class TopFreelancerCard extends StatelessWidget {
                         freelancer.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -93,7 +92,7 @@ class TopFreelancerCard extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             freelancer.rating.toStringAsFixed(1),
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: AppFontSize.xs,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -106,7 +105,7 @@ class TopFreelancerCard extends StatelessWidget {
                         freelancer.job,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: AppFontSize.tiny,
                           fontWeight: FontWeight.w500,
                           color: Colors.white.withValues(alpha: 0.85),
@@ -153,7 +152,7 @@ class _AvatarFallback extends StatelessWidget {
       child: Center(
         child: Text(
           initials.isEmpty ? '?' : initials,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: AppFontSize.h3,
             fontWeight: FontWeight.w700,
             color: AppColors.primary,

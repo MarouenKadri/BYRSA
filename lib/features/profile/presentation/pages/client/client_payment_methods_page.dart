@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
+import '../../widgets/shared/user_common_widgets.dart';
 
-/// ─────────────────────────────────────────────────────────────
-/// 💳 Inkern - Moyens de paiement (Client)
-/// ─────────────────────────────────────────────────────────────
 class ClientPaymentMethodsPage extends StatefulWidget {
   const ClientPaymentMethodsPage({super.key});
 
@@ -14,26 +12,72 @@ class ClientPaymentMethodsPage extends StatefulWidget {
 
 class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
   final List<_Card> _cards = [
-    _Card(brand: 'Visa', last4: '4242', expiry: '12/26', isDefault: true, color: AppColors.blueAction),
-    _Card(brand: 'Mastercard', last4: '8888', expiry: '08/25', isDefault: false, color: AppColors.mastercardOrange),
+    _Card(brand: 'Visa', last4: '4242', expiry: '12/26', isDefault: true,
+        gradient: [Color(0xFF1A1A2E), Color(0xFF16213E)]),
+    _Card(brand: 'Mastercard', last4: '8888', expiry: '08/25', isDefault: false,
+        gradient: [Color(0xFF2D1B69), Color(0xFF11998E)]),
   ];
 
   void _setDefault(int index) {
     setState(() {
       for (int i = 0; i < _cards.length; i++) {
-        _cards[i] = _Card(
-          brand: _cards[i].brand,
-          last4: _cards[i].last4,
-          expiry: _cards[i].expiry,
-          isDefault: i == index,
-          color: _cards[i].color,
-        );
+        _cards[i] = _cards[i].copyWith(isDefault: i == index);
       }
     });
   }
 
-  void _removeCard(int index) {
-    setState(() => _cards.removeAt(index));
+  void _removeCard(int index) => setState(() => _cards.removeAt(index));
+
+  void _showCardOptions(BuildContext context, int index) {
+    final card = _cards[index];
+    final bottom = MediaQuery.of(context).padding.bottom;
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: false,
+      child: AppDarkSheet(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppBottomSheetHandle(),
+            AppGap.h12,
+            Padding(
+              padding: AppInsets.h20,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${card.brand} •••• ${card.last4}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.snow),
+                ),
+              ),
+            ),
+            AppGap.h8,
+            if (!card.isDefault)
+              _SheetRow(
+                icon: Icons.star_outline_rounded,
+                label: 'Définir par défaut',
+                onTap: () { Navigator.pop(context); _setDefault(index); },
+              ),
+            if (!card.isDefault)
+              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+            _SheetRow(
+              icon: Icons.delete_outline_rounded,
+              label: 'Supprimer la carte',
+              isDestructive: true,
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteConfirm(
+                  context,
+                  title: 'Supprimer la carte ?',
+                  subtitle: '${card.brand} •••• ${card.last4} sera supprimée définitivement.',
+                  onConfirm: () => _removeCard(index),
+                );
+              },
+            ),
+            SizedBox(height: 12 + bottom),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -43,70 +87,71 @@ class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
       appBar: AppPageAppBar(
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
         titleWidget: Text('Moyens de paiement', style: context.profilePageTitleStyle),
-        actions: [
-          AppButton(
-            label: 'Ajouter',
-            variant: ButtonVariant.ghost,
-            width: null,
-            onPressed: () => _showAddCardSheet(context),
-          ),
-        ],
       ),
       body: ListView(
-        padding: AppInsets.a16,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         children: [
-          // ─── Cartes enregistrées ───
-          ..._cards.asMap().entries.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _CardTile(
-              card: entry.value,
-              onSetDefault: () => _setDefault(entry.key),
-              onRemove: () => _confirmRemove(context, entry.key),
+
+          // ─── Cartes ────────────────────────────────────────────────────────
+          ..._cards.asMap().entries.map((e) => Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _CreditCard(
+              card: e.value,
+              onTap: () => _showCardOptions(context, e.key),
             ),
           )),
 
-          // ─── Ajouter une carte ───
+          // ─── Ajouter ───────────────────────────────────────────────────────
           GestureDetector(
             onTap: () => _showAddCardSheet(context),
-            child: AppSurfaceCard(
-              padding: AppInsets.a16,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: context.colors.border),
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: context.colors.border,
+                  width: 1.5,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+              ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AppSurfaceCard(
-                    padding: AppInsets.a10,
-                    color: context.colors.surfaceAlt,
-                    borderRadius: BorderRadius.circular(AppRadius.input),
-                    child: Icon(Icons.add_rounded, color: context.colors.textSecondary, size: 24),
+                  Icon(Icons.add_rounded, size: 20, color: context.colors.primary),
+                  AppGap.w8,
+                  Text(
+                    'Ajouter une carte',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.primary,
+                    ),
                   ),
-                  AppGap.w14,
-                  Text('Ajouter une carte',
-                      style: context.profilePrimaryLabelStyle.copyWith(color: AppColors.primary)),
                 ],
               ),
             ),
           ),
 
-          AppGap.h24,
+          AppGap.h28,
 
-          // ─── Info sécurité ───
-          AppSurfaceCard(
+          // ─── Sécurité ──────────────────────────────────────────────────────
+          Container(
             padding: AppInsets.a16,
-            color: AppColors.blueBg,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.blueBorder),
+            decoration: BoxDecoration(
+              color: context.colors.surfaceAlt,
+              borderRadius: BorderRadius.circular(14),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lock_rounded, color: AppColors.blueAction, size: 22),
+                Icon(Icons.lock_outline_rounded, size: 18, color: context.colors.textTertiary),
                 AppGap.w12,
                 Expanded(
                   child: Text(
-                    'Vos informations bancaires sont chiffrées et sécurisées. Inkern ne stocke jamais vos numéros de carte complets.',
-                    style: context.profileSecondaryLabelStyle.copyWith(
-                      color: AppColors.blueDark,
-                      height: 1.5,
+                    'Vos informations bancaires sont chiffrées via SSL. Inkern ne stocke jamais vos numéros de carte complets.',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textSecondary,
+                      height: 1.55,
                     ),
                   ),
                 ),
@@ -118,15 +163,11 @@ class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
     );
   }
 
-  void _confirmRemove(BuildContext context, int index) {
-    showAppDialog(
+  void _showDeleteConfirm(BuildContext context, {required String title, required String subtitle, required VoidCallback onConfirm}) {
+    showAppBottomSheet(
       context: context,
-      title: const Text('Supprimer la carte ?'),
-      content: Text('La carte ${_cards[index].brand} •••• ${_cards[index].last4} sera supprimée.'),
-      cancelLabel: 'Annuler',
-      confirmLabel: 'Supprimer',
-      confirmVariant: ButtonVariant.destructive,
-      onConfirm: () => _removeCard(index),
+      wrapWithSurface: false,
+      child: _DeleteConfirmSheet(title: title, subtitle: subtitle, onConfirm: onConfirm),
     );
   }
 
@@ -135,136 +176,394 @@ class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: AppSheetSurface(
-          padding: AppInsets.a20,
+      child: _AddCardSheet(),
+    );
+  }
+}
+
+// ─── Carte bancaire visuelle ──────────────────────────────────────────────────
+
+class _CreditCard extends StatelessWidget {
+  final _Card card;
+  final VoidCallback onTap;
+
+  const _CreditCard({required this.card, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: card.gradient,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: card.gradient.first.withValues(alpha: 0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Cercles décoratifs
+            Positioned(
+              right: -30,
+              top: -30,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 20,
+              bottom: -40,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.04),
+                ),
+              ),
+            ),
+            // Contenu
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Ligne supérieure : réseau + badge défaut
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        card.brand.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      if (card.isDefault)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            'Par défaut',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Numéro masqué
+                  Text(
+                    '•••• •••• •••• ${card.last4}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 2.5,
+                    ),
+                  ),
+                  AppGap.h14,
+                  // Expiration + menu
+                  Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'EXPIRE',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: Colors.white.withValues(alpha: 0.6),
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          Text(
+                            card.expiry,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Modèle ───────────────────────────────────────────────────────────────────
+
+class _Card {
+  final String brand, last4, expiry;
+  final bool isDefault;
+  final List<Color> gradient;
+
+  const _Card({
+    required this.brand,
+    required this.last4,
+    required this.expiry,
+    required this.isDefault,
+    required this.gradient,
+  });
+
+  _Card copyWith({bool? isDefault}) => _Card(
+    brand: brand, last4: last4, expiry: expiry,
+    isDefault: isDefault ?? this.isDefault,
+    gradient: gradient,
+  );
+}
+
+// ─── Sheet row ────────────────────────────────────────────────────────────────
+
+class _SheetRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _SheetRow({
+    required this.icon, required this.label, required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color     = isDestructive ? const Color(0xFFE57373) : AppColors.snow;
+    final iconColor = isDestructive ? const Color(0xFFE57373) : const Color(0xFFD5DADE);
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 21, color: iconColor),
+            AppGap.w14,
+            Expanded(child: Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: color))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Sheet ajouter une carte ──────────────────────────────────────────────────
+
+class _AddCardSheet extends StatelessWidget {
+  const _AddCardSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: AppSheetSurface(
+        color: AppColors.snow,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AppBottomSheetHandle(),
+                AppGap.h20,
+                Text(
+                  'Ajouter une carte',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFontSize.title,
+                    fontWeight: FontWeight.w300,
+                    color: context.colors.textPrimary,
+                    letterSpacing: 0.1,
+                  ),
+                ),
+                AppGap.h16,
+                Divider(color: context.colors.divider, height: 1),
+                AppGap.h24,
+                _ShadowField(child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                  decoration: AppInputDecorations.profileField(context,
+                    hintText: 'Numéro de carte',
+                    prefixIcon: const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFFB0BAC4)),
+                  ),
+                )),
+                AppGap.h16,
+                Row(children: [
+                  Expanded(child: _ShadowField(child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                    decoration: AppInputDecorations.profileField(context, hintText: 'MM/AA'),
+                  ))),
+                  AppGap.w12,
+                  Expanded(child: _ShadowField(child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                    decoration: AppInputDecorations.profileField(context, hintText: 'CVV'),
+                  ))),
+                ]),
+                AppGap.h16,
+                _ShadowField(child: TextFormField(
+                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                  decoration: AppInputDecorations.profileField(context,
+                    hintText: 'Titulaire de la carte',
+                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+                  ),
+                )),
+                AppGap.h32,
+                ProfileSheetPrimaryAction(
+                  label: 'Ajouter la carte',
+                  onPressed: () => Navigator.pop(context),
+                ),
+                AppGap.h12,
+                Center(child: ProfileSheetSecondaryAction(
+                  label: 'Annuler',
+                  onTap: () => Navigator.pop(context),
+                )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Confirmation suppression ─────────────────────────────────────────────────
+
+class _DeleteConfirmSheet extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onConfirm;
+
+  const _DeleteConfirmSheet({required this.title, required this.subtitle, required this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSheetSurface(
+      color: AppColors.snow,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppSheetHeader(title: 'Ajouter une carte'),
-              AppGap.h20,
-              _buildInput(label: 'Numéro de carte', hint: '1234 5678 9012 3456',
-                  icon: Icons.credit_card_rounded, keyboard: TextInputType.number),
-              AppGap.h12,
-              Row(children: [
-                Expanded(child: _buildInput(label: 'Expiration', hint: 'MM/AA', keyboard: TextInputType.number)),
-                AppGap.w12,
-                Expanded(child: _buildInput(label: 'CVV', hint: '123',
-                    keyboard: TextInputType.number, obscure: true)),
-              ]),
-              AppGap.h12,
-              _buildInput(label: 'Nom du titulaire', hint: 'Jean Dupont'),
+              const AppBottomSheetHandle(),
               AppGap.h24,
-              AppButton(
-                label: 'Ajouter la carte',
-                variant: ButtonVariant.primary,
-                onPressed: () => Navigator.pop(context),
+              Center(
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
+                ),
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom),
+              AppGap.h16,
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFontSize.title,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              AppGap.h8,
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: context.text.bodySmall?.copyWith(
+                  color: context.colors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              AppGap.h28,
+              AppButton(
+                label: 'Supprimer',
+                variant: ButtonVariant.destructive,
+                onPressed: () {
+                  Navigator.pop(context);
+                  onConfirm();
+                },
+              ),
+              AppGap.h12,
+              Center(child: ProfileSheetSecondaryAction(
+                label: 'Annuler',
+                onTap: () => Navigator.pop(context),
+              )),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildInput({
-    required String label,
-    required String hint,
-    IconData? icon,
-    TextInputType keyboard = TextInputType.text,
-    bool obscure = false,
-  }) {
-    return TextField(
-      keyboardType: keyboard,
-      obscureText: obscure,
-      decoration: AppInputDecorations.formField(
-        context,
-        hintText: hint,
-        prefixIcon: icon != null ? Icon(icon) : null,
-      ).copyWith(
-        labelText: label,
-        labelStyle: context.profileSheetFieldLabelStyle,
-      ),
-    );
-  }
 }
 
-class _Card {
-  final String brand, last4, expiry;
-  final bool isDefault;
-  final Color color;
-  const _Card({required this.brand, required this.last4, required this.expiry,
-      required this.isDefault, required this.color});
-}
-
-class _CardTile extends StatelessWidget {
-  final _Card card;
-  final VoidCallback onSetDefault;
-  final VoidCallback onRemove;
-
-  const _CardTile({required this.card, required this.onSetDefault, required this.onRemove});
+class _ShadowField extends StatelessWidget {
+  final Widget child;
+  const _ShadowField({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return AppSurfaceCard(
-      padding: AppInsets.a16,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      border: card.isDefault ? Border.all(color: AppColors.primary, width: 1.5) : Border.all(color: context.colors.border),
-      child: Row(
-        children: [
-          AppSurfaceCard(
-            padding: AppInsets.a10,
-            color: card.color.withValues(alpha:0.1),
-            borderRadius: BorderRadius.circular(AppRadius.input),
-            child: Icon(Icons.credit_card_rounded, color: card.color, size: 24),
-          ),
-          AppGap.w14,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text('${card.brand} •••• ${card.last4}',
-                        style: context.profilePrimaryLabelStyle),
-                    if (card.isDefault) ...[
-                      AppGap.w8,
-                      AppTagPill(
-                        label: 'Par défaut',
-                        backgroundColor: AppColors.primary.withValues(alpha:0.1),
-                        foregroundColor: AppColors.primary,
-                        padding: AppInsets.h8v2,
-                        fontSize: AppFontSize.tiny,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ],
-                  ],
-                ),
-                Text('Expire ${card.expiry}', style: context.profileSecondaryLabelStyle),
-              ],
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded, color: context.colors.textTertiary),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-            onSelected: (value) {
-              if (value == 'default') onSetDefault();
-              if (value == 'remove') onRemove();
-            },
-            itemBuilder: (_) => [
-              if (!card.isDefault)
-                const PopupMenuItem(value: 'default',
-                    child: Row(children: [Icon(Icons.star_rounded, size: 18), AppGap.w10, Text('Définir par défaut')])),
-              PopupMenuItem(value: 'remove',
-                  child: Row(children: [const Icon(Icons.delete_rounded, size: 18, color: Colors.red), AppGap.w10,
-                    Text('Supprimer', style: context.text.bodyMedium?.copyWith(color: Colors.red))])),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: child,
     );
   }
 }

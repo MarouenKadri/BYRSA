@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/design/app_design_system.dart';
 import '../../core/design/app_primitives.dart';
 import '../auth_provider.dart';
@@ -89,7 +88,7 @@ class AppLocationRoleBar extends StatelessWidget
                 resolvedLocation,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   height: 1.1,
@@ -311,123 +310,117 @@ class RoleSwitchSheet extends StatelessWidget {
     final isLoading = auth.isLoading;
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
-    return AppBarSheetSurface(
+    return AppDarkSheet(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppBottomSheetHandle(),
-          AppGap.h16,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppBottomSheetHandle(),
+              AppGap.h16,
 
-          // ── Titre + avatar ───────────────────────────────────
-          Padding(
-            padding: AppInsets.h20,
-            child: GestureDetector(
-              onTap: onGoToAccount != null ? () {
-                Navigator.pop(context);
-                onGoToAccount!();
-              } : null,
-              child: Row(
-              children: [
-                AppInitialCircle(
-                  label: firstName.isNotEmpty
-                      ? firstName[0].toUpperCase()
-                      : (isClient ? 'C' : 'F'),
-                  size: AppBarMetrics.sheetAvatarSize,
-                  fontSize: AppBarMetrics.sheetAvatarFontSize,
-                  backgroundColor: context.colors.surfaceAlt,
-                  foregroundColor: isClient
-                      ? AppColors.primary
-                      : context.colors.textSecondary,
-                  border: Border.all(
-                    color: isClient ? AppColors.primary : context.colors.border,
-                    width: 1.5,
-                  ),
-                ),
-                AppGap.w12,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              // ── Titre + avatar ───────────────────────────────────
+              Padding(
+                padding: AppInsets.h20,
+                child: GestureDetector(
+                  onTap: onGoToAccount != null ? () {
+                    Navigator.pop(context);
+                    onGoToAccount!();
+                  } : null,
+                  child: Row(
                     children: [
-                      Text(
-                        firstName.isNotEmpty ? firstName : 'Mon compte',
-                        style: context.appBarSheetAccountTitleStyle,
+                      AppInitialCircle(
+                        label: firstName.isNotEmpty
+                            ? firstName[0].toUpperCase()
+                            : (isClient ? 'C' : 'F'),
+                        size: AppBarMetrics.sheetAvatarSize,
+                        fontSize: AppBarMetrics.sheetAvatarFontSize,
+                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        foregroundColor: AppColors.snow,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.20),
+                          width: 1.5,
+                        ),
                       ),
-                      AppGap.h2,
-                      Text(
-                        isClient ? 'Mode Client actif'
-                                 : 'Mode Prestataire actif',
-                        style: context.appBarSheetAccountSubtitleStyle,
+                      AppGap.w12,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              firstName.isNotEmpty ? firstName : 'Mon compte',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.snow,
+                              ),
+                            ),
+                            AppGap.h2,
+                            Text(
+                              isClient ? 'Mode Client actif' : 'Mode Prestataire actif',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.gray500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            ),
-          ),
-          AppGap.h20,
+              ),
+              AppGap.h16,
 
-          // ── Titre section ────────────────────────────────────
-          const AppBarSectionLabel(label: 'CHANGER DE MODE'),
-          AppGap.h8,
+              // ── Divider ──────────────────────────────────────────
+              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+              AppGap.h8,
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: Column(
-              children: [
-                _RoleItem(
-                  icon: Icons.person_outline_rounded,
-                  label: 'Client',
-                  subtitle: 'Trouvez des prestataires',
-                  isSelected: isClient,
-                  onTap: isClient || isLoading ? null : () async {
-                    Navigator.pop(context);
-                    await context.read<AuthProvider>().switchRole(UserRole.client);
-                  },
-                ),
-                AppGap.h10,
-                _RoleItem(
-                  icon: Icons.handyman_outlined,
-                  label: 'Prestataire',
-                  subtitle: 'Proposez vos services',
-                  isSelected: !isClient,
-                  onTap: !isClient || isLoading ? null : () async {
-                    Navigator.pop(context);
-                    await context.read<AuthProvider>().switchRole(UserRole.provider);
-                  },
-                ),
-              ],
-            ),
-          ),
+              // ── Items ────────────────────────────────────────────
+              _RoleItem(
+                icon: Icons.person_outline_rounded,
+                label: 'Client',
+                subtitle: 'Trouvez des prestataires',
+                isSelected: isClient,
+                onTap: isClient || isLoading ? null : () async {
+                  Navigator.pop(context);
+                  await context.read<AuthProvider>().switchRole(UserRole.client);
+                },
+              ),
+              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+              _RoleItem(
+                icon: Icons.handyman_outlined,
+                label: 'Prestataire',
+                subtitle: 'Proposez vos services',
+                isSelected: !isClient,
+                onTap: !isClient || isLoading ? null : () async {
+                  Navigator.pop(context);
+                  await context.read<AuthProvider>().switchRole(UserRole.provider);
+                },
+              ),
 
-          // ── Loading ──────────────────────────────────────────
-          if (isLoading)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppLoadingIndicator(size: AppBarMetrics.loadingIndicatorSize),
-                  AppGap.w8,
-                  Text(
-                    'Changement en cours...',
-                    style: context.appBarMutedMetaStyle,
+              // ── Loading ──────────────────────────────────────────
+              if (isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AppLoadingIndicator(size: AppBarMetrics.loadingIndicatorSize),
+                      AppGap.w8,
+                      Text(
+                        'Changement en cours...',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.gray500,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-          // ── Fermer ───────────────────────────────────────────
-          Padding(
-            padding: EdgeInsets.only(top: 4, bottom: 16 + bottomPad),
-            child: Center(
-              child: AppTextAction(
-                label: 'Fermer',
-                onTap: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-        ],
+              SizedBox(height: 12 + bottomPad),
+            ],
       ),
     );
   }
@@ -450,62 +443,49 @@ class _RoleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isSelected
-        ? const Color(0xFF101418)
-        : const Color(0xFFE5E9EE);
-    final backgroundColor = isSelected
-        ? const Color(0xFFF5F6F7)
-        : Colors.white.withValues(alpha: 0.66);
-    final titleColor = const Color(0xFF101418);
-    final subtitleColor = const Color(0xFF66707A);
-    final iconColor = isSelected
-        ? const Color(0xFF101418)
-        : const Color(0xFF5F6B76);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: borderColor, width: isSelected ? 1.15 : 1),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 22, color: iconColor),
-              AppGap.w14,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: titleColor,
-                      ),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 21,
+              color: isSelected ? AppColors.snow : const Color(0xFFD5DADE),
+            ),
+            AppGap.w14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.snow,
                     ),
-                    AppGap.h2,
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: subtitleColor,
-                      ),
+                  ),
+                  AppGap.h2,
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.gray500,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_rounded,
+                size: 18,
+                color: AppColors.snow,
+              ),
+          ],
         ),
       ),
     );
@@ -776,16 +756,18 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
     ));
   }
 
-  InputDecoration _searchDecoration(BuildContext context) => InputDecoration(
+  InputDecoration _searchDecoration(BuildContext context) =>
+      AppInputDecorations.formField(
+        context,
         hintText: 'Rechercher...',
-        hintStyle: GoogleFonts.inter(
+        hintStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w400,
-          color: const Color(0xFF8C96A3),
+          color: Color(0xFF8C96A3),
         ),
-        prefixIcon: Icon(
+        prefixIcon: const Icon(
           Icons.search_outlined,
-          color: const Color(0xFF7D8794),
+          color: Color(0xFF7D8794),
           size: 19,
         ),
         suffixIcon: _isSearching
@@ -801,21 +783,11 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                 },
               )
             : null,
-        filled: true,
         fillColor: Colors.white.withValues(alpha: 0.42),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        radius: 24,
+        noBorder: true,
       );
 
   @override
@@ -936,7 +908,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                 const SizedBox(height: 8),
                 Text(
                   'Lieu',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF20242B),
@@ -966,7 +938,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                       controller: _searchCtrl,
                       focusNode: _focusNode,
                       textInputAction: TextInputAction.search,
-                      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: const Color(0xFF20242B)),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: const Color(0xFF20242B)),
                       decoration: _searchDecoration(context),
                     ),
                   ),
@@ -1092,7 +1064,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
         children: [
           Text(
             'Lieux récents',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.2,
@@ -1116,7 +1088,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                     ),
                     child: Text(
                       place,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF29303A),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../data/models/mission.dart';
@@ -111,11 +110,11 @@ class MissionFocusCard extends StatelessWidget {
                             mission.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               height: 1.2,
-                              color: const Color(0xFF101418),
+                              color: AppColors.inkDark,
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -160,10 +159,10 @@ class MissionFocusCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         mission.budget.displayText,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF101418),
+                          color: AppColors.inkDark,
                           letterSpacing: -0.2,
                         ),
                       ),

@@ -29,7 +29,7 @@ class MainBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppNavBarSurface(
       child: SizedBox(
-        height: 72,
+        height: 80,
         child: Row(
           children: List.generate(items.length, (i) => Expanded(
             child: _NavTile(
@@ -103,39 +103,55 @@ class _NavTileState extends State<_NavTile>
 
   @override
   Widget build(BuildContext context) {
+    final activeColor = AppColors.inkDark;
+    final inactiveColor = const Color(0xFFB8C0CC);
+
     return GestureDetector(
       onTap: _handleTap,
       behavior: HitTestBehavior.opaque,
       child: Center(
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            ScaleTransition(
-              scale: _tapScale,
-              child: AppNavItemPill(
-                selected: widget.selected,
-                child: Icon(
-                  widget.selected ? widget.item.icon : widget.item.icon,
-                  size: 22,
-                  color: widget.selected
-                      ? const Color(0xFF101418)
-                      : const Color(0xFFB8C0CC),
-                ),
+        child: ScaleTransition(
+          scale: _tapScale,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppNavItemPill(
+                    selected: widget.selected,
+                    child: Icon(
+                      widget.selected ? widget.item.activeIcon : widget.item.icon,
+                      size: 22,
+                      color: widget.selected ? activeColor : inactiveColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.item.label,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+                      color: widget.selected ? activeColor : inactiveColor,
+                      height: 1,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            if (widget.badgeCount > 0)
-              Positioned(
-                top: AppNavMetrics.badgeTopOffset,
-                right: AppNavMetrics.badgeRightOffset,
-                child: AppCountBadge(
-                  label: widget.badgeCount > 9 ? '9+' : '${widget.badgeCount}',
-                  backgroundColor: AppColors.urgent,
-                  foregroundColor: Colors.white,
-                  padding: AppInsets.h4v1,
+              if (widget.badgeCount > 0)
+                Positioned(
+                  top: AppNavMetrics.badgeTopOffset,
+                  right: AppNavMetrics.badgeRightOffset,
+                  child: AppCountBadge(
+                    label: widget.badgeCount > 9 ? '9+' : '${widget.badgeCount}',
+                    backgroundColor: AppColors.urgent,
+                    foregroundColor: Colors.white,
+                    padding: AppInsets.h4v1,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

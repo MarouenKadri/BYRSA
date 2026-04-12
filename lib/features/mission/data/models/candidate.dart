@@ -1,6 +1,7 @@
 /// ─────────────────────────────────────────────────────────────
 /// 📦 Inkern - Modèle Candidat (candidature à une mission)
 /// ─────────────────────────────────────────────────────────────
+library;
 
 enum CandidateStatus { enAttente, accepte, refuse }
 

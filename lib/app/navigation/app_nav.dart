@@ -30,13 +30,13 @@ class AppNav extends StatelessWidget {
         config: AppNavConfig(
           items: [
             NavItem(
-              isClient ? Icons.explore_outlined : Icons.grid_view_outlined,
-              isClient ? Icons.explore_rounded : Icons.grid_view_rounded,
+              isClient ? Icons.home_outlined : Icons.search_outlined,
+              isClient ? Icons.home_rounded : Icons.search_rounded,
               isClient ? 'Découvrir' : 'Explorer',
             ),
             NavItem(
-              isClient ? Icons.receipt_long_outlined : Icons.handyman_outlined,
-              isClient ? Icons.receipt_long_rounded : Icons.handyman_rounded,
+              isClient ? Icons.assignment_outlined : Icons.work_outline_rounded,
+              isClient ? Icons.assignment_rounded : Icons.work_rounded,
               'Missions',
             ),
             NavItem(
@@ -45,8 +45,8 @@ class AppNav extends StatelessWidget {
               'Messages',
             ),
             NavItem(
-              isClient ? Icons.person_outline_rounded : Icons.badge_outlined,
-              isClient ? Icons.person_rounded : Icons.badge_rounded,
+              Icons.person_outline_rounded,
+              Icons.person_rounded,
               isClient ? 'Compte' : 'Profil',
             ),
           ],

@@ -21,8 +21,8 @@ class GoogleSignInButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: context.colors.surface,
           foregroundColor: context.colors.textPrimary,
-          side: BorderSide(color: context.colors.border, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesign.radius14)),
+          side: BorderSide(color: const Color(0xFFE2E6EA), width: 1),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
         ),
         child: isLoading
@@ -34,11 +34,14 @@ class GoogleSignInButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _GoogleLogo(size: 22),
-                  AppGap.w12,
+                  _GoogleLogo(size: 20),
+                  AppGap.w10,
                   Text(
                     'Continuer avec Google',
-                    style: context.text.titleSmall,
+                    style: context.text.titleSmall?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),

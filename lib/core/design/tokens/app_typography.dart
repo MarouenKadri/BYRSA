@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppType {
   static TextTheme buildTextTheme({required Color primary, required Color secondary, required Color tertiary}) {
-    final base = GoogleFonts.plusJakartaSansTextTheme();
+    final base = GoogleFonts.interTextTheme();
     return base.copyWith(
       // ── Display ─────────────────────────────────────────────────────────
       displayLarge:  base.displayLarge?.copyWith(fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0, color: primary, height: 1.15),

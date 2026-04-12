@@ -104,7 +104,7 @@ InputDecoration profileSheetInputDecoration(
   bool readOnly = false,
 }) {
   const borderColor = Color(0xFFE6EBF0);
-  const focusColor = Color(0xFF101418);
+  const focusColor = AppColors.inkDark;
   final labelColor = readOnly ? const Color(0xFF7A858F) : const Color(0xFF66707A);
 
   OutlineInputBorder outline(Color color, [double width = 1]) => OutlineInputBorder(
@@ -147,7 +147,7 @@ class ProfileSheetPrimaryAction extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF000000),
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           elevation: 0,
           shadowColor: Colors.transparent,

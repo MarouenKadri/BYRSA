@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import 'user_common_widgets.dart';
@@ -40,7 +39,7 @@ class _ChangeEmailSheetState extends State<_ChangeEmailSheet> {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: AppSheetSurface(
         // Fond #FAFAFA opaque — override du blanc translucide par défaut
-        color: const Color(0xFFFAFAFA),
+        color: AppColors.snow,
         child: SafeArea(
           top: false,
           child: Padding(
@@ -59,7 +58,7 @@ class _ChangeEmailSheetState extends State<_ChangeEmailSheet> {
                   Text(
                     "Adresse email",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: AppFontSize.title,
                       fontWeight: FontWeight.w300,
                       color: context.colors.textPrimary,
@@ -183,12 +182,17 @@ class _ReadOnlyField extends StatelessWidget {
     return TextFormField(
       initialValue: value,
       readOnly: true,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: AppFontSize.body,
         fontWeight: FontWeight.w400,
         color: const Color(0xFF9AA4AF),
       ),
-      decoration: _emailInputDecoration(context, label: label, readOnly: true),
+      decoration: AppInputDecorations.profileField(
+        context,
+        hintText: label,
+        readOnly: true,
+        prefixIcon: const Icon(Icons.mail_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+      ),
     );
   }
 }
@@ -213,56 +217,17 @@ class _EmailField extends StatelessWidget {
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
       validator: validator,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: AppFontSize.body,
         fontWeight: FontWeight.w400,
         color: context.colors.textPrimary,
       ),
-      decoration: _emailInputDecoration(context, label: label).copyWith(
-        errorStyle: context.profileErrorStyle,
-      ),
+      decoration: AppInputDecorations.profileField(
+        context,
+        hintText: label,
+        prefixIcon: const Icon(Icons.mail_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+      ).copyWith(errorStyle: context.profileErrorStyle),
     );
   }
 }
 
-// ─── Décoration locale : no-stroke, fond blanc, icône hairline ───────────────
-
-InputDecoration _emailInputDecoration(
-  BuildContext context, {
-  required String label,
-  bool readOnly = false,
-}) {
-  final Color labelColor =
-      readOnly ? const Color(0xFF9AA4AF) : const Color(0xFF8A949E);
-
-  OutlineInputBorder border({Color color = Colors.transparent, bool visible = false}) =>
-      OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: visible
-            ? BorderSide(color: color, width: 1)
-            : BorderSide.none,
-      );
-
-  return InputDecoration(
-    hintText: label,
-    hintStyle: GoogleFonts.inter(
-      fontSize: AppFontSize.md,
-      fontWeight: FontWeight.w400,
-      color: labelColor,
-    ),
-    prefixIcon: const Icon(
-      Icons.mail_outline_rounded,
-      size: 16,
-      color: Color(0xFFB0BAC4),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-    filled: true,
-    fillColor: Colors.white,
-    border: border(),
-    enabledBorder: border(),
-    focusedBorder: border(),
-    disabledBorder: border(),
-    errorBorder: border(color: AppColors.error, visible: true),
-    focusedErrorBorder: border(color: AppColors.error, visible: true),
-  );
-}

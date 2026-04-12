@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/design/app_primitives.dart';
 
@@ -28,18 +27,18 @@ class StepService extends StatelessWidget {
         children: [
           Text(
             'Quel service recherchez-vous ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w700,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.7,
             ),
           ),
           AppGap.h10,
           Text(
             'Sélectionnez le type de service dont vous avez besoin',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               height: 1.5,
@@ -122,21 +121,21 @@ class StepService extends StatelessWidget {
                   Icon(
                     service['icon'] as IconData,
                     size: 22,
-                    color: const Color(0xFF2C3137),
+                    color: AppColors.gray700,
                   ),
                   AppGap.w12,
                   Text(
                     service['name'] as String,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF101418),
+                      color: AppColors.inkDark,
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFFF0F1F3)),
+            const Divider(height: 1, color: AppColors.gray50),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -153,21 +152,21 @@ class StepService extends StatelessWidget {
                         ),
                         title: Text(
                           subService,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.w500,
                             color: isSelected
-                                ? const Color(0xFF1847A8)
-                                : const Color(0xFF2C3137),
+                                ? AppColors.stepBlue
+                                : AppColors.gray700,
                           ),
                         ),
                         trailing: isSelected
                             ? const Icon(
                                 Icons.check_rounded,
                                 size: 18,
-                                color: Color(0xFF1847A8),
+                                color: AppColors.stepBlue,
                               )
                             : null,
                         onTap: () {
@@ -219,7 +218,7 @@ class _LuxuryServiceCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isSelected ? const Color(0xFF1847A8) : Colors.transparent,
+          color: isSelected ? AppColors.stepBlue : Colors.transparent,
           width: isSelected ? 1.4 : 1,
         ),
         boxShadow: [
@@ -249,17 +248,17 @@ class _LuxuryServiceCard extends StatelessWidget {
                   ),
                 );
               },
-              child: Icon(icon, size: 31, color: const Color(0xFF2C3137)),
+              child: Icon(icon, size: 31, color: AppColors.gray700),
             ),
             AppGap.h16,
             Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 height: 1.25,
-                color: const Color(0xFF101418),
+                color: AppColors.inkDark,
               ),
             ),
             if (subtitle != null && subtitle!.isNotEmpty) ...[
@@ -269,7 +268,7 @@ class _LuxuryServiceCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                   height: 1.35,

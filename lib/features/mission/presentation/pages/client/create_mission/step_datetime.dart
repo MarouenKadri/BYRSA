@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../../core/design/app_design_system.dart';
 
 /// ─────────────────────────────────────────────────────────────
@@ -35,18 +34,18 @@ class StepDate extends StatelessWidget {
         children: [
           Text(
             'Quel jour ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
           AppGap.h12,
           Text(
             'Choisissez une date pour planifier votre mission.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.45,
@@ -94,7 +93,7 @@ class StepDate extends StatelessWidget {
                       children: [
                         Text(
                           isToday ? 'AUJ.' : _dayName(date.weekday).toUpperCase(),
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
@@ -104,17 +103,17 @@ class StepDate extends StatelessWidget {
                         AppGap.h10,
                         Text(
                           '${date.day}',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF101418),
+                            color: AppColors.inkDark,
                             height: 1,
                           ),
                         ),
                         AppGap.h6,
                         Text(
                           _monthName(date.month).toUpperCase(),
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
@@ -127,7 +126,7 @@ class StepDate extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF1847A8) : Colors.transparent,
+                            color: isSelected ? AppColors.stepBlue : Colors.transparent,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -149,10 +148,10 @@ class StepDate extends StatelessWidget {
                 builder: (ctx, child) => Theme(
                   data: Theme.of(ctx).copyWith(
                     colorScheme: const ColorScheme.light(
-                      primary: Color(0xFF1847A8),
+                      primary: AppColors.stepBlue,
                       onPrimary: Colors.white,
                       surface: Colors.white,
-                      onSurface: Color(0xFF101418),
+                      onSurface: AppColors.inkDark,
                     ),
                   ),
                   child: child!,
@@ -165,7 +164,7 @@ class StepDate extends StatelessWidget {
               }
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF2C3137),
+              foregroundColor: AppColors.gray700,
               side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
               backgroundColor: Colors.transparent,
               minimumSize: const Size.fromHeight(54),
@@ -176,10 +175,10 @@ class StepDate extends StatelessWidget {
             icon: const Icon(Icons.calendar_month_outlined, size: 18),
             label: Text(
               'Autre date',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF2C3137),
+                color: AppColors.gray700,
               ),
             ),
           ),
@@ -235,18 +234,18 @@ class StepTime extends StatelessWidget {
         children: [
           Text(
             'À quelle heure ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
           AppGap.h12,
           Text(
             'Choisissez le créneau qui vous convient le mieux.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.45,
@@ -298,12 +297,12 @@ class StepTime extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: isSelected
-                              ? const Color(0xFF1847A8)
-                              : const Color(0xFF101418),
+                              ? AppColors.stepBlue
+                              : AppColors.inkDark,
                         ),
                       ),
                     ),
@@ -321,10 +320,10 @@ class StepTime extends StatelessWidget {
                 builder: (ctx, child) => Theme(
                   data: Theme.of(ctx).copyWith(
                     colorScheme: const ColorScheme.light(
-                      primary: Color(0xFF1847A8),
+                      primary: AppColors.stepBlue,
                       onPrimary: Colors.white,
                       surface: Colors.white,
-                      onSurface: Color(0xFF101418),
+                      onSurface: AppColors.inkDark,
                     ),
                   ),
                   child: child!,
@@ -337,7 +336,7 @@ class StepTime extends StatelessWidget {
               }
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF2C3137),
+              foregroundColor: AppColors.gray700,
               side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
               backgroundColor: Colors.transparent,
               minimumSize: const Size.fromHeight(54),
@@ -348,10 +347,10 @@ class StepTime extends StatelessWidget {
             icon: const Icon(Icons.schedule_outlined, size: 18),
             label: Text(
               'Autre heure',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF2C3137),
+                color: AppColors.gray700,
               ),
             ),
           ),

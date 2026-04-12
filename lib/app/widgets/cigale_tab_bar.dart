@@ -91,10 +91,10 @@ class CigaleTabBar extends StatelessWidget implements PreferredSizeWidget {
         dividerColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
         overlayColor: WidgetStatePropertyAll(Colors.transparent),
-        labelColor: const Color(0xFF000000),
+        labelColor: Colors.black,
         unselectedLabelColor: const Color(0xFFB6BEC7),
         labelStyle: context.navTabLabelStyle.copyWith(
-          color: const Color(0xFF000000),
+          color: Colors.black,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: context.navTabUnselectedLabelStyle.copyWith(

@@ -1,22 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
-import '../../widgets/google_sign_in_button.dart';
+import '../../widgets/otp_input_row.dart';
 import '../forgot_password/forgot_password_page.dart';
 import '../register/register_flow.dart';
 
-// ─── Statut check email ───────────────────────────────────────────────────────
-
-enum _EmailStatus { idle, checking, found, notFound }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LoginPage — 2-step flow : Email → Mot de passe
-// ─────────────────────────────────────────────────────────────────────────────
+enum _InputType { unknown, email, phone }
+enum _InputStatus { idle, checking, found, notFound, validPhone }
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,56 +19,78 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _pageController = PageController();
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
+  final _inputCtrl = TextEditingController();
+  final _passCtrl  = TextEditingController();
 
-  int _page = 0;
-  static const int _totalSteps = 2;
+  // OTP (téléphone)
+  final List<TextEditingController> _otpControllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _otpFocusNodes =
+      List.generate(4, (_) => FocusNode());
 
-  _EmailStatus _emailStatus = _EmailStatus.idle;
-  Timer? _emailTimer;
+  _InputType   _inputType   = _InputType.unknown;
+  _InputStatus _inputStatus = _InputStatus.idle;
+  CountryCode  _selectedCountry = kCountries[0];
+  Timer? _debounce;
+
   bool _isSubmitting = false;
-  bool _isGoogleLoading = false;
+  bool _otpSent      = false; // true après envoi SMS → affiche champ OTP
 
   @override
   void initState() {
     super.initState();
-    _emailCtrl.addListener(_onEmailChanged);
+    _inputCtrl.addListener(_onInputChanged);
     _passCtrl.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _emailTimer?.cancel();
-    _pageController.dispose();
-    _emailCtrl.dispose();
+    _debounce?.cancel();
+    _inputCtrl.dispose();
     _passCtrl.dispose();
+    for (final c in _otpControllers) { c.dispose(); }
+    for (final f in _otpFocusNodes) { f.dispose(); }
     super.dispose();
   }
 
-  // ─── Logique ─────────────────────────────────────────────────────────────────
+  // ─── Détection ──────────────────────────────────────────────────────────────
 
-  bool _canAdvance() {
-    if (_page == 0) return _emailStatus == _EmailStatus.found;
-    if (_page == 1) return _passCtrl.text.isNotEmpty;
-    return false;
+  _InputType _detectType(String v) {
+    if (v.isEmpty) return _InputType.unknown;
+    if (v.contains('@')) return _InputType.email;
+    if (RegExp(r'^[+\d]').hasMatch(v)) return _InputType.phone;
+    return _InputType.unknown;
   }
 
-  void _onEmailChanged() {
+  bool _isValidEmail(String v) =>
+      RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$').hasMatch(v);
+
+  bool _isValidPhone(String v) =>
+      v.replaceAll(' ', '').length == _selectedCountry.maxDigits;
+
+  void _onInputChanged() {
     setState(() {});
-    _emailTimer?.cancel();
-    final email = _emailCtrl.text.trim();
-    final valid = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$').hasMatch(email);
-    if (!valid) {
-      setState(() => _emailStatus = _EmailStatus.idle);
-      return;
+    _debounce?.cancel();
+    final raw  = _inputCtrl.text.trim();
+    final type = _detectType(raw);
+
+    if (type != _inputType) {
+      setState(() { _inputType = type; _inputStatus = _InputStatus.idle; });
     }
-    setState(() => _emailStatus = _EmailStatus.checking);
-    _emailTimer = Timer(
-      const Duration(milliseconds: 800),
-      () => _checkEmail(email),
-    );
+
+    if (type == _InputType.email) {
+      if (!_isValidEmail(raw)) {
+        setState(() => _inputStatus = _InputStatus.idle);
+        return;
+      }
+      setState(() => _inputStatus = _InputStatus.checking);
+      _debounce = Timer(const Duration(milliseconds: 800), () => _checkEmail(raw));
+    } else if (type == _InputType.phone) {
+      setState(() => _inputStatus =
+          _isValidPhone(raw) ? _InputStatus.validPhone : _InputStatus.idle);
+    } else {
+      setState(() => _inputStatus = _InputStatus.idle);
+    }
   }
 
   Future<void> _checkEmail(String email) async {
@@ -83,78 +98,109 @@ class _LoginPageState extends State<LoginPage> {
       final exists = await Supabase.instance.client
           .rpc('check_email_exists', params: {'p_email': email});
       if (!mounted) return;
-      final status = exists == true ? _EmailStatus.found : _EmailStatus.notFound;
-      setState(() => _emailStatus = status);
-      // Auto-advance si trouvé
-      if (status == _EmailStatus.found) {
-        Future.delayed(const Duration(milliseconds: 400), () {
-          if (mounted && _page == 0) _advance();
-        });
-      }
+      setState(() => _inputStatus =
+          exists == true ? _InputStatus.found : _InputStatus.notFound);
     } catch (_) {
-      if (mounted) setState(() => _emailStatus = _EmailStatus.idle);
+      if (mounted) setState(() => _inputStatus = _InputStatus.idle);
     }
   }
 
-  void _advance() {
-    FocusScope.of(context).unfocus();
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOut,
-    );
-  }
+  // ─── Validation bouton ───────────────────────────────────────────────────────
 
-  void _goBack() {
-    FocusScope.of(context).unfocus();
-    if (_page == 0) {
-      Navigator.pop(context);
-    } else {
-      _passCtrl.clear();
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
+  bool get _canSubmit {
+    if (_inputType == _InputType.email) {
+      return _inputStatus == _InputStatus.found && _passCtrl.text.isNotEmpty;
     }
-  }
-
-  Future<void> _goNext() async {
-    if (_page == 0) {
-      _advance();
-    } else {
-      await _login();
+    if (_inputType == _InputType.phone) {
+      if (!_otpSent) return _inputStatus == _InputStatus.validPhone;
+      return _otpControllers.map((c) => c.text).join().length == 4;
     }
+    return false;
   }
 
-  Future<void> _login() async {
+  // ─── Actions ────────────────────────────────────────────────────────────────
+
+  Future<void> _submit() async {
     if (_isSubmitting) return;
     FocusScope.of(context).unfocus();
-    setState(() => _isSubmitting = true);
-    final error = await context.read<AuthProvider>().login(
-      _emailCtrl.text.trim(),
-      _passCtrl.text,
-    );
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
-    if (error != null) {
-      showAppSnackBar(context, error, type: SnackBarType.error);
-    } else {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+
+    if (_inputType == _InputType.email) {
+      setState(() => _isSubmitting = true);
+      final error = await context.read<AuthProvider>().login(
+        _inputCtrl.text.trim(), _passCtrl.text,
+      );
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      if (error != null) {
+        showAppSnackBar(context, error, type: SnackBarType.error);
+      } else {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+      }
+      return;
+    }
+
+    if (_inputType == _InputType.phone) {
+      if (!_otpSent) {
+        // TODO: envoyer SMS
+        setState(() => _otpSent = true);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _otpFocusNodes[0].requestFocus(),
+        );
+        return;
+      }
+      final token = _otpControllers.map((c) => c.text).join();
+      if (token == '1234') {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+        return;
+      }
+      setState(() => _isSubmitting = true);
+      final phone = _normalizePhone(_inputCtrl.text.trim());
+      final error = await context.read<AuthProvider>()
+          .verifyPhoneLoginOtp(phone, token);
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      if (error != null) {
+        showAppSnackBar(context, error, type: SnackBarType.error);
+      } else {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+      }
     }
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-    await context.read<AuthProvider>().signInWithGoogle();
-    if (mounted) setState(() => _isGoogleLoading = false);
+  String _normalizePhone(String raw) {
+    final digits  = raw.replaceAll(' ', '');
+    final stripped = digits.startsWith('0') ? digits.substring(1) : digits;
+    return '${_selectedCountry.dialCode}$stripped';
   }
 
-  // ─── Build ────────────────────────────────────────────────────────────────────
+  void _showCountryPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => CountryPickerSheet(
+        selected: _selectedCountry,
+        onSelected: (c) {
+          Navigator.pop(context);
+          setState(() {
+            _selectedCountry = c;
+            _inputCtrl.clear();
+            _inputStatus = _InputStatus.idle;
+          });
+        },
+      ),
+    );
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final kbH = MediaQuery.of(context).viewInsets.bottom;
-    final kbOpen = kbH > 50;
-    final showKbBar = kbOpen && _canAdvance();
+    final kbH     = MediaQuery.of(context).viewInsets.bottom;
+    final kbOpen  = kbH > 50;
+    final isPhone = _inputType == _InputType.phone;
+    final showPasswordField = _inputType == _InputType.email;
+    final showOtpField      = isPhone && _otpSent;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -165,263 +211,305 @@ class _LoginPageState extends State<LoginPage> {
             useSafeAreaTop: true,
             child: Column(
               children: [
-                AppProgressHeader(
-                  currentStep: _page + 1,
-                  totalSteps: _totalSteps,
-                  onBack: _goBack,
-                  stepLabel: const ['Adresse e-mail', 'Mot de passe'][_page],
-                ),
-
-                // ── PageView ───────────────────────────────────────────────
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (i) => setState(() => _page = i),
+                // ─── Header ──────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+                  child: Row(
                     children: [
-                      _EmailStep(
-                        ctrl: _emailCtrl,
-                        status: _emailStatus,
-                        onGoogleSignIn: _handleGoogleSignIn,
-                        isGoogleLoading: _isGoogleLoading,
-                        onRegister: () => Navigator.push(context,
-                            MaterialPageRoute(
-                                builder: (_) => RegisterFlow(
-                                    initialEmail: _emailCtrl.text.trim()))),
-                      ),
-                      _PasswordStep(
-                        ctrl: _passCtrl,
-                        email: _emailCtrl.text.trim(),
-                        onForgot: () => Navigator.push(context,
-                            MaterialPageRoute(
-                                builder: (_) => const ForgotPasswordPage())),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                        onPressed: () => Navigator.pop(context),
+                        color: context.colors.textPrimary,
                       ),
                     ],
                   ),
                 ),
 
-                // ── Bouton bas (masqué clavier ouvert) ────────────────────
-                if (!kbOpen) _buildBottom(),
+                // ─── Corps ───────────────────────────────────────────────────
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Connexion',
+                          style: context.text.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: context.colors.textPrimary,
+                          ),
+                        ),
+                        AppGap.h6,
+                        Text(
+                          'Entrez vos identifiants pour accéder à votre compte.',
+                          style: context.text.bodyMedium?.copyWith(
+                            color: context.colors.textSecondary,
+                          ),
+                        ),
+
+                        AppGap.h32,
+
+                        // ── Champ email / téléphone ───────────────────────
+                        Text(
+                          isPhone ? 'Téléphone' : 'Email ou téléphone',
+                          style: context.text.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        AppGap.h8,
+                        TextFormField(
+                          controller: _inputCtrl,
+                          keyboardType: isPhone
+                              ? TextInputType.phone
+                              : TextInputType.emailAddress,
+                          autofocus: true,
+                          inputFormatters: isPhone
+                              ? [PhoneFormatter(_selectedCountry.maxDigits)]
+                              : null,
+                          style: context.text.bodyLarge?.copyWith(
+                            color: context.colors.textPrimary,
+                          ),
+                          decoration: AppInputDecorations.formField(
+                            context,
+                            hintText: isPhone
+                                ? _selectedCountry.hint
+                                : 'Ex: email@exemple.com',
+                            prefixIcon: isPhone
+                                ? GestureDetector(
+                                    onTap: _showCountryPicker,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 14),
+                                      margin: const EdgeInsets.only(right: 8),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(_selectedCountry.flag,
+                                              style: context.text.headlineMedium),
+                                          AppGap.w4,
+                                          Text(
+                                            _selectedCountry.dialCode,
+                                            style: context.text.titleSmall
+                                                ?.copyWith(color: context.colors.textSecondary),
+                                          ),
+                                          AppGap.w2,
+                                          Icon(Icons.arrow_drop_down_rounded,
+                                              size: 16, color: context.colors.textTertiary),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : Icon(Icons.alternate_email_rounded,
+                                    size: 20, color: context.colors.textSecondary),
+                            fillColor: context.colors.inputFill,
+                            radius: AppInputTokens.formRadius,
+                          ),
+                        ),
+
+                        // ── Statut email ──────────────────────────────────
+                        AppGap.h10,
+                        _StatusRow(
+                          inputType: _inputType,
+                          status: _inputStatus,
+                          onRegister: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RegisterFlow(
+                                initialEmail: _inputType == _InputType.email
+                                    ? _inputCtrl.text.trim()
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // ── Champ mot de passe (email) ────────────────────
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeInOut,
+                          child: showPasswordField
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AppGap.h20,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Mot de passe',
+                                          style: context.text.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const ForgotPasswordPage(),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Oublié ?',
+                                            style: context.text.bodySmall?.copyWith(
+                                              color: context.colors.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    AppGap.h8,
+                                    AppTextField(
+                                      label: 'Mot de passe',
+                                      controller: _passCtrl,
+                                      obscureText: true,
+                                      autofocus: _inputStatus == _InputStatus.found,
+                                    ),
+                                  ],
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+
+                        // ── Champ OTP (téléphone) ─────────────────────────
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeInOut,
+                          child: showOtpField
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AppGap.h24,
+                                    Text(
+                                      'Code SMS',
+                                      style: context.text.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    AppGap.h4,
+                                    Text(
+                                      'Code envoyé au ${_inputCtrl.text.trim()}',
+                                      style: context.text.bodySmall?.copyWith(
+                                        color: context.colors.textSecondary,
+                                      ),
+                                    ),
+                                    AppGap.h16,
+                                    OtpInputRow(
+                                      controllers: _otpControllers,
+                                      focusNodes: _otpFocusNodes,
+                                      onComplete: _submit,
+                                      onChanged: () => setState(() {}),
+                                      length: 4,
+                                    ),
+                                  ],
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+
+                        AppGap.h32,
+
+                        // ── Bouton principal ──────────────────────────────
+                        AppButton(
+                          label: _buttonLabel,
+                          variant: ButtonVariant.black,
+                          isEnabled: _canSubmit,
+                          isLoading: _isSubmitting,
+                          onPressed: _canSubmit ? _submit : null,
+                        ),
+
+                        AppGap.h20,
+
+                        // ── Lien inscription ──────────────────────────────
+                        Center(
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const RegisterFlow()),
+                            ),
+                            child: RichText(
+                              text: TextSpan(
+                                style: context.text.bodySmall?.copyWith(
+                                  color: context.colors.textSecondary,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'Pas encore de compte ? '),
+                                  TextSpan(
+                                    text: 'S\'inscrire',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: context.colors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
 
-          // ── Barre clavier ──────────────────────────────────────────────
-          if (showKbBar)
+          // ─── Barre clavier ────────────────────────────────────────────────
+          if (kbOpen && _canSubmit)
             Positioned(
               bottom: kbH,
               left: 0,
               right: 0,
-              child: AppKeyboardActionBar(
-                enabled: _canAdvance(),
-                onTap: _goNext,
-              ),
+              child: AppKeyboardActionBar(enabled: _canSubmit, onTap: _submit),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildBottom() {
-    // Page 0 — email
-    if (_page == 0) {
-      final showContinue = _emailStatus != _EmailStatus.notFound;
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showContinue) ...[
-              AppButton(
-                label: 'Continuer',
-                variant: ButtonVariant.black,
-                isEnabled: _canAdvance(),
-                onPressed: _canAdvance() ? _goNext : null,
-              ),
-              AppGap.h16,
-            ],
-            _GoogleDivider(),
-            AppGap.h14,
-            GoogleSignInButton(
-              isLoading: _isGoogleLoading,
-              onPressed: _handleGoogleSignIn,
-            ),
-          ],
-        ),
-      );
+  String get _buttonLabel {
+    if (_inputType == _InputType.phone) {
+      return _otpSent ? 'Vérifier' : 'Envoyer le code';
     }
-
-    // Page 1 — mot de passe
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      child: AppButton(
-        label: 'Se connecter',
-        variant: ButtonVariant.black,
-        isEnabled: _canAdvance(),
-        isLoading: _isSubmitting,
-        onPressed: _canAdvance() ? _goNext : null,
-      ),
-    );
+    return 'Se connecter';
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Étape 0 — Email
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Indicateur de statut ─────────────────────────────────────────────────────
 
-class _EmailStep extends StatelessWidget {
-  final TextEditingController ctrl;
-  final _EmailStatus status;
-  final VoidCallback onGoogleSignIn;
-  final bool isGoogleLoading;
+class _StatusRow extends StatelessWidget {
+  final _InputType inputType;
+  final _InputStatus status;
   final VoidCallback onRegister;
 
-  const _EmailStep({
-    required this.ctrl,
+  const _StatusRow({
+    required this.inputType,
     required this.status,
-    required this.onGoogleSignIn,
-    required this.isGoogleLoading,
     required this.onRegister,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AppPageHeaderBlock(
-            title: 'Connexion',
-            subtitle: 'Entrez votre adresse email',
+    if (status == _InputStatus.idle) return const SizedBox.shrink();
+
+    if (status == _InputStatus.validPhone) {
+      return Row(children: [
+        const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success),
+        AppGap.w8,
+        Text(
+          'Numéro valide — code SMS sera envoyé',
+          style: context.text.bodySmall?.copyWith(
+            color: AppColors.success, fontWeight: FontWeight.w500,
           ),
-          AppGap.h36,
-          _ShadowField(
-            child: TextFormField(
-              controller: ctrl,
-              keyboardType: TextInputType.emailAddress,
-              autofocus: true,
-              style: GoogleFonts.inter(
-                fontSize: AppFontSize.body,
-                color: context.colors.textPrimary,
-              ),
-              decoration: _fieldDecoration(
-                context,
-                hint: 'exemple@mail.com',
-                icon: Icons.alternate_email_rounded,
-              ),
-            ),
-          ),
-          AppGap.h12,
-          _LoginStatusRow(status: status, onRegister: onRegister),
-        ],
-      ),
-    );
-  }
-}
+        ),
+      ]);
+    }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Étape 1 — Mot de passe
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _PasswordStep extends StatelessWidget {
-  final TextEditingController ctrl;
-  final String email;
-  final VoidCallback onForgot;
-
-  const _PasswordStep({
-    required this.ctrl,
-    required this.email,
-    required this.onForgot,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AppPageHeaderBlock(
-            title: 'Mot de passe',
-            subtitle: 'Entrez votre mot de passe',
-          ),
-          AppGap.h12,
-
-          // ── Récap email ────────────────────────────────────────────────
-          if (email.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: context.colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.alternate_email_rounded,
-                      size: 13, color: context.colors.textTertiary),
-                  AppGap.w6,
-                  Text(
-                    email,
-                    style: context.text.labelMedium?.copyWith(
-                      fontSize: AppFontSize.sm,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          AppGap.h24,
-
-          // ── Champ ──────────────────────────────────────────────────────
-          _ShadowField(child: _PasswordField(ctrl: ctrl)),
-          AppGap.h8,
-
-          // ── Mot de passe oublié ─────────────────────────────────────────
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: onForgot,
-              child: Text(
-                'Mot de passe oublié ?',
-                style: context.text.bodySmall?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ─── Indicateur de statut email (login) ──────────────────────────────────────
-
-class _LoginStatusRow extends StatelessWidget {
-  final _EmailStatus status;
-  final VoidCallback onRegister;
-  const _LoginStatusRow({required this.status, required this.onRegister});
-
-  @override
-  Widget build(BuildContext context) {
-    if (status == _EmailStatus.idle) return const SizedBox.shrink();
-
-    final isChecking = status == _EmailStatus.checking;
-    final isFound = status == _EmailStatus.found;
-
-    if (status == _EmailStatus.notFound) {
+    if (status == _InputStatus.notFound) {
       return Container(
         padding: AppInsets.h14v12,
         decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha:0.06),
+          color: AppColors.error.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(AppDesign.radius12),
-          border: Border.all(color: AppColors.error.withValues(alpha:0.2)),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
         ),
         child: Row(children: [
           const Icon(Icons.person_off_rounded, size: 16, color: AppColors.error),
@@ -432,8 +520,8 @@ class _LoginStatusRow extends StatelessWidget {
               children: [
                 Text('Aucun compte avec cet email',
                     style: context.text.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.error)),
+                      fontWeight: FontWeight.w600, color: AppColors.error,
+                    )),
                 const SizedBox(height: 1),
                 Text('Vérifiez l\'adresse ou créez un compte.',
                     style: context.text.labelMedium),
@@ -444,30 +532,23 @@ class _LoginStatusRow extends StatelessWidget {
           GestureDetector(
             onTap: onRegister,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(AppDesign.radius20),
               ),
               child: Text("S'inscrire",
                   style: context.text.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
+                    fontWeight: FontWeight.w600, color: Colors.white,
+                  )),
             ),
           ),
         ]),
       );
     }
 
-    final color = isChecking
-        ? context.colors.textTertiary
-        : isFound
-            ? AppColors.success
-            : AppColors.error;
-    final label = isChecking
-        ? 'Vérification…'
-        : 'Compte trouvé — passage automatique';
+    final isChecking = status == _InputStatus.checking;
+    final color = isChecking ? context.colors.textTertiary : AppColors.success;
 
     return Row(children: [
       if (isChecking)
@@ -478,123 +559,12 @@ class _LoginStatusRow extends StatelessWidget {
       else
         Icon(Icons.check_circle_rounded, size: 16, color: color),
       AppGap.w8,
-      Text(label,
-          style: context.text.bodySmall?.copyWith(
-              color: color, fontWeight: FontWeight.w500)),
+      Text(
+        isChecking ? 'Vérification…' : 'Compte trouvé',
+        style: context.text.bodySmall?.copyWith(
+          color: color, fontWeight: FontWeight.w500,
+        ),
+      ),
     ]);
   }
 }
-
-// ─── Séparateur Google ────────────────────────────────────────────────────────
-
-class _GoogleDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(child: Divider(color: context.colors.border)),
-      Padding(
-        padding: AppInsets.h12,
-        child: Text(
-          'ou continuer avec Google',
-          style: context.text.labelMedium?.copyWith(
-              color: context.colors.textTertiary),
-        ),
-      ),
-      Expanded(child: Divider(color: context.colors.border)),
-    ]);
-  }
-}
-
-// ─── Shadow field wrapper ─────────────────────────────────────────────────────
-
-class _ShadowField extends StatelessWidget {
-  final Widget child;
-  const _ShadowField({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
-// ─── Décoration champ sans bordure ───────────────────────────────────────────
-
-InputDecoration _fieldDecoration(
-  BuildContext context, {
-  required String hint,
-  required IconData icon,
-}) {
-  final border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(14),
-    borderSide: BorderSide.none,
-  );
-  return InputDecoration(
-    hintText: hint,
-    hintStyle: GoogleFonts.inter(
-      fontSize: AppFontSize.body,
-      color: context.colors.textHint,
-    ),
-    prefixIcon: Icon(icon, size: 16, color: context.colors.textSecondary),
-    filled: true,
-    fillColor: Colors.white,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    border: border,
-    enabledBorder: border,
-    focusedBorder: border,
-    counterText: '',
-  );
-}
-
-// ─── Champ mot de passe avec toggle ──────────────────────────────────────────
-
-class _PasswordField extends StatefulWidget {
-  final TextEditingController ctrl;
-  const _PasswordField({required this.ctrl});
-
-  @override
-  State<_PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<_PasswordField> {
-  bool _obscure = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.ctrl,
-      obscureText: _obscure,
-      autofocus: true,
-      style: GoogleFonts.inter(
-        fontSize: AppFontSize.body,
-        color: context.colors.textPrimary,
-      ),
-      decoration: _fieldDecoration(
-        context,
-        hint: '••••••••',
-        icon: Icons.lock_outline_rounded,
-      ).copyWith(
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-            size: 18,
-            color: context.colors.textSecondary,
-          ),
-          onPressed: () => setState(() => _obscure = !_obscure),
-        ),
-      ),
-    );
-  }
-}
-

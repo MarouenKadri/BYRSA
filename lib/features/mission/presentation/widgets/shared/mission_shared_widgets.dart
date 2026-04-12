@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
-import '../../../data/models/service_category.dart';
 import '../../../data/models/mission.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
@@ -46,14 +45,13 @@ class MissionStatusBadge extends StatelessWidget {
         children: [
           Text(
             status.label.toUpperCase(),
-            style: (compact
-                    ? context.text.labelSmall
-                    : context.text.labelMedium)
-                ?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: badgeColor,
-                  letterSpacing: 1.1,
-                ),
+            style:
+                (compact ? context.text.labelSmall : context.text.labelMedium)
+                    ?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: badgeColor,
+                      letterSpacing: 1.1,
+                    ),
           ),
           if (showIcon) ...[
             AppGap.w4,
@@ -81,8 +79,16 @@ class CategoryChip extends StatelessWidget {
     this.compact = false,
   });
 
-  factory CategoryChip.fromCategory(ServiceCategory category, {bool compact = false}) {
-    return CategoryChip(icon: category.icon, label: category.name, color: category.color, compact: compact);
+  factory CategoryChip.fromCategory(
+    ServiceCategory category, {
+    bool compact = false,
+  }) {
+    return CategoryChip(
+      icon: category.icon,
+      label: category.name,
+      color: category.color,
+      compact: compact,
+    );
   }
 
   @override
@@ -97,7 +103,9 @@ class CategoryChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: effectiveColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(compact ? AppRadius.tag : AppRadius.small),
+        borderRadius: BorderRadius.circular(
+          compact ? AppRadius.tag : AppRadius.small,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -107,8 +115,14 @@ class CategoryChip extends StatelessWidget {
           Text(
             label,
             style: compact
-                ? context.text.labelSmall?.copyWith(fontWeight: FontWeight.w600, color: effectiveColor)
-                : context.text.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: effectiveColor),
+                ? context.text.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: effectiveColor,
+                  )
+                : context.text.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: effectiveColor,
+                  ),
           ),
         ],
       ),
@@ -137,7 +151,11 @@ class InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: compact ? 14 : 16, color: iconColor ?? context.colors.textTertiary),
+        Icon(
+          icon,
+          size: compact ? 14 : 16,
+          color: iconColor ?? context.colors.textTertiary,
+        ),
         AppGap.w4,
         Flexible(
           child: Text(
@@ -160,22 +178,44 @@ class BudgetBadge extends StatelessWidget {
   final bool large;
   final bool outlined;
 
-  const BudgetBadge({super.key, required this.budget, this.large = false, this.outlined = false});
+  const BudgetBadge({
+    super.key,
+    required this.budget,
+    this.large = false,
+    this.outlined = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: large ? 14 : 12, vertical: large ? 8 : 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: large ? 14 : 12,
+        vertical: large ? 8 : 6,
+      ),
       decoration: BoxDecoration(
-        color: outlined ? Colors.transparent : context.colors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(large ? AppRadius.button : AppRadius.small),
-        border: outlined ? Border.all(color: context.colors.primary.withOpacity(0.3), width: 1) : null,
+        color: outlined
+            ? Colors.transparent
+            : context.colors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(
+          large ? AppRadius.button : AppRadius.small,
+        ),
+        border: outlined
+            ? Border.all(
+                color: context.colors.primary.withOpacity(0.3),
+                width: 1,
+              )
+            : null,
       ),
       child: Text(
         budget.displayText,
         style: large
-            ? context.text.headlineSmall?.copyWith(color: context.colors.primary)
-            : context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: context.colors.primary),
+            ? context.text.headlineSmall?.copyWith(
+                color: context.colors.primary,
+              )
+            : context.text.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.colors.primary,
+              ),
       ),
     );
   }
@@ -205,7 +245,12 @@ class UserAvatar extends StatelessWidget {
   final double radius;
   final bool showVerified;
 
-  const UserAvatar({super.key, required this.imageUrl, this.radius = 18, this.showVerified = false});
+  const UserAvatar({
+    super.key,
+    required this.imageUrl,
+    this.radius = 18,
+    this.showVerified = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -225,18 +270,27 @@ class UserAvatar extends StatelessWidget {
                       if (progress == null) return child;
                       return _AvatarShimmer(radius: radius);
                     },
-                    errorBuilder: (_, __, ___) => _AvatarPlaceholder(radius: radius),
+                    errorBuilder: (_, __, ___) =>
+                        _AvatarPlaceholder(radius: radius),
                   )
                 : _AvatarPlaceholder(radius: radius),
           ),
         ),
         if (showVerified)
           Positioned(
-            right: 0, bottom: 0,
+            right: 0,
+            bottom: 0,
             child: Container(
               padding: AppInsets.a2,
-              decoration: BoxDecoration(color: context.colors.surface, shape: BoxShape.circle),
-              child: Icon(Icons.verified_rounded, size: radius * 0.6, color: AppColors.info),
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.verified_rounded,
+                size: radius * 0.6,
+                color: AppColors.info,
+              ),
             ),
           ),
       ],
@@ -254,7 +308,11 @@ class _AvatarPlaceholder extends StatelessWidget {
       width: radius * 2,
       height: radius * 2,
       color: context.colors.surfaceAlt,
-      child: Icon(Icons.person_rounded, size: radius, color: context.colors.textHint),
+      child: Icon(
+        Icons.person_rounded,
+        size: radius,
+        color: context.colors.textHint,
+      ),
     );
   }
 }
@@ -279,8 +337,10 @@ class _AvatarShimmerState extends State<_AvatarShimmer>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _anim = Tween<double>(begin: 0.4, end: 0.9)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _anim = Tween<double>(
+      begin: 0.4,
+      end: 0.9,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -325,11 +385,16 @@ class RatingWidget extends StatelessWidget {
     if (showStars) {
       return Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(5, (i) => Icon(
-          i < rating.round() ? Icons.star_rounded : Icons.star_border_rounded,
-          size: compact ? 14 : 16,
-          color: i < rating.round() ? AppColors.rating : context.colors.border,
-        )),
+        children: List.generate(
+          5,
+          (i) => Icon(
+            i < rating.round() ? Icons.star_rounded : Icons.star_border_rounded,
+            size: compact ? 14 : 16,
+            color: i < rating.round()
+                ? AppColors.rating
+                : context.colors.border,
+          ),
+        ),
       );
     }
 
@@ -341,22 +406,36 @@ class RatingWidget extends StatelessWidget {
         Text(
           rating.toStringAsFixed(1),
           style: compact
-              ? context.text.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: context.colors.textPrimary)
-              : context.text.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: context.colors.textPrimary),
+              ? context.text.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textPrimary,
+                )
+              : context.text.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textPrimary,
+                ),
         ),
         if (missionsCount != null)
           Text(
             ' • $missionsCount mission${missionsCount! > 1 ? 's' : ''}',
             style: compact
-                ? context.text.labelSmall?.copyWith(color: context.colors.textTertiary)
-                : context.text.labelMedium?.copyWith(color: context.colors.textTertiary),
+                ? context.text.labelSmall?.copyWith(
+                    color: context.colors.textTertiary,
+                  )
+                : context.text.labelMedium?.copyWith(
+                    color: context.colors.textTertiary,
+                  ),
           )
         else if (reviewsCount != null)
           Text(
             ' ($reviewsCount)',
             style: compact
-                ? context.text.labelSmall?.copyWith(color: context.colors.textSecondary)
-                : context.text.labelSmall?.copyWith(color: context.colors.textSecondary),
+                ? context.text.labelSmall?.copyWith(
+                    color: context.colors.textSecondary,
+                  )
+                : context.text.labelSmall?.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
           ),
       ],
     );
@@ -383,26 +462,44 @@ class MissionImageHeader extends StatelessWidget {
     this.heroTag,
   });
 
-  Widget _buildImage(BuildContext context, String src, double height, IconData fallback) {
+  Widget _buildImage(
+    BuildContext context,
+    String src,
+    double height,
+    IconData fallback,
+  ) {
     final isLocal = !src.startsWith('http');
-    final errorWidget = (_, __, ___) => Container(
-      height: height, color: context.colors.divider,
+    errorWidget(_, __, ___) => Container(
+      height: height,
+      color: context.colors.divider,
       child: Icon(fallback, size: 48, color: context.colors.textTertiary),
     );
     if (isLocal) {
       return Image.file(
-        File(src), height: height, width: double.infinity, fit: BoxFit.cover,
+        File(src),
+        height: height,
+        width: double.infinity,
+        fit: BoxFit.cover,
         errorBuilder: errorWidget,
       );
     }
     return Image.network(
-      src, height: height, width: double.infinity, fit: BoxFit.cover,
+      src,
+      height: height,
+      width: double.infinity,
+      fit: BoxFit.cover,
       errorBuilder: errorWidget,
       loadingBuilder: (ctx, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(
-          height: height, color: context.colors.surfaceAlt,
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.textTertiary)),
+          height: height,
+          color: context.colors.surfaceAlt,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: context.colors.textTertiary,
+            ),
+          ),
         );
       },
     );
@@ -419,16 +516,30 @@ class MissionImageHeader extends StatelessWidget {
           _buildImage(context, images.first, height, fallbackIcon),
           if (showImageCount && images.length > 1)
             Positioned(
-              top: 10, right: 10,
+              top: 10,
+              right: 10,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(AppRadius.small)),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(AppRadius.small),
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.photo_library_rounded, size: 14, color: Colors.white),
+                    const Icon(
+                      Icons.photo_library_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                     AppGap.w4,
-                    Text('${images.length}', style: context.text.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.white)),
+                    Text(
+                      '${images.length}',
+                      style: context.text.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -485,7 +596,10 @@ class EmptyState extends StatelessWidget {
             AppGap.h8,
             Text(
               subtitle,
-              style: context.text.bodyMedium?.copyWith(color: context.colors.textTertiary, height: 1.5),
+              style: context.text.bodyMedium?.copyWith(
+                color: context.colors.textTertiary,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             if (buttonText != null && onButtonPressed != null) ...[
@@ -515,7 +629,9 @@ PageRoute<T> slideUpRoute<T>({required Widget page}) => PageRouteBuilder<T>(
       opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
       child: SlideTransition(
         position: Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero)
-            .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            .animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            ),
         child: child,
       ),
     );
@@ -532,17 +648,22 @@ class SkeletonList extends StatefulWidget {
   State<SkeletonList> createState() => _SkeletonListState();
 }
 
-class _SkeletonListState extends State<SkeletonList> with SingleTickerProviderStateMixin {
+class _SkeletonListState extends State<SkeletonList>
+    with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _anim;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))
-      ..repeat(reverse: true);
-    _anim = Tween<double>(begin: 0.3, end: 0.7)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(
+      begin: 0.3,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -571,14 +692,15 @@ class _MissionCardSkeleton extends StatelessWidget {
   final double opacity;
   const _MissionCardSkeleton({required this.opacity});
 
-  Widget _box(BuildContext context, double? w, double h, [double r = 6]) => Container(
-    width: w,
-    height: h,
-    decoration: BoxDecoration(
-      color: context.colors.border.withOpacity(opacity),
-      borderRadius: BorderRadius.circular(r),
-    ),
-  );
+  Widget _box(BuildContext context, double? w, double h, [double r = 6]) =>
+      Container(
+        width: w,
+        height: h,
+        decoration: BoxDecoration(
+          color: context.colors.border.withOpacity(opacity),
+          borderRadius: BorderRadius.circular(r),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -589,7 +711,9 @@ class _MissionCardSkeleton extends StatelessWidget {
         children: [
           // Image placeholder
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.card),
+            ),
             child: _box(context, double.infinity, 120, 0),
           ),
           Padding(
@@ -597,29 +721,35 @@ class _MissionCardSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  _box(context, 80, 22, AppRadius.badge),
-                  const Spacer(),
-                  _box(context, 70, 22, AppRadius.badge),
-                ]),
+                Row(
+                  children: [
+                    _box(context, 80, 22, AppRadius.badge),
+                    const Spacer(),
+                    _box(context, 70, 22, AppRadius.badge),
+                  ],
+                ),
                 AppGap.h12,
                 _box(context, double.infinity, 18),
                 AppGap.h6,
                 _box(context, 200, 14),
                 AppGap.h12,
-                Row(children: [
-                  _box(context, 90, 14),
-                  AppGap.w10,
-                  _box(context, 80, 14),
-                ]),
+                Row(
+                  children: [
+                    _box(context, 90, 14),
+                    AppGap.w10,
+                    _box(context, 80, 14),
+                  ],
+                ),
                 AppGap.h12,
                 Divider(height: 1, color: context.colors.divider),
                 AppGap.h12,
-                Row(children: [
-                  _box(context, 70, 20),
-                  const Spacer(),
-                  _box(context, 110, 32, AppRadius.chip),
-                ]),
+                Row(
+                  children: [
+                    _box(context, 70, 20),
+                    const Spacer(),
+                    _box(context, 110, 32, AppRadius.chip),
+                  ],
+                ),
               ],
             ),
           ),
@@ -635,18 +765,31 @@ class MissionInfoTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const MissionInfoTile({super.key, required this.icon, required this.label, required this.value});
+  const MissionInfoTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(children: [
-        Icon(icon, size: 24, color: AppColors.primary),
-        AppGap.h8,
-        Text(label, style: context.text.labelMedium),
-        AppGap.h4,
-        Text(value, style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
-      ]),
+      child: Column(
+        children: [
+          Icon(icon, size: 24, color: AppColors.primary),
+          AppGap.h8,
+          Text(label, style: context.text.labelMedium),
+          AppGap.h4,
+          Text(
+            value,
+            style: context.text.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -654,7 +797,8 @@ class MissionInfoTile extends StatelessWidget {
 class MissionVerticalDivider extends StatelessWidget {
   const MissionVerticalDivider({super.key});
   @override
-  Widget build(BuildContext context) => Container(width: 1, height: 50, color: context.colors.divider);
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 50, color: context.colors.divider);
 }
 
 class MissionLocationRow extends StatelessWidget {
@@ -679,18 +823,30 @@ class MissionLocationRow extends StatelessWidget {
       children: [
         Container(
           padding: AppInsets.a10,
-          decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(AppRadius.button)),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
           child: Icon(icon, color: iconColor, size: 24),
         ),
         AppGap.w14,
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: context.text.labelMedium),
-            AppGap.h2,
-            Text(value, style: context.text.labelLarge?.copyWith(fontSize: AppFontSize.body)),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: context.text.labelMedium),
+              AppGap.h2,
+              Text(
+                value,
+                style: context.text.labelLarge?.copyWith(
+                  fontSize: AppFontSize.body,
+                ),
+              ),
+            ],
+          ),
         ),
-        if (showMapIcon) const Icon(Icons.map_rounded, color: AppColors.primary, size: 22),
+        if (showMapIcon)
+          const Icon(Icons.map_rounded, color: AppColors.primary, size: 22),
       ],
     );
   }
@@ -704,7 +860,13 @@ class CardContainer extends StatelessWidget {
   final EdgeInsets? padding;
   final VoidCallback? onTap;
 
-  const CardContainer({super.key, required this.child, this.margin, this.padding, this.onTap});
+  const CardContainer({
+    super.key,
+    required this.child,
+    this.margin,
+    this.padding,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -716,7 +878,10 @@ class CardContainer extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          child: Padding(padding: padding ?? AppPadding.cardLarge, child: child),
+          child: Padding(
+            padding: padding ?? AppPadding.cardLarge,
+            child: child,
+          ),
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/design/app_design_system.dart';
 import '../../data/models/app_notification.dart';
 import '../../notification_provider.dart';
 
@@ -46,10 +46,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   Expanded(
                     child: Text(
                       'Notifications',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                         letterSpacing: -0.6,
                       ),
                     ),
@@ -58,8 +58,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     TextButton(
                       onPressed: () => context.read<NotificationProvider>().markAllRead(),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF111111),
-                        textStyle: GoogleFonts.inter(
+                        foregroundColor: AppColors.ink,
+                        textStyle: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
@@ -141,7 +141,7 @@ class _NotificationCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF0F1F3)),
+            border: Border.all(color: AppColors.gray50),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,10 +158,10 @@ class _NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111111),
+                              color: AppColors.ink,
                             ),
                           ),
                         ),
@@ -172,7 +172,7 @@ class _NotificationCard extends StatelessWidget {
                             height: 7,
                             margin: const EdgeInsets.only(top: 6),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF111111),
+                              color: AppColors.ink,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -184,7 +184,7 @@ class _NotificationCard extends StatelessWidget {
                       notification.body,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 13.5,
                         height: 1.45,
                         fontWeight: FontWeight.w400,
@@ -194,7 +194,7 @@ class _NotificationCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       notification.timeAgo,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF9AA1A8),
@@ -323,15 +323,15 @@ class _FilterPill extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF111111) : const Color(0xFFF2F3F5),
+          color: selected ? AppColors.ink : const Color(0xFFF2F3F5),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : const Color(0xFF111111),
+            color: selected ? Colors.white : AppColors.ink,
           ),
         ),
       ),
@@ -390,21 +390,21 @@ class _EmptyNotifications extends StatelessWidget {
             Text(
               showUnreadOnly ? 'Aucune notification non lue' : 'Aucune notification',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF111111),
+                color: AppColors.ink,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tout est a jour pour le moment.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 height: 1.45,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF8E959D),
+                color: AppColors.gray600,
               ),
             ),
           ],

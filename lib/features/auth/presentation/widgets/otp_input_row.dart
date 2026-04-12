@@ -4,14 +4,16 @@ import 'package:flutter/services.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
 
-// Widget OTP partagé — 4 cases numériques avec navigation focus automatique.
-// [onComplete] est appelé dès que les 4 chiffres sont saisis.
+// Widget OTP partagé — cases numériques avec navigation focus automatique.
+// [length] définit le nombre de cases (défaut 4 pour la registration, 6 pour SMS login).
+// [onComplete] est appelé dès que toutes les cases sont remplies.
 // [onChanged] est appelé à chaque frappe (utile pour setState parent).
 class OtpInputRow extends StatelessWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
   final VoidCallback onComplete;
   final VoidCallback? onChanged;
+  final int length;
 
   const OtpInputRow({
     super.key,
@@ -19,20 +21,22 @@ class OtpInputRow extends StatelessWidget {
     required this.focusNodes,
     required this.onComplete,
     this.onChanged,
+    this.length = 4,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cellSize = length <= 4 ? 68.0 : 52.0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(4, (i) => _buildCell(context, i)),
+      children: List.generate(length, (i) => _buildCell(context, i, cellSize)),
     );
   }
 
-  Widget _buildCell(BuildContext context, int i) {
+  Widget _buildCell(BuildContext context, int i, double cellSize) {
     final filled = controllers[i].text.isNotEmpty;
     return SizedBox(
-      width: 68,
+      width: cellSize,
       height: 76,
       child: TextField(
         controller: controllers[i],
@@ -44,32 +48,13 @@ class OtpInputRow extends StatelessWidget {
           color: context.colors.textPrimary,
         ),
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
-          counterText: '',
-          filled: true,
-          fillColor: filled ? const Color(0xFFF5F6F7) : context.colors.background,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDesign.radius16),
-            borderSide: BorderSide(color: context.colors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDesign.radius16),
-            borderSide: BorderSide(
-              color: filled ? context.colors.textPrimary : context.colors.border,
-              width: filled ? 1.5 : 1,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDesign.radius16),
-            borderSide: BorderSide(color: context.colors.textPrimary, width: 2),
-          ),
-        ),
+        decoration: AppInputDecorations.otpCell(context, filled: filled),
         onChanged: (v) {
-          if (v.isNotEmpty && i < 3) focusNodes[i + 1].requestFocus();
+          if (v.isNotEmpty && i < length - 1) focusNodes[i + 1].requestFocus();
           if (v.isEmpty && i > 0) focusNodes[i - 1].requestFocus();
           onChanged?.call();
           final code = controllers.map((c) => c.text).join();
-          if (code.length == 4) onComplete();
+          if (code.length == length) onComplete();
         },
       ),
     );

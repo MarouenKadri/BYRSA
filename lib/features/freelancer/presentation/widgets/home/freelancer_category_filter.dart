@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter_application_1/core/design/app_design_system.dart';
 import 'package:flutter_application_1/features/mission/data/models/mission.dart';
@@ -80,11 +79,11 @@ class _CategoryChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFFEAF3FF),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFFFFFFF), width: 0.8),
+            border: Border.all(color: Colors.white, width: 0.8),
           ),
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.1,
@@ -109,7 +108,7 @@ class _CategoryChip extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.1,

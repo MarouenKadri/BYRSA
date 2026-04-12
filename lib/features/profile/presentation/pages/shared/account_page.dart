@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -24,7 +23,6 @@ import '../../widgets/shared/change_phone_bottom_sheet.dart';
 import '../../widgets/shared/personal_info_bottom_sheet.dart';
 import '../../widgets/shared/freelancer_profile_bottom_sheet.dart';
 import '../../../profile_provider.dart';
-import '../freelancer/edit_profile_page.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// 👤 Inkern - Page Mon Compte
@@ -193,7 +191,7 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                     child: Text(
                       'Vérifié',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF163127),
@@ -334,7 +332,7 @@ class _ProfileHeader extends StatelessWidget {
                             displayName.isNotEmpty
                                 ? displayName[0].toUpperCase()
                                 : '?',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF6B7280),
@@ -393,22 +391,22 @@ class _ProfileHeader extends StatelessWidget {
               children: [
                 Text(
                   displayName,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.4,
-                    color: const Color(0xFF101418),
+                    color: AppColors.inkDark,
                   ),
                 ),
                 AppGap.h6,
                 Text(
                   isFreelancerMode ? 'Mode Freelancer' : 'Mode Client',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: isFreelancerMode
                         ? const Color(0xFF163127)
-                        : const Color(0xFF101418),
+                        : AppColors.inkDark,
                   ),
                 ),
                 AppGap.h12,
@@ -434,7 +432,7 @@ class _ProfileHeader extends StatelessWidget {
                   icon: const Icon(Icons.edit_outlined, size: 16),
                   label: Text(
                     'Modifier',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -487,10 +485,10 @@ class _AccountSectionCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 2, right: 2, bottom: 8),
             child: Text(
               title,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF101418),
+                color: AppColors.inkDark,
                 letterSpacing: -0.2,
               ),
             ),
@@ -525,7 +523,7 @@ class _AccountMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedTitleColor = titleColor ?? const Color(0xFF101418);
+    final resolvedTitleColor = titleColor ?? AppColors.inkDark;
     final resolvedIconColor = iconColor ?? const Color(0xFF6E7781);
 
     return InkWell(
@@ -560,7 +558,7 @@ class _AccountMenuTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: resolvedTitleColor,
@@ -570,7 +568,7 @@ class _AccountMenuTile extends StatelessWidget {
                     AppGap.h5,
                     Text(
                       subtitle!,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF66707A),
@@ -1099,7 +1097,7 @@ class _StoryOwnerCircle extends StatelessWidget {
                       ),
                       child: Text(
                         '$count',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF66707A),
@@ -1114,7 +1112,7 @@ class _StoryOwnerCircle extends StatelessWidget {
               width: 64,
               child: Text(
                 label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                   color: viewed

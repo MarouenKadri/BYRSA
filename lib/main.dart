@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/navigation/root_nav.dart';
-import 'app/navigation/guest_nav.dart';
 import 'app/auth_provider.dart';
 import 'app/theme_provider.dart';
 import 'core/design/app_design_system.dart';
@@ -34,19 +33,20 @@ void main() async {
     throw StateError('SUPABASE_URL is still using the example value in .env');
   }
   if (supabaseAnonKey == 'your-anon-key-here') {
-    throw StateError('SUPABASE_ANON_KEY is still using the example value in .env');
+    throw StateError(
+      'SUPABASE_ANON_KEY is still using the example value in .env',
+    );
   }
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.background,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: AppColors.background,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
   );
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const MyApp());
 }
 

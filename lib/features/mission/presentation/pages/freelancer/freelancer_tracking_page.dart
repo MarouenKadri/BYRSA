@@ -353,7 +353,8 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 6,
               ),
-              decoration: InputDecoration(
+              decoration: AppInputDecorations.formField(
+                context,
                 hintText: '000000',
                 errorText: _error,
               ),
@@ -365,7 +366,7 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
                 onPressed: _loading ? null : _verify,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: const Color(0xFF000000),
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(
@@ -734,7 +735,7 @@ class _TrackingPrimaryButton extends StatelessWidget {
         label: Text(label),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF000000),
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(54),
           shape: RoundedRectangleBorder(

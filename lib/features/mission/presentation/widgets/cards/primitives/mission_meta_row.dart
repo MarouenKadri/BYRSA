@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ─── Primitive : Composite ────────────────────────────────────────────────────
 // Responsabilité unique : afficher une ligne de métadonnées (date, heure,
@@ -48,7 +47,7 @@ class _MetaPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             item.text,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF7E8792),

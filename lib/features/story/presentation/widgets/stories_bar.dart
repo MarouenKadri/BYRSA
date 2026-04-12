@@ -1,8 +1,5 @@
 import 'dart:io';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
@@ -220,53 +217,42 @@ class StoryMediaPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const AppBottomSheetHandle(),
-              AppGap.h12,
-              Padding(
-                padding: AppInsets.h20,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Ajouter une story',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFAFAFA),
-                    ),
-                  ),
+    return AppDarkSheet(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AppBottomSheetHandle(),
+          AppGap.h12,
+          Padding(
+            padding: AppInsets.h20,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Ajouter une story',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.snow,
                 ),
               ),
-              AppGap.h8,
-              _StoryPickerTile(
-                icon: Icons.photo_camera_outlined,
-                title: 'Prendre une photo',
-                subtitle: 'Utiliser la caméra',
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-              _StoryPickerTile(
-                icon: Icons.photo_library_outlined,
-                title: 'Choisir depuis la galerie',
-                subtitle: 'Sélectionner une photo',
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-              SizedBox(height: 12 + bottom),
-            ],
+            ),
           ),
-        ),
+          AppGap.h8,
+          _StoryPickerTile(
+            icon: Icons.photo_camera_outlined,
+            title: 'Prendre une photo',
+            subtitle: 'Utiliser la caméra',
+            onTap: () => Navigator.pop(context, ImageSource.camera),
+          ),
+          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          _StoryPickerTile(
+            icon: Icons.photo_library_outlined,
+            title: 'Choisir depuis la galerie',
+            subtitle: 'Sélectionner une photo',
+            onTap: () => Navigator.pop(context, ImageSource.gallery),
+          ),
+          SizedBox(height: 12 + bottom),
+        ],
       ),
     );
   }
@@ -301,19 +287,19 @@ class _StoryPickerTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFFFAFAFA),
+                      color: AppColors.snow,
                     ),
                   ),
                   AppGap.h2,
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF808080),
+                      color: AppColors.gray500,
                     ),
                   ),
                 ],

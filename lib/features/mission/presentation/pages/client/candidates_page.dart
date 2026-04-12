@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -259,9 +258,9 @@ class _CandidatesPageState extends State<CandidatesPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.snow,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: AppColors.snow,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -279,10 +278,10 @@ class _CandidatesPageState extends State<CandidatesPage> {
           'Candidatures: ${widget.missionTitle}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF111111),
+            color: AppColors.ink,
             letterSpacing: -0.2,
           ),
         ),
@@ -293,7 +292,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
               child: Center(
                 child: Text(
                   '$pendingCount en attente',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF9AA3AE),
@@ -331,7 +330,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
                   AppGap.w10,
                   Text(
                     'Budget propose: ',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF5D6672),
@@ -341,10 +340,10 @@ class _CandidatesPageState extends State<CandidatesPage> {
                     child: Text(
                       widget.missionBudget,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                       ),
                     ),
                   ),
@@ -506,7 +505,7 @@ class _CandidateCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: isAccepted
-              ? Border.all(color: const Color(0xFF111111), width: 1.0)
+              ? Border.all(color: AppColors.ink, width: 1.0)
               : null,
           boxShadow: const [
             BoxShadow(
@@ -566,10 +565,10 @@ class _CandidateCard extends StatelessWidget {
                                   child: Text(
                                     candidate.name,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF111111),
+                                      color: AppColors.ink,
                                     ),
                                   ),
                                 ),
@@ -588,18 +587,18 @@ class _CandidateCard extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'CHOISI',
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 1.3,
-                                        color: const Color(0xFF111111),
+                                        color: AppColors.ink,
                                       ),
                                     ),
                                   ),
                                 if (isRejected)
                                   Text(
                                     'REFUSE',
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 1.3,
@@ -611,7 +610,7 @@ class _CandidateCard extends StatelessWidget {
                             AppGap.h6,
                             Text(
                               '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
                                 color: const Color(0xFF8F98A3),
@@ -625,7 +624,7 @@ class _CandidateCard extends StatelessWidget {
                   AppGap.h18,
                   Text(
                     'Tarif propose',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF98A1AC),
@@ -635,11 +634,11 @@ class _CandidateCard extends StatelessWidget {
                   AppGap.h6,
                   Text(
                     candidate.proposedPrice,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.8,
-                      color: const Color(0xFF111111),
+                      color: AppColors.ink,
                     ),
                   ),
                   AppGap.h14,
@@ -647,7 +646,7 @@ class _CandidateCard extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: Text(
                       candidate.appliedAt,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFFB0B8C2),
@@ -757,16 +756,16 @@ class _CandidateDetailsSheet extends StatelessWidget {
                           children: [
                             Text(
                               candidate.name,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111111),
+                                color: AppColors.ink,
                               ),
                             ),
                             AppGap.h6,
                             Text(
                               '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
                                 color: const Color(0xFF97A0AB),
@@ -783,7 +782,7 @@ class _CandidateDetailsSheet extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: const Color(0xFFF0F1F3),
+                        color: AppColors.gray50,
                         width: 0.8,
                       ),
                     ),
@@ -794,10 +793,10 @@ class _CandidateDetailsSheet extends StatelessWidget {
                           label: 'Tarif propose',
                           trailing: Text(
                             candidate.proposedPrice,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w300,
-                              color: const Color(0xFF111111),
+                              color: AppColors.ink,
                               letterSpacing: -0.8,
                             ),
                           ),
@@ -812,7 +811,7 @@ class _CandidateDetailsSheet extends StatelessWidget {
                               textAlign: TextAlign.right,
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 13,
                                 height: 1.45,
                                 fontWeight: FontWeight.w400,
@@ -831,7 +830,7 @@ class _CandidateDetailsSheet extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: const Color(0xFFF0F1F3),
+                        color: AppColors.gray50,
                         width: 0.8,
                       ),
                     ),
@@ -840,10 +839,10 @@ class _CandidateDetailsSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Statistiques',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111111),
+                            color: AppColors.ink,
                           ),
                         ),
                         AppGap.h14,
@@ -878,13 +877,13 @@ class _CandidateDetailsSheet extends StatelessWidget {
                       icon: const Icon(Icons.person_outline_rounded, size: 18),
                       label: Text(
                         'Voir le profil complet',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF111111),
+                        foregroundColor: AppColors.ink,
                         side: const BorderSide(color: Color(0xFFE5E8EC)),
                         minimumSize: const Size.fromHeight(52),
                         shape: RoundedRectangleBorder(
@@ -938,13 +937,13 @@ class _CandidateDetailsSheet extends StatelessWidget {
                         onPressed: onAccept,
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: const Color(0xFF000000),
+                          backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(56),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          textStyle: GoogleFonts.inter(
+                          textStyle: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -986,14 +985,14 @@ class _ProfileInfoRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF111111)),
+          Icon(icon, size: 18, color: AppColors.ink),
           AppGap.w12,
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: AppColors.ink,
             ),
           ),
           const Spacer(),
@@ -1021,7 +1020,7 @@ class _SheetSectionDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Divider(
     height: 1,
-    color: Color(0xFFF0F1F3),
+    color: AppColors.gray50,
     indent: 16,
     endIndent: 16,
   );
@@ -1749,39 +1748,9 @@ class _AddCardSheetState extends State<_AddCardSheet> {
                       keyboardType: TextInputType.number,
                       maxLength: 3,
                       obscureText: !_cvvVisible,
-                      decoration: InputDecoration(
-                        labelText: 'CVV',
-                        counterText: '',
-                        filled: true,
+                      decoration: AppInputDecorations.formField(
+                        context,
                         fillColor: context.colors.background,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                          borderSide: BorderSide(color: context.colors.divider),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                          borderSide: BorderSide(color: context.colors.divider),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(AppRadius.button),
-                          ),
-                          borderSide: BorderSide(
-                            color: AppColors.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                          borderSide: const BorderSide(color: AppColors.urgent),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                          borderSide: const BorderSide(
-                            color: AppColors.urgent,
-                            width: 1.5,
-                          ),
-                        ),
                         prefixIcon: const Icon(
                           Icons.lock_outline_rounded,
                           size: 18,
@@ -1797,6 +1766,9 @@ class _AddCardSheetState extends State<_AddCardSheet> {
                             color: context.colors.textTertiary,
                           ),
                         ),
+                      ).copyWith(
+                        labelText: 'CVV',
+                        counterText: '',
                       ),
                       validator: (v) =>
                           (v == null || v.length < 3) ? 'Invalide' : null,
@@ -1844,33 +1816,14 @@ class _AddCardSheetState extends State<_AddCardSheet> {
       textCapitalization: textCapitalization,
       onChanged: onChanged,
       validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
+      decoration: AppInputDecorations.formField(
+        context,
         hintText: hint,
-        counterText: '',
-        filled: true,
         fillColor: context.colors.background,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: BorderSide(color: context.colors.divider),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: BorderSide(color: context.colors.divider),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: const BorderSide(color: AppColors.urgent),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: const BorderSide(color: AppColors.urgent, width: 1.5),
-        ),
         prefixIcon: Icon(icon, size: 18),
+      ).copyWith(
+        labelText: label,
+        counterText: '',
       ),
     );
   }

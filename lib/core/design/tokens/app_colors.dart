@@ -220,6 +220,17 @@ abstract class AppPalette {
   static const info = AppColorsIndeed.info;
   static const success = AppColorsIndeed.success;
   static const warning = AppColorsIndeed.warning;
+  // ── Neutres fréquents ────────────────────────────────────────────────────
+  static const ink      = Color(0xFF111111);  // noir texte principal (68×)
+  static const inkDark  = Color(0xFF101418);  // noir profond mission (54×)
+  static const snow     = Color(0xFFFAFAFA);  // blanc cassé surface (41×)
+  static const gray50   = Color(0xFFF0F1F3);  // gris très clair (13×)
+  static const gray100  = Color(0xFFEDEEF0);  // gris clair (13×)
+  static const gray500  = Color(0xFF808080);  // gris moyen (15×)
+  static const gray600  = Color(0xFF8E959D);  // gris hint (14×)
+  static const gray700  = Color(0xFF2C3137);  // gris foncé texte (13×)
+  static const stepBlue = Color(0xFF1847A8);  // bleu label étape (10×)
+
   static const amber = Color(0xFFFFB800);
   static const amberBg = Color(0xFFFFF8E1);
   static const amberDark = Color(0xFFF59E0B);
@@ -323,6 +334,15 @@ class AppColors {
   static const Color urgent = AppPalette.urgent;
   static const Color rating = AppPalette.rating;
   static const Color gold = AppPalette.gold;
+  static const Color ink      = AppPalette.ink;
+  static const Color inkDark  = AppPalette.inkDark;
+  static const Color snow     = AppPalette.snow;
+  static const Color gray50   = AppPalette.gray50;
+  static const Color gray100  = AppPalette.gray100;
+  static const Color gray500  = AppPalette.gray500;
+  static const Color gray600  = AppPalette.gray600;
+  static const Color gray700  = AppPalette.gray700;
+  static const Color stepBlue = AppPalette.stepBlue;
   static const Color amber = AppPalette.amber;
   static const Color amberBg = AppPalette.amberBg;
   static const Color amberDark = AppPalette.amberDark;

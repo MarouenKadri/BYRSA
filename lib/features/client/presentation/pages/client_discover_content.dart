@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
 import '../../../../app/app_bar/location_app_bar.dart';
@@ -274,7 +273,7 @@ class _ClientStoriesWidgetState extends State<_ClientStoriesWidget> {
                       ),
                       child: Text(
                         'Expertise',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -318,7 +317,7 @@ class _ClientStoriesWidgetState extends State<_ClientStoriesWidget> {
                             group.groupName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -403,7 +402,7 @@ class _ClientStoryAvatarFallback extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF4A4F55),
@@ -423,52 +422,37 @@ class _MissionCtaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSection(
-      color: context.colors.surface,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+    final primary = context.colors.primary;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF101A24), Color(0xFF173042)],
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [primary, context.colors.primaryDark],
               ),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x140F172A),
-                  blurRadius: 18,
-                  offset: Offset(0, 10),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(14),
             ),
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
             child: Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.10),
-                    ),
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.add_task_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 18),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,43 +460,28 @@ class _MissionCtaSection extends StatelessWidget {
                     children: [
                       Text(
                         'Créer une mission',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17,
+                        style: TextStyle(
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
-                          letterSpacing: -0.2,
+                          letterSpacing: -0.1,
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
-                        'Décris ton besoin et reçois des candidatures rapidement.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.72),
-                          height: 1.35,
+                        'Reçois des candidatures rapidement',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white.withValues(alpha: 0.75),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(19),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 20,
-                    color: Color(0xFF0F172A),
-                  ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ],
             ),
@@ -569,13 +538,13 @@ class _CategoriesRow extends StatelessWidget {
                     color: const Color(0xFFEAF3FF),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: const Color(0xFFFFFFFF),
+                      color: Colors.white,
                       width: 0.8,
                     ),
                   ),
                   child: Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.1,
@@ -600,7 +569,7 @@ class _CategoriesRow extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           label,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             letterSpacing: -0.1,
@@ -1170,7 +1139,8 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                         search: _searchController.text,
                       );
                     },
-                    decoration: InputDecoration(
+                    decoration: AppInputDecorations.formField(
+                      context,
                       hintText: 'Rechercher un service, un nom...',
                       hintStyle: context.text.bodyMedium?.copyWith(
                         color: context.colors.textTertiary,
@@ -1194,8 +1164,9 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                               },
                             )
                           : null,
-                      border: InputBorder.none,
                       contentPadding: AppInsets.h16v14,
+                      noBorder: true,
+                      fillColor: Colors.transparent,
                     ),
                   ),
                 ),

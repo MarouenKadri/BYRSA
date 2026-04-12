@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
@@ -190,7 +189,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                             splashRadius: 20,
                             icon: const Icon(
                               Icons.close_rounded,
-                              color: Color(0xFFFAFAFA),
+                              color: AppColors.snow,
                               size: 22,
                             ),
                           ),
@@ -204,7 +203,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                       width: AppStoryMetrics.composerLoaderInnerSize,
                                       height: AppStoryMetrics.composerLoaderInnerSize,
                                       child: CircularProgressIndicator(
-                                        color: Color(0xFFFAFAFA),
+                                        color: AppColors.snow,
                                         strokeWidth: 2.2,
                                       ),
                                     ),
@@ -221,7 +220,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                         Icons.send_outlined,
                                         color: _selectedCategoryId != null
                                             ? const Color(0xFF4B8DFF)
-                                            : const Color(0xFF808080),
+                                            : AppColors.gray500,
                                         size: 20,
                                       ),
                                     ),
@@ -255,7 +254,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                           color: Colors.black.withValues(alpha: 0.18),
                                           borderRadius: BorderRadius.circular(16),
                                           border: Border.all(
-                                            color: const Color(0xFFFAFAFA).withValues(alpha: 0.14),
+                                            color: AppColors.snow.withValues(alpha: 0.14),
                                           ),
                                         ),
                                         child: const Icon(
@@ -309,7 +308,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                 style: TextButton.styleFrom(
                                   foregroundColor: const Color(0xFFBFC5CB),
                                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                                  textStyle: GoogleFonts.inter(
+                                  textStyle: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -323,7 +322,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                 style: TextButton.styleFrom(
                                   foregroundColor: const Color(0xFFBFC5CB),
                                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                                  textStyle: GoogleFonts.inter(
+                                  textStyle: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -343,7 +342,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                   color: Colors.black.withValues(alpha: 0.18),
                                   borderRadius: BorderRadius.circular(999),
                                   border: Border.all(
-                                    color: const Color(0xFFFAFAFA).withValues(alpha: 0.34),
+                                    color: AppColors.snow.withValues(alpha: 0.34),
                                     width: 1,
                                   ),
                                 ),
@@ -352,22 +351,22 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                   children: [
                                     Icon(
                                       _storyCategoryIcon(selectedCat.id),
-                                      color: const Color(0xFFFAFAFA),
+                                      color: AppColors.snow,
                                       size: 16,
                                     ),
                                     AppGap.w8,
                                     Text(
                                       selectedCat.name,
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
-                                        color: const Color(0xFFFAFAFA),
+                                        color: AppColors.snow,
                                       ),
                                     ),
                                     AppGap.w6,
                                     const Icon(
                                       Icons.keyboard_arrow_down_rounded,
-                                      color: Color(0xFFFAFAFA),
+                                      color: AppColors.snow,
                                       size: 16,
                                     ),
                                   ],
@@ -383,7 +382,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                   decoration: BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
-                                        color: const Color(0xFFFAFAFA).withValues(alpha: 0.20),
+                                        color: AppColors.snow.withValues(alpha: 0.20),
                                         width: 1,
                                       ),
                                     ),
@@ -394,26 +393,29 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                     maxLines: 3,
                                     minLines: 1,
                                     maxLength: 200,
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w400,
-                                      color: const Color(0xFFFAFAFA),
+                                      color: AppColors.snow,
                                       height: 1.45,
                                     ),
-                                    decoration: InputDecoration(
+                                    decoration: AppInputDecorations.formField(
+                                      context,
                                       hintText: 'Ajouter un commentaire...',
-                                      hintStyle: GoogleFonts.inter(
+                                      hintStyle: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w400,
-                                        color: const Color(0xFF808080),
-                                      ),
-                                      border: InputBorder.none,
-                                      isDense: true,
-                                      counterStyle: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        color: const Color(0xFF808080),
+                                        color: AppColors.gray500,
                                       ),
                                       contentPadding: EdgeInsets.zero,
+                                      noBorder: true,
+                                      fillColor: Colors.transparent,
+                                    ).copyWith(
+                                      isDense: true,
+                                      counterStyle: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.gray500,
+                                      ),
                                     ),
                                   ),
                                 )
@@ -425,17 +427,17 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                     decoration: BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
-                                          color: const Color(0xFFFAFAFA).withValues(alpha: 0.16),
+                                          color: AppColors.snow.withValues(alpha: 0.16),
                                           width: 1,
                                         ),
                                       ),
                                     ),
                                     child: Text(
                                       'Ajouter un commentaire...',
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w400,
-                                        color: const Color(0xFF808080),
+                                        color: AppColors.gray500,
                                       ),
                                     ),
                                   ),
@@ -483,10 +485,10 @@ class _CategoryPickerSheet extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "Quel talent montrez-vous aujourd'hui ?",
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFAFAFA),
+                      color: AppColors.snow,
                     ),
                   ),
                 ),
@@ -548,17 +550,17 @@ class _CategoryPickerSheet extends StatelessWidget {
                                   _storyCategoryIcon(cat.id),
                                   size: 24,
                                   color: isSelected
-                                      ? const Color(0xFFFAFAFA)
+                                      ? AppColors.snow
                                       : const Color(0xFFBFC5CB),
                                 ),
                                 AppGap.h8,
                                 Text(
                                   cat.name,
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                     color: isSelected
-                                        ? const Color(0xFFFAFAFA)
+                                        ? AppColors.snow
                                         : const Color(0xFFB0B0B0),
                                   ),
                                   textAlign: TextAlign.center,

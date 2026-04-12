@@ -6,7 +6,6 @@ import '../../../../../core/design/app_primitives.dart';
 import '../../../../../features/story/story.dart';
 import '../../../../../features/freelancer/presentation/widgets/home/freelancer_stories_section.dart';
 import '../../../../../features/freelancer/presentation/widgets/home/freelancer_category_filter.dart';
-import '../../../../../features/freelancer/presentation/widgets/home/freelancer_sort_bar.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
@@ -40,8 +39,6 @@ class MissionBrowsePage extends StatefulWidget {
 class _MissionBrowsePageState extends State<MissionBrowsePage> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategoryId;
-  String _sortBy = 'recent';
-  bool _showFilters = false;
   bool _isLoading = true;
 
   @override
@@ -82,26 +79,11 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
           .toList();
     }
 
-    switch (_sortBy) {
-      case 'distance':
-        list.sort((a, b) =>
-            _parseDistance(a.address.distance)
-                .compareTo(_parseDistance(b.address.distance)));
-      case 'budget':
-        list.sort(
-            (a, b) => b.budget.averageAmount.compareTo(a.budget.averageAmount));
-      default:
-        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    }
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return list;
   }
 
-  double _parseDistance(String? d) {
-    if (d == null) return double.infinity;
-    final m = RegExp(r'[\d.]+').firstMatch(d);
-    return m != null ? double.tryParse(m.group(0)!) ?? 0 : 0;
-  }
 
   // ─── Build ─────────────────────────────────────────────────────────────────
 
@@ -135,13 +117,6 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                 onSelect: (id) => setState(() => _selectedCategoryId = id),
               ),
             ),
-            if (_showFilters)
-              SliverToBoxAdapter(
-                child: FreelancerSortBar(
-                  sortBy: _sortBy,
-                  onSortChanged: (v) => setState(() => _sortBy = v),
-                ),
-              ),
             if (!_isLoading)
               SliverToBoxAdapter(child: _buildResultsHeader(filtered)),
             if (_isLoading)
@@ -220,17 +195,6 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
           else
             Text('Explorer', style: context.text.headlineLarge),
           const Spacer(),
-          IconButton(
-            onPressed: () => setState(() => _showFilters = !_showFilters),
-            icon: Icon(
-              _showFilters
-                  ? Icons.filter_list_off_rounded
-                  : Icons.filter_list_rounded,
-              color: _showFilters
-                  ? context.colors.primary
-                  : context.colors.textSecondary,
-            ),
-          ),
         ],
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flutter_application_1/core/design/app_design_system.dart';
 import 'package:flutter_application_1/features/story/story.dart';
 
 /// Carrousel de stories affiché en haut du home freelancer.
@@ -24,22 +24,64 @@ class _FreelancerStoriesSectionState extends State<FreelancerStoriesSection> {
         .take(8)
         .toList();
 
-    if (groups.isEmpty) return const SizedBox.shrink();
-
     return SizedBox(
       height: 194,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-        itemCount: groups.length,
+        itemCount: groups.length + 1,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final group = groups[index];
+          if (index == 0) {
+            return GestureDetector(
+              onTap: () => pickAndOpenComposer(context),
+              child: Container(
+                width: 128,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  color: context.colors.surfaceAlt,
+                  border: Border.all(color: context.colors.border, width: 1),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: context.colors.primary.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.add_rounded, size: 24, color: context.colors.primary),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ma story',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Publier',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          final group = groups[index - 1];
           final story = group.stories.first;
           final isViewed = group.stories.every((s) => _viewed.contains(s.id));
 
           return GestureDetector(
-            onTap: () => _openViewer(context, groups, index),
+            onTap: () => _openViewer(context, groups, index - 1),
             child: Container(
               width: 128,
               decoration: BoxDecoration(
@@ -87,32 +129,6 @@ class _FreelancerStoriesSectionState extends State<FreelancerStoriesSection> {
                     ),
                   ),
                   Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.34),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        'Expertise',
-                        style: GoogleFonts.inter(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
                     left: 12,
                     right: 12,
                     bottom: 12,
@@ -146,7 +162,7 @@ class _FreelancerStoriesSectionState extends State<FreelancerStoriesSection> {
                             group.groupName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -231,7 +247,7 @@ class _StoryAvatarFallback extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF4A4F55),

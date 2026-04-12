@@ -65,7 +65,7 @@ class MissionBrowseCard extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.w400,
                       height: 1.15,
-                      color: const Color(0xFF101418),
+                      color: AppColors.inkDark,
                     ),
                   ),
                   AppGap.h10,

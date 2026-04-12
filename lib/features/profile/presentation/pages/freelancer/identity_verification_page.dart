@@ -3,20 +3,10 @@ import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 
 /// Statut de vérification
-enum VerificationStatus {
-  notStarted,
-  inProgress,
-  pending,
-  verified,
-  rejected,
-}
+enum VerificationStatus { notStarted, inProgress, pending, verified, rejected }
 
 /// Type de document d'identité
-enum DocumentType {
-  idCard,
-  passport,
-  drivingLicense,
-}
+enum DocumentType { idCard, passport, drivingLicense }
 
 extension DocumentTypeExtension on DocumentType {
   String get label {
@@ -47,7 +37,8 @@ class IdentityVerificationPage extends StatefulWidget {
   const IdentityVerificationPage({super.key});
 
   @override
-  State<IdentityVerificationPage> createState() => _IdentityVerificationPageState();
+  State<IdentityVerificationPage> createState() =>
+      _IdentityVerificationPageState();
 }
 
 class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
@@ -96,7 +87,10 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
             padding: AppInsets.a32,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primary.withValues(alpha:0.8)],
+                colors: [
+                  AppColors.primary,
+                  AppColors.primary.withValues(alpha: 0.8),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -107,7 +101,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                 Container(
                   padding: AppInsets.a20,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha:0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -119,12 +113,17 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                 AppGap.h20,
                 Text(
                   'Vérifiez votre identité',
-                  style: context.text.displaySmall?.copyWith(color: Colors.white),
+                  style: context.text.displaySmall?.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
                 AppGap.h8,
                 Text(
                   'Augmentez la confiance des clients et accédez à toutes les fonctionnalités',
-                  style: context.text.bodyMedium?.copyWith(color: Colors.white.withValues(alpha:0.9), height: 1.4),
+                  style: context.text.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    height: 1.4,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -170,7 +169,11 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.lock_rounded, size: 18, color: context.colors.textSecondary),
+                Icon(
+                  Icons.lock_rounded,
+                  size: 18,
+                  color: context.colors.textSecondary,
+                ),
                 AppGap.w10,
                 Expanded(
                   child: Text(
@@ -199,7 +202,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
         children: [
           Text(
             'Pourquoi se faire vérifier ?',
-            style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           AppGap.h16,
           _buildBenefitItem(
@@ -231,7 +236,12 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
     );
   }
 
-  Widget _buildBenefitItem(IconData icon, Color color, String title, String subtitle) {
+  Widget _buildBenefitItem(
+    IconData icon,
+    Color color,
+    String title,
+    String subtitle,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
@@ -239,7 +249,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a10,
             decoration: BoxDecoration(
-              color: color.withValues(alpha:0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.badge),
             ),
             child: Icon(icon, color: color, size: 22),
@@ -249,14 +259,8 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: context.text.labelLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: context.text.labelMedium,
-                ),
+                Text(title, style: context.text.labelLarge),
+                Text(subtitle, style: context.text.labelMedium),
               ],
             ),
           ),
@@ -278,7 +282,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
         children: [
           Text(
             'Ce dont vous avez besoin',
-            style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           AppGap.h16,
           _buildRequirementItem(
@@ -309,7 +315,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a10,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha:0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.badge),
             ),
             child: Icon(icon, color: AppColors.primary, size: 22),
@@ -319,14 +325,8 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: context.text.labelLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: context.text.labelMedium,
-                ),
+                Text(title, style: context.text.labelLarge),
+                Text(subtitle, style: context.text.labelMedium),
               ],
             ),
           ),
@@ -339,9 +339,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
     return Container(
       padding: AppInsets.a16,
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha:0.05),
+        color: AppColors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppRadius.input),
-        border: Border.all(color: AppColors.info.withValues(alpha:0.2)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,12 +354,18 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
               children: [
                 Text(
                   'Processus rapide',
-                  style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.secondary),
+                  style: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.secondary,
+                  ),
                 ),
                 AppGap.h4,
                 Text(
                   'La vérification prend environ 2-3 minutes. Votre demande sera traitée sous 24-48 heures.',
-                  style: context.text.bodySmall?.copyWith(color: AppColors.info, height: 1.4),
+                  style: context.text.bodySmall?.copyWith(
+                    color: AppColors.info,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -397,7 +403,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a32,
             decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha:0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -409,16 +415,16 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
 
           AppGap.h32,
 
-          Text(
-            'Vérification en cours',
-            style: context.text.displaySmall,
-          ),
+          Text('Vérification en cours', style: context.text.displaySmall),
 
           AppGap.h12,
 
           Text(
             'Nous examinons vos documents. Vous recevrez une notification dès que la vérification sera terminée.',
-            style: context.text.bodyLarge?.copyWith(color: context.colors.textSecondary, height: 1.5),
+            style: context.text.bodyLarge?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -466,9 +472,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a16,
             decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha:0.05),
+              color: AppColors.info.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(AppRadius.input),
-              border: Border.all(color: AppColors.info.withValues(alpha:0.2)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -477,7 +483,10 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                 Expanded(
                   child: Text(
                     'Vous recevrez une notification push et un email dès que votre vérification sera terminée.',
-                    style: context.text.bodySmall?.copyWith(color: AppColors.info, height: 1.4),
+                    style: context.text.bodySmall?.copyWith(
+                      color: AppColors.info,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -499,12 +508,14 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           AppButton(
             label: '(Test) Simuler vérification réussie',
             variant: ButtonVariant.ghost,
-            onPressed: () => setState(() => _status = VerificationStatus.verified),
+            onPressed: () =>
+                setState(() => _status = VerificationStatus.verified),
           ),
           AppButton(
             label: '(Test) Simuler vérification rejetée',
             variant: ButtonVariant.ghost,
-            onPressed: () => setState(() => _status = VerificationStatus.rejected),
+            onPressed: () =>
+                setState(() => _status = VerificationStatus.rejected),
           ),
         ],
       ),
@@ -524,7 +535,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
         Container(
           padding: AppInsets.a8,
           decoration: BoxDecoration(
-            color: color.withValues(alpha:0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -538,12 +549,16 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                 title,
                 style: context.text.bodyLarge?.copyWith(
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? context.colors.textPrimary : context.colors.textSecondary,
+                  color: isActive
+                      ? context.colors.textPrimary
+                      : context.colors.textSecondary,
                 ),
               ),
               Text(
                 subtitle,
-                style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
+                style: context.text.bodySmall?.copyWith(
+                  color: context.colors.textTertiary,
+                ),
               ),
             ],
           ),
@@ -558,7 +573,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
       child: Container(
         width: 2,
         height: 30,
-        color: isActive ? AppColors.warning.withValues(alpha:0.5) : context.colors.border,
+        color: isActive
+            ? AppColors.warning.withValues(alpha: 0.5)
+            : context.colors.border,
       ),
     );
   }
@@ -577,7 +594,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a32,
             decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha:0.1),
+              color: AppColors.success.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -589,16 +606,16 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
 
           AppGap.h32,
 
-          Text(
-            'Identité vérifiée !',
-            style: context.text.displaySmall,
-          ),
+          Text('Identité vérifiée !', style: context.text.displaySmall),
 
           AppGap.h12,
 
           Text(
             'Félicitations ! Votre identité a été vérifiée avec succès. Vous bénéficiez maintenant de tous les avantages d\'un profil vérifié.',
-            style: context.text.bodyLarge?.copyWith(color: context.colors.textSecondary, height: 1.5),
+            style: context.text.bodyLarge?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -651,9 +668,11 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a20,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha:0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(AppRadius.card),
-              border: Border.all(color: AppColors.primary.withValues(alpha:0.2)),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,13 +683,18 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                     AppGap.w10,
                     Text(
                       'Avantages débloqués',
-                      style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppColors.primary),
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
                 AppGap.h16,
                 _buildUnlockedFeature('Badge vérifié visible sur votre profil'),
-                _buildUnlockedFeature('Priorité dans les résultats de recherche'),
+                _buildUnlockedFeature(
+                  'Priorité dans les résultats de recherche',
+                ),
                 _buildUnlockedFeature('Retrait des gains sans délai'),
                 _buildUnlockedFeature('Accès aux missions premium'),
               ],
@@ -689,28 +713,25 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
     );
   }
 
-  Widget _buildVerificationDetail(String label, String value, IconData icon, Color color) {
+  Widget _buildVerificationDetail(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(
           padding: AppInsets.a8,
           decoration: BoxDecoration(
-            color: color.withValues(alpha:0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.small),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
         AppGap.w14,
-        Expanded(
-          child: Text(
-            label,
-            style: context.text.bodyMedium,
-          ),
-        ),
-        Text(
-          value,
-          style: context.text.labelLarge,
-        ),
+        Expanded(child: Text(label, style: context.text.bodyMedium)),
+        Text(value, style: context.text.labelLarge),
       ],
     );
   }
@@ -725,7 +746,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Expanded(
             child: Text(
               text,
-              style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -747,7 +770,7 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a32,
             decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha:0.1),
+              color: AppColors.error.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -759,16 +782,16 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
 
           AppGap.h32,
 
-          Text(
-            'Vérification refusée',
-            style: context.text.displaySmall,
-          ),
+          Text('Vérification refusée', style: context.text.displaySmall),
 
           AppGap.h12,
 
           Text(
             'Malheureusement, nous n\'avons pas pu vérifier votre identité. Veuillez consulter les raisons ci-dessous et réessayer.',
-            style: context.text.bodyLarge?.copyWith(color: context.colors.textSecondary, height: 1.5),
+            style: context.text.bodyLarge?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -791,7 +814,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                     AppGap.w10,
                     Text(
                       'Raisons du refus',
-                      style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -814,9 +839,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Container(
             padding: AppInsets.a20,
             decoration: BoxDecoration(
-              color: AppColors.gold.withValues(alpha:0.1),
+              color: AppColors.gold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.card),
-              border: Border.all(color: AppColors.gold.withValues(alpha:0.3)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,13 +852,18 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
                     AppGap.w10,
                     Text(
                       'Conseils pour réessayer',
-                      style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppColors.secondary),
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary,
+                      ),
                     ),
                   ],
                 ),
                 AppGap.h12,
                 _buildTipItem('Prenez les photos dans un endroit bien éclairé'),
-                _buildTipItem('Assurez-vous que le document est entièrement visible'),
+                _buildTipItem(
+                  'Assurez-vous que le document est entièrement visible',
+                ),
                 _buildTipItem('Évitez les reflets et les ombres'),
                 _buildTipItem('Regardez directement la caméra pour le selfie'),
               ],
@@ -877,14 +907,8 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: context.text.labelLarge,
-                ),
-                Text(
-                  description,
-                  style: context.text.bodySmall,
-                ),
+                Text(title, style: context.text.labelLarge),
+                Text(description, style: context.text.bodySmall),
               ],
             ),
           ),
@@ -904,7 +928,9 @@ class _IdentityVerificationPageState extends State<IdentityVerificationPage> {
           Expanded(
             child: Text(
               text,
-              style: context.text.bodySmall?.copyWith(color: context.colors.textPrimary),
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.textPrimary,
+              ),
             ),
           ),
         ],
@@ -988,7 +1014,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             color: context.colors.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha:0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -1049,7 +1075,8 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
       case 0:
         return _selectedDocType != null;
       case 1:
-        return _frontUploaded && (_selectedDocType == DocumentType.passport || _backUploaded);
+        return _frontUploaded &&
+            (_selectedDocType == DocumentType.passport || _backUploaded);
       case 2:
         return _selfieUploaded;
       case 3:
@@ -1087,10 +1114,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Choisissez votre document',
-          style: context.text.headlineMedium,
-        ),
+        Text('Choisissez votre document', style: context.text.headlineMedium),
         AppGap.h8,
         Text(
           'Sélectionnez le type de pièce d\'identité que vous souhaitez utiliser.',
@@ -1112,7 +1136,11 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline_rounded, size: 20, color: context.colors.textSecondary),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 20,
+                color: context.colors.textSecondary,
+              ),
               AppGap.w10,
               Expanded(
                 child: Text(
@@ -1135,7 +1163,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: AppInsets.a16,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha:0.05) : Colors.white,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
             color: isSelected ? AppColors.primary : context.colors.border,
@@ -1148,13 +1178,15 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
               padding: AppInsets.a12,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary.withValues(alpha:0.1)
+                    ? AppColors.primary.withValues(alpha: 0.1)
                     : context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppRadius.input),
               ),
               child: Icon(
                 type.icon,
-                color: isSelected ? AppColors.primary : context.colors.textSecondary,
+                color: isSelected
+                    ? AppColors.primary
+                    : context.colors.textSecondary,
                 size: 28,
               ),
             ),
@@ -1162,7 +1194,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             Expanded(
               child: Text(
                 type.label,
-                style: context.text.titleMedium?.copyWith(color: isSelected ? AppColors.primary : null),
+                style: context.text.titleMedium?.copyWith(
+                  color: isSelected ? AppColors.primary : null,
+                ),
               ),
             ),
             Container(
@@ -1172,7 +1206,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 shape: BoxShape.circle,
                 color: isSelected ? AppColors.primary : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : context.colors.textHint,
+                  color: isSelected
+                      ? AppColors.primary
+                      : context.colors.textHint,
                   width: 2,
                 ),
               ),
@@ -1241,7 +1277,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
         Container(
           padding: AppInsets.a16,
           decoration: BoxDecoration(
-            color: AppColors.gold.withValues(alpha:0.1),
+            color: AppColors.gold.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.input),
           ),
           child: Column(
@@ -1249,11 +1285,18 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.lightbulb_rounded, color: AppColors.gold, size: 20),
+                  Icon(
+                    Icons.lightbulb_rounded,
+                    color: AppColors.gold,
+                    size: 20,
+                  ),
                   AppGap.w8,
                   Text(
                     'Conseils pour une bonne photo',
-                    style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.secondary),
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.secondary,
+                    ),
                   ),
                 ],
               ),
@@ -1282,7 +1325,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
       child: Container(
         padding: AppInsets.a20,
         decoration: BoxDecoration(
-          color: isUploaded ? AppColors.success.withValues(alpha:0.05) : Colors.white,
+          color: isUploaded
+              ? AppColors.success.withValues(alpha: 0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
             color: isUploaded ? AppColors.success : context.colors.border,
@@ -1295,13 +1340,15 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
               padding: AppInsets.a16,
               decoration: BoxDecoration(
                 color: isUploaded
-                    ? AppColors.success.withValues(alpha:0.1)
+                    ? AppColors.success.withValues(alpha: 0.1)
                     : context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppRadius.input),
               ),
               child: Icon(
                 isUploaded ? Icons.check_rounded : icon,
-                color: isUploaded ? AppColors.success : context.colors.textTertiary,
+                color: isUploaded
+                    ? AppColors.success
+                    : context.colors.textTertiary,
                 size: 32,
               ),
             ),
@@ -1312,11 +1359,15 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 children: [
                   Text(
                     title,
-                    style: context.text.titleMedium?.copyWith(color: isUploaded ? AppColors.success : null),
+                    style: context.text.titleMedium?.copyWith(
+                      color: isUploaded ? AppColors.success : null,
+                    ),
                   ),
                   Text(
                     isUploaded ? 'Photo ajoutée ✓' : subtitle,
-                    style: context.text.bodySmall?.copyWith(color: isUploaded ? AppColors.success : null),
+                    style: context.text.bodySmall?.copyWith(
+                      color: isUploaded ? AppColors.success : null,
+                    ),
                   ),
                 ],
               ),
@@ -1325,7 +1376,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
               Container(
                 padding: AppInsets.a10,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha:0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.badge),
                 ),
                 child: Icon(Icons.camera_alt_rounded, color: AppColors.primary),
@@ -1333,7 +1384,10 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             else
               IconButton(
                 onPressed: onReset,
-                icon: Icon(Icons.refresh_rounded, color: context.colors.textTertiary),
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: context.colors.textTertiary,
+                ),
                 tooltip: 'Reprendre',
               ),
           ],
@@ -1351,7 +1405,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
         return Container(
           decoration: BoxDecoration(
             color: context.colors.textPrimary,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1360,7 +1416,8 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
               Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 4),
                 child: Container(
-                  width: 40, height: 4,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: context.colors.border,
                     borderRadius: BorderRadius.circular(AppRadius.full),
@@ -1368,7 +1425,6 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 ),
               ),
               AppGap.h16,
-
 
               // Scanner option
               InkWell(
@@ -1381,18 +1437,34 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   child: Row(
                     children: [
                       Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt_rounded, size: 20, color: AppColors.primary),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: context.colors.surfaceAlt,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                       ),
                       AppGap.w14,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Scanner', style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Scanner',
+                              style: context.text.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             AppGap.h2,
-                            Text('Prendre une photo avec la caméra', style: context.text.bodySmall),
+                            Text(
+                              'Prendre une photo avec la caméra',
+                              style: context.text.bodySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -1400,7 +1472,13 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   ),
                 ),
               ),
-              Divider(height: 1, thickness: 1, color: context.colors.divider, indent: 16, endIndent: 16),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: context.colors.divider,
+                indent: 16,
+                endIndent: 16,
+              ),
 
               // Gallery option
               InkWell(
@@ -1413,18 +1491,34 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   child: Row(
                     children: [
                       Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.photo_library_rounded, size: 20, color: AppColors.primary),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: context.colors.surfaceAlt,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.photo_library_rounded,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                       ),
                       AppGap.w14,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Galerie', style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Galerie',
+                              style: context.text.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             AppGap.h2,
-                            Text('Choisir depuis vos photos', style: context.text.bodySmall),
+                            Text(
+                              'Choisir depuis vos photos',
+                              style: context.text.bodySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -1432,7 +1526,13 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   ),
                 ),
               ),
-              Divider(height: 1, thickness: 1, color: context.colors.divider, indent: 16, endIndent: 16),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: context.colors.divider,
+                indent: 16,
+                endIndent: 16,
+              ),
 
               // Files option
               InkWell(
@@ -1445,18 +1545,34 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   child: Row(
                     children: [
                       Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.folder_rounded, size: 20, color: AppColors.primary),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: context.colors.surfaceAlt,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.folder_rounded,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                       ),
                       AppGap.w14,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Fichiers', style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Fichiers',
+                              style: context.text.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             AppGap.h2,
-                            Text('Parcourir vos documents', style: context.text.bodySmall),
+                            Text(
+                              'Parcourir vos documents',
+                              style: context.text.bodySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -1470,9 +1586,12 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 padding: EdgeInsets.only(top: 12, bottom: 16 + bottomPad),
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text(
+                  child: Text(
                     'Fermer',
-                    style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: AppColors.gray400),
+                    style: context.text.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.gray400,
+                    ),
                   ),
                 ),
               ),
@@ -1503,7 +1622,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
               Container(
                 padding: AppInsets.a12,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha:0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.input),
                 ),
                 child: Icon(icon, color: color, size: 26),
@@ -1513,18 +1632,16 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: context.text.titleMedium,
-                    ),
-                    Text(
-                      subtitle,
-                      style: context.text.bodySmall,
-                    ),
+                    Text(title, style: context.text.titleMedium),
+                    Text(subtitle, style: context.text.bodySmall),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textHint),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: context.colors.textHint,
+              ),
             ],
           ),
         ),
@@ -1559,13 +1676,15 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                       AppGap.h16,
                       Text(
                         'Aperçu caméra',
-                        style: context.text.titleMedium?.copyWith(color: context.colors.textTertiary),
+                        style: context.text.titleMedium?.copyWith(
+                          color: context.colors.textTertiary,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              
+
               // Cadre de scan
               Center(
                 child: Container(
@@ -1602,7 +1721,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   ),
                 ),
               ),
-              
+
               // Instructions en haut
               Positioned(
                 top: 60,
@@ -1611,27 +1730,34 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                 child: Container(
                   padding: AppInsets.h16v12,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha:0.7),
+                    color: Colors.black.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(AppRadius.badge),
                   ),
                   child: Text(
                     'Placez votre document dans le cadre',
-                    style: context.text.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
+                    style: context.text.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              
+
               // Bouton fermer
               Positioned(
                 top: 40,
                 right: 16,
                 child: IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
-              
+
               // Boutons en bas
               Positioned(
                 bottom: 40,
@@ -1645,7 +1771,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                       icon: Icons.flash_off_rounded,
                       onTap: () {},
                     ),
-                    
+
                     // Capture
                     GestureDetector(
                       onTap: () {
@@ -1668,7 +1794,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                         ),
                       ),
                     ),
-                    
+
                     // Retourner caméra
                     _buildCameraButton(
                       icon: Icons.flip_camera_ios_rounded,
@@ -1690,10 +1816,18 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
       height: 24,
       decoration: BoxDecoration(
         border: Border(
-          top: isTop ? BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
-          bottom: !isTop ? BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
-          left: isLeft ? BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
-          right: !isLeft ? BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
+          top: isTop
+              ? BorderSide(color: AppColors.primary, width: 4)
+              : BorderSide.none,
+          bottom: !isTop
+              ? BorderSide(color: AppColors.primary, width: 4)
+              : BorderSide.none,
+          left: isLeft
+              ? BorderSide(color: AppColors.primary, width: 4)
+              : BorderSide.none,
+          right: !isLeft
+              ? BorderSide(color: AppColors.primary, width: 4)
+              : BorderSide.none,
         ),
       ),
     );
@@ -1708,7 +1842,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
       child: Container(
         padding: AppInsets.a12,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha:0.5),
+          color: Colors.black.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 26),
@@ -1725,7 +1859,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
           AppGap.w8,
           Text(
             text,
-            style: context.text.bodySmall?.copyWith(color: context.colors.textPrimary),
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -1737,10 +1873,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Prenez un selfie',
-          style: context.text.headlineMedium,
-        ),
+        Text('Prenez un selfie', style: context.text.headlineMedium),
         AppGap.h8,
         Text(
           'Nous avons besoin d\'une photo de votre visage pour confirmer votre identité.',
@@ -1758,11 +1891,13 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             padding: const EdgeInsets.symmetric(vertical: 48),
             decoration: BoxDecoration(
               color: _selfieUploaded
-                  ? AppColors.success.withValues(alpha:0.05)
+                  ? AppColors.success.withValues(alpha: 0.05)
                   : context.colors.surfaceAlt,
               borderRadius: BorderRadius.circular(AppRadius.cardLg),
               border: Border.all(
-                color: _selfieUploaded ? AppColors.success : context.colors.border,
+                color: _selfieUploaded
+                    ? AppColors.success
+                    : context.colors.border,
                 width: _selfieUploaded ? 2 : 1,
               ),
             ),
@@ -1772,21 +1907,27 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   padding: AppInsets.a24,
                   decoration: BoxDecoration(
                     color: _selfieUploaded
-                        ? AppColors.success.withValues(alpha:0.1)
+                        ? AppColors.success.withValues(alpha: 0.1)
                         : Colors.white,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     _selfieUploaded ? Icons.check_rounded : Icons.face_rounded,
                     size: 64,
-                    color: _selfieUploaded ? AppColors.success : context.colors.textHint,
+                    color: _selfieUploaded
+                        ? AppColors.success
+                        : context.colors.textHint,
                   ),
                 ),
                 AppGap.h16,
                 Text(
-                  _selfieUploaded ? 'Selfie ajouté !' : 'Appuyez pour prendre un selfie',
+                  _selfieUploaded
+                      ? 'Selfie ajouté !'
+                      : 'Appuyez pour prendre un selfie',
                   style: context.text.titleMedium?.copyWith(
-                    color: _selfieUploaded ? AppColors.success : context.colors.textSecondary,
+                    color: _selfieUploaded
+                        ? AppColors.success
+                        : context.colors.textSecondary,
                   ),
                 ),
                 if (_selfieUploaded) ...[
@@ -1809,7 +1950,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
         Container(
           padding: AppInsets.a16,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha:0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(AppRadius.input),
           ),
           child: Column(
@@ -1844,7 +1985,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
           Container(
             padding: AppInsets.a8,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha:0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.small),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
@@ -1854,14 +1995,8 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: context.text.labelLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: context.text.labelMedium,
-                ),
+                Text(title, style: context.text.labelLarge),
+                Text(subtitle, style: context.text.labelMedium),
               ],
             ),
           ),
@@ -1875,10 +2010,7 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Vérifiez vos informations',
-          style: context.text.headlineMedium,
-        ),
+        Text('Vérifiez vos informations', style: context.text.headlineMedium),
         AppGap.h8,
         Text(
           'Assurez-vous que tout est correct avant de soumettre.',
@@ -1937,12 +2069,16 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
           decoration: BoxDecoration(
             color: context.colors.background,
             borderRadius: BorderRadius.circular(AppRadius.input),
-            border: Border.all(color: context.colors.divider!),
+            border: Border.all(color: context.colors.divider),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.privacy_tip_rounded, color: context.colors.textSecondary, size: 20),
+              Icon(
+                Icons.privacy_tip_rounded,
+                color: context.colors.textSecondary,
+                size: 20,
+              ),
               AppGap.w12,
               Expanded(
                 child: Text(
@@ -1960,9 +2096,9 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
         Container(
           padding: AppInsets.a16,
           decoration: BoxDecoration(
-            color: AppColors.info.withValues(alpha:0.05),
+            color: AppColors.info.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(AppRadius.input),
-            border: Border.all(color: AppColors.info.withValues(alpha:0.2)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -1974,11 +2110,16 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
                   children: [
                     Text(
                       'Délai de traitement',
-                      style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.secondary),
+                      style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.secondary,
+                      ),
                     ),
                     Text(
                       'Votre demande sera traitée sous 24 à 48 heures.',
-                      style: context.text.bodySmall?.copyWith(color: AppColors.info),
+                      style: context.text.bodySmall?.copyWith(
+                        color: AppColors.info,
+                      ),
                     ),
                   ],
                 ),
@@ -1990,32 +2131,33 @@ class _VerificationStepsViewState extends State<_VerificationStepsView> {
     );
   }
 
-  Widget _buildConfirmationItem(String label, String value, IconData icon, Color color) {
+  Widget _buildConfirmationItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(
           padding: AppInsets.a10,
           decoration: BoxDecoration(
-            color: color.withValues(alpha:0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.badge),
           ),
           child: Icon(icon, color: color, size: 22),
         ),
         AppGap.w14,
-        Expanded(
-          child: Text(
-            label,
-            style: context.text.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(label, style: context.text.bodyMedium)),
         Row(
           children: [
-            Text(
-              value,
-              style: context.text.labelLarge,
-            ),
+            Text(value, style: context.text.labelLarge),
             AppGap.w6,
-            Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18),
+            Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.success,
+              size: 18,
+            ),
           ],
         ),
       ],

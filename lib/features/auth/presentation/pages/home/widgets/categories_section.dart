@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CategoriesRow extends StatelessWidget {
   const CategoriesRow({super.key});
@@ -36,7 +35,7 @@ class CategoriesRow extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       label,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         letterSpacing: -0.1,

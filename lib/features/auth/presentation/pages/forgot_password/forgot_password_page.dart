@@ -72,8 +72,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     autofocus: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Email requis';
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) return 'Email invalide';
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return 'Email invalide';
+                      }
                       return null;
                     },
                   ),
@@ -95,7 +98,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               bottom: kbH,
               left: 0,
               right: 0,
-              child: AppKeyboardActionBar(enabled: true, onTap: _handleSendCode),
+              child: AppKeyboardActionBar(
+                enabled: true,
+                onTap: _handleSendCode,
+              ),
             ),
         ],
       ),
@@ -107,7 +113,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     setState(() => _isLoading = true);
     final email = _emailController.text.trim();
-    final error = await context.read<AuthProvider>().sendPasswordResetOtp(email);
+    final error = await context.read<AuthProvider>().sendPasswordResetOtp(
+      email,
+    );
     if (!mounted) return;
     setState(() => _isLoading = false);
 
@@ -117,9 +125,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => ResetOtpPage(identifier: email),
-      ),
+      MaterialPageRoute(builder: (_) => ResetOtpPage(identifier: email)),
     );
   }
 }

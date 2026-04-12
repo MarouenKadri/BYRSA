@@ -150,7 +150,7 @@ class _ClientProfileViewState extends State<ClientProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.snow,
       appBar: AppPageAppBar(
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
         actions: [
@@ -247,17 +247,17 @@ class _ClientProfileViewState extends State<ClientProfileView> {
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         height: 1.06,
-                        color: const Color(0xFF101418),
+                        color: AppColors.inkDark,
                       ),
                     ),
                     AppGap.h10,
                     Text(
                       _levelLabel,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 3.2,
-                        color: const Color(0xFF101418),
+                        color: AppColors.inkDark,
                       ),
                     ),
                     AppGap.h16,
@@ -283,15 +283,15 @@ class _ClientProfileViewState extends State<ClientProfileView> {
                           AppGap.w6,
                           Text(
                             '${widget.rating.toStringAsFixed(1)}/5',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF101418),
+                              color: AppColors.inkDark,
                             ),
                           ),
                           Text(
                             '  ${widget.reviewsCount} avis',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: const Color(0xFF7A8088),
@@ -317,7 +317,7 @@ class _ClientProfileViewState extends State<ClientProfileView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFFF0F1F3)),
+              border: Border.all(color: AppColors.gray50),
               boxShadow: const [
                 BoxShadow(
                   color: Color.fromRGBO(16, 20, 24, 0.04),
@@ -350,7 +350,7 @@ class _ClientProfileViewState extends State<ClientProfileView> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFF0F1F3)),
+          border: Border.all(color: AppColors.gray50),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +359,7 @@ class _ClientProfileViewState extends State<ClientProfileView> {
             AppGap.h12,
             Text(
               "Client actif sur la plateforme depuis ${widget.memberSince.toLowerCase()}, avec ${widget.missionsCount} missions publiées.",
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
                 height: 1.65,
@@ -389,17 +389,17 @@ class _ClientProfileViewState extends State<ClientProfileView> {
             const _SectionTitle(title: 'Certification'),
             AppGap.h14,
             const _VerificationItem(label: "Pièce d'identité vérifiée"),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             const _VerificationItem(label: 'Adresse e-mail vérifiée'),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             const _VerificationItem(label: 'Numéro de téléphone vérifié'),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             const _VerificationItem(label: 'Moyen de paiement vérifié'),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             _VerificationItem(label: 'Membre depuis ${widget.memberSince}'),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             _VerificationItem(label: '${widget.missionsCount} missions demandées'),
-            const Divider(height: 24, color: Color(0xFFEDEEF0)),
+            const Divider(height: 24, color: AppColors.gray100),
             _VerificationItem(label: widget.cancellationLevel.label),
           ],
         ),
@@ -421,19 +421,19 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
             ),
           ),
           AppGap.h4,
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF8E959D),
+              color: AppColors.gray600,
             ),
           ),
         ],
@@ -450,7 +450,7 @@ class _StatDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 34,
-      color: const Color(0xFFEDEEF0),
+      color: AppColors.gray100,
     );
   }
 }
@@ -464,7 +464,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.8,
@@ -486,13 +486,13 @@ class _VerificationItem extends StatelessWidget {
         const Icon(
           Icons.check_rounded,
           size: 18,
-          color: Color(0xFF101418),
+          color: AppColors.inkDark,
         ),
         AppGap.w12,
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF353B43),

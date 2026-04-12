@@ -2,11 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
 import '../tokens/app_radius.dart';
 import '../theme/app_theme.dart';
-import 'app_layout.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sheet components
@@ -75,10 +73,7 @@ class AppSheetSurface extends StatelessWidget {
 class AppSheetHeader extends StatelessWidget {
   final String title;
 
-  const AppSheetHeader({
-    super.key,
-    required this.title,
-  });
+  const AppSheetHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +89,36 @@ class AppSheetHeader extends StatelessWidget {
   }
 }
 
+/// Bottom sheet dark glassmorphism — design partagé par tous les pickers sombres.
+/// Pour changer le design, modifier uniquement cette classe.
+class AppDarkSheet extends StatelessWidget {
+  final Widget child;
+
+  const AppDarkSheet({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 class AppBarSheetSurface extends StatelessWidget {
   final Widget child;
 
-  const AppBarSheetSurface({
-    super.key,
-    required this.child,
-  });
+  const AppBarSheetSurface({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

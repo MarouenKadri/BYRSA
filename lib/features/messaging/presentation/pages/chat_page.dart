@@ -6,8 +6,8 @@ import '../../data/models/message.dart';
 import '../../messaging_provider.dart';
 
 // ─── Couleurs locales luxury monochrome ──────────────────────────────────────
-const _kBg          = Color(0xFFFAFAFA);
-const _kWhite       = Color(0xFFFFFFFF);
+const _kBg          = AppColors.snow;
+const _kWhite       = Colors.white;
 const _kInk         = Color(0xFF0D0D0D);
 const _kCharcoal    = Color(0xFF2C2C2C);
 const _kGrayMid     = Color(0xFF8A8A8A);
@@ -491,15 +491,17 @@ class _ChatPageState extends State<ChatPage> {
                         color: _kInk,
                         height: 1.45,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: AppInputDecorations.formField(
+                        context,
                         hintText: 'Votre message...',
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: _kGrayXLight,
                         ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 11),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
+                        noBorder: true,
+                        fillColor: Colors.transparent,
                       ),
                       onChanged: (value) {
                         setState(() {});

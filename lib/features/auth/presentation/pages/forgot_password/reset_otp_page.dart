@@ -11,10 +11,7 @@ import 'reset_password_page.dart';
 class ResetOtpPage extends StatefulWidget {
   final String identifier;
 
-  const ResetOtpPage({
-    super.key,
-    required this.identifier,
-  });
+  const ResetOtpPage({super.key, required this.identifier});
 
   @override
   State<ResetOtpPage> createState() => _ResetOtpPageState();
@@ -22,8 +19,10 @@ class ResetOtpPage extends StatefulWidget {
 
 class _ResetOtpPageState extends State<ResetOtpPage>
     with OtpTimerMixin<ResetOtpPage> {
-  final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   bool _isLoading = false;
@@ -39,8 +38,12 @@ class _ResetOtpPageState extends State<ResetOtpPage>
 
   @override
   void dispose() {
-    for (var c in _controllers) c.dispose();
-    for (var f in _focusNodes) f.dispose();
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -121,7 +124,9 @@ class _ResetOtpPageState extends State<ResetOtpPage>
   Future<void> _handleResend() async {
     await context.read<AuthProvider>().sendPasswordResetOtp(widget.identifier);
     if (!mounted) return;
-    for (var c in _controllers) c.clear();
+    for (var c in _controllers) {
+      c.clear();
+    }
     startResendTimer();
     _focusNodes[0].requestFocus();
   }
@@ -131,14 +136,16 @@ class _ResetOtpPageState extends State<ResetOtpPage>
 
     setState(() => _isLoading = true);
     final error = await context.read<AuthProvider>().verifyPasswordResetOtp(
-          widget.identifier,
-          _otpCode,
-        );
+      widget.identifier,
+      _otpCode,
+    );
     if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (error != null) {
-      for (var c in _controllers) c.clear();
+      for (var c in _controllers) {
+        c.clear();
+      }
       _focusNodes[0].requestFocus();
       return;
     }

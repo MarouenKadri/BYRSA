@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../../core/design/app_design_system.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
 import '../../../../../app/widgets/cigale_tab_bar.dart';
 import '../../../data/models/mission.dart';
@@ -20,7 +21,7 @@ class FreelancerEngagementsContent extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: AppColors.snow,
         appBar: AppSectionBar(
           pageTitle: 'Mes missions',
           onGoToAccount: onGoToAccount,

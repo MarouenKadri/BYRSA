@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -131,7 +130,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
       children: [
         Text(
           mission.categoryName.toUpperCase(),
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 2.1,
@@ -250,7 +249,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                           child: const Icon(
                             Icons.search_rounded,
                             size: 18,
-                            color: Color(0xFF111111),
+                            color: AppColors.ink,
                           ),
                         ),
                       ),
@@ -277,11 +276,11 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                     mission.address.shortAddress.isNotEmpty
                         ? mission.address.shortAddress
                         : mission.address.fullAddress,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 16,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111111),
+                      color: AppColors.ink,
                     ),
                   ),
                 ),
@@ -357,16 +356,16 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
           children: [
             Text(
               'Description',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111111),
+                color: AppColors.ink,
               ),
             ),
             AppGap.h12,
             Text(
               mission.description,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.65,
                 fontWeight: FontWeight.w400,

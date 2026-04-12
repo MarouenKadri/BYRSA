@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import 'create_mission_models.dart';
 
@@ -24,18 +23,18 @@ class StepBudgetType extends StatelessWidget {
         children: [
           Text(
             'Comment souhaitez-vous payer ?',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
           AppGap.h10,
           Text(
             'Choisissez la formule qui correspond le mieux à votre mission.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.5,
@@ -113,7 +112,7 @@ class _BudgetTypeCard extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: const Color(0xFF2C3137),
+              color: AppColors.gray700,
             ),
             AppGap.w16,
             Expanded(
@@ -122,16 +121,16 @@ class _BudgetTypeCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF101418),
+                      color: AppColors.inkDark,
                     ),
                   ),
                   AppGap.h4,
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF98A0A8),

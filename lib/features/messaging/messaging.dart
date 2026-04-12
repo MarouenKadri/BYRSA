@@ -2,6 +2,7 @@
 /// Inkern - Messaging Feature Barrel
 /// Module messages — client et freelancer
 /// ═══════════════════════════════════════════════════════════════════════════
+library;
 
 // ─── Data Models ──────────────────────────────────────────────────────────────
 export 'data/models/message.dart';

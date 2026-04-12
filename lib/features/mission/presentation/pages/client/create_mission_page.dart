@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../../core/design/app_design_system.dart';
@@ -239,7 +238,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF6E757D),
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -338,47 +337,14 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
   }
 
   Widget _buildProgressBar() {
-    final progress = (_currentStep + 1) / missionSteps.length;
     return AppSection(
       color: context.colors.surface,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 2,
-              child: Stack(
-                children: [
-                  Container(color: const Color(0xFFE7EAEE)),
-                  FractionallySizedBox(
-                    widthFactor: progress,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutCubic,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF6CA6FF), Color(0xFF1847A8)],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AppGap.h12,
-          Text(
-            missionSteps[_currentStep],
-            style: GoogleFonts.inter(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1847A8),
-              letterSpacing: 0.2,
-            ),
-          ),
-        ],
+      padding: EdgeInsets.zero,
+      child: AppProgressBar(
+        currentStep: _currentStep + 1,
+        totalSteps: missionSteps.length,
+        stepLabel: missionSteps[_currentStep],
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
       ),
     );
   }
@@ -396,7 +362,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
           child: ElevatedButton(
             onPressed: _submitMission,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF000000),
+              backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               elevation: 0,
               minimumSize: const Size.fromHeight(56),
@@ -409,7 +375,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
                       widget.mission!.status != MissionStatus.draft
                   ? 'Enregistrer les modifications'
                   : 'Publier la mission',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
@@ -432,7 +398,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
             child: ElevatedButton(
               onPressed: canGo ? _nextStep : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF101418),
+                backgroundColor: AppColors.inkDark,
                 disabledBackgroundColor: const Color(0xFFD8DCE0),
                 foregroundColor: Colors.white,
                 disabledForegroundColor: const Color(0xFFFBFBFB),
@@ -444,7 +410,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
               ),
               child: Text(
                 'Continuer',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.1,
@@ -456,7 +422,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
           Text(
             'Paiement securise. Aucun debit avant la fin de la mission.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF9BA3AB),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
@@ -101,11 +100,11 @@ class _ClientMissionDetailPageState
         const Spacer(),
         Text(
           mission.budget.displayText,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.8,
-            color: const Color(0xFF111111),
+            color: AppColors.ink,
           ),
         ),
       ],

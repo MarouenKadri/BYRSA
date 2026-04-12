@@ -883,13 +883,12 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
               style: context.text.titleMedium?.copyWith(
                 letterSpacing: 2,
               ),
-              decoration: InputDecoration(
+              decoration: AppInputDecorations.formField(
+                context,
                 hintText: 'SUPPRIMER',
                 hintStyle: context.text.bodyMedium?.copyWith(color: context.colors.textHint),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
+                radius: AppRadius.button,
+              ).copyWith(
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppRadius.button),
                   borderSide: const BorderSide(color: Colors.red, width: 2),

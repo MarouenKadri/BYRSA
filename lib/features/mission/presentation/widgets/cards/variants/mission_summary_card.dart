@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../data/models/mission.dart';
 import '../../shared/mission_status_ui.dart';
@@ -67,7 +66,7 @@ class MissionSummaryCard extends StatelessWidget {
                     children: [
                       Text(
                         mission.categoryName,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1A1A1A),
@@ -79,7 +78,7 @@ class MissionSummaryCard extends StatelessWidget {
                         mission.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: const Color(0xFF6F7782),
@@ -92,7 +91,7 @@ class MissionSummaryCard extends StatelessWidget {
                 const SizedBox(width: 16),
                 Text(
                   mission.budget.displayText,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF101214),
@@ -107,7 +106,7 @@ class MissionSummaryCard extends StatelessWidget {
                 mission.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF8A929B),

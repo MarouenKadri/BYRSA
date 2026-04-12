@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -50,7 +49,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
       minChildSize: 0.6,
       maxChildSize: 0.95,
       builder: (_, scrollController) => AppSheetSurface(
-        color: const Color(0xFFFAFAFA),
+        color: AppColors.snow,
         child: Column(
           children: [
             Padding(
@@ -62,7 +61,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                   Text(
                     "Mon activité",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: AppFontSize.title,
                       fontWeight: FontWeight.w300,
                       color: context.colors.textPrimary,
@@ -136,27 +135,30 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
           controller: _bioCtrl,
           maxLines: 5,
           maxLength: 300,
-          style: GoogleFonts.inter(
+          style: const TextStyle(
             fontSize: 14,
             height: 1.6,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF20252B),
+            color: Color(0xFF20252B),
           ),
-          decoration: InputDecoration(
+          decoration: AppInputDecorations.formField(
+            context,
             hintText: 'Parlez de votre experience, de votre approche et de vos specialites.',
-            hintStyle: GoogleFonts.inter(
+            hintStyle: const TextStyle(
               fontSize: 14,
               height: 1.6,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF9AA1A8),
-            ),
-            counterStyle: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF9AA1A8),
+              color: Color(0xFF9AA1A8),
             ),
             contentPadding: const EdgeInsets.all(18),
-            border: InputBorder.none,
+            noBorder: true,
+            fillColor: Colors.transparent,
+          ).copyWith(
+            counterStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF9AA1A8),
+            ),
           ),
         ),
       ),
@@ -179,7 +181,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFF111111) : const Color(0xFFF2F2F2),
+                color: selected ? AppColors.ink : const Color(0xFFF2F2F2),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
@@ -193,7 +195,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                   const SizedBox(width: 7),
                   Text(
                     skill.label,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                       color: selected ? Colors.white : const Color(0xFF50565D),
@@ -218,7 +220,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
             children: [
               Text(
                 "Rayon d'intervention",
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF20252B),
@@ -228,12 +230,12 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF111111),
+                  color: AppColors.ink,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '${_radius.toInt()} km',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -246,10 +248,10 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 2,
-              activeTrackColor: const Color(0xFF111111),
+              activeTrackColor: AppColors.ink,
               inactiveTrackColor: const Color(0xFFD9DEE3),
-              thumbColor: const Color(0xFF111111),
-              overlayColor: const Color(0xFF111111).withValues(alpha: 0.08),
+              thumbColor: AppColors.ink,
+              overlayColor: AppColors.ink.withValues(alpha: 0.08),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
             ),
@@ -266,7 +268,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
             children: [
               Text(
                 '1 km',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF7E858C),
@@ -274,7 +276,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
               ),
               Text(
                 '100 km',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF7E858C),
@@ -306,27 +308,30 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
           controller: _tarifCtrl,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.inter(
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w300,
-            color: const Color(0xFF111111),
+            color: AppColors.ink,
             letterSpacing: -0.8,
           ),
-          decoration: InputDecoration(
+          decoration: AppInputDecorations.formField(
+            context,
             hintText: '0',
-            hintStyle: GoogleFonts.inter(
+            hintStyle: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w300,
-              color: const Color(0xFFB4BAC1),
-            ),
-            suffixText: '€ / h',
-            suffixStyle: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF7E858C),
+              color: Color(0xFFB4BAC1),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            border: InputBorder.none,
+            noBorder: true,
+            fillColor: Colors.transparent,
+          ).copyWith(
+            suffixText: '€ / h',
+            suffixStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF7E858C),
+            ),
           ),
         ),
       ),
@@ -388,7 +393,7 @@ class _ActivitySection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF20252B),

@@ -5,13 +5,10 @@ import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../widgets/google_sign_in_button.dart';
-import '../../widgets/payment_security_card.dart';
-import '../../widgets/status_dot_badge.dart';
 import '../login/login_page.dart';
 import '../register/register_flow.dart';
 import 'widgets/categories_section.dart';
 import 'widgets/freelancers_section.dart';
-import 'widgets/users_section.dart';
 
 // ─── Page d'accueil visiteur ──────────────────────────────────────────────────
 
@@ -31,14 +28,12 @@ class WelcomePage extends StatelessWidget {
                 slivers: [
                   const SliverToBoxAdapter(child: _HeroSection()),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         AppSectionHeader(title: 'Catégories populaires', padding: EdgeInsets.zero),
                         AppGap.h14,
                         const CategoriesRow(),
-                        AppGap.h32,
-                        const StatusDotBadge(),
                         AppGap.h32,
                         AppSectionHeader(title: 'Prestataires de confiance', padding: EdgeInsets.zero),
                         AppGap.h6,
@@ -51,69 +46,6 @@ class WelcomePage extends StatelessWidget {
                         ),
                         AppGap.h20,
                         const FreelancersRow(),
-                        AppGap.h16,
-                        GestureDetector(
-                          onTap: () {},
-                          child: Row(
-                            children: [
-                              Text(
-                                'Voir tous les prestataires',
-                                style: context.text.titleSmall?.copyWith(
-                                  fontSize: AppFontSize.base,
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              AppGap.w4,
-                              const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 13,
-                                color: AppColors.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        AppGap.h32,
-                        const PaymentSecurityCard(),
-                        AppGap.h32,
-                        AppSectionHeader(title: 'Inkern, pour qui ?', padding: EdgeInsets.zero),
-                        AppGap.h6,
-                        Text(
-                          'Découvrez comment Inkern peut vous aider',
-                          style: context.text.bodyMedium?.copyWith(
-                            fontSize: AppFontSize.base,
-                            color: context.colors.textTertiary,
-                          ),
-                        ),
-                        AppGap.h16,
-                        const FeaturesSection(),
-                        AppGap.h32,
-                        AppSurfaceCard(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 24,
-                            horizontal: 20,
-                          ),
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppDesign.radius16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _statItem('10K+', 'Prestataires'),
-                              Container(
-                                height: 36,
-                                width: 1,
-                                color: Colors.white24,
-                              ),
-                              _statItem('50K+', 'Missions'),
-                              Container(
-                                height: 36,
-                                width: 1,
-                                color: Colors.white24,
-                              ),
-                              _statItem('4.8', 'Note moyenne'),
-                            ],
-                          ),
-                        ),
                         AppGap.h8,
                       ]),
                     ),
@@ -128,27 +60,6 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-  static Widget _statItem(String value, String label) {
-    return Builder(
-      builder: (context) => Column(
-        children: [
-          Text(
-            value,
-            style: context.text.headlineLarge?.copyWith(
-              color: Colors.white,
-            ),
-          ),
-          AppGap.h4,
-          Text(
-            label,
-            style: context.text.labelMedium?.copyWith(
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ─── Section hero ─────────────────────────────────────────────────────────────
@@ -158,13 +69,8 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSurfaceCard(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-      color: context.colors.surface,
-      borderRadius: BorderRadius.zero,
-      border: Border(
-        bottom: BorderSide(color: context.colors.border, width: 1),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -172,8 +78,8 @@ class _HeroSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(AppDesign.radius10),
@@ -181,14 +87,15 @@ class _HeroSection extends StatelessWidget {
                 child: const Icon(
                   Icons.eco_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 18,
                 ),
               ),
               AppGap.w10,
               Text(
-                'La Cigale',
+                'Inkern',
                 style: context.text.headlineSmall?.copyWith(
                   color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -273,15 +180,19 @@ class _BottomAuthBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    return AppSection(
-      color: context.colors.surface,
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        border: Border(top: BorderSide(color: context.colors.border, width: 1)),
+      ),
       child: SafeArea(
         top: false,
-        child: AppSection(
-          padding: AppInsets.h20v14,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Google ──────────────────────────────────────────────────
               GoogleSignInButton(
                 isLoading: auth.isLoading,
                 onPressed: auth.isLoading
@@ -293,50 +204,44 @@ class _BottomAuthBar extends StatelessWidget {
                         }
                       },
               ),
-              AppGap.h12,
-              Row(
-                children: [
-                  Expanded(child: Divider(color: context.colors.border)),
-                  Padding(
-                    padding: AppInsets.h12,
-                    child: Text(
-                      'ou',
-                      style: context.text.bodySmall?.copyWith(
-                        fontSize: AppFontSize.md,
-                        color: context.colors.textTertiary,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: context.colors.border)),
-                ],
+              AppGap.h14,
+
+              // ── Créer un compte ──────────────────────────────────────────
+              AppButton(
+                label: 'Créer un compte',
+                variant: ButtonVariant.black,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterFlow()),
+                ),
               ),
-              AppGap.h12,
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Créer un compte',
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const RegisterFlow(),
+              AppGap.h16,
+
+              // ── Lien connexion ───────────────────────────────────────────
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                ),
+                child: RichText(
+                  text: TextSpan(
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textTertiary,
+                      fontSize: AppFontSize.md,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Déjà un compte ? '),
+                      TextSpan(
+                        text: 'Se connecter',
+                        style: context.text.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                          fontSize: AppFontSize.md,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      variant: ButtonVariant.black,
-                    ),
+                    ],
                   ),
-                  AppGap.w12,
-                  Expanded(
-                    child: AppButton(
-                      label: 'Se connecter',
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                      ),
-                      variant: ButtonVariant.secondary,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

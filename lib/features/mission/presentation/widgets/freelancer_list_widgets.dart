@@ -241,25 +241,19 @@ class ApplicationForm extends StatelessWidget {
             initialValue: priceController == null ? suggestedBudget.averageAmount.toInt().toString() : null,
             keyboardType: TextInputType.number,
             style: context.text.headlineSmall,
-            decoration: InputDecoration(
+            decoration: AppInputDecorations.formField(
+              context,
               hintText: suggestedBudget.averageAmount.toInt().toString(),
               hintStyle: context.text.headlineSmall?.copyWith(color: context.colors.border),
               prefixIcon: Icon(Icons.euro_rounded, color: context.colors.primary),
+              fillColor: context.colors.primary.withValues(alpha: 0.04),
+              contentPadding: AppInsets.h16v16,
+              radius: AppDesign.radius10,
+            ).copyWith(
               suffixText: '€',
               suffixStyle: context.text.titleMedium?.copyWith(color: context.colors.textSecondary),
               helperText: 'Budget suggéré par le client : ${suggestedBudget.displayText}',
               helperStyle: context.text.labelMedium?.copyWith(color: context.colors.textTertiary),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius10),
-                borderSide: BorderSide(color: context.colors.primary, width: 1.5),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius10),
-                borderSide: BorderSide(color: context.colors.primary, width: 2),
-              ),
-              filled: true,
-              fillColor: context.colors.primary.withOpacity(0.04),
-              contentPadding: AppInsets.h16v16,
             ),
           ),
 
@@ -285,20 +279,13 @@ class ApplicationForm extends StatelessWidget {
           TextFormField(
             controller: messageController,
             maxLines: 4,
-            decoration: InputDecoration(
+            decoration: AppInputDecorations.formField(
+              context,
               hintText: 'Présentez-vous et expliquez pourquoi vous êtes le bon choix...',
               hintStyle: context.text.bodySmall?.copyWith(color: context.colors.textHint),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius10),
-                borderSide: BorderSide(color: context.colors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius10),
-                borderSide: BorderSide(color: context.colors.primary, width: 1.5),
-              ),
-              filled: true,
               fillColor: context.colors.background,
               contentPadding: AppInsets.a14,
+              radius: AppDesign.radius10,
             ),
           ),
 

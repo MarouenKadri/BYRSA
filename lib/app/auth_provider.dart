@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'enum/user_role.dart';
 import '../features/auth/data/models/registration_data.dart';
 import '../features/auth/data/models/user_type.dart';
-import '../main.dart' show appNavigatorKey;
 
 class AuthProvider extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
@@ -25,6 +24,7 @@ class AuthProvider extends ChangeNotifier {
     final identities = _supabase.auth.currentUser?.identities ?? [];
     return identities.any((i) => i.provider == 'google');
   }
+
   bool _isRegistering = false; // skip _loadProfile() during registration
   bool _isLoadingProfile = false; // guard against concurrent _loadProfile calls
 
@@ -41,13 +41,16 @@ class AuthProvider extends ChangeNotifier {
         currentRole = UserRole.guest;
         isLogged = false;
         notifyListeners();
-      } else if (data.event == AuthChangeEvent.signedIn && data.session != null) {
+      } else if (data.event == AuthChangeEvent.signedIn &&
+          data.session != null) {
         // Blocked during login() and register() which call _loadProfile directly.
         if (!_isRegistering) _loadProfile(data.session!.user.id);
-      } else if (data.event == AuthChangeEvent.initialSession && data.session != null) {
+      } else if (data.event == AuthChangeEvent.initialSession &&
+          data.session != null) {
         // Fires on app restart when a valid session is found in local storage.
         _loadProfile(data.session!.user.id);
-      } else if (data.event == AuthChangeEvent.tokenRefreshed && data.session != null) {
+      } else if (data.event == AuthChangeEvent.tokenRefreshed &&
+          data.session != null) {
         if (!isLogged) _loadProfile(data.session!.user.id);
       }
     });
@@ -67,7 +70,8 @@ class AuthProvider extends ChangeNotifier {
 
       if (data.isEmpty || (data.first['user_type'] as String?) == null) {
         // Fallback: read user_type from Supabase Auth metadata (set during signUp)
-        userType = _supabase.auth.currentUser?.userMetadata?['user_type'] as String?;
+        userType =
+            _supabase.auth.currentUser?.userMetadata?['user_type'] as String?;
         if (userType == null) {
           needsRoleSelection = true;
           isLogged = false;
@@ -78,7 +82,9 @@ class AuthProvider extends ChangeNotifier {
         userType = data.first['user_type'] as String;
       }
 
-      final baseRole = userType == 'freelancer' ? UserRole.provider : UserRole.client;
+      final baseRole = userType == 'freelancer'
+          ? UserRole.provider
+          : UserRole.client;
 
       final prefs = await SharedPreferences.getInstance();
       final saved = prefs.getString('role_$userId');
@@ -112,9 +118,7 @@ class AuthProvider extends ChangeNotifier {
         return 'GOOGLE_WEB_CLIENT_ID manquant ou invalide dans .env';
       }
 
-      final googleSignIn = GoogleSignIn(
-        serverClientId: serverClientId,
-      );
+      final googleSignIn = GoogleSignIn(serverClientId: serverClientId);
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         isLoading = false;
@@ -190,7 +194,8 @@ class AuthProvider extends ChangeNotifier {
 
   Future<String?> login(String email, String password) async {
     isLoading = true;
-    _isRegistering = true; // prevent the signedIn listener from calling _loadProfile
+    _isRegistering =
+        true; // prevent the signedIn listener from calling _loadProfile
     error = null;
     notifyListeners();
     try {
@@ -207,6 +212,46 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('login error: $e');
       error = 'Une erreur est survenue';
       return error;
+    } finally {
+      _isRegistering = false;
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // ─── Login téléphone OTP ─────────────────────────────────────────────────
+
+  Future<String?> sendPhoneLoginOtp(String phone) async {
+    try {
+      debugPrint('sendPhoneLoginOtp: phone=$phone');
+      await _supabase.auth.signInWithOtp(phone: phone);
+      return null;
+    } on AuthException catch (e) {
+      debugPrint('sendPhoneLoginOtp AuthException: ${e.message} (status=${e.statusCode})');
+      return _friendlyError(e.message);
+    } catch (e) {
+      debugPrint('sendPhoneLoginOtp error: $e');
+      return 'Une erreur est survenue';
+    }
+  }
+
+  Future<String?> verifyPhoneLoginOtp(String phone, String token) async {
+    isLoading = true;
+    _isRegistering = true;
+    notifyListeners();
+    try {
+      final res = await _supabase.auth.verifyOTP(
+        phone: phone,
+        token: token,
+        type: OtpType.sms,
+      );
+      if (res.user != null) await _loadProfile(res.user!.id);
+      return null;
+    } on AuthException catch (e) {
+      return _friendlyError(e.message);
+    } catch (e) {
+      debugPrint('verifyPhoneLoginOtp error: $e');
+      return 'Une erreur est survenue';
     } finally {
       _isRegistering = false;
       isLoading = false;
@@ -243,11 +288,16 @@ class AuthProvider extends ChangeNotifier {
             try {
               final bytes = await data.photo!.readAsBytes();
               final path = '${res.user!.id}/avatar.jpg';
-              await _supabase.storage.from('avatars').uploadBinary(
-                path,
-                bytes,
-                fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
-              );
+              await _supabase.storage
+                  .from('avatars')
+                  .uploadBinary(
+                    path,
+                    bytes,
+                    fileOptions: const FileOptions(
+                      contentType: 'image/jpeg',
+                      upsert: true,
+                    ),
+                  );
               avatarUrl = _supabase.storage.from('avatars').getPublicUrl(path);
             } catch (e) {
               debugPrint('avatar upload warning (non-blocking): $e');
@@ -291,7 +341,8 @@ class AuthProvider extends ChangeNotifier {
   // ─── Switch de rôle ───────────────────────────────────────────────────────
 
   Future<void> switchRole(UserRole newRole) async {
-    if (!isLogged || newRole == UserRole.guest || newRole == currentRole) return;
+    if (!isLogged || newRole == UserRole.guest || newRole == currentRole)
+      return;
     final token = ++_switchToken;
     pendingRole = newRole;
     isLoading = true;
@@ -389,7 +440,10 @@ class AuthProvider extends ChangeNotifier {
       if (email == null) return 'Email introuvable';
       _isRegistering = true;
       try {
-        await _supabase.auth.signInWithPassword(email: email, password: password);
+        await _supabase.auth.signInWithPassword(
+          email: email,
+          password: password,
+        );
       } on AuthException {
         _isRegistering = false;
         return 'Mot de passe incorrect';
@@ -419,17 +473,29 @@ class AuthProvider extends ChangeNotifier {
 
         // 2. IDs de mes missions (client)
         final myMissionsRaw = await _supabase
-            .from('missions').select('id').eq('client_id', userId);
+            .from('missions')
+            .select('id')
+            .eq('client_id', userId);
         final myMissionIds = (myMissionsRaw as List)
-            .map((r) => r['id'] as String).toList();
+            .map((r) => r['id'] as String)
+            .toList();
 
         if (myMissionIds.isNotEmpty) {
           // 3. Candidatures sur mes missions
-          await _supabase.from('candidates').delete().inFilter('mission_id', myMissionIds);
+          await _supabase
+              .from('candidates')
+              .delete()
+              .inFilter('mission_id', myMissionIds);
           // 4. Avis liés à mes missions
-          await _supabase.from('reviews').delete().inFilter('mission_id', myMissionIds);
+          await _supabase
+              .from('reviews')
+              .delete()
+              .inFilter('mission_id', myMissionIds);
           // 5. Transactions liées à mes missions
-          await _supabase.from('transactions').delete().inFilter('mission_id', myMissionIds);
+          await _supabase
+              .from('transactions')
+              .delete()
+              .inFilter('mission_id', myMissionIds);
         }
 
         // 6. Avis où je suis reviewer ou reviewee
@@ -440,15 +506,25 @@ class AuthProvider extends ChangeNotifier {
         await _supabase.from('transactions').delete().eq('user_id', userId);
 
         // 8. Messages & conversations
-        final convRaw = await _supabase.from('conversations').select('id')
+        final convRaw = await _supabase
+            .from('conversations')
+            .select('id')
             .or('client_id.eq.$userId,freelancer_id.eq.$userId');
-        final myConvIds = (convRaw as List).map((r) => r['id'] as String).toList();
+        final myConvIds = (convRaw as List)
+            .map((r) => r['id'] as String)
+            .toList();
         if (myConvIds.isNotEmpty) {
-          await _supabase.from('messages').delete().inFilter('conversation_id', myConvIds);
+          await _supabase
+              .from('messages')
+              .delete()
+              .inFilter('conversation_id', myConvIds);
         }
         await _supabase.from('messages').delete().eq('sender_id', userId);
         await _supabase.from('conversations').delete().eq('client_id', userId);
-        await _supabase.from('conversations').delete().eq('freelancer_id', userId);
+        await _supabase
+            .from('conversations')
+            .delete()
+            .eq('freelancer_id', userId);
 
         // 9. Notifications
         await _supabase.from('notifications').delete().eq('user_id', userId);
@@ -458,10 +534,17 @@ class AuthProvider extends ChangeNotifier {
 
         // 11. Votes sur mes publications + mes votes
         final myPostsRaw = await _supabase
-            .from('posts').select('id').eq('author_id', userId);
-        final myPostIds = (myPostsRaw as List).map((r) => r['id'] as String).toList();
+            .from('posts')
+            .select('id')
+            .eq('author_id', userId);
+        final myPostIds = (myPostsRaw as List)
+            .map((r) => r['id'] as String)
+            .toList();
         if (myPostIds.isNotEmpty) {
-          await _supabase.from('post_votes').delete().inFilter('post_id', myPostIds);
+          await _supabase
+              .from('post_votes')
+              .delete()
+              .inFilter('post_id', myPostIds);
         }
         await _supabase.from('post_votes').delete().eq('user_id', userId);
 
@@ -482,7 +565,9 @@ class AuthProvider extends ChangeNotifier {
     }
 
     // 3. Déconnexion + nettoyage local
-    try { await _supabase.auth.signOut(); } catch (_) {}
+    try {
+      await _supabase.auth.signOut();
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('role_$userId');
     _switchToken++;
@@ -515,10 +600,14 @@ class AuthProvider extends ChangeNotifier {
   // ─── Erreurs lisibles ─────────────────────────────────────────────────────
 
   String _friendlyError(String message) {
-    if (message.contains('Invalid login credentials')) return 'Email ou mot de passe incorrect';
-    if (message.contains('Email not confirmed')) return 'Confirmez votre email avant de vous connecter';
-    if (message.contains('User already registered')) return 'Cet email est déjà utilisé';
-    if (message.contains('Password should be')) return 'Mot de passe trop court (minimum 8 caractères)';
+    if (message.contains('Invalid login credentials'))
+      return 'Email ou mot de passe incorrect';
+    if (message.contains('Email not confirmed'))
+      return 'Confirmez votre email avant de vous connecter';
+    if (message.contains('User already registered'))
+      return 'Cet email est déjà utilisé';
+    if (message.contains('Password should be'))
+      return 'Mot de passe trop court (minimum 8 caractères)';
     return 'Une erreur est survenue';
   }
 }

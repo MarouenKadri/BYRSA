@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../app/app_bar/app_section_bar.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../app/enum/user_role.dart';
 import '../../../../../core/design/app_design_system.dart';
@@ -20,25 +18,32 @@ class ArchivesPage extends StatelessWidget {
     final isFreelancer =
         context.watch<AuthProvider>().currentRole == UserRole.provider;
     final provider = context.watch<MissionProvider>();
-    final source = isFreelancer ? provider.freelancerMissions : provider.clientMissions;
+    final source = isFreelancer
+        ? provider.freelancerMissions
+        : provider.clientMissions;
     final role = isFreelancer ? MissionUiRole.freelancer : MissionUiRole.client;
-    final missions = source
-        .where((mission) => MissionStatusUi.belongsToTab(
-              status: mission.status,
-              role: role,
-              tab: MissionUiTab.archived,
-            ))
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final missions =
+        source
+            .where(
+              (mission) => MissionStatusUi.belongsToTab(
+                status: mission.status,
+                role: role,
+                tab: MissionUiTab.archived,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppPageAppBar(
         backgroundColor: Colors.white,
-        leading: AppBackButtonLeading(onPressed: () => Navigator.of(context).pop()),
+        leading: AppBackButtonLeading(
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         titleWidget: Text(
           'Archives',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF222629),
@@ -53,7 +58,7 @@ class ArchivesPage extends StatelessWidget {
                 child: Text(
                   'Aucune mission archivee pour le moment.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF8A9199),
@@ -74,7 +79,10 @@ class ArchivesPage extends StatelessWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => isFreelancer
-                          ? FreelancerMissionDetailPage(mission: mission, isOwn: true)
+                          ? FreelancerMissionDetailPage(
+                              mission: mission,
+                              isOwn: true,
+                            )
                           : ClientMissionDetailPage(mission: mission),
                     ),
                   ),
@@ -84,4 +92,3 @@ class ArchivesPage extends StatelessWidget {
     );
   }
 }
-

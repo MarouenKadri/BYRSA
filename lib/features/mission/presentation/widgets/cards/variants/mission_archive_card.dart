@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../data/models/mission.dart';
 import '../../shared/mission_status_ui.dart';
@@ -51,7 +50,7 @@ class MissionArchiveCard extends StatelessWidget {
                     mission.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF181B1F),
@@ -61,7 +60,7 @@ class MissionArchiveCard extends StatelessWidget {
                   const SizedBox(height: 7),
                   Text(
                     _formatDate(mission.date),
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF9AA1A8),

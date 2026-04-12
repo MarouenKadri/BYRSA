@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../../core/design/app_design_system.dart';
 
 class StepSummary extends StatelessWidget {
@@ -51,11 +50,11 @@ class StepSummary extends StatelessWidget {
         children: [
           Text(
             'Resume de votre mission',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 31,
               fontWeight: FontWeight.w600,
               height: 1.16,
-              color: const Color(0xFF101418),
+              color: AppColors.inkDark,
               letterSpacing: -0.6,
             ),
           ),
@@ -64,7 +63,7 @@ class StepSummary extends StatelessWidget {
             isEdit
                 ? 'Verifiez les details avant d\'enregistrer.'
                 : 'Verifiez les details avant de publier.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w400,
               height: 1.5,
@@ -102,7 +101,7 @@ class StepSummary extends StatelessWidget {
                       child: Icon(
                         serviceData['icon'] as IconData,
                         size: 22,
-                        color: const Color(0xFF2C3137),
+                        color: AppColors.gray700,
                       ),
                     ),
                     AppGap.w14,
@@ -114,19 +113,19 @@ class StepSummary extends StatelessWidget {
                             (subService?.isNotEmpty ?? false)
                                 ? subService!
                                 : serviceData['name'] as String,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF101418),
+                              color: AppColors.inkDark,
                             ),
                           ),
                           AppGap.h4,
                           Text(
                             serviceData['name'] as String,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF8E959D),
+                              color: AppColors.gray600,
                             ),
                           ),
                         ],
@@ -135,7 +134,7 @@ class StepSummary extends StatelessWidget {
                   ],
                 ),
                 AppGap.h20,
-                const Divider(height: 1, color: Color(0xFFF0F1F3)),
+                const Divider(height: 1, color: AppColors.gray50),
                 AppGap.h18,
                 SummaryRow(
                   icon: Icons.calendar_month_outlined,
@@ -170,10 +169,10 @@ class StepSummary extends StatelessWidget {
                   AppGap.h18,
                   Text(
                     'PHOTOS',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF8E959D),
+                      color: AppColors.gray600,
                       letterSpacing: 1.8,
                     ),
                   ),
@@ -223,7 +222,7 @@ class StepSummary extends StatelessWidget {
                   ),
                 ],
                 AppGap.h22,
-                const Divider(height: 1, color: Color(0xFFF0F1F3)),
+                const Divider(height: 1, color: AppColors.gray50),
                 AppGap.h18,
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -238,17 +237,17 @@ class StepSummary extends StatelessWidget {
                                 : budgetType == 'fixed'
                                     ? 'Budget fixe'
                                     : 'Sur devis',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF8E959D),
+                              color: AppColors.gray600,
                             ),
                           ),
                           if (budgetType == 'hourly') ...[
                             AppGap.h4,
                             Text(
                               '${estimatedHours.toStringAsFixed(estimatedHours.truncateToDouble() == estimatedHours ? 0 : 1)} heures estimees',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF6E757D),
@@ -264,16 +263,16 @@ class StepSummary extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: '${totalBudget.round()}',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w300,
-                                color: const Color(0xFF101418),
+                                color: AppColors.inkDark,
                                 letterSpacing: -1,
                               ),
                             ),
                             TextSpan(
                               text: ' EUR',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF6E757D),
@@ -286,7 +285,7 @@ class StepSummary extends StatelessWidget {
                     else
                       Text(
                         'Sur devis',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF16345F),
@@ -304,7 +303,7 @@ class StepSummary extends StatelessWidget {
               isEdit
                   ? 'Vos modifications seront visibles immediatement par les freelancers.'
                   : 'Votre demande sera transmise aux meilleurs experts disponibles.',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w400,
                 fontStyle: FontStyle.italic,
@@ -367,7 +366,7 @@ class SummaryRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF9CA3AB),
@@ -376,10 +375,10 @@ class SummaryRow extends StatelessWidget {
               AppGap.h4,
               Text(
                 value,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF101418),
+                  color: AppColors.inkDark,
                   height: 1.45,
                 ),
               ),

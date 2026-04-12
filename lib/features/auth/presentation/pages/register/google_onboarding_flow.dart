@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/registration_data.dart';
 import '../../../data/models/user_type.dart';
 
@@ -271,66 +270,14 @@ class _BirthdateStepState extends State<_BirthdateStep> {
             subtitle: 'Nous vérifierons que vous avez bien 18 ans',
           ),
           AppGap.h40,
-          TextField(
+          AppDateField(
+            label: 'Date de naissance',
             controller: _ctrl,
             onChanged: _onChanged,
-            inputFormatters: [_DateInputFormatter()],
-            keyboardType: TextInputType.number,
-            style: TextStyle(
-              fontSize: AppFontSize.h1Lg,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 3,
-              color: context.colors.textPrimary,
-            ),
-            decoration: InputDecoration(
-              hintText: 'JJ / MM / AAAA',
-              hintStyle: TextStyle(
-                fontSize: AppFontSize.h1Lg,
-                fontWeight: FontWeight.w400,
-                letterSpacing: 3,
-                color: context.colors.textTertiary.withOpacity(0.5),
-              ),
-              errorText: _error,
-              filled: true,
-              fillColor: context.colors.background,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius16),
-                borderSide: BorderSide(color: context.colors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius16),
-                borderSide: BorderSide(color: context.colors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDesign.radius16),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            ),
+            errorText: _error,
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DateInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue old,
-    TextEditingValue value,
-  ) {
-    final digits = value.text.replaceAll(RegExp(r'[^0-9]'), '');
-    final capped = digits.length > 8 ? digits.substring(0, 8) : digits;
-    final buf = StringBuffer();
-    for (int i = 0; i < capped.length; i++) {
-      if (i == 2 || i == 4) buf.write(' / ');
-      buf.write(capped[i]);
-    }
-    final result = buf.toString();
-    return TextEditingValue(
-      text: result,
-      selection: TextSelection.collapsed(offset: result.length),
     );
   }
 }

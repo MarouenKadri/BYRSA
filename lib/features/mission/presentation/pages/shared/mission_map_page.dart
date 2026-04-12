@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -94,7 +93,7 @@ class _MissionMapPageState extends State<MissionMapPage> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.snow,
       body: Stack(
         children: [
           // ── Carte plein écran ──────────────────────────────────────────
@@ -280,7 +279,7 @@ class _AddressCard extends StatelessWidget {
                   children: [
                     Text(
                       "Lieu d'intervention",
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF98A1AC),
@@ -289,11 +288,11 @@ class _AddressCard extends StatelessWidget {
                     AppGap.h4,
                     Text(
                       address,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.6,
-                        color: const Color(0xFF111111),
+                        color: AppColors.ink,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

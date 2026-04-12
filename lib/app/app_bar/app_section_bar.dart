@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/design/app_design_system.dart';
 import '../../core/design/app_primitives.dart';
 import '../../features/notifications/notifications.dart';
 import '../../features/profile/profile_provider.dart';
-import '../auth_provider.dart';
-import '../enum/user_role.dart';
 import 'location_app_bar.dart' show RoleSwitchSheet;
 
 /// App bar standard des pages de section.
@@ -27,9 +24,8 @@ class AppSectionBar extends StatefulWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(
-        kToolbarHeight + (bottom?.preferredSize.height ?? 0),
-      );
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 
   @override
   State<AppSectionBar> createState() => _AppSectionBarState();
@@ -52,9 +48,7 @@ class _AppSectionBarState extends State<AppSectionBar>
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.35), weight: 40),
       TweenSequenceItem(tween: Tween(begin: 1.35, end: 0.9), weight: 30),
       TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 30),
-    ]).animate(
-      CurvedAnimation(parent: _bellController, curve: Curves.easeOut),
-    );
+    ]).animate(CurvedAnimation(parent: _bellController, curve: Curves.easeOut));
   }
 
   @override
@@ -84,7 +78,7 @@ class _AppSectionBarState extends State<AppSectionBar>
           widget.pageTitle ?? 'Byrsa',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
             color: context.colors.textPrimary,
@@ -123,7 +117,9 @@ class _AppSectionBarState extends State<AppSectionBar>
       iconSize: 20,
       size: 34,
       scale: _bellScale,
-      badgeLabel: unreadCount > 0 ? (unreadCount > 99 ? '99+' : '$unreadCount') : null,
+      badgeLabel: unreadCount > 0
+          ? (unreadCount > 99 ? '99+' : '$unreadCount')
+          : null,
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const NotificationsPage()),
