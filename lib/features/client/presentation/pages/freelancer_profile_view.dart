@@ -1,19 +1,17 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import '../../../../app/auth_provider.dart';
-import '../../../../app/enum/user_role.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
-import '../../../messaging/messaging_provider.dart';
-import '../../../messaging/presentation/pages/chat_page.dart';
+import '../../../mission/data/models/mission.dart';
 import '../../../mission/data/models/service_category.dart';
-import '../../../profile/data/models/user_profile.dart';
-import '../../../profile/profile_provider.dart';
+import '../../../mission/presentation/mission_provider.dart';
+import '../../../mission/presentation/pages/client/create_mission_page.dart';
+import '../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
 import '../../../story/story.dart';
+import '../providers/freelancer_public_profile_provider.dart';
 import 'freelancer_reviews_page.dart';
 
 enum CancellationLevel { never, rarely, sometimes, often }
@@ -81,276 +79,321 @@ class FreelancerProfileView extends StatefulWidget {
 }
 
 class _FreelancerProfilePageState extends State<FreelancerProfileView> {
-  bool _openingChat = false;
-  UserProfile? _profile;
-  bool _loadingProfile = false;
+  late final FreelancerPublicProfileProvider _profileProvider;
 
-  String get _name => _profile?.fullName ?? widget.freelancerName;
-  String get _avatar => _profile?.avatarUrl ?? widget.freelancerAvatar;
-  double get _rate => _profile?.hourlyRate ?? widget.hourlyRate;
-  String get _bio => _profile?.bio ?? '';
-  String get _address => _profile?.address ?? '';
+  String get _name => _profileProvider.profile?.fullName ?? widget.freelancerName;
+  String get _avatar =>
+      _profileProvider.profile?.avatarUrl ?? widget.freelancerAvatar;
+  double get _rate => _profileProvider.profile?.hourlyRate ?? widget.hourlyRate;
+  String get _bio => _profileProvider.profile?.bio ?? '';
+  String get _address => _profileProvider.profile?.address ?? '';
+  double get _rating => _profileProvider.profile?.rating ?? widget.rating;
+  int get _reviewsCount =>
+      _profileProvider.profile?.reviewsCount ?? widget.reviewsCount;
+  int get _missionsCount =>
+      _profileProvider.profile?.missionsCount ?? widget.missionsCount;
+  List<String> get _serviceCategories =>
+      _profileProvider.profile?.serviceCategories ?? const [];
+  double? get _latitude => _profileProvider.profile?.latitude;
+  double? get _longitude => _profileProvider.profile?.longitude;
+  double get _zoneRadius => _profileProvider.profile?.zoneRadius ?? 10;
+  bool get _loadingProfile => _profileProvider.isLoading;
+
+  String get _memberSince =>
+      _formatMemberSince(_profileProvider.profile?.createdAt) ?? widget.memberSince;
 
   String get _experienceStat {
-    final match = RegExp(r'(20\d{2})').firstMatch(widget.memberSince);
-    if (match != null) {
-      final year = int.tryParse(match.group(1)!);
-      if (year != null) {
-        final years = DateTime.now().year - year;
-        return years <= 1 ? '1 an' : '$years ans';
-      }
+    final createdAt = _profileProvider.profile?.createdAt;
+    if (createdAt != null) {
+      final years = DateTime.now().difference(createdAt).inDays ~/ 365;
+      return years <= 1 ? '1 an' : '$years ans';
     }
-    return '2 ans';
+
+    final match = RegExp(r'(20\d{2})').firstMatch(widget.memberSince);
+    if (match == null) return '2 ans';
+    final year = int.tryParse(match.group(1)!);
+    if (year == null) return '2 ans';
+    final years = DateTime.now().year - year;
+    return years <= 1 ? '1 an' : '$years ans';
   }
 
-  String get _reliabilityStat => '${widget.cancellationLevel.reliabilityScore}%';
+  CancellationLevel get _cancellationLevel {
+    final rate = _profileProvider.profile?.cancellationRate;
+    if (rate == null) return widget.cancellationLevel;
+    if (rate <= 0) return CancellationLevel.never;
+    if (rate <= 0.05) return CancellationLevel.rarely;
+    if (rate <= 0.12) return CancellationLevel.sometimes;
+    return CancellationLevel.often;
+  }
+
+  String get _missionsStat => '$_missionsCount';
 
   String get _responseStat {
+    final dbRaw = _profileProvider.profile?.responseTime?.trim();
+    if (dbRaw != null && dbRaw.isNotEmpty) return dbRaw;
+
     final raw = widget.responseTime?.trim();
     if (raw != null && raw.isNotEmpty) return raw;
     return '15 min';
   }
 
-  String get _experienceLabel => _spacedLabel(widget.experienceLevel);
-
   @override
   void initState() {
     super.initState();
-    if (widget.freelancerId != null) _loadProfile();
+    _profileProvider = FreelancerPublicProfileProvider();
+    _profileProvider.load(widget.freelancerId);
   }
 
-  Future<void> _loadProfile() async {
-    setState(() => _loadingProfile = true);
-    final loaded =
-        await context.read<ProfileProvider>().fetchProfileById(widget.freelancerId!);
-    if (!mounted) return;
-    setState(() {
-      _profile = loaded;
-      _loadingProfile = false;
-    });
+  @override
+  void dispose() {
+    _profileProvider.dispose();
+    super.dispose();
   }
 
-  Future<void> _openChat() async {
-    final freelancerId = widget.freelancerId;
-    if (freelancerId == null) {
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChatPage(
-            contactName: _name,
-            contactAvatar: _avatar,
-          ),
-        ),
-      );
-      return;
-    }
+  String? _formatMemberSince(DateTime? createdAt) {
+    if (createdAt == null) return null;
+    const months = <String>[
+      'Janvier',
+      'Fevrier',
+      'Mars',
+      'Avril',
+      'Mai',
+      'Juin',
+      'Juillet',
+      'Aout',
+      'Septembre',
+      'Octobre',
+      'Novembre',
+      'Decembre',
+    ];
+    return '${months[createdAt.month - 1]} ${createdAt.year}';
+  }
 
-    setState(() => _openingChat = true);
-    final auth = context.read<AuthProvider>();
-    final isClient = auth.currentRole == UserRole.client;
-    final conversationId = await context
-        .read<MessagingProvider>()
-        .getOrCreateConversation(otherUserId: freelancerId, iAmClient: isClient);
-    if (!mounted) return;
-    setState(() => _openingChat = false);
+  void _openInvite(BuildContext context) {
+    final missions = context
+        .read<MissionProvider>()
+        .clientMissions
+        .where((m) =>
+            m.status == MissionStatus.waitingCandidates ||
+            m.status == MissionStatus.draft)
+        .toList();
 
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: false,
+      builder: (_) => _InviteMissionSheet(
+        freelancerName: _name,
+        missions: missions,
+        onCreateMission: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PostMissionFlow()),
+          );
+        },
+      ),
+    );
+  }
+
+  void _openReviews(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChatPage(
-          conversationId: conversationId,
-          contactName: _name,
-          contactAvatar: _avatar,
+        builder: (_) => FreelancerReviewsPage(
+          freelancerName: _name,
+          freelancerAvatar: _avatar,
+          reviewsCount: _reviewsCount,
         ),
       ),
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.snow,
-      appBar: AppPageAppBar(
-        leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: AppButton(
-              label: 'Chat',
-              variant: ButtonVariant.outline,
-              icon: Icons.chat_bubble_outline_rounded,
-              width: null,
-              isLoading: _openingChat,
-              onPressed: _openingChat ? null : _openChat,
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileHeader(context),
-            _buildProposalCard(context),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 6, 20, 2),
-              child: _ServicesStoriesSection(
-                freelancerId: widget.freelancerId,
-                serviceCategories: _profile?.serviceCategories ?? [],
+    return ChangeNotifierProvider<FreelancerPublicProfileProvider>.value(
+      value: _profileProvider,
+      child: Consumer<FreelancerPublicProfileProvider>(
+        builder: (context, _, __) => Scaffold(
+          backgroundColor: context.colors.background,
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              decoration: BoxDecoration(
+                color: context.colors.background,
+                border: Border(
+                  top: BorderSide(color: context.colors.divider),
+                ),
+              ),
+              child: AppButton(
+                label: 'Inviter à une mission',
+                variant: ButtonVariant.black,
+                icon: Icons.add_task_rounded,
+                onPressed: () => _openInvite(context),
               ),
             ),
-            _AboutSection(
-              memberSince: widget.memberSince,
-              missionsCount: widget.missionsCount,
-              cancellationLevel: widget.cancellationLevel,
-              bio: _bio,
-              address: _address,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildProfileHeader(context),
+                _buildProposalCard(context),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 6, 20, 2),
+                  child: _ServicesStoriesSection(
+                    freelancerId: widget.freelancerId,
+                    serviceCategories: _serviceCategories,
+                  ),
+                ),
+                _AboutSection(
+                  memberSince: _memberSince,
+                  missionsCount: _missionsCount,
+                  cancellationLevel: _cancellationLevel,
+                  bio: _bio,
+                  address: _address,
+                  latitude: _latitude,
+                  longitude: _longitude,
+                  zoneRadius: _zoneRadius,
+                ),
+                AppGap.h32,
+              ],
             ),
-            AppGap.h32,
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProfileHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_loadingProfile)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: LinearProgressIndicator(minHeight: 2),
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final topPad = MediaQuery.of(context).padding.top;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_loadingProfile)
+          const LinearProgressIndicator(minHeight: 2),
+        SizedBox(
+          height: 290,
+          child: Stack(
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 112,
-                    height: 112,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(_avatar),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(16, 20, 24, 0.08),
-                          blurRadius: 18,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    right: 6,
-                    bottom: 6,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7E3),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(185, 151, 91, 0.18),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.verified_rounded,
-                        size: 13,
-                        color: Color(0xFF9B7A32),
+              Positioned.fill(
+                child: Image.network(
+                  _avatar,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF23272D), Color(0xFF3A4048)],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-              AppGap.w20,
-              Expanded(
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xC7000000),
+                          Color(0x52000000),
+                          Color(0x00000000),
+                        ],
+                        stops: [0.0, 0.28, 0.62],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: topPad + 4,
+                left: 8,
+                right: 8,
+                child: Row(
+                  children: [
+                    DetailCircleBtn(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 34,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _name.toLowerCase(),
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 31,
+                      _name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 28,
                         fontWeight: FontWeight.w700,
-                        height: 1.06,
-                        color: AppColors.inkDark,
+                        height: 1.08,
+                        color: Colors.white,
+                        letterSpacing: -0.9,
                       ),
                     ),
                     AppGap.h10,
-                    Text(
-                      '${_rate.toInt()}€/h',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.inkDark,
-                        letterSpacing: -0.4,
+                    FittedBox(
+                      alignment: Alignment.centerLeft,
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.94),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: const Color(0xFFE6E9ED),
+                                width: 0.7,
+                              ),
+                            ),
+                            child: Text(
+                              '${_rate.toInt()}€/h',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ),
+                          AppGap.w8,
+                          _LevelPill(level: widget.experienceLevel),
+                        ],
                       ),
                     ),
                     AppGap.h12,
-                    Text(
-                      _experienceLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 3.4,
-                        color: AppColors.inkDark,
-                      ),
-                    ),
-                    AppGap.h16,
                     GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FreelancerReviewsPage(
-                            freelancerName: _name,
-                            freelancerAvatar: _avatar,
-                            reviewsCount: widget.reviewsCount,
-                          ),
-                        ),
-                      ),
+                      onTap: () => _openReviews(context),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 17,
-                            color: Color(0xFFC6A76A),
-                          ),
-                          AppGap.w6,
                           Text(
-                            '${widget.rating.toStringAsFixed(1)}/5',
-                            style: TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.inkDark,
-                            ),
-                          ),
-                          Text(
-                            '  ${widget.reviewsCount} avis',
-                            style: TextStyle(
+                            '${_rating.toStringAsFixed(1)} · $_reviewsCount avis',
+                            style: const TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xFF7A8088),
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
                             ),
                           ),
-                          AppGap.w6,
+                          const Spacer(),
                           const Icon(
                             Icons.arrow_forward_ios_rounded,
-                            size: 12,
-                            color: Color(0xFFADB3BA),
+                            size: 11,
+                            color: Colors.white70,
                           ),
                         ],
                       ),
@@ -360,33 +403,35 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
               ),
             ],
           ),
-          AppGap.h24,
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: AppColors.gray50),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color.fromRGBO(16, 20, 24, 0.04),
-                  blurRadius: 18,
-                  offset: Offset(0, 8),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: DetailMetaChip(
+                  icon: Icons.workspace_premium_rounded,
+                  label: '$_experienceStat d\'experience',
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _StatCard(value: _experienceStat, label: 'Expérience'),
-                _StatDivider(),
-                _StatCard(value: _reliabilityStat, label: 'Fiabilité'),
-                _StatDivider(),
-                _StatCard(value: _responseStat, label: 'Réponse'),
-              ],
-            ),
+              ),
+              const DetailInlineDivider(),
+              Expanded(
+                child: DetailMetaChip(
+                  icon: Icons.assignment_turned_in_outlined,
+                  label: '$_missionsStat missions',
+                ),
+              ),
+              const DetailInlineDivider(),
+              Expanded(
+                child: DetailMetaChip(
+                  icon: Icons.schedule_outlined,
+                  label: 'Repond en $_responseStat',
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -396,29 +441,35 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.gray50),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x08000000),
+              blurRadius: 24,
+              offset: Offset(0, 10),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Tarif proposé',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF6E757D),
+                color: Color(0xFF9AA3AE),
               ),
             ),
             Text(
               widget.proposedPrice!,
-              style: TextStyle(
-                fontSize: 24,
+              style: const TextStyle(
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: AppColors.inkDark,
+                color: AppColors.ink,
               ),
             ),
           ],
@@ -434,6 +485,9 @@ class _AboutSection extends StatelessWidget {
   final CancellationLevel cancellationLevel;
   final String bio;
   final String address;
+  final double? latitude;
+  final double? longitude;
+  final double zoneRadius;
 
   const _AboutSection({
     required this.memberSince,
@@ -441,10 +495,17 @@ class _AboutSection extends StatelessWidget {
     required this.cancellationLevel,
     this.bio = '',
     this.address = '',
+    this.latitude,
+    this.longitude,
+    this.zoneRadius = 10,
   });
 
   @override
   Widget build(BuildContext context) {
+    final center = latitude != null && longitude != null
+        ? LatLng(latitude!, longitude!)
+        : const LatLng(48.8566, 2.3522);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: Column(
@@ -454,98 +515,113 @@ class _AboutSection extends StatelessWidget {
           AppGap.h12,
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.gray50),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 24,
+                  offset: Offset(0, 10),
+                ),
+              ],
             ),
             child: bio.isNotEmpty
                 ? Text(
                     bio,
-                    style: TextStyle(
-                      fontSize: 15,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      height: 1.7,
-                      color: AppColors.inkDark,
+                      height: 1.65,
+                      color: Color(0xFF5F6975),
                     ),
                   )
                 : Text(
                     "Ce prestataire n'a pas encore rédigé sa présentation.",
-                    style: TextStyle(
-                      fontSize: 15,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
                       height: 1.6,
-                                            color: const Color(0xFF9AA1A9),
+                      color: Color(0xFF9AA3AE),
                     ),
                   ),
           ),
           AppGap.h24,
-          const _SectionTitle(title: 'Certification'),
+          const _SectionTitle(title: 'Informations vérifiées'),
           AppGap.h12,
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9F9F9),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF1F1F1)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 24,
+                  offset: Offset(0, 10),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                const _VerificationItem(label: "Pièce d'identité vérifiée"),
-                const Divider(height: 24, color: AppColors.gray100),
-                const _VerificationItem(label: 'Adresse e-mail vérifiée'),
-                const Divider(height: 24, color: AppColors.gray100),
-                const _VerificationItem(label: 'Numéro de téléphone vérifié'),
-                const Divider(height: 24, color: AppColors.gray100),
-                _VerificationItem(label: 'Membre depuis $memberSince'),
-                const Divider(height: 24, color: AppColors.gray100),
-                _VerificationItem(label: '$missionsCount missions réalisées'),
-                const Divider(height: 24, color: AppColors.gray100),
-                _VerificationItem(label: cancellationLevel.label),
+                const _VerificationItem(
+                  label: "Pièce d'identité vérifiée",
+                  verified: true,
+                ),
+                const Divider(height: 1, color: AppColors.gray50, indent: 31),
+                const _VerificationItem(
+                  label: 'Adresse e-mail vérifiée',
+                  verified: true,
+                ),
+                const Divider(height: 1, color: AppColors.gray50, indent: 31),
+                const _VerificationItem(
+                  label: 'Numéro de téléphone vérifié',
+                  verified: true,
+                ),
+                const Divider(height: 1, color: AppColors.gray50, indent: 31),
+                _VerificationItem(
+                  label: cancellationLevel.label,
+                  verified: cancellationLevel == CancellationLevel.never ||
+                      cancellationLevel == CancellationLevel.rarely,
+                  warning: cancellationLevel == CancellationLevel.sometimes,
+                ),
               ],
             ),
           ),
           AppGap.h24,
           const _SectionTitle(title: 'Localisation'),
           AppGap.h12,
-          if (address.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                address,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF5B626A),
-                ),
-              ),
-            ),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFFF1F2F4)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
               boxShadow: const [
                 BoxShadow(
-                  color: Color.fromRGBO(16, 20, 24, 0.03),
-                  blurRadius: 16,
-                  offset: Offset(0, 6),
+                  color: Color(0x08000000),
+                  blurRadius: 24,
+                  offset: Offset(0, 10),
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: SizedBox(
-                height: 220,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    FlutterMap(
-                      options: const MapOptions(
-                        initialCenter: LatLng(48.8566, 2.3522),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 182,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE8EBEF)),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCenter: center,
                         initialZoom: 12,
-                        interactionOptions: InteractionOptions(
+                        interactionOptions: const InteractionOptions(
                           flags: InteractiveFlag.none,
                         ),
                       ),
@@ -556,39 +632,58 @@ class _AboutSection extends StatelessWidget {
                           subdomains: const ['a', 'b', 'c', 'd'],
                           userAgentPackageName: 'com.example.homservice',
                         ),
-                        const MarkerLayer(
+                        MarkerLayer(
                           markers: [
                             Marker(
-                              point: LatLng(48.8566, 2.3522),
+                              point: center,
                               width: 40,
                               height: 40,
-                              child: _MapMarker(),
+                              child: const _MapMarker(),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0x2EFFFFFF), Colors.transparent],
+                  ),
+                  if (address.isNotEmpty) ...[
+                    AppGap.h14,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: Color(0xFF9AA3AE),
+                          ),
                         ),
-                      ),
+                        AppGap.w8,
+                        Expanded(
+                          child: Text(
+                            address,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              height: 1.35,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
+                ],
               ),
             ),
           ),
           AppGap.h10,
           Text(
-            "Zone d'intervention : 10 km autour de ${address.isNotEmpty ? address : 'sa position'}",
-            style: TextStyle(
+            "Zone d'intervention : ${zoneRadius.toInt()} km autour de ${address.isNotEmpty ? address : 'sa position'}",
+            style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF949CA4),
+              color: Color(0xFF5F6975),
             ),
           ),
         ],
@@ -649,7 +744,7 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
           if (cat == null) return const SizedBox.shrink();
           final hasStory = activeIds.contains(catId);
           final isViewed = _viewed.contains(catId);
-          final accent = hasStory ? const Color(0xFFC6A76A) : const Color(0xFFE8EAED);
+          final accent = hasStory ? AppColors.ink : const Color(0xFFE8EAED);
 
           return GestureDetector(
             onTap: hasStory
@@ -677,10 +772,10 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                           ? const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Color(0xFFE7D3A2), Color(0xFFC6A76A)],
+                              colors: [Color(0xFF596372), Color(0xFF2C343F)],
                             )
                           : null,
-                      color: hasStory && isViewed ? const Color(0xFFF0ECE3) : null,
+                      color: hasStory && isViewed ? const Color(0xFFEAEEF3) : null,
                       boxShadow: hasStory
                           ? const [
                               BoxShadow(
@@ -694,10 +789,10 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFFFFFBF6),
+                        color: Colors.white,
                         border: Border.all(
                           color: hasStory
-                              ? accent.withValues(alpha: 0.38)
+                              ? accent.withValues(alpha: 0.26)
                               : const Color(0xFFE8EAED),
                           width: 0.8,
                         ),
@@ -706,7 +801,7 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                         child: Icon(
                           cat.icon,
                           size: 23,
-                          color: hasStory ? AppColors.gray700 : const Color(0xFFB1B7BF),
+                          color: hasStory ? AppColors.ink : const Color(0xFFB1B7BF),
                         ),
                       ),
                     ),
@@ -720,7 +815,7 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
                         fontSize: 11,
                         fontWeight: hasStory ? FontWeight.w600 : FontWeight.w500,
                         letterSpacing: 0.2,
-                        color: hasStory ? AppColors.inkDark : const Color(0xFF9EA5AE),
+                        color: hasStory ? AppColors.ink : const Color(0xFF9EA5AE),
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -753,51 +848,6 @@ class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String value;
-  final String label;
-
-  const _StatCard({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w700,
-              color: AppColors.inkDark,
-            ),
-          ),
-          AppGap.h4,
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.gray600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 34,
-      color: AppColors.gray100,
-    );
-  }
-}
-
 class _SectionTitle extends StatelessWidget {
   final String title;
 
@@ -807,11 +857,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.8,
-        color: const Color(0xFF7A8088),
+      style: const TextStyle(
+        fontSize: 19,
+        fontWeight: FontWeight.w700,
+        color: AppColors.ink,
       ),
     );
   }
@@ -819,30 +868,49 @@ class _SectionTitle extends StatelessWidget {
 
 class _VerificationItem extends StatelessWidget {
   final String label;
+  final bool verified;
+  final bool warning;
 
-  const _VerificationItem({required this.label});
+  const _VerificationItem({
+    required this.label,
+    this.verified = false,
+    this.warning = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.check_rounded,
-          size: 18,
-          color: AppColors.inkDark,
-        ),
-        AppGap.w12,
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14.5,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF353B43),
+    final Color iconColor;
+    final IconData iconData;
+
+    if (warning) {
+      iconColor = const Color(0xFFF59E0B);
+      iconData = Icons.warning_amber_rounded;
+    } else if (verified) {
+      iconColor = const Color(0xFF22C55E);
+      iconData = Icons.check_circle_rounded;
+    } else {
+      iconColor = const Color(0xFFEF4444);
+      iconData = Icons.cancel_rounded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Icon(iconData, size: 17, color: iconColor),
+          AppGap.w14,
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -894,10 +962,153 @@ class _PinTailPainter extends CustomPainter {
   bool shouldRepaint(_) => false;
 }
 
-String _spacedLabel(String value) {
-  return value
-      .toUpperCase()
-      .split('')
-      .where((part) => part.isNotEmpty)
-      .join(' ');
+// ─────────────────────────────────────────────────────────────
+// Pill niveau — typographie normale
+// ─────────────────────────────────────────────────────────────
+class _LevelPill extends StatelessWidget {
+  final String level;
+  const _LevelPill({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    final lower = level.toLowerCase();
+    final IconData icon;
+
+    if (lower == 'ambassadeur') {
+      icon = Icons.workspace_premium_rounded;
+    } else if (lower == 'expert') {
+      icon = Icons.military_tech_rounded;
+    } else if (lower == 'pro') {
+      icon = Icons.verified_rounded;
+    } else {
+      icon = Icons.person_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFFE6E9ED),
+          width: 0.7,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: const Color(0xFF66707C)),
+          const SizedBox(width: 5),
+          Text(
+            level,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Sheet — Inviter à une mission
+// ─────────────────────────────────────────────────────────────
+class _InviteMissionSheet extends StatelessWidget {
+  final String freelancerName;
+  final List<Mission> missions;
+  final VoidCallback onCreateMission;
+
+  const _InviteMissionSheet({
+    required this.freelancerName,
+    required this.missions,
+    required this.onCreateMission,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPickerSheet(
+      title: 'Inviter à une mission',
+      footer: Padding(
+        padding: EdgeInsets.fromLTRB(
+            20, 12, 20, 16 + MediaQuery.of(context).padding.bottom),
+        child: AppButton(
+          label: 'Créer une nouvelle mission',
+          variant: ButtonVariant.outline,
+          icon: Icons.add_rounded,
+          onPressed: onCreateMission,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: missions.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppGap.h16,
+                  Icon(Icons.inbox_outlined,
+                      size: 48, color: context.colors.border),
+                  AppGap.h12,
+                  Text(
+                    'Aucune mission ouverte',
+                    style: context.text.titleSmall
+                        ?.copyWith(color: context.colors.textSecondary),
+                  ),
+                  AppGap.h6,
+                  Text(
+                    'Créez une mission pour inviter $freelancerName',
+                    style: context.text.bodySmall
+                        ?.copyWith(color: context.colors.textTertiary),
+                    textAlign: TextAlign.center,
+                  ),
+                  AppGap.h24,
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: missions
+                    .map(
+                      (m) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: context.colors.surfaceAlt,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.home_repair_service_outlined,
+                            size: 18,
+                            color: context.colors.textSecondary,
+                          ),
+                        ),
+                        title: Text(
+                          m.title,
+                          style: context.text.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          m.status.label,
+                          style: context.text.labelSmall
+                              ?.copyWith(color: context.colors.textTertiary),
+                        ),
+                        trailing: AppButton(
+                          label: 'Inviter',
+                          variant: ButtonVariant.primary,
+                          width: null,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+      ),
+    );
+  }
+}
+

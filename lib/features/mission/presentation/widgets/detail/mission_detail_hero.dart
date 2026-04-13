@@ -93,22 +93,6 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
             ),
           ),
 
-          // ── Gradient bottom (fondu vers le background) ───────────────────
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, context.colors.background],
-                    stops: const [0.72, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           // ── AppBar overlay (back + menu) ─────────────────────────────────
           Positioned(
             top: topPad + 4,
