@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
+import '../../../../profile/profile_provider.dart';
 import 'user_common_widgets.dart';
 
 /// Affiche le bottom sheet de changement de numéro de téléphone.
@@ -121,10 +123,20 @@ class _ChangePhoneSheetState extends State<_ChangePhoneSheet> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.pop(context);
-    // TODO: envoyer OTP de vérification puis appeler l'API
+    final profileProvider = context.read<ProfileProvider>();
+    final current = profileProvider.profile;
+    if (current == null) return;
+    final updated = current.copyWith(phone: _newCtrl.text.trim());
+    final err = await profileProvider.updateProfile(updated);
+    if (!mounted) return;
+    if (err != null) {
+      showAppSnackBar(context, err, type: SnackBarType.error);
+    } else {
+      Navigator.pop(context);
+      showAppSnackBar(context, 'Numéro de téléphone mis à jour', type: SnackBarType.success);
+    }
   }
 }
 

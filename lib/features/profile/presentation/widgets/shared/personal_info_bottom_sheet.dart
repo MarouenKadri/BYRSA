@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
+import '../../../../profile/profile_provider.dart';
 import 'user_common_widgets.dart';
 
 /// Affiche le bottom sheet d'informations personnelles.
@@ -16,14 +18,10 @@ void showPersonalInfoBottomSheet(BuildContext context) {
 class _PersonalInfoSheet extends StatelessWidget {
   const _PersonalInfoSheet();
 
-  // Données non modifiables (récupérées depuis le profil)
-  static const String _firstName = 'Jean';
-  static const String _lastName  = 'Dupont';
-  static final DateTime _birthDate = DateTime(1995, 5, 12);
-  static const String _gender    = 'Homme';
-
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileProvider>().profile;
+
     return AppSheetSurface(
       color: AppColors.snow,
       child: SafeArea(
@@ -67,7 +65,7 @@ class _PersonalInfoSheet extends StatelessWidget {
                       child: _ReadOnlyField(
                         icon: Icons.person_outline_rounded,
                         label: "Prénom",
-                        value: _firstName,
+                        value: profile?.firstName ?? '—',
                       ),
                     ),
                     AppGap.h16,
@@ -75,26 +73,25 @@ class _PersonalInfoSheet extends StatelessWidget {
                       child: _ReadOnlyField(
                         icon: Icons.person_outline_rounded,
                         label: "Nom",
-                        value: _lastName,
+                        value: profile?.lastName ?? '—',
                       ),
                     ),
                     AppGap.h16,
                     _ShadowField(
                       child: _ReadOnlyField(
-                        icon: Icons.cake_outlined,
-                        label: "Date de naissance",
-                        value:
-                            '${_birthDate.day.toString().padLeft(2, '0')}/'
-                            '${_birthDate.month.toString().padLeft(2, '0')}/'
-                            '${_birthDate.year}',
+                        icon: Icons.mail_outline_rounded,
+                        label: "Email",
+                        value: profile?.email ?? '—',
                       ),
                     ),
                     AppGap.h16,
                     _ShadowField(
                       child: _ReadOnlyField(
-                        icon: Icons.wc_rounded,
-                        label: "Genre",
-                        value: _gender,
+                        icon: Icons.phone_outlined,
+                        label: "Téléphone",
+                        value: profile?.phone?.isNotEmpty == true
+                            ? profile!.phone!
+                            : '—',
                       ),
                     ),
                     AppGap.h16,
@@ -119,14 +116,7 @@ class _PersonalInfoSheet extends StatelessWidget {
                 children: [
                   ProfileSheetPrimaryAction(
                     onPressed: () => Navigator.pop(context),
-                    label: "Enregistrer",
-                  ),
-                  AppGap.h12,
-                  Center(
-                    child: ProfileSheetSecondaryAction(
-                      label: "Annuler",
-                      onTap: () => Navigator.pop(context),
-                    ),
+                    label: "Fermer",
                   ),
                 ],
               ),
@@ -196,4 +186,3 @@ class _ReadOnlyField extends StatelessWidget {
     );
   }
 }
-

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../../auth/data/models/service_type.dart';
+import '../../../../profile/profile_provider.dart';
 import 'user_common_widgets.dart';
 
 void showFreelancerProfileBottomSheet(BuildContext context) {
@@ -23,17 +25,29 @@ class _FreelancerProfileSheet extends StatefulWidget {
 }
 
 class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
-  final Set<ServiceType> _selectedSkills = {
-    ServiceType.menage,
-    ServiceType.jardinage,
-    ServiceType.bricolage,
-  };
-
-  final _tarifCtrl = TextEditingController(text: '25');
-  final _bioCtrl = TextEditingController(
-    text: "Prestataire serieux avec 5 ans d'experience dans les services a domicile.",
-  );
+  late final Set<ServiceType> _selectedSkills;
+  late final TextEditingController _tarifCtrl;
+  late final TextEditingController _bioCtrl;
   double _radius = 15;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = context.read<ProfileProvider>().profile;
+    _selectedSkills = {
+      if (profile != null)
+        for (final cat in profile.serviceCategories)
+          ServiceType.values.where((s) => s.name == cat || s.label.toLowerCase() == cat.toLowerCase()).firstOrNull
+        ?? ServiceType.autre,
+    };
+    if (_selectedSkills.isEmpty) {
+      _selectedSkills.addAll([ServiceType.menage, ServiceType.jardinage, ServiceType.bricolage]);
+    }
+    _tarifCtrl = TextEditingController(
+      text: profile?.hourlyRate != null ? profile!.hourlyRate!.toInt().toString() : '25',
+    );
+    _bioCtrl = TextEditingController(text: profile?.bio ?? '');
+  }
 
   @override
   void dispose() {
@@ -371,9 +385,27 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
     }
   }
 
-  void _submit() {
-    Navigator.pop(context);
-    showAppSnackBar(context, 'Activite mise a jour', type: SnackBarType.success);
+  Future<void> _submit() async {
+    final profileProvider = context.read<ProfileProvider>();
+    final current = profileProvider.profile;
+    if (current == null) {
+      Navigator.pop(context);
+      return;
+    }
+    final rate = double.tryParse(_tarifCtrl.text.trim());
+    final updated = current.copyWith(
+      bio: _bioCtrl.text.trim(),
+      hourlyRate: rate,
+      serviceCategories: _selectedSkills.map((s) => s.name).toList(),
+    );
+    final err = await profileProvider.updateProfile(updated);
+    if (!mounted) return;
+    if (err != null) {
+      showAppSnackBar(context, err, type: SnackBarType.error);
+    } else {
+      Navigator.pop(context);
+      showAppSnackBar(context, 'Activité mise à jour', type: SnackBarType.success);
+    }
   }
 }
 

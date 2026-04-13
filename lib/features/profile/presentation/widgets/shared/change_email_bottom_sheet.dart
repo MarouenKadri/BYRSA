@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import 'user_common_widgets.dart';
@@ -136,10 +138,20 @@ class _ChangeEmailSheetState extends State<_ChangeEmailSheet> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.pop(context);
-    // TODO: appeler l'API de changement d'email
+    final err = await context.read<AuthProvider>().updateEmail(_newCtrl.text.trim());
+    if (!mounted) return;
+    if (err != null) {
+      showAppSnackBar(context, err, type: SnackBarType.error);
+    } else {
+      Navigator.pop(context);
+      showAppSnackBar(
+        context,
+        'Email mis à jour. Confirmez via le lien envoyé.',
+        type: SnackBarType.success,
+      );
+    }
   }
 }
 

@@ -73,13 +73,25 @@ class _AccountPageState extends State<AccountPage> {
                   icon: Icons.lock_outline_rounded,
                   title: 'Adresse email',
                   subtitle: "Modifier l'email associé",
-                  onTap: () => showChangeEmailBottomSheet(context),
+                  onTap: () {
+                    final profile = context.read<ProfileProvider>().profile;
+                    showChangeEmailBottomSheet(
+                      context,
+                      currentEmail: profile?.email ?? '',
+                    );
+                  },
                 ),
                 _AccountMenuTile(
                   icon: Icons.phone_iphone_outlined,
                   title: 'Numéro de téléphone',
                   subtitle: 'Modifier le numéro associé',
-                  onTap: () => showChangePhoneBottomSheet(context),
+                  onTap: () {
+                    final profile = context.read<ProfileProvider>().profile;
+                    showChangePhoneBottomSheet(
+                      context,
+                      currentPhone: profile?.phone ?? '',
+                    );
+                  },
                 ),
                 if (isFreelancer)
                   _AccountMenuTile(

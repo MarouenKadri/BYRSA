@@ -426,6 +426,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<String?> updateEmail(String newEmail) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+    try {
+      await _supabase.auth.updateUser(UserAttributes(email: newEmail));
+      return null;
+    } on AuthException catch (e) {
+      error = _friendlyError(e.message);
+      return error;
+    } catch (e) {
+      error = 'Une erreur est survenue';
+      return error;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ─── Suppression de compte ────────────────────────────────────────────────
 
   /// Vérifie le mot de passe puis supprime définitivement le compte.

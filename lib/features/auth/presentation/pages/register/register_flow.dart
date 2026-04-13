@@ -40,6 +40,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
   final _firstCtrl = TextEditingController();
   final _lastCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _passConfirmCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
 
   // ── Field availability checks ─────────────────────────────────────────────
@@ -55,7 +56,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
   File? _photo;
   CountryCode _selectedCountry = kCountries[0];
 
-  static const _totalSteps = 7;
+  static const _totalSteps = 6;
 
   @override
   void initState() {
@@ -64,7 +65,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
       _emailCtrl.text = widget.initialEmail!;
     }
     _emailCtrl.addListener(_onEmailChanged);
-    for (final c in [_firstCtrl, _lastCtrl, _passCtrl]) {
+    for (final c in [_firstCtrl, _lastCtrl, _passCtrl, _passConfirmCtrl]) {
       c.addListener(_rebuild);
     }
     _phoneCtrl.addListener(_onPhoneChanged);
@@ -150,6 +151,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
       _firstCtrl,
       _lastCtrl,
       _passCtrl,
+      _passConfirmCtrl,
       _phoneCtrl,
     ]) {
       c.dispose();
@@ -161,19 +163,19 @@ class _RegisterFlowState extends State<RegisterFlow> {
   bool _canAdvance() {
     switch (_page) {
       case 0:
-        return _emailStatus == _FieldCheckStatus.available;
-      case 1:
         return _firstCtrl.text.trim().isNotEmpty &&
             _lastCtrl.text.trim().isNotEmpty;
+      case 1:
+        return _emailStatus == _FieldCheckStatus.available &&
+            _phoneStatus == _FieldCheckStatus.available;
       case 2:
         return _birthDate != null && _gender != null;
       case 3:
-        return _passCtrl.text.length >= 8;
+        return _passCtrl.text.length >= 8 &&
+            _passConfirmCtrl.text == _passCtrl.text;
       case 4:
-        return _phoneStatus == _FieldCheckStatus.available;
-      case 5:
         return _userType != null;
-      case 6:
+      case 5:
         return true;
       default:
         return false;
@@ -184,11 +186,14 @@ class _RegisterFlowState extends State<RegisterFlow> {
   Future<void> _goNext() async {
     switch (_page) {
       case 0:
-        _data.email = _emailCtrl.text.trim();
-        _advance();
-      case 1:
         _data.firstName = _firstCtrl.text.trim();
         _data.lastName = _lastCtrl.text.trim();
+        _advance();
+      case 1:
+        _data.email = _emailCtrl.text.trim();
+        final digits = _phoneCtrl.text.replaceAll(' ', '');
+        final stripped = digits.startsWith('0') ? digits.substring(1) : digits;
+        _data.phone = '${_selectedCountry.dialCode}$stripped';
         _advance();
       case 2:
         _data.birthDate = _birthDate;
@@ -198,18 +203,13 @@ class _RegisterFlowState extends State<RegisterFlow> {
         _data.password = _passCtrl.text;
         _advance();
       case 4:
-        final digits = _phoneCtrl.text.replaceAll(' ', '');
-        final stripped = digits.startsWith('0') ? digits.substring(1) : digits;
-        _data.phone = '${_selectedCountry.dialCode}$stripped';
-        _advance();
-      case 5:
         _data.userType = _userType;
         if (_userType == UserType.freelancer) {
           _advance();
         } else {
           await _submit();
         }
-      case 6:
+      case 5:
         _data.photo = _photo;
         await _submit();
     }
@@ -255,7 +255,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
   void _onUserTypeSelected(UserType t) {
     setState(() => _userType = t);
     Future.delayed(const Duration(milliseconds: 300), () {
-      if (!mounted || _page != 5) return;
+      if (!mounted || _page != 4) return;
       _data.userType = t;
       if (t == UserType.freelancer) {
         _advance();
@@ -270,7 +270,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
   Widget build(BuildContext context) {
     final kbH = MediaQuery.of(context).viewInsets.bottom;
     final kbOpen = kbH > 50;
-    const textSteps = {0, 1, 2, 4, 5};
+    const textSteps = {0, 1, 2, 3};
     final kbOnTextStep = kbOpen && textSteps.contains(_page);
     final showKbBar = kbOnTextStep && _canAdvance();
 
@@ -288,11 +288,10 @@ class _RegisterFlowState extends State<RegisterFlow> {
                   totalSteps: _totalSteps,
                   onBack: _goBack,
                   stepLabel: const [
-                    'Adresse e-mail',
                     'Prénom & Nom',
+                    'Email & Téléphone',
                     'Identité',
                     'Mot de passe',
-                    'Téléphone',
                     'Votre rôle',
                     'Photo de profil',
                   ][_page],
@@ -304,17 +303,12 @@ class _RegisterFlowState extends State<RegisterFlow> {
                     physics: const NeverScrollableScrollPhysics(),
                     onPageChanged: (i) => setState(() => _page = i),
                     children: [
-                      _EmailPage(ctrl: _emailCtrl, status: _emailStatus),
                       _NamePage(firstCtrl: _firstCtrl, lastCtrl: _lastCtrl),
-                      _BirthdateGenderPage(
-                        selectedGender: _gender,
-                        onGenderChanged: (g) => setState(() => _gender = g),
-                        onBirthdateChanged: (d) => setState(() => _birthDate = d),
-                      ),
-                      _PasswordPage(ctrl: _passCtrl),
-                      _PhonePage(
-                        ctrl: _phoneCtrl,
-                        status: _phoneStatus,
+                      _EmailPhonePage(
+                        emailCtrl: _emailCtrl,
+                        emailStatus: _emailStatus,
+                        phoneCtrl: _phoneCtrl,
+                        phoneStatus: _phoneStatus,
                         country: _selectedCountry,
                         onCountryChanged: (c) => setState(() {
                           _selectedCountry = c;
@@ -322,6 +316,12 @@ class _RegisterFlowState extends State<RegisterFlow> {
                           _phoneStatus = _FieldCheckStatus.idle;
                         }),
                       ),
+                      _BirthdateGenderPage(
+                        selectedGender: _gender,
+                        onGenderChanged: (g) => setState(() => _gender = g),
+                        onBirthdateChanged: (d) => setState(() => _birthDate = d),
+                      ),
+                      _PasswordPage(ctrl: _passCtrl, confirmCtrl: _passConfirmCtrl),
                       _UserTypePage(
                         selected: _userType,
                         onSelected: _onUserTypeSelected,
@@ -355,8 +355,8 @@ class _RegisterFlowState extends State<RegisterFlow> {
   }
 
   Widget _buildBottom() {
-    // Page 8 — Photo: full-width submit
-    if (_page == 6) {
+    // Page 6 — Photo: full-width submit
+    if (_page == 5) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         child: Column(
@@ -511,13 +511,25 @@ Widget _pageHeader(BuildContext context, String title, String subtitle) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Page 0 — Email
+// Page 0 — Email + Téléphone (fusionnés)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _EmailPage extends StatelessWidget {
-  final TextEditingController ctrl;
-  final _FieldCheckStatus status;
-  const _EmailPage({required this.ctrl, required this.status});
+class _EmailPhonePage extends StatelessWidget {
+  final TextEditingController emailCtrl;
+  final _FieldCheckStatus emailStatus;
+  final TextEditingController phoneCtrl;
+  final _FieldCheckStatus phoneStatus;
+  final CountryCode country;
+  final ValueChanged<CountryCode> onCountryChanged;
+
+  const _EmailPhonePage({
+    required this.emailCtrl,
+    required this.emailStatus,
+    required this.phoneCtrl,
+    required this.phoneStatus,
+    required this.country,
+    required this.onCountryChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -528,21 +540,33 @@ class _EmailPage extends StatelessWidget {
         children: [
           _pageHeader(
             context,
-            'Votre email',
-            'Pour vous connecter à votre compte',
+            'Vos coordonnées',
+            'Email et téléphone pour votre compte',
           ),
           AppGap.h36,
           AppTextField(
             label: 'Adresse email',
             hint: 'exemple@mail.com',
             prefixIcon: Icons.email_outlined,
-            controller: ctrl,
+            controller: emailCtrl,
             keyboardType: TextInputType.emailAddress,
           ),
           AppGap.h12,
           _FieldStatusRow(
-            status: status,
+            status: emailStatus,
             takenMessage: 'Cet email est déjà utilisé',
+          ),
+          AppGap.h24,
+          AppPhoneField(
+            label: 'Téléphone',
+            controller: phoneCtrl,
+            initialCountry: country,
+            onCountryChanged: onCountryChanged,
+          ),
+          AppGap.h12,
+          _FieldStatusRow(
+            status: phoneStatus,
+            takenMessage: 'Ce numéro est déjà utilisé',
           ),
         ],
       ),
@@ -770,11 +794,11 @@ class _BirthdateGenderPageState extends State<_BirthdateGenderPage> {
     }
   }
 
-  IconData _icon(Gender g) {
+  ({IconData icon, String emoji}) _genderMeta(Gender g) {
     switch (g) {
-      case Gender.homme: return Icons.person_rounded;
-      case Gender.femme: return Icons.face_3_rounded;
-      case Gender.autre: return Icons.people_rounded;
+      case Gender.homme: return (icon: Icons.person_rounded, emoji: '♂');
+      case Gender.femme: return (icon: Icons.face_3_rounded, emoji: '♀');
+      case Gender.autre: return (icon: Icons.people_rounded, emoji: '⚧');
     }
   }
 
@@ -795,9 +819,9 @@ class _BirthdateGenderPageState extends State<_BirthdateGenderPage> {
             errorText: _error,
           ),
 
-          AppGap.h32,
+          AppGap.h36,
 
-          // ── Genre ──
+          // ── Genre — label ──
           Text(
             'Votre genre',
             style: context.text.bodyMedium?.copyWith(
@@ -805,17 +829,70 @@ class _BirthdateGenderPageState extends State<_BirthdateGenderPage> {
               color: context.colors.textPrimary,
             ),
           ),
-          AppGap.h16,
-          ...Gender.values.map(
-            (g) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _SelectableCard(
-                icon: _icon(g),
-                label: g.label,
-                isSelected: widget.selectedGender == g,
-                onTap: () => widget.onGenderChanged(g),
-              ),
+          AppGap.h4,
+          Text(
+            'Cette information reste privée',
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textTertiary,
             ),
+          ),
+          AppGap.h16,
+
+          // ── Genre — pills ──
+          Row(
+            children: Gender.values.map((g) {
+              final selected = widget.selectedGender == g;
+              final meta = _genderMeta(g);
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: g != Gender.values.last ? 10 : 0,
+                  ),
+                  child: GestureDetector(
+                    onTap: () => widget.onGenderChanged(g),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? context.colors.textPrimary
+                            : context.colors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: selected
+                              ? context.colors.textPrimary
+                              : context.colors.border,
+                          width: selected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            meta.icon,
+                            size: 26,
+                            color: selected
+                                ? Colors.white
+                                : context.colors.textSecondary,
+                          ),
+                          AppGap.h8,
+                          Text(
+                            g.label,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: selected
+                                  ? Colors.white
+                                  : context.colors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -829,10 +906,12 @@ class _BirthdateGenderPageState extends State<_BirthdateGenderPage> {
 
 class _PasswordPage extends StatelessWidget {
   final TextEditingController ctrl;
-  const _PasswordPage({required this.ctrl});
+  final TextEditingController confirmCtrl;
+  const _PasswordPage({required this.ctrl, required this.confirmCtrl});
 
   @override
   Widget build(BuildContext context) {
+    final mismatch = confirmCtrl.text.isNotEmpty && confirmCtrl.text != ctrl.text;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
       child: Column(
@@ -852,8 +931,32 @@ class _PasswordPage extends StatelessWidget {
             obscureText: true,
           ),
           AppGap.h16,
-          // Strength indicator
           _StrengthBar(password: ctrl.text),
+          AppGap.h20,
+          AppTextField(
+            label: 'Confirmer le mot de passe',
+            hint: '••••••••',
+            prefixIcon: Icons.lock_outline_rounded,
+            controller: confirmCtrl,
+            obscureText: true,
+          ),
+          if (mismatch) ...[
+            AppGap.h8,
+            Row(
+              children: [
+                const Icon(Icons.cancel_rounded, size: 14, color: AppColors.error),
+                AppGap.w6,
+                Text(
+                  'Les mots de passe ne correspondent pas',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -933,53 +1036,6 @@ class _StrengthBar extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Page 5 — Numéro de téléphone avec sélecteur de pays
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _PhonePage extends StatelessWidget {
-  final TextEditingController ctrl;
-  final _FieldCheckStatus status;
-  final CountryCode country;
-  final ValueChanged<CountryCode> onCountryChanged;
-
-  const _PhonePage({
-    required this.ctrl,
-    required this.status,
-    required this.country,
-    required this.onCountryChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _pageHeader(
-            context,
-            'Votre numéro de téléphone',
-            'Pour être contacté par les clients',
-          ),
-          AppGap.h36,
-          AppPhoneField(
-            label: 'Téléphone',
-            controller: ctrl,
-            initialCountry: country,
-            onCountryChanged: onCountryChanged,
-          ),
-          AppGap.h12,
-          _FieldStatusRow(
-            status: status,
-            takenMessage: 'Ce numéro est déjà utilisé',
-          ),
-        ],
-      ),
     );
   }
 }

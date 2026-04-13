@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import 'user_common_widgets.dart';
@@ -141,10 +143,16 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.pop(context);
-    // TODO: appeler l'API de changement de mot de passe
+    final err = await context.read<AuthProvider>().updatePassword(_newCtrl.text.trim());
+    if (!mounted) return;
+    if (err != null) {
+      showAppSnackBar(context, err, type: SnackBarType.error);
+    } else {
+      Navigator.pop(context);
+      showAppSnackBar(context, 'Mot de passe mis à jour', type: SnackBarType.success);
+    }
   }
 }
 
