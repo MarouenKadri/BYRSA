@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -22,109 +23,102 @@ class _PersonalInfoSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().profile;
 
-    return AppSheetSurface(
-      color: AppColors.snow,
-      child: SafeArea(
-        top: false,
+    return AppFormSheet(
+      title: "Informations personnelles",
+      footer: Column(
+        children: [
+          ProfileSheetPrimaryAction(
+            onPressed: () => Navigator.pop(context),
+            label: "Fermer",
+          ),
+        ],
+      ),
+      child: ProfileSheetSection(
+        icon: Icons.person_outline_rounded,
+        title: 'Identité',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Header ───────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Column(
-                children: [
-                  const AppBottomSheetHandle(),
-                  AppGap.h20,
-                  Text(
-                    "Informations personnelles",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                  AppGap.h16,
-                  Divider(color: context.colors.divider, height: 1),
-                ],
-              ),
-            ),
-
-            // ── Contenu ───────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: ProfileSheetSection(
+            _ShadowField(
+              child: _ReadOnlyField(
                 icon: Icons.person_outline_rounded,
-                title: 'Identité',
-                child: Column(
-                  children: [
-                    _ShadowField(
-                      child: _ReadOnlyField(
-                        icon: Icons.person_outline_rounded,
-                        label: "Prénom",
-                        value: profile?.firstName ?? '—',
-                      ),
-                    ),
-                    AppGap.h16,
-                    _ShadowField(
-                      child: _ReadOnlyField(
-                        icon: Icons.person_outline_rounded,
-                        label: "Nom",
-                        value: profile?.lastName ?? '—',
-                      ),
-                    ),
-                    AppGap.h16,
-                    _ShadowField(
-                      child: _ReadOnlyField(
-                        icon: Icons.mail_outline_rounded,
-                        label: "Email",
-                        value: profile?.email ?? '—',
-                      ),
-                    ),
-                    AppGap.h16,
-                    _ShadowField(
-                      child: _ReadOnlyField(
-                        icon: Icons.phone_outlined,
-                        label: "Téléphone",
-                        value: profile?.phone?.isNotEmpty == true
-                            ? profile!.phone!
-                            : '—',
-                      ),
-                    ),
-                    AppGap.h16,
-                    Text(
-                      'Ces informations ne peuvent pas être modifiées après inscription.',
-                      style: context.text.bodySmall?.copyWith(
-                        color: const Color(0xFF7A858F),
-                        height: 1.45,
-                      ),
-                    ),
-                  ],
-                ),
+                label: "Prénom",
+                value: profile?.firstName ?? '—',
               ),
             ),
-
-            // ── Footer ────────────────────────────────────────────────────
-            AppGap.h20,
-            Divider(color: context.colors.divider, height: 1),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Column(
-                children: [
-                  ProfileSheetPrimaryAction(
-                    onPressed: () => Navigator.pop(context),
-                    label: "Fermer",
-                  ),
-                ],
+            AppGap.h16,
+            _ShadowField(
+              child: _ReadOnlyField(
+                icon: Icons.person_outline_rounded,
+                label: "Nom",
+                value: profile?.lastName ?? '—',
+              ),
+            ),
+            AppGap.h16,
+            _ShadowField(
+              child: _ReadOnlyField(
+                icon: Icons.mail_outline_rounded,
+                label: "Email",
+                value: profile?.email ?? '—',
+              ),
+            ),
+            AppGap.h16,
+            _ShadowField(
+              child: _ReadOnlyField(
+                icon: Icons.phone_outlined,
+                label: "Téléphone",
+                value: profile?.phone?.isNotEmpty == true
+                    ? profile!.phone!
+                    : '—',
+              ),
+            ),
+            AppGap.h16,
+            _ShadowField(
+              child: _ReadOnlyField(
+                icon: Icons.cake_outlined,
+                label: "Date de naissance",
+                value: _formatBirthDate(profile?.birthDate),
+              ),
+            ),
+            AppGap.h16,
+            _ShadowField(
+              child: _ReadOnlyField(
+                icon: Icons.wc_outlined,
+                label: "Genre",
+                value: _formatGender(profile?.gender),
+              ),
+            ),
+            AppGap.h16,
+            Text(
+              'Ces informations ne peuvent pas être modifiées après inscription.',
+              style: context.text.bodySmall?.copyWith(
+                color: const Color(0xFF7A858F),
+                height: 1.45,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+String _formatBirthDate(DateTime? birthDate) {
+  if (birthDate == null) return '—';
+  return DateFormat('dd/MM/yyyy', 'fr_FR').format(birthDate);
+}
+
+String _formatGender(String? gender) {
+  switch (gender) {
+    case 'homme':
+      return 'Homme';
+    case 'femme':
+      return 'Femme';
+    case 'autre':
+      return 'Autre';
+    default:
+      return '—';
   }
 }
 

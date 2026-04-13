@@ -305,73 +305,72 @@ class WalletPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => AppSheetSurface(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppSheetHeader(title: 'Retirer des fonds'),
-            AppGap.h8,
-            Text(
-              'Solde disponible : 245,50 €',
-              style: context.profileSecondaryLabelStyle,
-            ),
-            AppGap.h24,
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: AppInputDecorations.formField(
-                context,
-                hintText: 'Ex: 100',
-              ).copyWith(
-                labelText: 'Montant à retirer',
-                labelStyle: context.profileSheetFieldLabelStyle,
-                suffixText: '€',
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppFormSheet(
+          title: 'Retirer des fonds',
+          footer: AppButton(
+            label: 'Retirer',
+            onPressed: () => Navigator.pop(context),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Solde disponible : 245,50 €',
+                style: context.profileSecondaryLabelStyle,
               ),
-              style: context.profileValueStyle.copyWith(
-                fontSize: AppFontSize.h2,
-                fontWeight: FontWeight.w700,
+              AppGap.h24,
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: AppInputDecorations.formField(
+                  context,
+                  hintText: 'Ex: 100',
+                ).copyWith(
+                  labelText: 'Montant à retirer',
+                  labelStyle: context.profileSheetFieldLabelStyle,
+                  suffixText: '€',
+                ),
+                style: context.profileValueStyle.copyWith(
+                  fontSize: AppFontSize.h2,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            AppGap.h12,
-            Row(
-              children: [
-                AppPillChip(label: '50 €', onTap: () {}, padding: AppInsets.h12v8),
-                AppGap.w8,
-                AppPillChip(label: '100 €', onTap: () {}, padding: AppInsets.h12v8),
-                AppGap.w8,
-                AppPillChip(label: '200 €', onTap: () {}, padding: AppInsets.h12v8),
-                AppGap.w8,
-                AppPillChip(label: 'Tout', onTap: () {}, padding: AppInsets.h12v8),
-              ],
-            ),
-            AppGap.h24,
-            AppSurfaceCard(
-              padding: AppInsets.a12,
-              color: AppColors.lightBlue,
-              borderRadius: BorderRadius.circular(AppDesign.radius10),
-              child: Row(
+              AppGap.h12,
+              Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, color: AppColors.info, size: 20),
-                  AppGap.w10,
-                  Expanded(
-                    child: Text(
-                      'Le virement sera effectué sous 2-3 jours ouvrés',
-                      style: context.profileSecondaryLabelStyle.copyWith(
-                        color: AppColors.info,
-                      ),
-                    ),
-                  ),
+                  AppPillChip(label: '50 €', onTap: () {}, padding: AppInsets.h12v8),
+                  AppGap.w8,
+                  AppPillChip(label: '100 €', onTap: () {}, padding: AppInsets.h12v8),
+                  AppGap.w8,
+                  AppPillChip(label: '200 €', onTap: () {}, padding: AppInsets.h12v8),
+                  AppGap.w8,
+                  AppPillChip(label: 'Tout', onTap: () {}, padding: AppInsets.h12v8),
                 ],
               ),
-            ),
-            AppGap.h24,
-            AppButton(
-              label: 'Retirer',
-              onPressed: () => Navigator.pop(context),
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
+              AppGap.h24,
+              AppSurfaceCard(
+                padding: AppInsets.a12,
+                color: AppColors.lightBlue,
+                borderRadius: BorderRadius.circular(AppDesign.radius10),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: AppColors.info, size: 20),
+                    AppGap.w10,
+                    Expanded(
+                      child: Text(
+                        'Le virement sera effectué sous 2-3 jours ouvrés',
+                        style: context.profileSecondaryLabelStyle.copyWith(
+                          color: AppColors.info,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -382,60 +381,59 @@ class WalletPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => AppSheetSurface(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppSheetHeader(title: 'Ajouter des fonds'),
-            AppGap.h24,
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: AppInputDecorations.formField(
-                context,
-                hintText: 'Ex: 50',
-              ).copyWith(
-                labelText: 'Montant',
-                labelStyle: context.profileSheetFieldLabelStyle,
-                suffixText: '€',
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppFormSheet(
+          title: 'Ajouter des fonds',
+          footer: AppButton(
+            label: 'Ajouter',
+            onPressed: () => Navigator.pop(context),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: AppInputDecorations.formField(
+                  context,
+                  hintText: 'Ex: 50',
+                ).copyWith(
+                  labelText: 'Montant',
+                  labelStyle: context.profileSheetFieldLabelStyle,
+                  suffixText: '€',
+                ),
+                style: context.profileValueStyle.copyWith(
+                  fontSize: AppFontSize.h2,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              style: context.profileValueStyle.copyWith(
-                fontSize: AppFontSize.h2,
-                fontWeight: FontWeight.w700,
+              AppGap.h16,
+              Text(
+                'Carte de paiement',
+                style: context.profilePrimaryLabelStyle.copyWith(fontSize: AppFontSize.base),
               ),
-            ),
-            AppGap.h16,
-            Text(
-              'Carte de paiement',
-              style: context.profilePrimaryLabelStyle.copyWith(fontSize: AppFontSize.base),
-            ),
-            AppGap.h8,
-            AppSurfaceCard(
-              padding: AppInsets.a12,
-              color: context.colors.background,
-              borderRadius: BorderRadius.circular(AppDesign.radius10),
-              border: Border.all(color: AppColors.primary),
-              child: Row(
-                children: [
-                  Icon(Icons.credit_card_rounded, color: AppColors.info),
-                  AppGap.w12,
-                  Text(
-                    'Visa •••• 4242',
-                    style: context.profilePrimaryLabelStyle,
-                  ),
-                  const Spacer(),
-                  Icon(Icons.check_circle_rounded, color: AppColors.primary),
-                ],
+              AppGap.h8,
+              AppSurfaceCard(
+                padding: AppInsets.a12,
+                color: context.colors.background,
+                borderRadius: BorderRadius.circular(AppDesign.radius10),
+                border: Border.all(color: AppColors.primary),
+                child: Row(
+                  children: [
+                    Icon(Icons.credit_card_rounded, color: AppColors.info),
+                    AppGap.w12,
+                    Text(
+                      'Visa •••• 4242',
+                      style: context.profilePrimaryLabelStyle,
+                    ),
+                    const Spacer(),
+                    Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                  ],
+                ),
               ),
-            ),
-            AppGap.h24,
-            AppButton(
-              label: 'Ajouter',
-              onPressed: () => Navigator.pop(context),
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -446,63 +444,62 @@ class WalletPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => AppSheetSurface(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const AppSheetHeader(title: 'Ajouter une carte'),
-            AppGap.h24,
-            TextField(
-              decoration: AppInputDecorations.formField(
-                context,
-                hintText: '1234 5678 9012 3456',
-                prefixIcon: const Icon(Icons.credit_card_rounded),
-              ).copyWith(
-                labelText: 'Numéro de carte',
-                labelStyle: context.profileSheetFieldLabelStyle,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppFormSheet(
+          title: 'Ajouter une carte',
+          footer: AppButton(
+            label: 'Ajouter la carte',
+            onPressed: () => Navigator.pop(context),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                decoration: AppInputDecorations.formField(
+                  context,
+                  hintText: '1234 5678 9012 3456',
+                  prefixIcon: const Icon(Icons.credit_card_rounded),
+                ).copyWith(
+                  labelText: 'Numéro de carte',
+                  labelStyle: context.profileSheetFieldLabelStyle,
+                ),
+                keyboardType: TextInputType.number,
               ),
-              keyboardType: TextInputType.number,
-            ),
-            AppGap.h12,
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: AppInputDecorations.formField(
-                      context,
-                      hintText: 'MM/AA',
-                    ).copyWith(
-                      labelText: 'Date d\'expiration',
-                      labelStyle: context.profileSheetFieldLabelStyle,
+              AppGap.h12,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: AppInputDecorations.formField(
+                        context,
+                        hintText: 'MM/AA',
+                      ).copyWith(
+                        labelText: 'Date d\'expiration',
+                        labelStyle: context.profileSheetFieldLabelStyle,
+                      ),
+                      keyboardType: TextInputType.number,
                     ),
-                    keyboardType: TextInputType.number,
                   ),
-                ),
-                AppGap.w12,
-                Expanded(
-                  child: TextField(
-                    decoration: AppInputDecorations.formField(
-                      context,
-                      hintText: '123',
-                    ).copyWith(
-                      labelText: 'CVV',
-                      labelStyle: context.profileSheetFieldLabelStyle,
+                  AppGap.w12,
+                  Expanded(
+                    child: TextField(
+                      decoration: AppInputDecorations.formField(
+                        context,
+                        hintText: '123',
+                      ).copyWith(
+                        labelText: 'CVV',
+                        labelStyle: context.profileSheetFieldLabelStyle,
+                      ),
+                      keyboardType: TextInputType.number,
+                      obscureText: true,
                     ),
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
                   ),
-                ),
-              ],
-            ),
-            AppGap.h24,
-            AppButton(
-              label: 'Ajouter la carte',
-              onPressed: () => Navigator.pop(context),
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

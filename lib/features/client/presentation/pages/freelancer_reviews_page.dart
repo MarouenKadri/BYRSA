@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
-import '../../../reviews/data/models/review.dart';
+import '../../../reviews/domain/entities/review.dart';
+import '../../../reviews/domain/value_objects/satisfaction.dart';
+import '../../../reviews/presentation/mappers/satisfaction_ui.dart';
+import '../../../reviews/presentation/utils/review_formatters.dart';
 
 /// Page des avis reçus par un freelancer — vue CLIENT
 class FreelancerReviewsPage extends StatelessWidget {
@@ -184,7 +187,7 @@ class FreelancerReviewsPage extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppDesign.radius4),
-                  child: LinearProgressIndicator(
+                child: LinearProgressIndicator(
                     value: pct,
                     backgroundColor: context.colors.border,
                     valueColor: AlwaysStoppedAnimation<Color>(s.color),
@@ -214,11 +217,6 @@ class _ReviewCard extends StatelessWidget {
   final Review review;
   const _ReviewCard({required this.review});
 
-  String _fmt(DateTime dt) {
-    const m = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-    return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final s = review.satisfaction;
@@ -244,7 +242,7 @@ class _ReviewCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     )),
                 const Spacer(),
-                Text(_fmt(review.createdAt),
+                Text(formatReviewDate(review.createdAt),
                     style: context.text.labelMedium?.copyWith(
                       fontSize: AppFontSize.sm,
                       color: context.colors.textTertiary,

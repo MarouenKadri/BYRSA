@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../tokens/app_colors.dart';
+import '../tokens/app_typography.dart';
 import '../tokens/app_spacing.dart';
 import '../tokens/app_radius.dart';
 import '../theme/app_theme.dart';
@@ -85,6 +87,357 @@ class AppSheetHeader extends StatelessWidget {
         AppGap.h14,
         Divider(color: context.colors.divider, height: 1),
       ],
+    );
+  }
+}
+
+class AppFormSheet extends StatelessWidget {
+  final String title;
+  final Widget child;
+  final Widget? footer;
+  final EdgeInsetsGeometry contentPadding;
+  final Color? color;
+
+  const AppFormSheet({
+    super.key,
+    required this.title,
+    required this.child,
+    this.footer,
+    this.contentPadding = const EdgeInsets.fromLTRB(20, 16, 20, 24),
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSheetSurface(
+      color: color ?? AppColors.snow,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: contentPadding,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AppBottomSheetHandle(),
+                  AppGap.h20,
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFontSize.title,
+                      fontWeight: FontWeight.w300,
+                      color: context.colors.textPrimary,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  AppGap.h16,
+                  Divider(color: context.colors.divider, height: 1),
+                  AppGap.h24,
+                  child,
+                ],
+              ),
+            ),
+            if (footer != null) ...[
+              Divider(color: context.colors.divider, height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: footer!,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AppPickerSheet extends StatelessWidget {
+  final String title;
+  final Widget child;
+  final Widget? footer;
+  final bool dark;
+  final Alignment titleAlignment;
+  final EdgeInsetsGeometry contentPadding;
+
+  const AppPickerSheet({
+    super.key,
+    required this.title,
+    required this.child,
+    this.footer,
+    this.dark = false,
+    this.titleAlignment = Alignment.centerLeft,
+    this.contentPadding = const EdgeInsets.fromLTRB(20, 0, 20, 0),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sheet = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const AppBottomSheetHandle(),
+        AppGap.h12,
+        Padding(
+          padding: contentPadding,
+          child: Align(
+            alignment: titleAlignment,
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: dark ? AppColors.snow : context.colors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+        AppGap.h8,
+        child,
+        if (footer != null) footer!,
+      ],
+    );
+
+    if (dark) {
+      return AppDarkSheet(child: sheet);
+    }
+    return AppSheetSurface(color: context.colors.sheetBg, child: sheet);
+  }
+}
+
+class AppActionSheet extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+  final Widget? header;
+  final bool dark;
+
+  const AppActionSheet({
+    super.key,
+    required this.title,
+    required this.children,
+    this.header,
+    this.dark = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const AppBottomSheetHandle(),
+        if (header != null) ...[
+          header!,
+        ] else ...[
+          AppGap.h12,
+          Padding(
+            padding: AppInsets.h20,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: dark ? AppColors.snow : context.colors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+          AppGap.h8,
+        ],
+        ...children,
+        SizedBox(height: 12 + bottom),
+      ],
+    );
+
+    if (dark) {
+      return AppDarkSheet(child: content);
+    }
+    return AppSheetSurface(color: context.colors.sheetBg, child: content);
+  }
+}
+
+class AppActionSheetItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final bool destructive;
+  final bool dark;
+
+  const AppActionSheetItem({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+    this.destructive = false,
+    this.dark = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final titleColor = destructive
+        ? const Color(0xFFE57373)
+        : dark
+            ? AppColors.snow
+            : context.colors.textPrimary;
+    final iconColor = destructive
+        ? const Color(0xFFE57373)
+        : dark
+            ? const Color(0xFFD5DADE)
+            : context.colors.textSecondary;
+    final subtitleColor = dark ? AppColors.gray500 : context.colors.textSecondary;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 21, color: iconColor),
+            AppGap.w14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: titleColor,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    AppGap.h2,
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AppScrollableSheet extends StatelessWidget {
+  final String? title;
+  final Widget? trailing;
+  final Widget? header;
+  final Widget? footer;
+  final Color? color;
+  final double initialChildSize;
+  final double minChildSize;
+  final double maxChildSize;
+  final Widget Function(BuildContext context, ScrollController controller)
+  builder;
+
+  const AppScrollableSheet({
+    super.key,
+    required this.builder,
+    this.title,
+    this.trailing,
+    this.header,
+    this.footer,
+    this.color,
+    this.initialChildSize = 0.7,
+    this.minChildSize = 0.4,
+    this.maxChildSize = 0.95,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: initialChildSize,
+      minChildSize: minChildSize,
+      maxChildSize: maxChildSize,
+      builder: (context, controller) => AppSheetSurface(
+        color: color ?? context.colors.sheetBg,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (header != null) ...[
+              header!,
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Column(
+                  children: [
+                    if (title == null && trailing == null)
+                      const Center(child: AppBottomSheetHandle())
+                    else
+                      Row(
+                        children: [
+                          if (title == null)
+                            const Expanded(
+                              child: Center(child: AppBottomSheetHandle()),
+                            )
+                          else
+                            const Expanded(
+                              child: Center(child: AppBottomSheetHandle()),
+                            ),
+                          if (trailing != null) trailing!,
+                        ],
+                      ),
+                    if (title != null) ...[
+                      AppGap.h12,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: AppFontSize.title,
+                                fontWeight: FontWeight.w300,
+                                color: context.colors.textPrimary,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          ),
+                          if (trailing != null) ...[
+                            AppGap.w8,
+                            SizedBox(width: 40, child: trailing!),
+                          ],
+                        ],
+                      ),
+                      AppGap.h16,
+                      Divider(color: context.colors.divider, height: 1),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+            Expanded(child: builder(context, controller)),
+            if (footer != null) ...[
+              Divider(color: context.colors.divider, height: 1),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                  child: footer!,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

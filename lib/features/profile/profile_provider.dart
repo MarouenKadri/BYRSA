@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -41,7 +42,39 @@ class ProfileProvider extends ChangeNotifier {
           .select()
           .eq('id', userId)
           .single();
-      profile = UserProfile.fromJson({...row, 'email': currentUserEmail});
+      final metadata = _supabase.auth.currentUser?.userMetadata ?? {};
+      final mergedRow = <String, dynamic>{
+        ...row,
+        'email': currentUserEmail,
+        'birth_date': (row['birth_date'] as String?)?.isNotEmpty == true
+            ? row['birth_date']
+            : metadata['birth_date'],
+        'gender': (row['gender'] as String?)?.isNotEmpty == true
+            ? row['gender']
+            : metadata['gender'],
+      };
+
+      profile = UserProfile.fromJson(mergedRow);
+
+      final needsBirthDateBackfill =
+          (row['birth_date'] as String?)?.isNotEmpty != true &&
+          mergedRow['birth_date'] != null;
+      final needsGenderBackfill =
+          (row['gender'] as String?)?.isNotEmpty != true &&
+          mergedRow['gender'] != null;
+
+      if (needsBirthDateBackfill || needsGenderBackfill) {
+        final patch = <String, dynamic>{};
+        if (needsBirthDateBackfill) {
+          patch['birth_date'] = mergedRow['birth_date'];
+        }
+        if (needsGenderBackfill) {
+          patch['gender'] = mergedRow['gender'];
+        }
+        unawaited(
+          _supabase.from('profiles').update(patch).eq('id', userId),
+        );
+      }
     } catch (e) {
       debugPrint('loadProfile error: $e');
       error = 'Impossible de charger le profil';

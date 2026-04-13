@@ -30,52 +30,38 @@ class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
 
   void _showCardOptions(BuildContext context, int index) {
     final card = _cards[index];
-    final bottom = MediaQuery.of(context).padding.bottom;
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      child: AppDarkSheet(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h12,
-            Padding(
-              padding: AppInsets.h20,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${card.brand} •••• ${card.last4}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.snow),
-                ),
-              ),
-            ),
-            AppGap.h8,
-            if (!card.isDefault)
-              _SheetRow(
-                icon: Icons.star_outline_rounded,
-                label: 'Définir par défaut',
-                onTap: () { Navigator.pop(context); _setDefault(index); },
-              ),
-            if (!card.isDefault)
-              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-            _SheetRow(
-              icon: Icons.delete_outline_rounded,
-              label: 'Supprimer la carte',
-              isDestructive: true,
+      child: AppActionSheet(
+        title: '${card.brand} •••• ${card.last4}',
+        children: [
+          if (!card.isDefault)
+            AppActionSheetItem(
+              icon: Icons.star_outline_rounded,
+              title: 'Définir par défaut',
               onTap: () {
                 Navigator.pop(context);
-                _showDeleteConfirm(
-                  context,
-                  title: 'Supprimer la carte ?',
-                  subtitle: '${card.brand} •••• ${card.last4} sera supprimée définitivement.',
-                  onConfirm: () => _removeCard(index),
-                );
+                _setDefault(index);
               },
             ),
-            SizedBox(height: 12 + bottom),
-          ],
-        ),
+          if (!card.isDefault)
+            const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          AppActionSheetItem(
+            icon: Icons.delete_outline_rounded,
+            title: 'Supprimer la carte',
+            destructive: true,
+            onTap: () {
+              Navigator.pop(context);
+              _showDeleteConfirm(
+                context,
+                title: 'Supprimer la carte ?',
+                subtitle: '${card.brand} •••• ${card.last4} sera supprimée définitivement.',
+                onConfirm: () => _removeCard(index),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -395,75 +381,59 @@ class _AddCardSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppSheetSurface(
-        color: AppColors.snow,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const AppBottomSheetHandle(),
-                AppGap.h20,
-                Text(
-                  'Ajouter une carte',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFontSize.title,
-                    fontWeight: FontWeight.w300,
-                    color: context.colors.textPrimary,
-                    letterSpacing: 0.1,
-                  ),
-                ),
-                AppGap.h16,
-                Divider(color: context.colors.divider, height: 1),
-                AppGap.h24,
-                _ShadowField(child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                  decoration: AppInputDecorations.profileField(context,
-                    hintText: 'Numéro de carte',
-                    prefixIcon: const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFFB0BAC4)),
-                  ),
-                )),
-                AppGap.h16,
-                Row(children: [
-                  Expanded(child: _ShadowField(child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                    decoration: AppInputDecorations.profileField(context, hintText: 'MM/AA'),
-                  ))),
-                  AppGap.w12,
-                  Expanded(child: _ShadowField(child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                    decoration: AppInputDecorations.profileField(context, hintText: 'CVV'),
-                  ))),
-                ]),
-                AppGap.h16,
-                _ShadowField(child: TextFormField(
-                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                  decoration: AppInputDecorations.profileField(context,
-                    hintText: 'Titulaire de la carte',
-                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
-                  ),
-                )),
-                AppGap.h32,
-                ProfileSheetPrimaryAction(
-                  label: 'Ajouter la carte',
-                  onPressed: () => Navigator.pop(context),
-                ),
-                AppGap.h12,
-                Center(child: ProfileSheetSecondaryAction(
-                  label: 'Annuler',
-                  onTap: () => Navigator.pop(context),
-                )),
-              ],
+      child: AppFormSheet(
+        title: 'Ajouter une carte',
+        footer: Column(
+          children: [
+            ProfileSheetPrimaryAction(
+              label: 'Ajouter la carte',
+              onPressed: () => Navigator.pop(context),
             ),
-          ),
+            AppGap.h12,
+            Center(
+              child: ProfileSheetSecondaryAction(
+                label: 'Annuler',
+                onTap: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _ShadowField(child: TextFormField(
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+              decoration: AppInputDecorations.profileField(context,
+                hintText: 'Numéro de carte',
+                prefixIcon: const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFFB0BAC4)),
+              ),
+            )),
+            AppGap.h16,
+            Row(children: [
+              Expanded(child: _ShadowField(child: TextFormField(
+                keyboardType: TextInputType.number,
+                style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                decoration: AppInputDecorations.profileField(context, hintText: 'MM/AA'),
+              ))),
+              AppGap.w12,
+              Expanded(child: _ShadowField(child: TextFormField(
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+                decoration: AppInputDecorations.profileField(context, hintText: 'CVV'),
+              ))),
+            ]),
+            AppGap.h16,
+            _ShadowField(child: TextFormField(
+              style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+              decoration: AppInputDecorations.profileField(context,
+                hintText: 'Titulaire de la carte',
+                prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+              ),
+            )),
+          ],
         ),
       ),
     );
@@ -481,65 +451,52 @@ class _DeleteConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSheetSurface(
-      color: AppColors.snow,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const AppBottomSheetHandle(),
-              AppGap.h24,
-              Center(
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
-                ),
-              ),
-              AppGap.h16,
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFontSize.title,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textPrimary,
-                ),
-              ),
-              AppGap.h8,
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: context.text.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-              AppGap.h28,
-              AppButton(
-                label: 'Supprimer',
-                variant: ButtonVariant.destructive,
-                onPressed: () {
-                  Navigator.pop(context);
-                  onConfirm();
-                },
-              ),
-              AppGap.h12,
-              Center(child: ProfileSheetSecondaryAction(
-                label: 'Annuler',
-                onTap: () => Navigator.pop(context),
-              )),
-            ],
+    return AppFormSheet(
+      title: title,
+      footer: Column(
+        children: [
+          AppButton(
+            label: 'Supprimer',
+            variant: ButtonVariant.destructive,
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
           ),
-        ),
+          AppGap.h12,
+          Center(
+            child: ProfileSheetSecondaryAction(
+              label: 'Annuler',
+              onTap: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
+            ),
+          ),
+          AppGap.h16,
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }

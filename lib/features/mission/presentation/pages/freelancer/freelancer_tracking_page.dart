@@ -215,51 +215,45 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage>
               ),
             ),
           ),
-          DraggableScrollableSheet(
+          AppScrollableSheet(
             initialChildSize: 0.38,
             minChildSize: 0.24,
             maxChildSize: 0.68,
-            builder: (_, controller) => AppSheetSurface(
-              child: ListView(
-                controller: controller,
-                padding: EdgeInsets.zero,
-                children: [
-                  const Center(child: AppBottomSheetHandle()),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                    child: _FreelancerTrackingPanel(
-                      mission: _mission,
-                      etaMinutes: _etaMinutes,
-                      onStartRoute: _mission.status == MissionStatus.confirmed
-                          ? () => _updateStatus(MissionStatus.onTheWay)
+            builder: (_, controller) => ListView(
+              controller: controller,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              children: [
+                _FreelancerTrackingPanel(
+                  mission: _mission,
+                  etaMinutes: _etaMinutes,
+                  onStartRoute: _mission.status == MissionStatus.confirmed
+                      ? () => _updateStatus(MissionStatus.onTheWay)
+                      : null,
+                  onEnterStartCode:
+                      _mission.status == MissionStatus.confirmed ||
+                              _mission.status == MissionStatus.onTheWay
+                          ? _openStartCodeSheet
                           : null,
-                      onEnterStartCode:
-                          _mission.status == MissionStatus.confirmed ||
-                                  _mission.status == MissionStatus.onTheWay
-                              ? _openStartCodeSheet
-                              : null,
-                      startCodeHint: _mission.startCode,
-                      onCopyHint: _mission.startCode == null
-                          ? null
-                          : () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: _mission.startCode!),
-                              );
-                              if (context.mounted) {
-                                showAppSnackBar(
-                                  context,
-                                  'Code copie pour test local',
-                                  icon: Icons.copy_rounded,
-                                );
-                              }
-                            },
-                      onFinishMission: _mission.status == MissionStatus.inProgress
-                          ? () => _updateStatus(MissionStatus.completionRequested)
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
+                  startCodeHint: _mission.startCode,
+                  onCopyHint: _mission.startCode == null
+                      ? null
+                      : () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: _mission.startCode!),
+                          );
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              'Code copie pour test local',
+                              icon: Icons.copy_rounded,
+                            );
+                          }
+                        },
+                  onFinishMission: _mission.status == MissionStatus.inProgress
+                      ? () => _updateStatus(MissionStatus.completionRequested)
+                      : null,
+                ),
+              ],
             ),
           ),
         ],
@@ -317,22 +311,14 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomPad = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18, 0, 18, 18 + bottomPad),
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPad),
+      child: AppFormSheet(
+        title: 'Entrer le code client',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(child: AppBottomSheetHandle()),
-            AppGap.h18,
-            Text(
-              'Entrer le code client',
-              style: context.text.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            AppGap.h8,
             Text(
               'Demandez au client le code de demarrage pour lancer "${widget.missionTitle}".',
               style: context.text.bodyMedium?.copyWith(
@@ -359,33 +345,32 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
                 errorText: _error,
               ),
             ),
-            AppGap.h16,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _verify,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Verifier le code'),
+          ],
+        ),
+        footer: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _loading ? null : _verify,
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
-          ],
+            child: _loading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Verifier le code'),
+          ),
         ),
       ),
     );

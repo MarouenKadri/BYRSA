@@ -39,99 +39,67 @@ class _ChangeEmailSheetState extends State<_ChangeEmailSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppSheetSurface(
-        // Fond #FAFAFA opaque — override du blanc translucide par défaut
-        color: AppColors.snow,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Handle ────────────────────────────────────────────────
-                  const AppBottomSheetHandle(),
-                  AppGap.h20,
-
-                  // ── Titre Inter Light centré ──────────────────────────────
-                  Text(
-                    "Adresse email",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                  AppGap.h16,
-                  Divider(color: context.colors.divider, height: 1),
-                  AppGap.h24,
-
-                  // ── Email actuel (lecture seule) ─────────────────────────
-                  _ShadowField(
-                    child: _ReadOnlyField(
-                      label: "Email actuel",
-                      value: widget.currentEmail.isNotEmpty
-                          ? widget.currentEmail
-                          : "user@example.com",
-                    ),
-                  ),
-                  AppGap.h16,
-
-                  // ── Nouvel email ─────────────────────────────────────────
-                  _ShadowField(
-                    child: _EmailField(
-                      controller: _newCtrl,
-                      label: "Nouvel email",
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return "Champ requis";
-                        if (!RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$').hasMatch(v)) {
-                          return "Adresse email invalide";
-                        }
-                        if (v == widget.currentEmail) {
-                          return "Doit être différent de l'email actuel";
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  AppGap.h16,
-
-                  // ── Confirmation ─────────────────────────────────────────
-                  _ShadowField(
-                    child: _EmailField(
-                      controller: _confirmCtrl,
-                      label: "Confirmer le nouvel email",
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return "Champ requis";
-                        if (v != _newCtrl.text) return "Les emails ne correspondent pas";
-                        return null;
-                      },
-                    ),
-                  ),
-                  AppGap.h32,
-
-                  // ── CTA principal noir pilule ─────────────────────────────
-                  ProfileSheetPrimaryAction(
-                    onPressed: _submit,
-                    label: "Enregistrer",
-                  ),
-                  AppGap.h12,
-
-                  // ── CTA secondaire discret ────────────────────────────────
-                  Center(
-                    child: ProfileSheetSecondaryAction(
-                      label: "Annuler",
-                      onTap: () => Navigator.pop(context),
-                    ),
-                  ),
-                ],
+      child: Form(
+        key: _formKey,
+        child: AppFormSheet(
+          title: "Adresse email",
+          footer: Column(
+            children: [
+              ProfileSheetPrimaryAction(
+                onPressed: _submit,
+                label: "Enregistrer",
               ),
-            ),
+              AppGap.h12,
+              Center(
+                child: ProfileSheetSecondaryAction(
+                  label: "Annuler",
+                  onTap: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ShadowField(
+                child: _ReadOnlyField(
+                  label: "Email actuel",
+                  value: widget.currentEmail.isNotEmpty
+                      ? widget.currentEmail
+                      : "user@example.com",
+                ),
+              ),
+              AppGap.h16,
+              _ShadowField(
+                child: _EmailField(
+                  controller: _newCtrl,
+                  label: "Nouvel email",
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Champ requis";
+                    if (!RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$').hasMatch(v)) {
+                      return "Adresse email invalide";
+                    }
+                    if (v == widget.currentEmail) {
+                      return "Doit être différent de l'email actuel";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              AppGap.h16,
+              _ShadowField(
+                child: _EmailField(
+                  controller: _confirmCtrl,
+                  label: "Confirmer le nouvel email",
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Champ requis";
+                    if (v != _newCtrl.text) return "Les emails ne correspondent pas";
+                    return null;
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

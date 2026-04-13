@@ -58,74 +58,39 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
+    return AppScrollableSheet(
+      title: 'Mon activité',
       initialChildSize: 0.92,
       minChildSize: 0.6,
       maxChildSize: 0.95,
-      builder: (_, scrollController) => AppSheetSurface(
-        color: AppColors.snow,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Column(
-                children: [
-                  const AppBottomSheetHandle(),
-                  AppGap.h20,
-                  Text(
-                    "Mon activité",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                  AppGap.h16,
-                  Divider(color: context.colors.divider, height: 1),
-                ],
-              ),
+      color: AppColors.snow,
+      builder: (_, scrollController) => ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+        children: [
+          _buildAboutSection(),
+          const SizedBox(height: 28),
+          _buildSkillsSection(),
+          const SizedBox(height: 28),
+          _buildRayonSection(),
+          const SizedBox(height: 28),
+          _buildTarifSection(),
+        ],
+      ),
+      footer: Column(
+        children: [
+          ProfileSheetPrimaryAction(
+            onPressed: _submit,
+            label: "Enregistrer",
+          ),
+          AppGap.h12,
+          Center(
+            child: ProfileSheetSecondaryAction(
+              label: "Annuler",
+              onTap: () => Navigator.pop(context),
             ),
-            Expanded(
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
-                children: [
-                  _buildAboutSection(),
-                  const SizedBox(height: 28),
-                  _buildSkillsSection(),
-                  const SizedBox(height: 28),
-                  _buildRayonSection(),
-                  const SizedBox(height: 28),
-                  _buildTarifSection(),
-                ],
-              ),
-            ),
-            Divider(color: context.colors.divider, height: 1),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-                child: Column(
-                  children: [
-                    ProfileSheetPrimaryAction(
-                      onPressed: _submit,
-                      label: "Enregistrer",
-                    ),
-                    AppGap.h12,
-                    Center(
-                      child: ProfileSheetSecondaryAction(
-                        label: "Annuler",
-                        onTap: () => Navigator.pop(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

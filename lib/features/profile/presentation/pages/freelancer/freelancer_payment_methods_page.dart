@@ -17,53 +17,39 @@ class _FreelancerPaymentMethodsPageState
   bool _autoPayoutEnabled = false;
 
   void _showIbanOptions(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      child: AppDarkSheet(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppBottomSheetHandle(),
-            AppGap.h12,
-            const Padding(
-              padding: AppInsets.h20,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Compte bancaire',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.snow),
+      child: AppActionSheet(
+        title: 'Compte bancaire',
+        children: [
+          AppActionSheetItem(
+            icon: Icons.edit_outlined,
+            title: 'Modifier l\'IBAN',
+            onTap: () {
+              Navigator.pop(context);
+              _showEditIbanSheet(context);
+            },
+          ),
+          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          AppActionSheetItem(
+            icon: Icons.delete_outline_rounded,
+            title: 'Supprimer le compte',
+            destructive: true,
+            onTap: () {
+              Navigator.pop(context);
+              showAppBottomSheet(
+                context: context,
+                wrapWithSurface: false,
+                child: _DeleteConfirmSheet(
+                  title: 'Supprimer le compte ?',
+                  subtitle: 'Le compte FR76 •••• 1234 sera supprimé définitivement.',
+                  onConfirm: () {},
                 ),
-              ),
-            ),
-            AppGap.h8,
-            _SheetRow(
-              icon: Icons.edit_outlined,
-              label: 'Modifier l\'IBAN',
-              onTap: () { Navigator.pop(context); _showEditIbanSheet(context); },
-            ),
-            const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-            _SheetRow(
-              icon: Icons.delete_outline_rounded,
-              label: 'Supprimer le compte',
-              isDestructive: true,
-              onTap: () {
-                Navigator.pop(context);
-                showAppBottomSheet(
-                  context: context,
-                  wrapWithSurface: false,
-                  child: _DeleteConfirmSheet(
-                    title: 'Supprimer le compte ?',
-                    subtitle: 'Le compte FR76 •••• 1234 sera supprimé définitivement.',
-                    onConfirm: () {},
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 12 + bottom),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -442,64 +428,48 @@ class _IbanSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppSheetSurface(
-        color: AppColors.snow,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const AppBottomSheetHandle(),
-                AppGap.h20,
-                Text(
-                  isEdit ? 'Modifier l\'IBAN' : 'Ajouter un compte',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFontSize.title,
-                    fontWeight: FontWeight.w300,
-                    color: context.colors.textPrimary,
-                    letterSpacing: 0.1,
-                  ),
-                ),
-                AppGap.h16,
-                Divider(color: context.colors.divider, height: 1),
-                AppGap.h24,
-                _ShadowField(child: TextFormField(
-                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                  decoration: AppInputDecorations.profileField(context,
-                    hintText: 'IBAN',
-                    prefixIcon: const Icon(Icons.account_balance_rounded, size: 16, color: Color(0xFFB0BAC4)),
-                  ),
-                )),
-                AppGap.h16,
-                _ShadowField(child: TextFormField(
-                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                  decoration: AppInputDecorations.profileField(context, hintText: 'BIC / SWIFT'),
-                )),
-                AppGap.h16,
-                _ShadowField(child: TextFormField(
-                  style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-                  decoration: AppInputDecorations.profileField(context,
-                    hintText: 'Titulaire du compte',
-                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
-                  ),
-                )),
-                AppGap.h32,
-                ProfileSheetPrimaryAction(
-                  label: isEdit ? 'Enregistrer' : 'Ajouter',
-                  onPressed: () => Navigator.pop(context),
-                ),
-                AppGap.h12,
-                Center(child: ProfileSheetSecondaryAction(
-                  label: 'Annuler',
-                  onTap: () => Navigator.pop(context),
-                )),
-              ],
+      child: AppFormSheet(
+        title: isEdit ? 'Modifier l\'IBAN' : 'Ajouter un compte',
+        footer: Column(
+          children: [
+            ProfileSheetPrimaryAction(
+              label: isEdit ? 'Enregistrer' : 'Ajouter',
+              onPressed: () => Navigator.pop(context),
             ),
-          ),
+            AppGap.h12,
+            Center(
+              child: ProfileSheetSecondaryAction(
+                label: 'Annuler',
+                onTap: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _ShadowField(child: TextFormField(
+              style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+              decoration: AppInputDecorations.profileField(context,
+                hintText: 'IBAN',
+                prefixIcon: const Icon(Icons.account_balance_rounded, size: 16, color: Color(0xFFB0BAC4)),
+              ),
+            )),
+            AppGap.h16,
+            _ShadowField(child: TextFormField(
+              style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+              decoration: AppInputDecorations.profileField(context, hintText: 'BIC / SWIFT'),
+            )),
+            AppGap.h16,
+            _ShadowField(child: TextFormField(
+              style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
+              decoration: AppInputDecorations.profileField(context,
+                hintText: 'Titulaire du compte',
+                prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+              ),
+            )),
+          ],
         ),
       ),
     );
@@ -517,65 +487,52 @@ class _DeleteConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSheetSurface(
-      color: AppColors.snow,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const AppBottomSheetHandle(),
-              AppGap.h24,
-              Center(
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
-                ),
-              ),
-              AppGap.h16,
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFontSize.title,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textPrimary,
-                ),
-              ),
-              AppGap.h8,
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: context.text.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-              AppGap.h28,
-              AppButton(
-                label: 'Supprimer',
-                variant: ButtonVariant.destructive,
-                onPressed: () {
-                  Navigator.pop(context);
-                  onConfirm();
-                },
-              ),
-              AppGap.h12,
-              Center(child: ProfileSheetSecondaryAction(
-                label: 'Annuler',
-                onTap: () => Navigator.pop(context),
-              )),
-            ],
+    return AppFormSheet(
+      title: title,
+      footer: Column(
+        children: [
+          AppButton(
+            label: 'Supprimer',
+            variant: ButtonVariant.destructive,
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
           ),
-        ),
+          AppGap.h12,
+          Center(
+            child: ProfileSheetSecondaryAction(
+              label: 'Annuler',
+              onTap: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
+            ),
+          ),
+          AppGap.h16,
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }

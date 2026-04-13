@@ -791,95 +791,32 @@ class ClientActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppDarkSheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppBottomSheetHandle(),
-          AppGap.h12,
-          Padding(
-            padding: AppInsets.h20,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Options',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.snow,
-                    ),
-                  ),
-                ),
-              ),
-              AppGap.h8,
-              if (canModify) ...[
-                _SheetRow(
-                  icon: Icons.edit_outlined,
-                  label: 'Modifier la mission',
-                  onTap: onEdit,
-                ),
-                const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-              ],
-              _SheetRow(
-                icon: Icons.ios_share_outlined,
-                label: 'Partager la mission',
-                onTap: onShare,
-              ),
-              if (canCancel) ...[
-                const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-                _SheetRow(
-                  icon: Icons.delete_outline,
-                  label: 'Annuler la mission',
-                  isDestructive: true,
-                  onTap: onCancel,
-                ),
-              ],
-              SizedBox(height: 12 + bottom),
-            ],
-      ),
-    );
-  }
-}
-
-class _SheetRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  const _SheetRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isDestructive ? const Color(0xFFE57373) : AppColors.snow;
-    final iconColor = isDestructive ? const Color(0xFFE57373) : const Color(0xFFD5DADE);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        child: Row(
-          children: [
-            Icon(icon, size: 21, color: iconColor),
-            AppGap.w14,
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
-              ),
-            ),
-          ],
+    return AppActionSheet(
+      title: 'Options',
+      children: [
+        if (canModify) ...[
+          AppActionSheetItem(
+            icon: Icons.edit_outlined,
+            title: 'Modifier la mission',
+            onTap: onEdit,
+          ),
+          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        ],
+        AppActionSheetItem(
+          icon: Icons.ios_share_outlined,
+          title: 'Partager la mission',
+          onTap: onShare,
         ),
-      ),
+        if (canCancel) ...[
+          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          AppActionSheetItem(
+            icon: Icons.delete_outline,
+            title: 'Annuler la mission',
+            destructive: true,
+            onTap: onCancel,
+          ),
+        ],
+      ],
     );
   }
 }
@@ -905,67 +842,69 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppDarkSheet(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottom),
+    return AppActionSheet(
+      title: 'Annuler la mission ?',
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const AppBottomSheetHandle(),
-                AppGap.h20,
-                Text(
-                  'Annuler la mission ?',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.snow,
-                  ),
-                ),
-                AppGap.h6,
-                Text(
-                  widget.missionTitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.gray500,
-                  ),
-                ),
-                AppGap.h24,
-                const Divider(height: 1, color: Color(0x1FFFFFFF)),
-                AppGap.h24,
-                AppButton(
-                  label: 'Confirmer l\'annulation',
-                  variant: ButtonVariant.destructive,
-                  isLoading: _loading,
-                  onPressed: _loading
-                      ? null
-                      : () {
-                          HapticFeedback.heavyImpact();
-                          setState(() => _loading = true);
-                          widget.onConfirm();
-                        },
-                ),
-                AppGap.h14,
-                Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Text(
-                      'Garder la mission',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.gray500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Annuler la mission ?',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+                color: AppColors.snow,
+              ),
+            ),
+            AppGap.h6,
+            Text(
+              widget.missionTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: AppColors.gray500,
+              ),
+            ),
+            AppGap.h24,
+            const Divider(height: 1, color: Color(0x1FFFFFFF)),
+            AppGap.h24,
+          ],
         ),
       ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: AppButton(
+            label: 'Confirmer l\'annulation',
+            variant: ButtonVariant.destructive,
+            isLoading: _loading,
+            onPressed: _loading
+                ? null
+                : () {
+                    HapticFeedback.heavyImpact();
+                    setState(() => _loading = true);
+                    widget.onConfirm();
+                  },
+          ),
+        ),
+        AppGap.h14,
+        Center(
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Text(
+              'Garder la mission',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.gray500,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

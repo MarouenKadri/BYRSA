@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -463,121 +462,88 @@ class _CategoryPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+    return AppPickerSheet(
+      title: "Quel talent montrez-vous aujourd'hui ?",
+      dark: true,
+      child: Flexible(
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.78,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const AppBottomSheetHandle(),
-              AppGap.h12,
-              Padding(
-                padding: AppInsets.h20,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Quel talent montrez-vous aujourd'hui ?",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.snow,
+          itemCount: ServiceCategory.all.length,
+          itemBuilder: (_, i) {
+            final cat = ServiceCategory.all[i];
+            final isSelected = selected == cat.id;
+            return AnimatedOpacity(
+              duration: const Duration(milliseconds: 180),
+              opacity: isSelected ? 1 : 0.72,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context, cat.id),
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 180),
+                  scale: isSelected ? 1.05 : 1,
+                  curve: Curves.easeOut,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF4B8DFF).withValues(alpha: 0.60)
+                            : Colors.transparent,
+                        width: isSelected ? 1.1 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? const [
+                              BoxShadow(
+                                color: Color.fromRGBO(75, 141, 255, 0.24),
+                                blurRadius: 14,
+                                offset: Offset(0, 4),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _storyCategoryIcon(cat.id),
+                          size: 24,
+                          color: isSelected
+                              ? AppColors.snow
+                              : const Color(0xFFBFC5CB),
+                        ),
+                        AppGap.h8,
+                        Text(
+                          cat.name,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.snow
+                                : const Color(0xFFB0B0B0),
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              AppGap.h8,
-              Flexible(
-                child: GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.78,
-                  ),
-                  itemCount: ServiceCategory.all.length,
-                  itemBuilder: (_, i) {
-                    final cat = ServiceCategory.all[i];
-                    final isSelected = selected == cat.id;
-                    return AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      opacity: isSelected ? 1 : 0.72,
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context, cat.id),
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 180),
-                          scale: isSelected ? 1.05 : 1,
-                          curve: Curves.easeOut,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            curve: Curves.easeOut,
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18),
-                              color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFF4B8DFF).withValues(alpha: 0.60)
-                                    : Colors.transparent,
-                                width: isSelected ? 1.1 : 1,
-                              ),
-                              boxShadow: isSelected
-                                  ? const [
-                                      BoxShadow(
-                                        color: Color.fromRGBO(75, 141, 255, 0.24),
-                                        blurRadius: 14,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  _storyCategoryIcon(cat.id),
-                                  size: 24,
-                                  color: isSelected
-                                      ? AppColors.snow
-                                      : const Color(0xFFBFC5CB),
-                                ),
-                                AppGap.h8,
-                                Text(
-                                  cat.name,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                    color: isSelected
-                                        ? AppColors.snow
-                                        : const Color(0xFFB0B0B0),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 16 + bottom),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

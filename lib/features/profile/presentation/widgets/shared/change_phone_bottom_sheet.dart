@@ -38,85 +38,56 @@ class _ChangePhoneSheetState extends State<_ChangePhoneSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppSheetSurface(
-        color: AppColors.snow,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Handle ────────────────────────────────────────────────
-                  const AppBottomSheetHandle(),
-                  AppGap.h20,
-
-                  // ── Titre Inter Light centré ──────────────────────────────
-                  Text(
-                    "Numéro de téléphone",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                  AppGap.h16,
-                  Divider(color: context.colors.divider, height: 1),
-                  AppGap.h24,
-
-                  // ── Numéro actuel (lecture seule) ─────────────────────────
-                  _ShadowField(
-                    child: _ReadOnlyField(
-                      label: "Numéro actuel",
-                      value: widget.currentPhone.isNotEmpty
-                          ? widget.currentPhone
-                          : "+33 6 •• •• •• ••",
-                    ),
-                  ),
-                  AppGap.h16,
-
-                  // ── Nouveau numéro ────────────────────────────────────────
-                  _ShadowField(
-                    child: _PhoneField(
-                      controller: _newCtrl,
-                      label: "Nouveau numéro",
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return "Champ requis";
-                        final digits = v.replaceAll(RegExp(r'\D'), '');
-                        if (digits.length < 8 || digits.length > 15) {
-                          return "Numéro de téléphone invalide";
-                        }
-                        if (v == widget.currentPhone) {
-                          return "Doit être différent du numéro actuel";
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  AppGap.h32,
-
-                  // ── CTA principal noir pilule ─────────────────────────────
-                  ProfileSheetPrimaryAction(
-                    onPressed: _submit,
-                    label: "Enregistrer",
-                  ),
-                  AppGap.h12,
-
-                  // ── CTA secondaire discret ────────────────────────────────
-                  Center(
-                    child: ProfileSheetSecondaryAction(
-                      label: "Annuler",
-                      onTap: () => Navigator.pop(context),
-                    ),
-                  ),
-                ],
+      child: Form(
+        key: _formKey,
+        child: AppFormSheet(
+          title: "Numéro de téléphone",
+          footer: Column(
+            children: [
+              ProfileSheetPrimaryAction(
+                onPressed: _submit,
+                label: "Enregistrer",
               ),
-            ),
+              AppGap.h12,
+              Center(
+                child: ProfileSheetSecondaryAction(
+                  label: "Annuler",
+                  onTap: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ShadowField(
+                child: _ReadOnlyField(
+                  label: "Numéro actuel",
+                  value: widget.currentPhone.isNotEmpty
+                      ? widget.currentPhone
+                      : "+33 6 •• •• •• ••",
+                ),
+              ),
+              AppGap.h16,
+              _ShadowField(
+                child: _PhoneField(
+                  controller: _newCtrl,
+                  label: "Nouveau numéro",
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Champ requis";
+                    final digits = v.replaceAll(RegExp(r'\D'), '');
+                    if (digits.length < 8 || digits.length > 15) {
+                      return "Numéro de téléphone invalide";
+                    }
+                    if (v == widget.currentPhone) {
+                      return "Doit être différent du numéro actuel";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

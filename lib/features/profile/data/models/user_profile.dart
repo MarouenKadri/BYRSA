@@ -4,6 +4,8 @@ class UserProfile {
   final String lastName;
   final String? email;
   final String? phone;
+  final DateTime? birthDate;
+  final String? gender;
   final String? avatarUrl;
   final String? bio;
   final String? address;
@@ -18,6 +20,8 @@ class UserProfile {
     required this.lastName,
     this.email,
     this.phone,
+    this.birthDate,
+    this.gender,
     this.avatarUrl,
     this.bio,
     this.address,
@@ -36,6 +40,10 @@ class UserProfile {
         lastName: json['last_name'] as String? ?? '',
         email: json['email'] as String?,
         phone: json['phone'] as String?,
+        birthDate: json['birth_date'] != null
+            ? DateTime.tryParse(json['birth_date'] as String)
+            : null,
+        gender: json['gender'] as String?,
         avatarUrl: json['avatar_url'] as String?,
         bio: json['bio'] as String?,
         address: json['address'] as String?,
@@ -49,6 +57,9 @@ class UserProfile {
         'first_name': firstName,
         'last_name': lastName,
         'phone': phone,
+        if (birthDate != null)
+          'birth_date': birthDate!.toIso8601String().split('T').first,
+        if (gender != null) 'gender': gender,
         'bio': bio,
         'address': address,
         if (hourlyRate != null) 'hourly_rate': hourlyRate,
@@ -58,6 +69,8 @@ class UserProfile {
     String? firstName,
     String? lastName,
     String? phone,
+    DateTime? birthDate,
+    String? gender,
     String? avatarUrl,
     String? bio,
     String? address,
@@ -70,6 +83,8 @@ class UserProfile {
         lastName: lastName ?? this.lastName,
         email: email,
         phone: phone ?? this.phone,
+        birthDate: birthDate ?? this.birthDate,
+        gender: gender ?? this.gender,
         avatarUrl: avatarUrl ?? this.avatarUrl,
         bio: bio ?? this.bio,
         address: address ?? this.address,

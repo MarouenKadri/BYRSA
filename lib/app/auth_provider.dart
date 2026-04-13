@@ -311,6 +311,8 @@ class AuthProvider extends ChangeNotifier {
             'first_name': data.firstName,
             'last_name': data.lastName,
             'phone': data.phone,
+            'birth_date': data.birthDate?.toIso8601String().split('T').first,
+            'gender': data.gender?.name,
             'user_type': data.userType?.name,
             if (avatarUrl != null) 'avatar_url': avatarUrl,
           });

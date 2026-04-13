@@ -208,14 +208,11 @@ class _SecurityPageState extends State<SecurityPage> {
       context: context,
       wrapWithSurface: false,
       builder: (context) {
-        final bottomPad = MediaQuery.of(context).padding.bottom;
-        return AppSheetSurface(
+        return AppPickerSheet(
+          title: 'Double authentification',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AppBottomSheetHandle(),
-              AppGap.h16,
-
               InkWell(
                 onTap: () {
                   Navigator.pop(context);
@@ -256,18 +253,18 @@ class _SecurityPageState extends State<SecurityPage> {
                   subtitle: 'Google Authenticator, Authy...',
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsets.only(top: 12, bottom: 16 + bottomPad),
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Text(
-                    'Fermer',
-                    style: context.profileTertiaryStyle,
-                  ),
-                ),
-              ),
             ],
+          ),
+          footer: Padding(
+            padding: EdgeInsets.only(top: 12, bottom: 16 + MediaQuery.of(context).padding.bottom),
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Text(
+                'Fermer',
+                style: context.profileTertiaryStyle,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         );
       },

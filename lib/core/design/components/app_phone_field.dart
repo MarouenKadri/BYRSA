@@ -44,11 +44,11 @@ class _AppPhoneFieldState extends AppBaseFieldState<AppPhoneField> {
   }
 
   Future<void> _showCountryPicker() async {
-    await showModalBottomSheet(
+    await showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => CountryPickerSheet(
+      wrapWithSurface: false,
+      child: CountryPickerSheet(
         selected: _country,
         onSelected: (c) {
           setState(() => _country = c);

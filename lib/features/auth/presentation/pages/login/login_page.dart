@@ -174,11 +174,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showCountryPicker() {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      wrapWithSurface: false,
       isScrollControlled: true,
-      builder: (_) => CountryPickerSheet(
+      child: CountryPickerSheet(
         selected: _selectedCountry,
         onSelected: (c) {
           Navigator.pop(context);

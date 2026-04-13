@@ -373,30 +373,60 @@ class _MyPostsPageState extends State<MyPostsPage> {
 
   Widget _buildEmpty(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: const BoxDecoration(
-                color: AppColors.primaryLight, shape: BoxShape.circle),
-            child: const Icon(Icons.auto_stories_rounded,
-                size: 36, color: AppColors.primary),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: AppSurfaceCard(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: context.colors.border),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceAlt,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.auto_stories_rounded,
+                  size: 26,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              AppGap.h16,
+              Text(
+                'Aucune publication pour le moment',
+                textAlign: TextAlign.center,
+                style: context.text.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              AppGap.h8,
+              Text(
+                'Ajoutez une photo pour commencer.',
+                textAlign: TextAlign.center,
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.colors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+              AppGap.h18,
+              AppButton(
+                label: 'Ajouter',
+                variant: ButtonVariant.secondary,
+                icon: Icons.add_rounded,
+                iconTrailing: false,
+                width: 170,
+                height: 48,
+                onPressed: () => pickAndOpenComposer(context),
+              ),
+            ],
           ),
-          AppGap.h16,
-          Text('Aucune publication', style: context.text.titleLarge),
-          AppGap.h8,
-          Text('Publiez vos premières réalisations photo',
-              style: context.text.bodySmall),
-          AppGap.h24,
-          AppButton(
-            label: 'Ajouter une publication',
-            variant: ButtonVariant.primary,
-            icon: Icons.add_a_photo_rounded,
-            onPressed: () => pickAndOpenComposer(context),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -417,85 +447,27 @@ class _StoryOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppDarkSheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppBottomSheetHandle(),
-          AppGap.h12,
-          Padding(
-            padding: AppInsets.h20,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Options',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.snow,
-                ),
-              ),
-            ),
-          ),
-          AppGap.h8,
-          _SheetRow(
-            icon: Icons.play_circle_outline_rounded,
-            label: 'Voir la publication',
-            onTap: onView,
-          ),
-          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-          _SheetRow(
-            icon: Icons.delete_outline_rounded,
-            label: 'Supprimer la publication',
-            isDestructive: true,
-            onTap: onDelete,
-          ),
-          SizedBox(height: 12 + bottom),
-        ],
-      ),
-    );
-  }
-}
-
-class _SheetRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  const _SheetRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color     = isDestructive ? const Color(0xFFE57373) : AppColors.snow;
-    final iconColor = isDestructive ? const Color(0xFFE57373) : const Color(0xFFD5DADE);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        child: Row(
-          children: [
-            Icon(icon, size: 21, color: iconColor),
-            AppGap.w14,
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
-              ),
-            ),
-          ],
+    return AppActionSheet(
+      title: 'Options',
+      children: <Widget>[
+        AppActionSheetItem(
+          icon: Icons.play_circle_outline_rounded,
+          title: 'Voir la publication',
+          onTap: onView,
         ),
-      ),
+        const Divider(
+          height: 1,
+          indent: 20,
+          endIndent: 20,
+          color: Color(0x1FFFFFFF),
+        ),
+        AppActionSheetItem(
+          icon: Icons.delete_outline_rounded,
+          title: 'Supprimer la publication',
+          destructive: true,
+          onTap: onDelete,
+        ),
+      ],
     );
   }
 }

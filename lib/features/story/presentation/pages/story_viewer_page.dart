@@ -639,81 +639,65 @@ class _OwnerOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppSheetSurface(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppBottomSheetHandle(),
-          // Story preview row
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.small),
-                  child: SizedBox(
-                    width: 48, height: 48,
-                    child: Image.network(story.imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                            color: context.colors.primary.withValues(alpha: 0.14),
-                            child: Icon(Icons.image_rounded,
-                                color: context.colors.primary))),
+    return AppActionSheet(
+      title: 'Options',
+      dark: false,
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.small),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Image.network(
+                  story.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: context.colors.primary.withValues(alpha: 0.14),
+                    child: Icon(Icons.image_rounded, color: context.colors.primary),
                   ),
                 ),
-                AppGap.w12,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        story.caption.isNotEmpty ? story.caption : 'Story',
-                        style: context.text.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(_timeAgo(story.createdAt),
-                          style: context.text.labelMedium),
-                    ],
+              ),
+            ),
+            AppGap.w12,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    story.caption.isNotEmpty ? story.caption : 'Story',
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  Text(_timeAgo(story.createdAt), style: context.text.labelMedium),
+                ],
+              ),
             ),
-          ),
-          const Divider(height: 1, indent: 20, endIndent: 20),
-          ListTile(
-            leading: Container(
-              width: AppStoryMetrics.ownerActionIconSize,
-              height: AppStoryMetrics.ownerActionIconSize,
-              decoration: BoxDecoration(
-                  color: context.colors.primary.withValues(alpha: 0.14), shape: BoxShape.circle),
-              child: Icon(Icons.edit_rounded,
-                  size: 18, color: context.colors.primary),
-            ),
-            title: Text('Modifier la story',
-                style: context.storyOwnerSheetActionStyle),
-            onTap: onEdit,
-          ),
-          ListTile(
-            leading: Container(
-              width: AppStoryMetrics.ownerActionIconSize,
-              height: AppStoryMetrics.ownerActionIconSize,
-              decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.1),
-                  shape: BoxShape.circle),
-              child: const Icon(Icons.delete_outline_rounded,
-                  size: 18, color: AppColors.error),
-            ),
-            title: Text('Supprimer la story',
-                style: context.storyOwnerSheetDangerActionStyle),
-            onTap: onDelete,
-          ),
-          SizedBox(height: 8 + bottom),
-        ],
+          ],
+        ),
       ),
+      children: [
+        const Divider(height: 1, indent: 20, endIndent: 20),
+        AppActionSheetItem(
+          icon: Icons.edit_rounded,
+          title: 'Modifier la story',
+          onTap: onEdit,
+          dark: false,
+        ),
+        AppActionSheetItem(
+          icon: Icons.delete_outline_rounded,
+          title: 'Supprimer la story',
+          destructive: true,
+          onTap: onDelete,
+          dark: false,
+        ),
+      ],
     );
   }
 
@@ -762,74 +746,80 @@ class _EditStorySheetState extends State<_EditStorySheet> {
     final bottom = MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
 
-    return AppSheetSurface(
-      child: Column(
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: AppFormSheet(
+        title: 'Modifier la story',
+        contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        footer: Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: 'Annuler',
+                variant: ButtonVariant.outline,
+                isEnabled: !_saving,
+                onPressed: _saving ? null : () => Navigator.pop(context),
+              ),
+            ),
+            AppGap.w10,
+            Expanded(
+              flex: 2,
+              child: AppButton(
+                label: 'Enregistrer',
+                variant: ButtonVariant.primary,
+                isLoading: _saving,
+                onPressed: _saving
+                    ? null
+                    : () async {
+                        setState(() => _saving = true);
+                        await widget.onSaved(_caption.text.trim(), _categoryId);
+                      },
+              ),
+            ),
+          ],
+        ),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const AppBottomSheetHandle(),
-
-          // ── Titre ────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 4, 0),
-            child: Row(
-              children: [
-                Text('Modifier la story', style: context.storySheetPrimaryTitleStyle),
-                const Spacer(),
-                IconButton(
-                  onPressed: _saving ? null : () => Navigator.pop(context),
-                  icon: Icon(Icons.close_rounded,
-                      size: 22, color: context.colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: context.colors.divider),
-
           // ── Aperçu image + légende ───────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Thumbnail
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.input),
-                  child: SizedBox(
-                    width: 62, height: 78,
-                    child: Image.network(
-                      widget.story.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: context.colors.primary.withValues(alpha: 0.14),
-                        child: Icon(Icons.image_rounded,
-                            color: context.colors.primary),
-                      ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.input),
+                child: SizedBox(
+                  width: 62,
+                  height: 78,
+                  child: Image.network(
+                    widget.story.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: context.colors.primary.withValues(alpha: 0.14),
+                      child: Icon(Icons.image_rounded, color: context.colors.primary),
                     ),
                   ),
                 ),
-                AppGap.w12,
-                // Caption field
-                Expanded(
-                  child: TextField(
-                    controller: _caption,
-                    maxLines: 4,
-                    minLines: 3,
-                    maxLength: 200,
-                    style: context.storyEditFieldStyle,
-                    decoration: AppInputDecorations.formField(
-                      context,
-                      hintText: 'Ajouter une légende…',
-                      hintStyle: context.storyEditHintStyle,
-                      fillColor: context.colors.surfaceAlt,
-                      contentPadding: AppInsets.h12v10,
-                    ).copyWith(
-                      counterStyle: context.storyEditCounterStyle,
-                    ),
+              ),
+              AppGap.w12,
+              Expanded(
+                child: TextField(
+                  controller: _caption,
+                  maxLines: 4,
+                  minLines: 3,
+                  maxLength: 200,
+                  style: context.storyEditFieldStyle,
+                  decoration: AppInputDecorations.formField(
+                    context,
+                    hintText: 'Ajouter une légende…',
+                    hintStyle: context.storyEditHintStyle,
+                    fillColor: context.colors.surfaceAlt,
+                    contentPadding: AppInsets.h12v10,
+                  ).copyWith(
+                    counterStyle: context.storyEditCounterStyle,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
           // ── Catégorie ─────────────────────────────────────────
@@ -897,43 +887,8 @@ class _EditStorySheetState extends State<_EditStorySheet> {
             ),
           ),
 
-          AppGap.h14,
-          Divider(height: 1, color: context.colors.divider),
-
-          // ── Boutons Annuler / Enregistrer ────────────────────
-          Padding(
-            padding:
-                EdgeInsets.fromLTRB(16, 10, 16, bottom > 0 ? bottom : 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    label: 'Annuler',
-                    variant: ButtonVariant.outline,
-                    isEnabled: !_saving,
-                    onPressed: _saving ? null : () => Navigator.pop(context),
-                  ),
-                ),
-                AppGap.w10,
-                Expanded(
-                  flex: 2,
-                  child: AppButton(
-                    label: 'Enregistrer',
-                    variant: ButtonVariant.primary,
-                    isLoading: _saving,
-                    onPressed: _saving
-                        ? null
-                        : () async {
-                            setState(() => _saving = true);
-                            await widget.onSaved(
-                                _caption.text.trim(), _categoryId);
-                          },
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
+      ),
       ),
     );
   }

@@ -44,99 +44,68 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppSheetSurface(
-        color: AppColors.snow,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Handle ────────────────────────────────────────────────
-                  const AppBottomSheetHandle(),
-                  AppGap.h20,
-
-                  // ── Titre Inter Light centré ──────────────────────────────
-                  Text(
-                    "Mot de passe",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                  AppGap.h16,
-                  Divider(color: context.colors.divider, height: 1),
-                  AppGap.h24,
-
-                  // ── Mot de passe actuel ───────────────────────────────────
-                  _ShadowField(
-                    child: _PasswordField(
-                      controller: _currentCtrl,
-                      label: "Mot de passe actuel",
-                      obscure: _hideCurrent,
-                      onToggle: () => setState(() => _hideCurrent = !_hideCurrent),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? "Champ requis" : null,
-                    ),
-                  ),
-                  AppGap.h16,
-
-                  // ── Nouveau mot de passe ──────────────────────────────────
-                  _ShadowField(
-                    child: _PasswordField(
-                      controller: _newCtrl,
-                      label: "Nouveau mot de passe",
-                      obscure: _hideNew,
-                      onToggle: () => setState(() => _hideNew = !_hideNew),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return "Champ requis";
-                        if (v.length < 8) return "Minimum 8 caractères";
-                        return null;
-                      },
-                    ),
-                  ),
-                  AppGap.h16,
-
-                  // ── Confirmation ──────────────────────────────────────────
-                  _ShadowField(
-                    child: _PasswordField(
-                      controller: _repeatCtrl,
-                      label: "Confirmer le nouveau mot de passe",
-                      obscure: _hideRepeat,
-                      onToggle: () => setState(() => _hideRepeat = !_hideRepeat),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return "Champ requis";
-                        if (v != _newCtrl.text) return "Les mots de passe ne correspondent pas";
-                        return null;
-                      },
-                    ),
-                  ),
-                  AppGap.h32,
-
-                  // ── CTA principal noir pilule ─────────────────────────────
-                  ProfileSheetPrimaryAction(
-                    onPressed: _submit,
-                    label: "Enregistrer",
-                  ),
-                  AppGap.h12,
-
-                  // ── CTA secondaire discret ────────────────────────────────
-                  Center(
-                    child: ProfileSheetSecondaryAction(
-                      label: "Annuler",
-                      onTap: () => Navigator.pop(context),
-                    ),
-                  ),
-                ],
+      child: Form(
+        key: _formKey,
+        child: AppFormSheet(
+          title: "Mot de passe",
+          footer: Column(
+            children: [
+              ProfileSheetPrimaryAction(
+                onPressed: _submit,
+                label: "Enregistrer",
               ),
-            ),
+              AppGap.h12,
+              Center(
+                child: ProfileSheetSecondaryAction(
+                  label: "Annuler",
+                  onTap: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ShadowField(
+                child: _PasswordField(
+                  controller: _currentCtrl,
+                  label: "Mot de passe actuel",
+                  obscure: _hideCurrent,
+                  onToggle: () => setState(() => _hideCurrent = !_hideCurrent),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? "Champ requis" : null,
+                ),
+              ),
+              AppGap.h16,
+              _ShadowField(
+                child: _PasswordField(
+                  controller: _newCtrl,
+                  label: "Nouveau mot de passe",
+                  obscure: _hideNew,
+                  onToggle: () => setState(() => _hideNew = !_hideNew),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Champ requis";
+                    if (v.length < 8) return "Minimum 8 caractères";
+                    return null;
+                  },
+                ),
+              ),
+              AppGap.h16,
+              _ShadowField(
+                child: _PasswordField(
+                  controller: _repeatCtrl,
+                  label: "Confirmer le nouveau mot de passe",
+                  obscure: _hideRepeat,
+                  onToggle: () => setState(() => _hideRepeat = !_hideRepeat),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Champ requis";
+                    if (v != _newCtrl.text) return "Les mots de passe ne correspondent pas";
+                    return null;
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

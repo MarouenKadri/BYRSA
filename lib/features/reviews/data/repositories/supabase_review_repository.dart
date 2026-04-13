@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/review.dart';
-import 'review_repository.dart';
+import '../../domain/entities/review.dart';
+import '../../domain/repositories/review_repository.dart';
 
 class SupabaseReviewRepository implements ReviewRepository {
   final _supabase = Supabase.instance.client;

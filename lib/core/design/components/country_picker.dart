@@ -101,81 +101,56 @@ class _CountryPickerSheetState extends State<CountryPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
+    return AppScrollableSheet(
+      title: 'Choisir un pays',
       initialChildSize: 0.6,
       maxChildSize: 0.92,
       minChildSize: 0.4,
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.border,
-                borderRadius: BorderRadius.circular(2),
+      builder: (context, controller) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              autofocus: true,
+              decoration: AppInputDecorations.searchField(
+                context,
+                hintText: 'Rechercher…',
+                prefixIcon: const Icon(Icons.search_rounded, size: 18),
               ),
+              onChanged: (v) => setState(() => _query = v),
             ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Choisir un pays',
-                style: context.text.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                autofocus: true,
-                decoration: AppInputDecorations.searchField(
-                  context,
-                  hintText: 'Rechercher…',
-                  prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                ),
-                onChanged: (v) => setState(() => _query = v),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Divider(height: 1, color: context.colors.border),
-            Expanded(
-              child: ListView.builder(
-                controller: controller,
-                itemCount: _filtered.length,
-                itemBuilder: (_, i) {
-                  final c = _filtered[i];
-                  final isSelected = c.dialCode == widget.selected.dialCode &&
-                      c.name == widget.selected.name;
-                  return ListTile(
-                    leading: Text(c.flag, style: const TextStyle(fontSize: 24)),
-                    title: Text(
-                      c.name,
-                      style: context.text.bodyMedium?.copyWith(
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: context.colors.textPrimary,
-                      ),
+          ),
+          const SizedBox(height: 8),
+          Divider(height: 1, color: context.colors.border),
+          Expanded(
+            child: ListView.builder(
+              controller: controller,
+              itemCount: _filtered.length,
+              itemBuilder: (_, i) {
+                final c = _filtered[i];
+                final isSelected = c.dialCode == widget.selected.dialCode &&
+                    c.name == widget.selected.name;
+                return ListTile(
+                  leading: Text(c.flag, style: const TextStyle(fontSize: 24)),
+                  title: Text(
+                    c.name,
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: context.colors.textPrimary,
                     ),
-                    trailing: Text(
-                      c.dialCode,
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.colors.textTertiary,
-                      ),
+                  ),
+                  trailing: Text(
+                    c.dialCode,
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textTertiary,
                     ),
-                    onTap: () => widget.onSelected(c),
-                  );
-                },
-              ),
+                  ),
+                  onTap: () => widget.onSelected(c),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

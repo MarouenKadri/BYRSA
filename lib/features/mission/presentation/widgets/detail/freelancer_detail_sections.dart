@@ -358,53 +358,16 @@ class FreelancerActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppDarkSheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppBottomSheetHandle(),
-          AppGap.h12,
-          Padding(
-            padding: AppInsets.h20,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Options',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.snow,
-                    ),
-                  ),
-                ),
-              ),
-              AppGap.h8,
-              InkWell(
-                onTap: onReport,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.flag_outlined, size: 21, color: Color(0xFFE57373)),
-                      AppGap.w14,
-                      Expanded(
-                        child: Text(
-                          'Signaler cette mission',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFFE57373),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 12 + bottom),
-            ],
-      ),
+    return AppActionSheet(
+      title: 'Options',
+      children: [
+        AppActionSheetItem(
+          icon: Icons.flag_outlined,
+          title: 'Signaler cette mission',
+          destructive: true,
+          onTap: onReport,
+        ),
+      ],
     );
   }
 }
@@ -432,99 +395,101 @@ class _FreelancerReportConfirmSheetState
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    return AppDarkSheet(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const AppBottomSheetHandle(),
-                AppGap.h20,
-                Text(
-                  'Signaler la mission ?',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.snow,
-                  ),
-                ),
-                AppGap.h6,
-                Text(
-                  widget.missionTitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.gray500,
-                  ),
-                ),
-                AppGap.h18,
-                Text(
-                  'Merci de nous aider à garder la plateforme sûre. Votre signalement sera examiné par notre équipe.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.55,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.gray500,
-                  ),
-                ),
-                AppGap.h24,
-                const Divider(height: 1, color: Color(0x1FFFFFFF)),
-                AppGap.h24,
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _loading
-                        ? null
-                        : () {
-                            setState(() => _loading = true);
-                            widget.onConfirm();
-                          },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: const Color(0xFFE57373),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      textStyle: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    child: _loading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text('Signaler'),
-                  ),
-                ),
-                AppGap.h12,
-                Center(
-                  child: GestureDetector(
-                    onTap: _loading ? null : () => Navigator.pop(context),
-                    child: Text(
-                      'Annuler',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.gray500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+    return AppActionSheet(
+      title: 'Signaler la mission ?',
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Signaler la mission ?',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+                color: AppColors.snow,
+              ),
+            ),
+            AppGap.h6,
+            Text(
+              widget.missionTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: AppColors.gray500,
+              ),
+            ),
+            AppGap.h18,
+            const Text(
+              'Merci de nous aider à garder la plateforme sûre. Votre signalement sera examiné par notre équipe.',
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.55,
+                fontWeight: FontWeight.w400,
+                color: AppColors.gray500,
+              ),
+            ),
+            AppGap.h24,
+            const Divider(height: 1, color: Color(0x1FFFFFFF)),
+            AppGap.h24,
+          ],
         ),
       ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _loading
+                  ? null
+                  : () {
+                      setState(() => _loading = true);
+                      widget.onConfirm();
+                    },
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: const Color(0xFFE57373),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: _loading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Signaler'),
+            ),
+          ),
+        ),
+        AppGap.h12,
+        Center(
+          child: GestureDetector(
+            onTap: _loading ? null : () => Navigator.pop(context),
+            child: const Text(
+              'Annuler',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.gray500,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

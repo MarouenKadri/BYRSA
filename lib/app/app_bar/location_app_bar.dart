@@ -308,120 +308,105 @@ class RoleSwitchSheet extends StatelessWidget {
     final auth      = context.watch<AuthProvider>();
     final isClient  = auth.currentRole == UserRole.client;
     final isLoading = auth.isLoading;
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-
-    return AppDarkSheet(
-      child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return AppActionSheet(
+      title: 'Mode',
+      header: Padding(
+        padding: AppInsets.h20,
+        child: GestureDetector(
+          onTap: onGoToAccount != null
+              ? () {
+                  Navigator.pop(context);
+                  onGoToAccount!();
+                }
+              : null,
+          child: Row(
             children: [
-              const AppBottomSheetHandle(),
-              AppGap.h16,
-
-              // ── Titre + avatar ───────────────────────────────────
-              Padding(
-                padding: AppInsets.h20,
-                child: GestureDetector(
-                  onTap: onGoToAccount != null ? () {
-                    Navigator.pop(context);
-                    onGoToAccount!();
-                  } : null,
-                  child: Row(
-                    children: [
-                      AppInitialCircle(
-                        label: firstName.isNotEmpty
-                            ? firstName[0].toUpperCase()
-                            : (isClient ? 'C' : 'F'),
-                        size: AppBarMetrics.sheetAvatarSize,
-                        fontSize: AppBarMetrics.sheetAvatarFontSize,
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
-                        foregroundColor: AppColors.snow,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.20),
-                          width: 1.5,
-                        ),
-                      ),
-                      AppGap.w12,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              firstName.isNotEmpty ? firstName : 'Mon compte',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.snow,
-                              ),
-                            ),
-                            AppGap.h2,
-                            Text(
-                              isClient ? 'Mode Client actif' : 'Mode Prestataire actif',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.gray500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              AppInitialCircle(
+                label: firstName.isNotEmpty
+                    ? firstName[0].toUpperCase()
+                    : (isClient ? 'C' : 'F'),
+                size: AppBarMetrics.sheetAvatarSize,
+                fontSize: AppBarMetrics.sheetAvatarFontSize,
+                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                foregroundColor: AppColors.snow,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.20),
+                  width: 1.5,
                 ),
               ),
-              AppGap.h16,
-
-              // ── Divider ──────────────────────────────────────────
-              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-              AppGap.h8,
-
-              // ── Items ────────────────────────────────────────────
-              _RoleItem(
-                icon: Icons.person_outline_rounded,
-                label: 'Client',
-                subtitle: 'Trouvez des prestataires',
-                isSelected: isClient,
-                onTap: isClient || isLoading ? null : () async {
-                  Navigator.pop(context);
-                  await context.read<AuthProvider>().switchRole(UserRole.client);
-                },
-              ),
-              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-              _RoleItem(
-                icon: Icons.handyman_outlined,
-                label: 'Prestataire',
-                subtitle: 'Proposez vos services',
-                isSelected: !isClient,
-                onTap: !isClient || isLoading ? null : () async {
-                  Navigator.pop(context);
-                  await context.read<AuthProvider>().switchRole(UserRole.provider);
-                },
-              ),
-
-              // ── Loading ──────────────────────────────────────────
-              if (isLoading)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AppLoadingIndicator(size: AppBarMetrics.loadingIndicatorSize),
-                      AppGap.w8,
-                      Text(
-                        'Changement en cours...',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.gray500,
-                        ),
+              AppGap.w12,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      firstName.isNotEmpty ? firstName : 'Mon compte',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.snow,
                       ),
-                    ],
-                  ),
+                    ),
+                    AppGap.h2,
+                    Text(
+                      isClient ? 'Mode Client actif' : 'Mode Prestataire actif',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.gray500,
+                      ),
+                    ),
+                  ],
                 ),
-
-              SizedBox(height: 12 + bottomPad),
+              ),
             ],
+          ),
+        ),
       ),
+      children: [
+        const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        AppGap.h8,
+        _RoleItem(
+          icon: Icons.person_outline_rounded,
+          label: 'Client',
+          subtitle: 'Trouvez des prestataires',
+          isSelected: isClient,
+          onTap: isClient || isLoading ? null : () async {
+            Navigator.pop(context);
+            await context.read<AuthProvider>().switchRole(UserRole.client);
+          },
+        ),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        _RoleItem(
+          icon: Icons.handyman_outlined,
+          label: 'Prestataire',
+          subtitle: 'Proposez vos services',
+          isSelected: !isClient,
+          onTap: !isClient || isLoading ? null : () async {
+            Navigator.pop(context);
+            await context.read<AuthProvider>().switchRole(UserRole.provider);
+          },
+        ),
+        if (isLoading)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppLoadingIndicator(size: AppBarMetrics.loadingIndicatorSize),
+                AppGap.w8,
+                const Text(
+                  'Changement en cours...',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.gray500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

@@ -649,14 +649,11 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       wrapWithSurface: false,
       builder: (ctx) {
-        final bottomPad = MediaQuery.of(ctx).padding.bottom;
-        return AppSheetSurface(
-          color: ctx.colors.surface,
+        return AppPickerSheet(
+          title: 'Pièces jointes',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AppBottomSheetHandle(),
-              AppGap.h16,
               AppRoundIconTile(
                 icon: Icons.image_rounded,
                 iconColor: AppColors.primary,
@@ -688,21 +685,22 @@ class _ChatPageState extends State<ChatPage> {
                 subtitle: 'Partager votre localisation',
                 onTap: () => Navigator.pop(ctx),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 12, bottom: 16 + bottomPad),
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(ctx),
-                  child: Text(
-                    'Fermer',
-                    style: ctx.text.bodyMedium?.copyWith(
-                      fontSize: AppFontSize.body,
-                      fontWeight: FontWeight.w500,
-                      color: ctx.colors.textTertiary,
-                    ),
-                  ),
-                ),
-              ),
             ],
+          ),
+          footer: Padding(
+            padding: EdgeInsets.only(top: 12, bottom: 16 + MediaQuery.of(ctx).padding.bottom),
+            child: GestureDetector(
+              onTap: () => Navigator.pop(ctx),
+              child: Text(
+                'Fermer',
+                style: ctx.text.bodyMedium?.copyWith(
+                  fontSize: AppFontSize.body,
+                  fontWeight: FontWeight.w500,
+                  color: ctx.colors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         );
       },

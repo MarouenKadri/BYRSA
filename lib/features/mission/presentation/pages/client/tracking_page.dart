@@ -119,26 +119,20 @@ class _TrackingPageState extends State<TrackingPage> with TickerProviderStateMix
           ),
 
           // ─── Panneau inférieur draggable ────────────────────────────────
-          DraggableScrollableSheet(
+          AppScrollableSheet(
             initialChildSize: 0.32,
             minChildSize: 0.2,
             maxChildSize: 0.6,
-            builder: (_, controller) => AppSheetSurface(
-              child: ListView(
-                controller: controller,
-                padding: EdgeInsets.zero,
-                children: [
-                  const Center(child: AppBottomSheetHandle()),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                    child: _BottomPanel(
-                      mission: widget.mission,
-                      etaMinutes: _etaMinutes,
-                      onCall: () {},
-                    ),
-                  ),
-                ],
-              ),
+            builder: (_, controller) => ListView(
+              controller: controller,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              children: [
+                _BottomPanel(
+                  mission: widget.mission,
+                  etaMinutes: _etaMinutes,
+                  onCall: () {},
+                ),
+              ],
             ),
           ),
         ],

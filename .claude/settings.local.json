@@ -64,7 +64,13 @@
       "Bash(mv \"lib/features/mission/presentation/pages/freelancer/freelancer_mission_sections.dart\" \"lib/features/mission/presentation/widgets/detail/freelancer_detail_sections.dart\")",
       "Bash(mv \"lib/features/mission/presentation/pages/client/tracking_screen.dart\" \"lib/features/mission/presentation/pages/client/tracking_page.dart\")",
       "Bash(mv \"lib/features/mission/presentation/pages/client/mission_validation_screen.dart\" \"lib/features/mission/presentation/pages/client/mission_validation_page.dart\")",
-      "Bash(mv \"lib/features/mission/presentation/pages/freelancer/active_mission_screen.dart\" \"lib/features/mission/presentation/pages/freelancer/active_mission_page.dart\")"
+      "Bash(mv \"lib/features/mission/presentation/pages/freelancer/active_mission_screen.dart\" \"lib/features/mission/presentation/pages/freelancer/active_mission_page.dart\")",
+      "Bash(find lib:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(xargs -I {} bash -c 'grep -H \"^import\\\\|^export\" {} | grep -E \"app/theme/\\(app_theme|app_colors|app_spacing|design_tokens\\)\"')",
+      "Bash(cat)",
+      "Bash(chmod +x /tmp/check_imports.sh)"
     ]
   }
 }

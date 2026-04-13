@@ -129,53 +129,35 @@ class _StepDetailsState extends State<StepDetails> {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      builder: (sheetCtx) {
-        final bottom = MediaQuery.of(sheetCtx).padding.bottom;
-        return AppDarkSheet(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const AppBottomSheetHandle(),
-              AppGap.h12,
-              Padding(
-                padding: AppInsets.h20,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Choisir une photo',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.snow,
-                    ),
-                  ),
-                ),
-              ),
-              AppGap.h8,
-              _PhotoOptionTile(
-                icon: Icons.photo_camera_outlined,
-                title: 'Prendre une photo',
-                subtitle: 'Utiliser la caméra',
-                onTap: () {
-                  Navigator.pop(sheetCtx);
-                  _takePhoto();
-                },
-              ),
-              const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
-              _PhotoOptionTile(
-                icon: Icons.photo_library_outlined,
-                title: 'Choisir depuis la galerie',
-                subtitle: 'Sélectionner une photo',
-                onTap: () {
-                  Navigator.pop(sheetCtx);
-                  _pickFromGallery();
-                },
-              ),
-              SizedBox(height: 12 + bottom),
-            ],
+      builder: (sheetCtx) => AppActionSheet(
+        title: 'Choisir une photo',
+        children: [
+          AppActionSheetItem(
+            icon: Icons.photo_camera_outlined,
+            title: 'Prendre une photo',
+            subtitle: 'Utiliser la caméra',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              _takePhoto();
+            },
           ),
-        );
-      },
+          const Divider(
+            height: 1,
+            indent: 20,
+            endIndent: 20,
+            color: Color(0x1FFFFFFF),
+          ),
+          AppActionSheetItem(
+            icon: Icons.photo_library_outlined,
+            title: 'Choisir depuis la galerie',
+            subtitle: 'Sélectionner une photo',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              _pickFromGallery();
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -282,57 +264,48 @@ class _StepDetailsState extends State<StepDetails> {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      builder: (ctx) => AppSheetSurface(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          20,
-          24,
-          24 + MediaQuery.of(ctx).padding.bottom,
-        ),
+      builder: (ctx) => AppFormSheet(
+        title: 'Supprimer toutes les photos ?',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const AppBottomSheetHandle(),
-            AppGap.h24,
             AppSurfaceCard(
               padding: AppInsets.a16,
               color: AppColors.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(AppRadius.full),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: AppColors.error, size: 32),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+                size: 32,
+              ),
             ),
             AppGap.h16,
             Text(
-              'Supprimer toutes les photos ?',
-              style: ctx.text.headlineSmall,
-            ),
-            AppGap.h8,
-            Text(
               '${widget.photos.length} photo${widget.photos.length > 1 ? 's' : ''} seront supprimées.',
               style: ctx.text.bodyMedium,
+              textAlign: TextAlign.center,
             ),
-            AppGap.h28,
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    label: 'Annuler',
-                    variant: ButtonVariant.outline,
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ),
-                AppGap.w12,
-                Expanded(
-                  child: AppButton(
-                    label: 'Supprimer',
-                    variant: ButtonVariant.destructive,
-                    onPressed: () {
-                      widget.onPhotosChanged([]);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                ),
-              ],
+          ],
+        ),
+        footer: Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: 'Annuler',
+                variant: ButtonVariant.outline,
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ),
+            AppGap.w12,
+            Expanded(
+              child: AppButton(
+                label: 'Supprimer',
+                variant: ButtonVariant.destructive,
+                onPressed: () {
+                  widget.onPhotosChanged([]);
+                  Navigator.pop(ctx);
+                },
+              ),
             ),
           ],
         ),

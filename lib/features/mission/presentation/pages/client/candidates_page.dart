@@ -688,275 +688,247 @@ class _CandidateDetailsSheet extends StatelessWidget {
         ? "Ce freelance n'a pas laisse de message pour le moment."
         : candidate.message.trim();
 
-    return DraggableScrollableSheet(
+    return AppScrollableSheet(
       initialChildSize: 0.82,
       minChildSize: 0.52,
       maxChildSize: 0.94,
-      builder: (context, scrollController) => AppSheetSurface(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 8, 18, 0),
-              child: Row(
-                children: [
-                  const Expanded(child: Center(child: AppBottomSheetHandle())),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.close_rounded,
-                        size: 16,
-                        color: Color(0xFF9AA3AE),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x12000000),
-                              blurRadius: 12,
-                              offset: Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 34,
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          backgroundImage: candidate.avatar.isNotEmpty
-                              ? NetworkImage(candidate.avatar)
-                              : null,
-                          child: candidate.avatar.isEmpty
-                              ? const Icon(
-                                  Icons.person_outline_rounded,
-                                  color: Color(0xFF9AA3AE),
-                                )
-                              : null,
-                        ),
-                      ),
-                      AppGap.w14,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              candidate.name,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                            AppGap.h6,
-                            Text(
-                              '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF97A0AB),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  AppGap.h24,
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppColors.gray50,
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        _ProfileInfoRow(
-                          icon: Icons.edit_outlined,
-                          label: 'Tarif propose',
-                          trailing: Text(
-                            candidate.proposedPrice,
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w300,
-                              color: AppColors.ink,
-                              letterSpacing: -0.8,
-                            ),
-                          ),
-                        ),
-                        const _SheetSectionDivider(),
-                        _ProfileInfoRow(
-                          icon: Icons.chat_bubble_outline_rounded,
-                          label: 'Message',
-                          trailing: Flexible(
-                            child: Text(
-                              messageText,
-                              textAlign: TextAlign.right,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                height: 1.45,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF8F98A3),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AppGap.h18,
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppColors.gray50,
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Statistiques',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        AppGap.h14,
-                        Row(
-                          children: [
-                            _StatCard(
-                              icon: Icons.work_outline_rounded,
-                              value: '${candidate.completedMissions}',
-                              label: 'Missions',
-                            ),
-                            AppGap.w10,
-                            _StatCard(
-                              icon: Icons.schedule_rounded,
-                              value: replyValue,
-                              label: 'Reponse',
-                            ),
-                            AppGap.w10,
-                            _StatCard(
-                              icon: Icons.star_border_rounded,
-                              value: candidate.rating.toStringAsFixed(1),
-                              label: 'Note',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (onViewProfile != null) ...[
-                    AppGap.h18,
-                    OutlinedButton.icon(
-                      onPressed: onViewProfile,
-                      icon: const Icon(Icons.person_outline_rounded, size: 18),
-                      label: Text(
-                        'Voir le profil complet',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.ink,
-                        side: const BorderSide(color: Color(0xFFE5E8EC)),
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (onAccept != null)
-              Container(
-                padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x08000000),
-                      blurRadius: 18,
-                      offset: Offset(0, -6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (onChat != null)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: const Color(0xFFE8EBEF)),
-                        ),
-                        child: _ProfileInfoRow(
-                          icon: Icons.chat_bubble_outline_rounded,
-                          label: 'Message',
-                          compact: true,
-                          trailing: const Icon(
-                            Icons.chevron_right_rounded,
-                            size: 18,
-                            color: Color(0xFFB5BDC7),
-                          ),
-                          onTap: onChat,
-                        ),
-                      ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: onAccept,
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(56),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        child: const Text('Accepter'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+      trailing: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.close_rounded,
+            size: 16,
+            color: Color(0xFF9AA3AE),
+          ),
         ),
       ),
+      builder: (context, scrollController) => ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x12000000),
+                      blurRadius: 12,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 34,
+                  backgroundColor: const Color(0xFFF3F4F6),
+                  backgroundImage: candidate.avatar.isNotEmpty
+                      ? NetworkImage(candidate.avatar)
+                      : null,
+                  child: candidate.avatar.isEmpty
+                      ? const Icon(
+                          Icons.person_outline_rounded,
+                          color: Color(0xFF9AA3AE),
+                        )
+                      : null,
+                ),
+              ),
+              AppGap.w14,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      candidate.name,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    AppGap.h6,
+                    Text(
+                      '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF97A0AB),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AppGap.h24,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: AppColors.gray50,
+                width: 0.8,
+              ),
+            ),
+            child: Column(
+              children: [
+                _ProfileInfoRow(
+                  icon: Icons.edit_outlined,
+                  label: 'Tarif propose',
+                  trailing: Text(
+                    candidate.proposedPrice,
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w300,
+                      color: AppColors.ink,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                ),
+                const _SheetSectionDivider(),
+                _ProfileInfoRow(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Message',
+                  trailing: Flexible(
+                    child: Text(
+                      messageText,
+                      textAlign: TextAlign.right,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF8F98A3),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AppGap.h18,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: AppColors.gray50,
+                width: 0.8,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Statistiques',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+                AppGap.h14,
+                Row(
+                  children: [
+                    _StatCard(
+                      icon: Icons.work_outline_rounded,
+                      value: '${candidate.completedMissions}',
+                      label: 'Missions',
+                    ),
+                    AppGap.w10,
+                    _StatCard(
+                      icon: Icons.schedule_rounded,
+                      value: replyValue,
+                      label: 'Reponse',
+                    ),
+                    AppGap.w10,
+                    _StatCard(
+                      icon: Icons.star_border_rounded,
+                      value: candidate.rating.toStringAsFixed(1),
+                      label: 'Note',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (onViewProfile != null) ...[
+            AppGap.h18,
+            OutlinedButton.icon(
+              onPressed: onViewProfile,
+              icon: const Icon(Icons.person_outline_rounded, size: 18),
+              label: const Text(
+                'Voir le profil complet',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.ink,
+                side: const BorderSide(color: Color(0xFFE5E8EC)),
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      footer: onAccept == null
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onChat != null)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFE8EBEF)),
+                    ),
+                    child: _ProfileInfoRow(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      label: 'Message',
+                      compact: true,
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: Color(0xFFB5BDC7),
+                      ),
+                      onTap: onChat,
+                    ),
+                  ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onAccept,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: const Text('Accepter'),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

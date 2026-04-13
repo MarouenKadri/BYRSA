@@ -883,102 +883,81 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      child: AppSheetSurface(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppBottomSheetHandle(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color:
-                          cat?.color.withValues(alpha: 0.12) ??
-                          context.colors.surfaceAlt,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      cat?.icon ?? Icons.photo_library_rounded,
-                      size: 18,
-                      color: cat?.color ?? AppColors.primary,
-                    ),
-                  ),
-                  AppGap.w10,
-                  Text(
-                    group.groupName,
-                    style: context.text.bodyMedium?.copyWith(
-                      fontSize: AppFontSize.body,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${group.stories.length} story${group.stories.length > 1 ? 's' : ''}',
-                    style: context.text.bodySmall?.copyWith(
-                      fontSize: AppFontSize.sm,
-                      color: context.colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1, indent: 20, endIndent: 20),
-            ListTile(
-              leading: const Icon(
-                Icons.play_circle_outline_rounded,
-                color: AppColors.primary,
-              ),
-              title: Text(
-                'Voir les stories',
-                style: context.profilePrimaryLabelStyle,
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                final groups = context.read<StoryProvider>().myStoryGroups;
-                final idx = groups.indexWhere(
-                  (g) => g.groupId == group.groupId,
-                );
-                if (idx >= 0) _openViewer(context, groups, idx);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.add_a_photo_rounded,
-                color: AppColors.primary,
-              ),
-              title: Text(
-                'Ajouter une story',
-                style: context.profilePrimaryLabelStyle,
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                pickAndOpenComposer(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.delete_outline_rounded,
-                color: AppColors.error,
-              ),
-              title: Text(
-                'Supprimer cette catégorie',
-                style: context.profilePrimaryLabelStyle.copyWith(
-                  color: AppColors.error,
+      child: AppActionSheet(
+        title: group.groupName,
+        dark: false,
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color:
+                      cat?.color.withValues(alpha: 0.12) ??
+                      context.colors.surfaceAlt,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  cat?.icon ?? Icons.photo_library_rounded,
+                  size: 18,
+                  color: cat?.color ?? AppColors.primary,
                 ),
               ),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDeleteCategory(context, group);
-              },
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
-          ],
+              AppGap.w10,
+              Text(
+                group.groupName,
+                style: context.text.bodyMedium?.copyWith(
+                  fontSize: AppFontSize.body,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${group.stories.length} story${group.stories.length > 1 ? 's' : ''}',
+                style: context.text.bodySmall?.copyWith(
+                  fontSize: AppFontSize.sm,
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
+        children: [
+          const Divider(height: 1, indent: 20, endIndent: 20),
+          AppActionSheetItem(
+            icon: Icons.play_circle_outline_rounded,
+            title: 'Voir les stories',
+            dark: false,
+            onTap: () {
+              Navigator.pop(context);
+              final groups = context.read<StoryProvider>().myStoryGroups;
+              final idx = groups.indexWhere((g) => g.groupId == group.groupId);
+              if (idx >= 0) _openViewer(context, groups, idx);
+            },
+          ),
+          AppActionSheetItem(
+            icon: Icons.add_a_photo_rounded,
+            title: 'Ajouter une story',
+            dark: false,
+            onTap: () {
+              Navigator.pop(context);
+              pickAndOpenComposer(context);
+            },
+          ),
+          AppActionSheetItem(
+            icon: Icons.delete_outline_rounded,
+            title: 'Supprimer cette catégorie',
+            destructive: true,
+            dark: false,
+            onTap: () {
+              Navigator.pop(context);
+              _confirmDeleteCategory(context, group);
+            },
+          ),
+        ],
       ),
     );
   }

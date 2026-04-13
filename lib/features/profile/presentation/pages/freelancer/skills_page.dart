@@ -388,68 +388,27 @@ class _MySkillsPageState extends State<MySkillsPage> {
   }
 
   void _showAddSkillSheet() {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
+      wrapWithSurface: false,
+      child: AppScrollableSheet(
+        title: 'Ajouter une compétence',
         initialChildSize: 0.85,
         minChildSize: 0.5,
         maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: context.colors.sheetBg,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Column(
-            children: [
-              // Handle
-              Padding(
-                padding: AppInsets.a12,
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(AppRadius.micro),
-                  ),
-                ),
-              ),
-
-              // Header
-              Padding(
-                padding: AppInsets.h20,
-                child: Row(
-                  children: [
-                    Text(
-                      'Ajouter une compétence',
-                      style: context.text.headlineMedium,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(),
-
-              // Liste des catégories et compétences
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  padding: AppInsets.a16,
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    final category = _categories[index];
-                    return _buildCategorySection(category);
-                  },
-                ),
-              ),
-            ],
-          ),
+        trailing: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close_rounded),
+        ),
+        builder: (context, scrollController) => ListView.builder(
+          controller: scrollController,
+          padding: AppInsets.a16,
+          itemCount: _categories.length,
+          itemBuilder: (context, index) {
+            final category = _categories[index];
+            return _buildCategorySection(category);
+          },
         ),
       ),
     );
@@ -535,212 +494,56 @@ class _MySkillsPageState extends State<MySkillsPage> {
     int selectedYears = 1;
     SkillLevel selectedLevel = SkillLevel.debutant;
 
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.cardLg)),
-      ),
+      wrapWithSurface: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
           padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(AppRadius.micro),
-                  ),
+          child: AppFormSheet(
+            title: 'Configurer la compétence',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSkillSheetIdentity(
+                  icon: category.icon,
+                  color: category.color,
+                  title: skillName,
+                  subtitle: category.name,
                 ),
-              ),
-
-              AppGap.h20,
-
-              // Header
-              Row(
-                children: [
-                  Container(
-                    padding: AppInsets.a12,
-                    decoration: BoxDecoration(
-                      color: category.color.withValues(alpha:0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.button),
-                    ),
-                    child: Icon(category.icon, color: category.color, size: 24),
-                  ),
-                  AppGap.w14,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          skillName,
-                          style: context.text.headlineMedium,
-                        ),
-                        Text(
-                          category.name,
-                          style: context.text.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              AppGap.h24,
-
-              // Années d'expérience
-              Text(
-                'Années d\'expérience',
-                style: context.text.titleSmall,
-              ),
-              AppGap.h12,
-              Row(
-                children: [
-                  for (int i = 1; i <= 5; i++)
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setModalState(() => selectedYears = i),
-                        child: Container(
-                          margin: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                          padding: AppInsets.v12,
-                          decoration: BoxDecoration(
-                            color: selectedYears == i
-                                ? AppColors.primary
-                                : context.colors.surfaceAlt,
-                            borderRadius: BorderRadius.circular(AppRadius.input),
-                            border: selectedYears == i
-                                ? null
-                                : Border.all(color: context.colors.border),
-                          ),
-                          child: Center(
-                            child: Text(
-                              i == 5 ? '5+' : '$i',
-                              style: context.text.titleSmall?.copyWith(
-                                color: selectedYears == i
-                                    ? Colors.white
-                                    : context.colors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              AppGap.h24,
-
-              // Niveau
-              Text(
-                'Niveau de maîtrise',
-                style: context.text.titleSmall,
-              ),
-              AppGap.h12,
-              ...SkillLevel.values.map((level) {
-                final isSelected = selectedLevel == level;
-                return GestureDetector(
-                  onTap: () => setModalState(() => selectedLevel = level),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: AppInsets.a14,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? level.color.withValues(alpha:0.1)
-                          : context.colors.background,
-                      borderRadius: BorderRadius.circular(AppRadius.button),
-                      border: Border.all(
-                        color: isSelected ? level.color : context.colors.border,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected ? level.color : Colors.transparent,
-                            border: Border.all(
-                              color: isSelected ? level.color : context.colors.textHint,
-                              width: 2,
-                            ),
-                          ),
-                          child: isSelected
-                              ? const Icon(Icons.check, size: 14, color: Colors.white)
-                              : null,
-                        ),
-                        AppGap.w12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                level.label,
-                                style: context.text.titleSmall?.copyWith(
-                                  color: isSelected ? level.color : null,
-                                ),
-                              ),
-                              Text(
-                                _getLevelDescription(level),
-                                style: context.text.labelMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Mini barre de progression
-                        SizedBox(
-                          width: 60,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                            child: LinearProgressIndicator(
-                              value: level.progress,
-                              backgroundColor: context.colors.divider,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                isSelected ? level.color : context.colors.textHint,
-                              ),
-                              minHeight: 6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-
-              AppGap.h24,
-
-              // Bouton ajouter
-              AppButton(
-                label: 'Ajouter cette compétence',
-                variant: ButtonVariant.primary,
-                onPressed: () {
-                  setState(() {
-                    _userSkills.add(Skill(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: skillName,
-                      category: category.name,
-                      icon: category.icon,
-                      experienceYears: selectedYears,
-                      level: selectedLevel,
-                    ));
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+                AppGap.h24,
+                _buildYearsSelector(
+                  selectedYears: selectedYears,
+                  onSelected: (value) => setModalState(() => selectedYears = value),
+                ),
+                AppGap.h24,
+                _buildLevelSelector(
+                  selectedLevel: selectedLevel,
+                  onSelected: (value) => setModalState(() => selectedLevel = value),
+                ),
+              ],
+            ),
+            footer: AppButton(
+              label: 'Ajouter cette compétence',
+              variant: ButtonVariant.primary,
+              onPressed: () {
+                setState(() {
+                  _userSkills.add(Skill(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: skillName,
+                    category: category.name,
+                    icon: category.icon,
+                    experienceYears: selectedYears,
+                    level: selectedLevel,
+                  ));
+                });
+                Navigator.pop(context);
+              },
+            ),
           ),
         ),
       ),
@@ -751,215 +554,229 @@ class _MySkillsPageState extends State<MySkillsPage> {
     int selectedYears = skill.experienceYears;
     SkillLevel selectedLevel = skill.level;
 
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.cardLg)),
-      ),
+      wrapWithSurface: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
           padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
+          child: AppFormSheet(
+            title: 'Modifier la compétence',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSkillSheetIdentity(
+                        icon: skill.icon,
+                        color: selectedLevel.color,
+                        title: skill.name,
+                        subtitle: skill.category,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showDeleteConfirmation(skill);
+                      },
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                AppGap.h24,
+                _buildYearsSelector(
+                  selectedYears: selectedYears,
+                  onSelected: (value) => setModalState(() => selectedYears = value),
+                ),
+                AppGap.h24,
+                _buildLevelSelector(
+                  selectedLevel: selectedLevel,
+                  onSelected: (value) => setModalState(() => selectedLevel = value),
+                ),
+              ],
+            ),
+            footer: AppButton(
+              label: 'Enregistrer les modifications',
+              variant: ButtonVariant.primary,
+              onPressed: () {
+                setState(() {
+                  skill.experienceYears = selectedYears;
+                  skill.level = selectedLevel;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkillSheetIdentity({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: AppInsets.a12,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        AppGap.w14,
+        Expanded(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(AppRadius.micro),
+              Text(title, style: context.text.headlineMedium),
+              Text(subtitle, style: context.text.bodyMedium),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildYearsSelector({
+    required int selectedYears,
+    required ValueChanged<int> onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Années d\'expérience', style: context.text.titleSmall),
+        AppGap.h12,
+        Row(
+          children: [
+            for (int i = 1; i <= 5; i++)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => onSelected(i),
+                  child: Container(
+                    margin: EdgeInsets.only(right: i < 5 ? 8 : 0),
+                    padding: AppInsets.v12,
+                    decoration: BoxDecoration(
+                      color: selectedYears == i
+                          ? AppColors.primary
+                          : context.colors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(AppRadius.input),
+                      border: selectedYears == i
+                          ? null
+                          : Border.all(color: context.colors.border),
+                    ),
+                    child: Center(
+                      child: Text(
+                        i == 5 ? '5+' : '$i',
+                        style: context.text.titleSmall?.copyWith(
+                          color: selectedYears == i
+                              ? Colors.white
+                              : context.colors.textSecondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
+          ],
+        ),
+      ],
+    );
+  }
 
-              AppGap.h20,
-
-              // Header
-              Row(
+  Widget _buildLevelSelector({
+    required SkillLevel selectedLevel,
+    required ValueChanged<SkillLevel> onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Niveau de maîtrise', style: context.text.titleSmall),
+        AppGap.h12,
+        ...SkillLevel.values.map((level) {
+          final isSelected = selectedLevel == level;
+          return GestureDetector(
+            onTap: () => onSelected(level),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: AppInsets.a14,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? level.color.withValues(alpha: 0.1)
+                    : context.colors.background,
+                borderRadius: BorderRadius.circular(AppRadius.button),
+                border: Border.all(
+                  color: isSelected ? level.color : context.colors.border,
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Row(
                 children: [
                   Container(
-                    padding: AppInsets.a12,
+                    width: 20,
+                    height: 20,
                     decoration: BoxDecoration(
-                      color: selectedLevel.color.withValues(alpha:0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.button),
+                      shape: BoxShape.circle,
+                      color: isSelected ? level.color : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected ? level.color : context.colors.textHint,
+                        width: 2,
+                      ),
                     ),
-                    child: Icon(skill.icon, color: selectedLevel.color, size: 24),
+                    child: isSelected
+                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        : null,
                   ),
-                  AppGap.w14,
+                  AppGap.w12,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          skill.name,
-                          style: context.text.headlineMedium,
+                          level.label,
+                          style: context.text.titleSmall?.copyWith(
+                            color: isSelected ? level.color : null,
+                          ),
                         ),
                         Text(
-                          skill.category,
-                          style: context.text.bodyMedium,
+                          _getLevelDescription(level),
+                          style: context.text.labelMedium,
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showDeleteConfirmation(skill);
-                    },
-                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                  SizedBox(
+                    width: 60,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                      child: LinearProgressIndicator(
+                        value: level.progress,
+                        backgroundColor: context.colors.divider,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isSelected ? level.color : context.colors.textHint,
+                        ),
+                        minHeight: 6,
+                      ),
+                    ),
                   ),
                 ],
               ),
-
-              AppGap.h24,
-
-              // Années d'expérience
-              Text(
-                'Années d\'expérience',
-                style: context.text.titleSmall,
-              ),
-              AppGap.h12,
-              Row(
-                children: [
-                  for (int i = 1; i <= 5; i++)
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setModalState(() => selectedYears = i),
-                        child: Container(
-                          margin: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                          padding: AppInsets.v12,
-                          decoration: BoxDecoration(
-                            color: selectedYears == i
-                                ? AppColors.primary
-                                : context.colors.surfaceAlt,
-                            borderRadius: BorderRadius.circular(AppRadius.input),
-                            border: selectedYears == i
-                                ? null
-                                : Border.all(color: context.colors.border),
-                          ),
-                          child: Center(
-                            child: Text(
-                              i == 5 ? '5+' : '$i',
-                              style: context.text.titleSmall?.copyWith(
-                                color: selectedYears == i
-                                    ? Colors.white
-                                    : context.colors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              AppGap.h24,
-
-              // Niveau
-              Text(
-                'Niveau de maîtrise',
-                style: context.text.titleSmall,
-              ),
-              AppGap.h12,
-              ...SkillLevel.values.map((level) {
-                final isSelected = selectedLevel == level;
-                return GestureDetector(
-                  onTap: () => setModalState(() => selectedLevel = level),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: AppInsets.a14,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? level.color.withValues(alpha:0.1)
-                          : context.colors.background,
-                      borderRadius: BorderRadius.circular(AppRadius.button),
-                      border: Border.all(
-                        color: isSelected ? level.color : context.colors.border,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected ? level.color : Colors.transparent,
-                            border: Border.all(
-                              color: isSelected ? level.color : context.colors.textHint,
-                              width: 2,
-                            ),
-                          ),
-                          child: isSelected
-                              ? const Icon(Icons.check, size: 14, color: Colors.white)
-                              : null,
-                        ),
-                        AppGap.w12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                level.label,
-                                style: context.text.titleSmall?.copyWith(
-                                  color: isSelected ? level.color : null,
-                                ),
-                              ),
-                              Text(
-                                _getLevelDescription(level),
-                                style: context.text.labelMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 60,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                            child: LinearProgressIndicator(
-                              value: level.progress,
-                              backgroundColor: context.colors.divider,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                isSelected ? level.color : context.colors.textHint,
-                              ),
-                              minHeight: 6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-
-              AppGap.h24,
-
-              // Bouton sauvegarder
-              AppButton(
-                label: 'Enregistrer les modifications',
-                variant: ButtonVariant.primary,
-                onPressed: () {
-                  setState(() {
-                    skill.experienceYears = selectedYears;
-                    skill.level = selectedLevel;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          );
+        }),
+      ],
     );
   }
 
