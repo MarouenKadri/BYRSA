@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
+import '../../../../freelancer/presentation/pages/client_profile_view.dart';
 
 // ─── FreelancerClientCard ─────────────────────────────────────────────────────
 
@@ -47,69 +48,84 @@ class FreelancerClientCard extends StatelessWidget {
               ),
             ),
             AppGap.h14,
-            Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFE8EBEF),
-                      width: 1.5,
-                    ),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ClientProfileView(
+                    clientId: client.id,
+                    clientName: client.name,
+                    clientAvatar: client.avatarUrl,
+                    rating: client.rating,
+                    missionsCount: client.missionsCount,
                   ),
-                  clipBehavior: Clip.hardEdge,
-                  child: client.avatarUrl.isNotEmpty
-                      ? Image.network(
-                          client.avatarUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _ClientAvatarFallback(name: client.name),
-                        )
-                      : _ClientAvatarFallback(name: client.name),
                 ),
-                AppGap.w14,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              client.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.ink,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFE8EBEF),
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: client.avatarUrl.isNotEmpty
+                        ? Image.network(
+                            client.avatarUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _ClientAvatarFallback(name: client.name),
+                          )
+                        : _ClientAvatarFallback(name: client.name),
+                  ),
+                  AppGap.w14,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                client.name,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.ink,
+                                ),
                               ),
                             ),
-                          ),
-                          if (client.isVerified) ...[
-                            AppGap.w6,
-                            const Icon(
-                              Icons.verified_rounded,
-                              size: 16,
-                              color: AppColors.ink,
-                            ),
+                            if (client.isVerified) ...[
+                              AppGap.w6,
+                              const Icon(
+                                Icons.verified_rounded,
+                                size: 16,
+                                color: AppColors.ink,
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                      AppGap.h6,
-                      Text(
-                        '${client.rating.toStringAsFixed(1)} · ${client.missionsCount} mission${client.missionsCount > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF8F98A3),
                         ),
-                      ),
-                    ],
+                        AppGap.h6,
+                        Text(
+                          '${client.rating.toStringAsFixed(1)} · ${client.missionsCount} mission${client.missionsCount > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF8F98A3),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFFB0B8C1)),
+                ],
+              ),
             ),
             if (onPhone != null || onChat != null) ...[
               AppGap.h16,

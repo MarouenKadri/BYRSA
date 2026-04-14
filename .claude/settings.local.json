@@ -73,7 +73,8 @@
       "Bash(chmod +x /tmp/check_imports.sh)",
       "Bash(bash:*)",
       "Bash(/mnt/c/Users/marouen/Documents/flutter/bin/dart analyze:*)",
-      "Bash(cmd.exe /c \"flutter analyze lib/features/client/presentation/pages/client_discover_content.dart\")"
+      "Bash(cmd.exe /c \"flutter analyze lib/features/client/presentation/pages/client_discover_content.dart\")",
+      "Bash(cmd.exe:*)"
     ]
   }
 }
