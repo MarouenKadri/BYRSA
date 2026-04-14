@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../data/models/freelancer.dart';
 
-class TopFreelancerCard extends StatelessWidget {
+class FreelancerPreviewCard extends StatelessWidget {
   final Freelancer freelancer;
   final VoidCallback? onTap;
+  final double? width;
+  final double? height;
 
-  const TopFreelancerCard({
+  const FreelancerPreviewCard({
     super.key,
     required this.freelancer,
     this.onTap,
+    this.width = 130,
+    this.height,
   });
 
   @override
@@ -18,7 +22,8 @@ class TopFreelancerCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 130,
+        width: width,
+        height: height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.cardLg),
           boxShadow: [
@@ -34,7 +39,6 @@ class TopFreelancerCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // ── Photo pleine ──────────────────────────────────
               freelancer.imageUrl.isNotEmpty
                   ? Image.network(
                       freelancer.imageUrl,
@@ -43,8 +47,6 @@ class TopFreelancerCard extends StatelessWidget {
                           _AvatarFallback(name: freelancer.name),
                     )
                   : _AvatarFallback(name: freelancer.name),
-
-              // ── Dégradé bas ───────────────────────────────────
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -60,8 +62,24 @@ class TopFreelancerCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // ── Infos overlay bas ─────────────────────────────
+              if (freelancer.isVerified)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.verified_rounded,
+                      size: 13,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
               Positioned(
                 left: 0,
                 right: 0,
@@ -122,8 +140,6 @@ class TopFreelancerCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Fallback si pas de photo ─────────────────────────────────────────────────
 
 class _AvatarFallback extends StatelessWidget {
   final String name;

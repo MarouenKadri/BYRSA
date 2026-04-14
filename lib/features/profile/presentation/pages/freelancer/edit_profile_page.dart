@@ -8,7 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
-import '../../../../../app/widgets/cigale_tab_bar.dart';
+import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../app/enum/user_role.dart';
 import '../../../profile_provider.dart';
@@ -148,21 +148,15 @@ class _EditProfilePageState extends State<EditProfilePage>
         ),
         centerTitle: true,
         bottom: isFreelancer
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(50),
-                child: Container(
-                  color: context.colors.surface,
-                  child: CigaleTabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      CigaleTab(icon: Icons.person_rounded, label: 'Profil'),
-                      CigaleTab(
-                        icon: Icons.trending_up_rounded,
-                        label: 'Activité',
-                      ),
-                    ],
+            ? AppSegmentedTabBar(
+                controller: _tabController,
+                tabs: const [
+                  AppSegmentedTab(icon: Icons.person_rounded, label: 'Profil'),
+                  AppSegmentedTab(
+                    icon: Icons.trending_up_rounded,
+                    label: 'Activité',
                   ),
-                ),
+                ],
               )
             : null,
       ),

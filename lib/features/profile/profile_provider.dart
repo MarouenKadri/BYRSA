@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/models/user_profile.dart';
+import 'data/repositories/freelancer_catalog_repository.dart';
+import 'data/repositories/supabase_freelancer_catalog_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
+  final FreelancerCatalogRepository _freelancerCatalogRepository;
 
   UserProfile? profile;
   bool isLoading = false;
@@ -19,7 +22,9 @@ class ProfileProvider extends ChangeNotifier {
   String? get currentUserId => _supabase.auth.currentUser?.id;
   String? get currentUserEmail => _supabase.auth.currentUser?.email;
 
-  ProfileProvider() {
+  ProfileProvider({FreelancerCatalogRepository? freelancerCatalogRepository})
+    : _freelancerCatalogRepository =
+          freelancerCatalogRepository ?? SupabaseFreelancerCatalogRepository() {
     _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         loadProfile();
@@ -111,21 +116,44 @@ class ProfileProvider extends ChangeNotifier {
     isLoadingFreelancers = true;
     notifyListeners();
     try {
-      var query = _supabase
-          .from('profiles')
-          .select('id, first_name, last_name, avatar_url, bio, address, hourly_rate, is_verified, user_type')
-          .eq('user_type', 'freelancer');
+      List<Map<String, dynamic>> results;
+      try {
+        results = await _freelancerCatalogRepository.fetchFreelancers(
+          includeServiceCategories: true,
+        );
+      } catch (e) {
+        debugPrint('loadFreelancers with service_categories failed: $e');
+        results = await _freelancerCatalogRepository.fetchFreelancers(
+          includeServiceCategories: false,
+        );
+      }
 
-      final rows = await query.order('created_at', ascending: false);
-      var results = (rows as List).cast<Map<String, dynamic>>();
-
-      // Filtrage local (search par nom)
+      // Filtrage local (search sur nom + catégories)
       if (search != null && search.isNotEmpty) {
         final q = search.toLowerCase();
         results = results.where((f) {
-          final name = '${f['first_name'] ?? ''} ${f['last_name'] ?? ''}'.toLowerCase();
-          return name.contains(q);
+          final name =
+              '${f['first_name'] ?? ''} ${f['last_name'] ?? ''}'.toLowerCase();
+          final categories =
+              _readStringList(f['service_categories']).join(' ').toLowerCase();
+          return name.contains(q) || categories.contains(q);
         }).toList();
+      }
+
+      // Filtrage local par catégorie (id ou libellé).
+      if (category != null && category.trim().isNotEmpty) {
+        final normalizedCategory = _normalizeToken(category);
+        if (normalizedCategory != 'all' &&
+            normalizedCategory != 'tous' &&
+            normalizedCategory != 'toutes') {
+          results = results.where((f) {
+            final categories = _readStringList(f['service_categories']);
+            if (categories.isEmpty) return false;
+            return categories.any(
+              (entry) => _normalizeToken(entry) == normalizedCategory,
+            );
+          }).toList();
+        }
       }
 
       freelancers = results;
@@ -188,5 +216,59 @@ class ProfileProvider extends ChangeNotifier {
     profile = null;
     error = null;
     notifyListeners();
+  }
+
+  static List<String> _readStringList(dynamic value) {
+    if (value is List) {
+      return value
+          .map((entry) => '$entry'.trim())
+          .where((entry) => entry.isNotEmpty)
+          .toList();
+    }
+    if (value is String && value.trim().isNotEmpty) {
+      return value
+          .split(',')
+          .map((entry) => entry.trim())
+          .where((entry) => entry.isNotEmpty)
+          .toList();
+    }
+    return const [];
+  }
+
+  static String _normalizeToken(String raw) {
+    var value = raw.trim().toLowerCase();
+    if (value.isEmpty) return value;
+    const replacements = <String, String>{
+      'à': 'a',
+      'â': 'a',
+      'ä': 'a',
+      'á': 'a',
+      'ã': 'a',
+      'ç': 'c',
+      'é': 'e',
+      'è': 'e',
+      'ê': 'e',
+      'ë': 'e',
+      'î': 'i',
+      'ï': 'i',
+      'ì': 'i',
+      'í': 'i',
+      'ô': 'o',
+      'ö': 'o',
+      'ò': 'o',
+      'ó': 'o',
+      'õ': 'o',
+      'ù': 'u',
+      'û': 'u',
+      'ü': 'u',
+      'ú': 'u',
+      'ÿ': 'y',
+      'œ': 'oe',
+      'æ': 'ae',
+    };
+    replacements.forEach((from, to) {
+      value = value.replaceAll(from, to);
+    });
+    return value.replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
 }

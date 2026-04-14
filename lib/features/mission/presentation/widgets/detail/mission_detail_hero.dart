@@ -57,7 +57,7 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
                       final src = widget.mission.images[i];
                       Widget fallback(_, __, ___) =>
                           DetailGradientPlaceholder(mission: widget.mission);
-                      return src.startsWith('http')
+                      final image = src.startsWith('http')
                           ? Image.network(
                               src,
                               fit: BoxFit.cover,
@@ -68,6 +68,10 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
                               fit: BoxFit.cover,
                               errorBuilder: fallback,
                             );
+                      return GestureDetector(
+                        onTap: () => _openImageViewer(i),
+                        child: image,
+                      );
                     },
                   )
                 : DetailGradientPlaceholder(mission: widget.mission),
@@ -115,40 +119,178 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
             left: 20,
             right: 20,
             bottom: 34,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.mission.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 28,
-                    height: 1.08,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.9,
+            child: IgnorePointer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.mission.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 28,
+                      height: 1.08,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: -0.9,
+                    ),
                   ),
-                ),
-                if (hasImages && widget.mission.images.length > 1) ...[
-                  AppGap.h14,
-                  Row(
-                    children: List.generate(
-                      widget.mission.images.length,
-                      (i) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.only(right: 6),
-                        width: _index == i ? 18 : 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: _index == i ? Colors.white : Colors.white38,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.micro),
+                  if (hasImages && widget.mission.images.length > 1) ...[
+                    AppGap.h14,
+                    Row(
+                      children: List.generate(
+                        widget.mission.images.length,
+                        (i) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(right: 6),
+                          width: _index == i ? 18 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: _index == i ? Colors.white : Colors.white38,
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.micro),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openImageViewer(int initialIndex) {
+    if (widget.mission.images.isEmpty) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _MissionImageViewerPage(
+          images: widget.mission.images,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
+  }
+}
+
+class _MissionImageViewerPage extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _MissionImageViewerPage({
+    required this.images,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_MissionImageViewerPage> createState() => _MissionImageViewerPageState();
+}
+
+class _MissionImageViewerPageState extends State<_MissionImageViewerPage> {
+  late final PageController _controller;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex;
+    _controller = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topPad = MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: PageView.builder(
+              controller: _controller,
+              itemCount: widget.images.length,
+              onPageChanged: (value) => setState(() => _index = value),
+              itemBuilder: (_, i) {
+                final src = widget.images[i];
+                return InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 4,
+                  child: Center(
+                    child: src.startsWith('http')
+                        ? Image.network(
+                            src,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.white54,
+                              size: 52,
+                            ),
+                          )
+                        : Image.file(
+                            File(src),
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.white54,
+                              size: 52,
+                            ),
+                          ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: topPad + 8,
+            left: 8,
+            right: 8,
+            child: Row(
+              children: [
+                DetailCircleBtn(
+                  icon: Icons.close_rounded,
+                  onTap: () => Navigator.pop(context),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.38),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.22),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${_index + 1} / ${widget.images.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

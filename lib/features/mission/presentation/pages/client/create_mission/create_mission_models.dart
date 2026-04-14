@@ -24,7 +24,7 @@ const List<String> missionSteps = [
 ];
 
 /// Liste des services pour le formulaire de création (issue de ServiceCategory)
-List<Map<String, dynamic>> get missionServices => ServiceCategory.all.map((cat) => <String, dynamic>{
+List<Map<String, dynamic>> get missionServices => ServiceCategory.ordered.map((cat) => <String, dynamic>{
       'id': cat.id,
       'name': cat.name,
       'icon': cat.icon,

@@ -1,57 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app/widgets/app_category_filter_bar.dart';
+import 'package:flutter_application_1/features/mission/data/models/service_category.dart';
 
 class CategoriesRow extends StatelessWidget {
   const CategoriesRow({super.key});
 
-  static const _items = [
-    (Icons.home_rounded, 'Ménage'),
-    (Icons.grass_rounded, 'Jardinage'),
-    (Icons.child_care_rounded, "Garde d'enfants"),
-    (Icons.bolt_rounded, 'Électricité'),
-    (Icons.water_drop_rounded, 'Plomberie'),
-    (Icons.handyman_rounded, 'Bricolage'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final categories = [
+      ...ServiceCategory.popular,
+      ...ServiceCategory.ordered.where((category) => !category.isPopular),
+    ].take(6).toList();
+
     return SizedBox(
-      height: 46,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 18),
+        itemCount: categories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final (icon, label) = _items[index];
-          return Padding(
-            padding: const EdgeInsets.only(top: 9, bottom: 7),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, size: 14, color: const Color(0xFF646B73)),
-                    const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -0.1,
-                        color: const Color(0xFF646B73),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 7),
-                Container(
-                  width: (label.length * 6).toDouble(),
-                  height: 1,
-                  color: const Color(0xFFD2D7DD),
-                ),
-              ],
-            ),
+          final category = categories[index];
+          return AppCategoryChip(
+            label: category.chipLabel,
+            icon: category.icon,
+            color: category.color,
           );
         },
       ),

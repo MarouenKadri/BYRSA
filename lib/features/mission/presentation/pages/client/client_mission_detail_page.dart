@@ -202,6 +202,7 @@ class _ClientMissionDetailPageState
                   rating: presta.rating,
                   reviewsCount: presta.reviewsCount,
                   missionsCount: presta.completedMissions,
+                  contactMode: FreelancerContactMode.confirmedPresta,
                 ),
               ),
             ),

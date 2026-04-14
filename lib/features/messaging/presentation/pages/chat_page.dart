@@ -4,6 +4,7 @@ import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
 import '../../data/models/message.dart';
 import '../../messaging_provider.dart';
+import '../../../mission/presentation/pages/client/create_mission_page.dart';
 
 // ─── Couleurs locales luxury monochrome ──────────────────────────────────────
 const _kBg          = AppColors.snow;
@@ -28,6 +29,9 @@ class ChatPage extends StatefulWidget {
   final String? candidatePrice;
   final VoidCallback? onAcceptCandidate;
 
+  // Mode réservation : affiche le bouton "Réserver ce service"
+  final bool showReserveButton;
+
   const ChatPage({
     super.key,
     this.conversationId,
@@ -39,6 +43,7 @@ class ChatPage extends StatefulWidget {
     this.candidateMode = false,
     this.candidatePrice,
     this.onAcceptCandidate,
+    this.showReserveButton = false,
   });
 
   @override
@@ -52,6 +57,7 @@ class _ChatPageState extends State<ChatPage> {
 
   bool _showContactWarning = false;
   bool _candidateAccepted = false;
+  bool _missionBooked = false;
 
   // Patterns pour détecter les coordonnées interdites
   final List<RegExp> _forbiddenPatterns = [
@@ -187,6 +193,16 @@ class _ChatPageState extends State<ChatPage> {
   void _confirmAcceptance() {
     setState(() => _candidateAccepted = true);
     widget.onAcceptCandidate?.call();
+  }
+
+  Future<void> _openReservation() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const PostMissionFlow()),
+    );
+    if (result == 'published' && mounted) {
+      setState(() => _missionBooked = true);
+    }
   }
 
   @override
@@ -445,6 +461,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildInputArea() {
     final hasText = _messageController.text.trim().isNotEmpty;
     final isForbidden = hasText && _containsForbiddenContent(_messageController.text);
+    final showReserve = widget.showReserveButton && !_missionBooked;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -454,7 +471,40 @@ class _ChatPageState extends State<ChatPage> {
         color: _kWhite,
         border: Border(top: BorderSide(color: _kBorder, width: 0.5)),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showReserve) ...[
+            GestureDetector(
+              onTap: _openReservation,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                decoration: BoxDecoration(
+                  color: _kInk,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('⚡', style: TextStyle(fontSize: 14)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Réserver ce service',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _kWhite,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // Pill input
@@ -549,6 +599,8 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                   )
                 : const SizedBox.shrink(),
+          ),
+        ],
           ),
         ],
       ),

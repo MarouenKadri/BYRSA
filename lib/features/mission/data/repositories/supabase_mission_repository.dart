@@ -151,35 +151,75 @@ class SupabaseMissionRepository implements MissionRepository {
   Future<List<Map<String, dynamic>>> fetchCandidates(String missionId) async {
     try {
       // Step 1: fetch candidates
-      final data = await _supabase
-          .from('candidates')
-          .select('*')
-          .eq('mission_id', missionId)
-          .order('applied_at', ascending: false);
+      dynamic raw;
+      try {
+        raw = await _supabase
+            .from('candidates')
+            .select('*')
+            .eq('mission_id', missionId)
+            .order('applied_at', ascending: false);
+      } catch (e1, st1) {
+        debugPrint(
+          'fetchCandidates order applied_at failed, retry with created_at: $e1\n$st1',
+        );
+        try {
+          raw = await _supabase
+              .from('candidates')
+              .select('*')
+              .eq('mission_id', missionId)
+              .order('created_at', ascending: false);
+        } catch (e2, st2) {
+          debugPrint(
+            'fetchCandidates order created_at failed, retry without order: $e2\n$st2',
+          );
+          raw = await _supabase
+              .from('candidates')
+              .select('*')
+              .eq('mission_id', missionId);
+        }
+      }
+
+      final data = (raw as List)
+          .whereType<Map>()
+          .map((row) => Map<String, dynamic>.from(row))
+          .toList();
 
       debugPrint(
-        'fetchCandidates: ${(data as List).length} rows for mission $missionId',
+        'fetchCandidates: ${data.length} rows for mission $missionId',
       );
 
       if (data.isEmpty) return [];
 
       // Step 2: fetch freelancer profiles separately (avoids FK name issues)
       final freelancerIds = data
-          .map((r) => r['freelancer_id'] as String)
+          .map((r) => r['freelancer_id']?.toString())
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toSet()
           .toList();
-      final profiles = await _supabase
-          .from('profiles')
-          .select('*')
-          .inFilter('id', freelancerIds);
 
-      final profileMap = {
-        for (final p in profiles as List)
-          p['id'] as String: p as Map<String, dynamic>,
-      };
+      Map<String, Map<String, dynamic>> profileMap = {};
+      if (freelancerIds.isNotEmpty) {
+        try {
+          final profiles = await _supabase
+              .from('profiles')
+              .select('*')
+              .inFilter('id', freelancerIds);
+
+          profileMap = {
+            for (final p in (profiles as List).whereType<Map>())
+              (p['id'] ?? '').toString(): Map<String, dynamic>.from(p),
+          };
+        } catch (e, st) {
+          // Keep candidate rows visible even if profiles query fails.
+          debugPrint('fetchCandidates profiles lookup error: $e\n$st');
+        }
+      }
 
       return data.map<Map<String, dynamic>>((row) {
-        final r = Map<String, dynamic>.from(row as Map);
-        r['freelancer'] = profileMap[r['freelancer_id']] ?? {};
+        final freelancerId = row['freelancer_id']?.toString() ?? '';
+        final r = Map<String, dynamic>.from(row);
+        r['freelancer'] = profileMap[freelancerId] ?? <String, dynamic>{};
         return r;
       }).toList();
     } catch (e, st) {

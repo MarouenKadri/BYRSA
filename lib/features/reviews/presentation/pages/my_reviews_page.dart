@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../app/widgets/cigale_tab_bar.dart';
+import '../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../providers/review_provider.dart';
 import '../widgets/reviews_error_card.dart';
@@ -48,11 +48,11 @@ class _MyReviewsPageState extends State<MyReviewsPage>
         leading: const AppBackButtonLeading(),
         titleWidget: Text('Mes avis', style: context.reviewPageTitleStyle),
         centerTitle: true,
-        bottom: CigaleTabBar(
+        bottom: AppSegmentedTabBar(
           controller: _tabController,
           tabs: const [
-            CigaleTab(icon: Icons.star_rounded, label: 'Reçus'),
-            CigaleTab(icon: Icons.rate_review_rounded, label: 'Donnés'),
+            AppSegmentedTab(icon: Icons.star_rounded, label: 'Reçus'),
+            AppSegmentedTab(icon: Icons.rate_review_rounded, label: 'Donnés'),
           ],
         ),
       ),

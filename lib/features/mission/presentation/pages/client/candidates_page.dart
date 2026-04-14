@@ -5,10 +5,9 @@ import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/candidate.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
-import '../../../../messaging/presentation/pages/chat_page.dart';
-import '../../../../client/presentation/pages/freelancer_profile_view.dart';
 import '../../../../notifications/notification_provider.dart';
 import '../../../../notifications/data/models/app_notification.dart';
+import '../../../../client/presentation/pages/freelancer_profile_view.dart';
 
 class CandidatesPage extends StatefulWidget {
   final String missionId;
@@ -38,17 +37,26 @@ class _CandidatesPageState extends State<CandidatesPage> {
   }
 
   Future<void> _loadCandidates() async {
-    final rows = await context.read<MissionProvider>().fetchCandidates(
-      widget.missionId,
-    );
-    if (!mounted) return;
-    setState(() {
-      _candidates = rows.map(_candidateFromRow).toList();
-      _hasAcceptedCandidate = _candidates.any(
-        (c) => c.status == CandidateStatus.accepte,
+    try {
+      final rows = await context.read<MissionProvider>().fetchCandidates(
+        widget.missionId,
       );
-      _isLoading = false;
-    });
+      if (!mounted) return;
+      setState(() {
+        _candidates = rows.map(_candidateFromRow).toList();
+        _hasAcceptedCandidate = _candidates.any(
+          (c) => c.status == CandidateStatus.accepte,
+        );
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _candidates = [];
+        _hasAcceptedCandidate = false;
+        _isLoading = false;
+      });
+    }
   }
 
   static CandidateStatus _candidateStatusFromDb(String s) => switch (s) {
@@ -59,9 +67,11 @@ class _CandidatesPageState extends State<CandidatesPage> {
   };
 
   static Candidate _candidateFromRow(Map<String, dynamic> row) {
-    final f = row['freelancer'] as Map<String, dynamic>? ?? {};
+    final f = row['freelancer'] is Map
+        ? Map<String, dynamic>.from(row['freelancer'] as Map)
+        : <String, dynamic>{};
     final createdAt = DateTime.tryParse(
-      row['applied_at'] as String? ?? row['created_at'] as String? ?? '',
+      (row['applied_at'] ?? row['created_at'] ?? '').toString(),
     );
     String appliedAt = 'À l\'instant';
     if (createdAt != null) {
@@ -75,23 +85,39 @@ class _CandidatesPageState extends State<CandidatesPage> {
       else
         appliedAt = 'Il y a ${diff.inDays}j';
     }
-    final price = (row['proposed_price'] as num?)?.toDouble() ?? 0;
-    final statusStr = row['status'] as String? ?? 'en_attente';
+    final price = _asDouble(row['proposed_price']);
+    final statusStr = (row['status'] ?? 'en_attente').toString();
+    final firstName = (f['first_name'] ?? '').toString().trim();
+    final lastName = (f['last_name'] ?? '').toString().trim();
+    final fullName = '$firstName $lastName'.trim();
+
     return Candidate(
-      id: row['freelancer_id'] as String? ?? (row['id'] as String? ?? ''),
-      name: '${f['first_name'] ?? ''} ${f['last_name'] ?? ''}'.trim(),
-      avatar: f['avatar_url'] as String? ?? '',
-      rating: (f['rating'] as num?)?.toDouble() ?? 0,
-      reviewsCount: f['reviews_count'] as int? ?? 0,
+      id: (row['freelancer_id'] ?? row['id'] ?? '').toString(),
+      name: fullName.isNotEmpty ? fullName : 'Freelancer',
+      avatar: (f['avatar_url'] ?? '').toString(),
+      rating: _asDouble(f['rating']),
+      reviewsCount: _asInt(f['reviews_count']),
       proposedPrice: price > 0 ? '${price.toInt()} €' : 'Devis',
-      message: row['message'] as String? ?? '',
+      message: (row['message'] ?? '').toString(),
       skills: const [],
       responseTime: '',
-      completedMissions: f['completed_missions'] as int? ?? 0,
+      completedMissions: _asInt(f['completed_missions']),
       isVerified: f['is_verified'] as bool? ?? false,
       appliedAt: appliedAt,
       status: _candidateStatusFromDb(statusStr),
     );
+  }
+
+  static int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse('${value ?? ''}') ?? 0;
+  }
+
+  static double _asDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    return double.tryParse('${value ?? ''}') ?? 0;
   }
 
   /// ─── Accepter un candidat (les autres sont rejetés) ───
@@ -222,85 +248,85 @@ class _CandidatesPageState extends State<CandidatesPage> {
     });
   }
 
-  /// ─── Ouvrir le chat avec un candidat ───
-  void _openChat(Candidate candidate) async {
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(
-          contactName: candidate.name,
-          contactAvatar: candidate.avatar,
-          isOnline: true,
-          isVerified: candidate.isVerified,
-          missionTitle: widget.missionTitle,
-          // Mode candidat : permet d'accepter depuis le chat
-          candidateMode: true,
-          candidatePrice: candidate.proposedPrice,
-          onAcceptCandidate: () {
-            // Callback quand accepté depuis le chat
-            Navigator.pop(context, true);
-          },
-        ),
+  int _statusRank(CandidateStatus status) => switch (status) {
+    CandidateStatus.enAttente => 0,
+    CandidateStatus.accepte => 1,
+    CandidateStatus.refuse => 2,
+  };
+
+  double? _extractPrice(String raw) {
+    final normalized = raw.replaceAll(',', '.');
+    final parsed = double.tryParse(
+      normalized.replaceAll(RegExp(r'[^0-9.]'), ''),
+    );
+    if (parsed == null || parsed <= 0) return null;
+    return parsed;
+  }
+
+  String _formatPrice(double value) {
+    if (value % 1 == 0) return '${value.toInt()} €';
+    return '${value.toStringAsFixed(1)} €';
+  }
+
+  String get _bestPriceLabel {
+    final prices = _candidates
+        .map((c) => _extractPrice(c.proposedPrice))
+        .whereType<double>()
+        .toList();
+    if (prices.isEmpty) return 'Devis';
+    prices.sort();
+    return _formatPrice(prices.first);
+  }
+
+  List<Candidate> get _sortedCandidates {
+    final sorted = List<Candidate>.from(_candidates);
+    sorted.sort((a, b) => _statusRank(a.status).compareTo(_statusRank(b.status)));
+    return sorted;
+  }
+
+  Widget _buildSummaryMetric({
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.textTertiary,
+              letterSpacing: 0.2,
+            ),
+          ),
+          AppGap.h4,
+          Text(
+            value,
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? context.colors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
-
-    // Si accepté depuis le chat
-    if (result == true) {
-      _confirmAcceptance(candidate);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final offersCount = _candidates.length;
     final pendingCount = _candidates
         .where((c) => c.status == CandidateStatus.enAttente)
         .length;
+    final displayCandidates = _sortedCandidates;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.snow,
-      appBar: AppBar(
-        backgroundColor: AppColors.snow,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leadingWidth: 52,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 18,
-            color: Color(0xFF9099A4),
-          ),
-        ),
-        titleSpacing: 0,
-        title: Text(
-          'Candidatures: ${widget.missionTitle}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppColors.ink,
-            letterSpacing: -0.2,
-          ),
-        ),
-        actions: [
-          if (!_hasAcceptedCandidate)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  '$pendingCount en attente',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF9AA3AE),
-                  ),
-                ),
-              ),
-            ),
-        ],
+      appBar: AppPageAppBar(
+        title: 'Offres reçues',
+        leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
       ),
       body: Column(
         children: [
@@ -308,7 +334,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
@@ -320,38 +346,47 @@ class _CandidatesPageState extends State<CandidatesPage> {
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: Color(0xFF9AA3AE),
-                    size: 18,
-                  ),
-                  AppGap.w10,
                   Text(
-                    'Budget propose: ',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF5D6672),
+                    widget.missionTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ink,
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      widget.missionBudget,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                      ),
+                  AppGap.h2,
+                  Text(
+                    'Liste des offres reçues pour cette mission',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textSecondary,
                     ),
+                  ),
+                  AppGap.h16,
+                  Row(
+                    children: [
+                      _buildSummaryMetric(
+                        label: 'Offres',
+                        value: '$offersCount',
+                      ),
+                      _buildSummaryMetric(
+                        label: 'Meilleur',
+                        value: _bestPriceLabel,
+                      ),
+                      _buildSummaryMetric(
+                        label: 'En attente',
+                        value: '$pendingCount',
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-
           // ─── Message si accepté ───
           if (_hasAcceptedCandidate)
             AppSurfaceCard(
@@ -387,7 +422,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _candidates.isEmpty
+                : displayCandidates.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -399,7 +434,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
                         ),
                         AppGap.h12,
                         Text(
-                          'Aucune candidature pour l\'instant',
+                          'Aucune offre pour l\'instant',
                           style: context.text.bodyMedium,
                         ),
                       ],
@@ -412,17 +447,14 @@ class _CandidatesPageState extends State<CandidatesPage> {
                       16,
                       100,
                     ),
-                    itemCount: _candidates.length,
+                    itemCount: displayCandidates.length,
                     separatorBuilder: (_, __) => AppGap.h12,
                     itemBuilder: (context, index) => _CandidateCard(
-                      candidate: _candidates[index],
+                      candidate: displayCandidates[index],
                       onAccept: _hasAcceptedCandidate
                           ? null
-                          : () => _acceptCandidate(_candidates[index]),
-                      onChat: _hasAcceptedCandidate
-                          ? null
-                          : () => _openChat(_candidates[index]),
-                      onTap: () => _showCandidateDetails(_candidates[index]),
+                          : () => _acceptCandidate(displayCandidates[index]),
+                      onTap: () => _openProfile(displayCandidates[index]),
                     ),
                   ),
           ),
@@ -431,47 +463,31 @@ class _CandidatesPageState extends State<CandidatesPage> {
     );
   }
 
-  /// ─── Détail candidat (bottom sheet) ───
-  void _showCandidateDetails(Candidate candidate) {
-    showAppBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      wrapWithSurface: false,
-      builder: (context) => _CandidateDetailsSheet(
-        candidate: candidate,
-        onAccept:
-            _hasAcceptedCandidate ||
-                candidate.status != CandidateStatus.enAttente
-            ? null
-            : () {
-                Navigator.pop(context);
-                _acceptCandidate(candidate);
-              },
-        onChat:
-            _hasAcceptedCandidate ||
-                candidate.status != CandidateStatus.enAttente
-            ? null
-            : () {
-                Navigator.pop(context);
-                _openChat(candidate);
-              },
-        onViewProfile: () {
-          Navigator.pop(context);
-          Navigator.push(
-            this.context,
-            MaterialPageRoute(
-              builder: (_) => FreelancerProfileView(
-                freelancerId: candidate.id,
-                freelancerName: candidate.name,
-                freelancerAvatar: candidate.avatar,
-                rating: candidate.rating,
-                reviewsCount: candidate.reviewsCount,
-                missionsCount: candidate.completedMissions,
-                responseTime: candidate.responseTime,
-              ),
-            ),
-          );
-        },
+  void _openProfile(Candidate candidate) {
+    final isPending = candidate.status == CandidateStatus.enAttente && !_hasAcceptedCandidate;
+    final isAccepted = candidate.status == CandidateStatus.accepte;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FreelancerProfileView(
+          freelancerId: candidate.id,
+          freelancerName: candidate.name,
+          freelancerAvatar: candidate.avatar,
+          rating: candidate.rating,
+          reviewsCount: candidate.reviewsCount,
+          missionsCount: candidate.completedMissions,
+          proposedPrice: candidate.proposedPrice,
+          contactMode: isPending
+              ? FreelancerContactMode.pendingCandidate
+              : isAccepted
+                  ? FreelancerContactMode.confirmedPresta
+                  : FreelancerContactMode.spontaneous,
+          candidatePrice: candidate.proposedPrice,
+          onCandidateAccepted: isPending
+              ? () => _acceptCandidate(candidate)
+              : null,
+        ),
       ),
     );
   }
@@ -483,13 +499,11 @@ class _CandidatesPageState extends State<CandidatesPage> {
 class _CandidateCard extends StatelessWidget {
   final Candidate candidate;
   final VoidCallback? onAccept;
-  final VoidCallback? onChat;
   final VoidCallback onTap;
 
   const _CandidateCard({
     required this.candidate,
     required this.onAccept,
-    required this.onChat,
     required this.onTap,
   });
 
@@ -497,16 +511,21 @@ class _CandidateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isAccepted = candidate.status == CandidateStatus.accepte;
     final isRejected = candidate.status == CandidateStatus.refuse;
+    final isPending = candidate.status == CandidateStatus.enAttente;
+    final canAccept = onAccept != null && isPending;
+    final messagePreview = candidate.message.trim().isEmpty
+        ? 'Aucun message ajoute.'
+        : candidate.message.trim();
 
     return Opacity(
       opacity: isRejected ? 0.52 : 1.0,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
           border: isAccepted
               ? Border.all(color: AppColors.ink, width: 1.0)
-              : null,
+              : Border.all(color: AppColors.gray50),
           boxShadow: const [
             BoxShadow(
               color: Color(0x04000000),
@@ -518,7 +537,7 @@ class _CandidateCard extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(22),
@@ -542,14 +561,14 @@ class _CandidateCard extends StatelessWidget {
                         ),
                         child: CircleAvatar(
                           radius: 29,
-                          backgroundColor: const Color(0xFFF2F3F5),
+                          backgroundColor: AppColors.gray50,
                           backgroundImage: candidate.avatar.isNotEmpty
                               ? NetworkImage(candidate.avatar)
                               : null,
                           child: candidate.avatar.isEmpty
                               ? const Icon(
                                   Icons.person_outline_rounded,
-                                  color: Color(0xFF9AA3AE),
+                                  color: AppColors.gray400,
                                 )
                               : null,
                         ),
@@ -565,55 +584,21 @@ class _CandidateCard extends StatelessWidget {
                                   child: Text(
                                     candidate.name,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.ink,
                                     ),
                                   ),
                                 ),
-                                if (isAccepted)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: const Color(0xFFE8EBEF),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'CHOISI',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 1.3,
-                                        color: AppColors.ink,
-                                      ),
-                                    ),
-                                  ),
-                                if (isRejected)
-                                  Text(
-                                    'REFUSE',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.3,
-                                      color: const Color(0xFFA0A8B2),
-                                    ),
-                                  ),
+                                _OfferStatusChip(status: candidate.status),
                               ],
                             ),
                             AppGap.h6,
                             Text(
-                              '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF8F98A3),
+                              '★ ${candidate.rating.toStringAsFixed(1)} · ${candidate.reviewsCount} avis',
+                              style: context.text.bodySmall?.copyWith(
+                                color: context.colors.textSecondary,
                               ),
                             ),
                           ],
@@ -621,37 +606,64 @@ class _CandidateCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  AppGap.h18,
+                  AppGap.h16,
                   Text(
-                    'Tarif propose',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF98A1AC),
+                    'Tarif proposé',
+                    style: context.text.labelSmall?.copyWith(
+                      color: context.colors.textTertiary,
                       letterSpacing: 0.2,
                     ),
                   ),
-                  AppGap.h6,
+                  AppGap.h4,
                   Text(
                     candidate.proposedPrice,
-                    style: TextStyle(
-                      fontSize: 30,
+                    style: context.text.displaySmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.8,
-                      color: AppColors.ink,
+                      color: context.colors.textPrimary,
+                    ),
+                  ),
+                  AppGap.h12,
+                  Text(
+                    messagePreview,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.bodySmall?.copyWith(
+                      height: 1.5,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                   AppGap.h14,
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      candidate.appliedAt,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFFB0B8C2),
+                  Row(
+                    children: [
+                      Text(
+                        candidate.appliedAt,
+                        style: context.text.labelSmall?.copyWith(
+                          color: context.colors.textHint,
+                        ),
                       ),
-                    ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: onTap,
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.colors.textPrimary,
+                          textStyle: context.text.labelLarge,
+                        ),
+                        child: const Text('Voir profil'),
+                      ),
+                      if (canAccept) ...[
+                        AppGap.w8,
+                        IntrinsicWidth(
+                          child: AppButton(
+                            label: 'Accepter',
+                            variant: ButtonVariant.black,
+                            height: 38,
+                            width: null,
+                            onPressed: onAccept,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -663,339 +675,49 @@ class _CandidateCard extends StatelessWidget {
   }
 }
 
-/// ─────────────────────────────────────────────────────────────
-/// 📋 Bottom Sheet Détails Candidat
-/// ─────────────────────────────────────────────────────────────
-class _CandidateDetailsSheet extends StatelessWidget {
-  final Candidate candidate;
-  final VoidCallback? onAccept;
-  final VoidCallback? onChat;
-  final VoidCallback? onViewProfile;
+class _OfferStatusChip extends StatelessWidget {
+  final CandidateStatus status;
 
-  const _CandidateDetailsSheet({
-    required this.candidate,
-    required this.onAccept,
-    required this.onChat,
-    this.onViewProfile,
-  });
+  const _OfferStatusChip({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final replyValue = candidate.responseTime.isEmpty
-        ? 'Rapide'
-        : candidate.responseTime.replaceAll('Répond en ', '');
-    final messageText = candidate.message.trim().isEmpty
-        ? "Ce freelance n'a pas laisse de message pour le moment."
-        : candidate.message.trim();
+    final (label, bg, fg) = switch (status) {
+      CandidateStatus.enAttente => (
+          'EN ATTENTE',
+          AppColors.gray50,
+          AppColors.gray600,
+        ),
+      CandidateStatus.accepte => (
+          'CHOISIE',
+          AppColors.successBg,
+          AppColors.successDark,
+        ),
+      CandidateStatus.refuse => (
+          'REFUSÉE',
+          AppColors.gray50,
+          AppColors.gray400,
+        ),
+    };
 
-    return AppScrollableSheet(
-      initialChildSize: 0.82,
-      minChildSize: 0.52,
-      maxChildSize: 0.94,
-      trailing: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.close_rounded,
-            size: 16,
-            color: Color(0xFF9AA3AE),
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: bg.withValues(alpha: 0.9)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.9,
+          color: fg,
         ),
       ),
-      builder: (context, scrollController) => ListView(
-        controller: scrollController,
-        padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
-        children: [
-          Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x12000000),
-                      blurRadius: 12,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 34,
-                  backgroundColor: const Color(0xFFF3F4F6),
-                  backgroundImage: candidate.avatar.isNotEmpty
-                      ? NetworkImage(candidate.avatar)
-                      : null,
-                  child: candidate.avatar.isEmpty
-                      ? const Icon(
-                          Icons.person_outline_rounded,
-                          color: Color(0xFF9AA3AE),
-                        )
-                      : null,
-                ),
-              ),
-              AppGap.w14,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      candidate.name,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    AppGap.h6,
-                    Text(
-                      '${candidate.rating.toStringAsFixed(1)} (${candidate.reviewsCount} avis)',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF97A0AB),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          AppGap.h24,
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: AppColors.gray50,
-                width: 0.8,
-              ),
-            ),
-            child: Column(
-              children: [
-                _ProfileInfoRow(
-                  icon: Icons.edit_outlined,
-                  label: 'Tarif propose',
-                  trailing: Text(
-                    candidate.proposedPrice,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w300,
-                      color: AppColors.ink,
-                      letterSpacing: -0.8,
-                    ),
-                  ),
-                ),
-                const _SheetSectionDivider(),
-                _ProfileInfoRow(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: 'Message',
-                  trailing: Flexible(
-                    child: Text(
-                      messageText,
-                      textAlign: TextAlign.right,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF8F98A3),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          AppGap.h18,
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: AppColors.gray50,
-                width: 0.8,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Statistiques',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
-                AppGap.h14,
-                Row(
-                  children: [
-                    _StatCard(
-                      icon: Icons.work_outline_rounded,
-                      value: '${candidate.completedMissions}',
-                      label: 'Missions',
-                    ),
-                    AppGap.w10,
-                    _StatCard(
-                      icon: Icons.schedule_rounded,
-                      value: replyValue,
-                      label: 'Reponse',
-                    ),
-                    AppGap.w10,
-                    _StatCard(
-                      icon: Icons.star_border_rounded,
-                      value: candidate.rating.toStringAsFixed(1),
-                      label: 'Note',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (onViewProfile != null) ...[
-            AppGap.h18,
-            OutlinedButton.icon(
-              onPressed: onViewProfile,
-              icon: const Icon(Icons.person_outline_rounded, size: 18),
-              label: const Text(
-                'Voir le profil complet',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.ink,
-                side: const BorderSide(color: Color(0xFFE5E8EC)),
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-      footer: onAccept == null
-          ? null
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onChat != null)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE8EBEF)),
-                    ),
-                    child: _ProfileInfoRow(
-                      icon: Icons.chat_bubble_outline_rounded,
-                      label: 'Message',
-                      compact: true,
-                      trailing: const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: Color(0xFFB5BDC7),
-                      ),
-                      onTap: onChat,
-                    ),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onAccept,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    child: const Text('Accepter'),
-                  ),
-                ),
-              ],
-            ),
     );
   }
-}
-
-class _ProfileInfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Widget trailing;
-  final VoidCallback? onTap;
-  final bool compact;
-
-  const _ProfileInfoRow({
-    required this.icon,
-    required this.label,
-    required this.trailing,
-    this.onTap,
-    this.compact = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final content = Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: compact ? 14 : 18,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.ink),
-          AppGap.w12,
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
-            ),
-          ),
-          const Spacer(),
-          trailing,
-        ],
-      ),
-    );
-
-    if (onTap == null) return content;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: content,
-      ),
-    );
-  }
-}
-
-class _SheetSectionDivider extends StatelessWidget {
-  const _SheetSectionDivider();
-
-  @override
-  Widget build(BuildContext context) => const Divider(
-    height: 1,
-    color: AppColors.gray50,
-    indent: 16,
-    endIndent: 16,
-  );
 }
 
 /// ─────────────────────────────────────────────────────────────
@@ -1804,46 +1526,3 @@ class _AddCardSheetState extends State<_AddCardSheet> {
 /// ─────────────────────────────────────────────────────────────
 /// 📊 Carte Stat
 /// ─────────────────────────────────────────────────────────────
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-
-  const _StatCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: AppInsets.v14,
-        decoration: BoxDecoration(
-          color: context.colors.background,
-          borderRadius: BorderRadius.circular(AppRadius.input),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 22, color: AppColors.primary),
-            AppGap.h6,
-            Text(
-              value,
-              style: context.text.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            AppGap.h2,
-            Text(
-              label,
-              style: context.text.labelMedium?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

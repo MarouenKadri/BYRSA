@@ -8,6 +8,8 @@ library;
 export 'data/models/transaction.dart';
 export 'data/models/skill.dart';
 export 'data/models/user_profile.dart';
+export 'data/repositories/freelancer_catalog_repository.dart';
+export 'data/repositories/supabase_freelancer_catalog_repository.dart';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export 'profile_provider.dart';

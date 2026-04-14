@@ -194,7 +194,7 @@ class LocationAppBarCoordinator {
 // ─────────────────────────────────────────────────────────────
 // LocationAppBar — barre de navigation avec localisation,
 // cloche de notifications et switch de rôle via avatar.
-// Accepte un paramètre [bottom] (ex: CigaleTabBar) optionnel.
+// Accepte un paramètre [bottom] (ex: AppSegmentedTabBar) optionnel.
 // ─────────────────────────────────────────────────────────────
 
 class LocationAppBar extends StatefulWidget implements PreferredSizeWidget {

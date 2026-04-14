@@ -14,6 +14,7 @@ import 'features/mission/presentation/mission_provider.dart';
 import 'features/notifications/notifications.dart';
 import 'features/story/story_provider.dart';
 import 'features/profile/profile_provider.dart';
+import 'features/profile/data/repositories/supabase_freelancer_catalog_repository.dart';
 import 'features/reviews/presentation/providers/review_provider.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -64,7 +65,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
         ChangeNotifierProvider(create: (_) => MessagingProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(
+            freelancerCatalogRepository: SupabaseFreelancerCatalogRepository(),
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
       ],
       child: Consumer<ThemeProvider>(

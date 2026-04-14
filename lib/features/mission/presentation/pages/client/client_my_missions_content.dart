@@ -9,7 +9,7 @@ import '../../widgets/shared/mission_status_ui.dart';
 import '../../widgets/cards/variants/mission_summary_card.dart';
 import 'client_mission_detail_page.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
-import '../../../../../app/widgets/cigale_tab_bar.dart';
+import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// 📋 Inkern - Page Mes Missions (Client)
@@ -29,10 +29,13 @@ class ClientMyMissionsContent extends StatelessWidget {
         appBar: AppSectionBar(
           pageTitle: 'Mes missions',
           onGoToAccount: onGoToAccount,
-          bottom: const CigaleTabBar(
+          bottom: const AppSegmentedTabBar(
             tabs: [
-              CigaleTab(icon: Icons.campaign_rounded, label: 'Publiées'),
-              CigaleTab(icon: Icons.play_circle_outline_rounded, label: 'En cours'),
+              AppSegmentedTab(icon: Icons.campaign_rounded, label: 'Publiées'),
+              AppSegmentedTab(
+                icon: Icons.play_circle_outline_rounded,
+                label: 'En cours',
+              ),
             ],
           ),
         ),

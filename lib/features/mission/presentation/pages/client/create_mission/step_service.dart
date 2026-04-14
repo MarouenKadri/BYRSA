@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/design/app_primitives.dart';
 
@@ -18,8 +19,16 @@ class StepService extends StatelessWidget {
     required this.onCompleted,
   });
 
+  Map<String, dynamic>? _selectedServiceMeta() {
+    for (final service in services) {
+      if (service['id'] == selectedService) return service;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedMeta = _selectedServiceMeta();
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
       child: Column(
@@ -37,7 +46,7 @@ class StepService extends StatelessWidget {
           ),
           AppGap.h10,
           Text(
-            'Sélectionnez le type de service dont vous avez besoin',
+            'Choisissez votre catégorie puis un sous-service précis',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -45,42 +54,17 @@ class StepService extends StatelessWidget {
               color: const Color(0xFF98A0A8),
             ),
           ),
-          AppGap.h28,
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: 1.06,
+          if (selectedMeta != null) ...[
+            AppGap.h16,
+            _SelectedServiceSummary(
+              title: selectedMeta['name'] as String? ?? 'Service',
+              icon: selectedMeta['icon'] as IconData? ?? Icons.category_rounded,
+              color: selectedMeta['color'] as Color? ?? AppColors.primary,
+              subtitle: selectedSubService ?? 'Sous-service à confirmer',
             ),
-            itemCount: services.length,
-            itemBuilder: (context, index) {
-              final service = services[index];
-              final isSelected = selectedService == service['id'];
-              final icon = service['icon'] as IconData;
-              final title = service['name'] as String;
-
-              return GestureDetector(
-                onTap: () => _showSubServices(context, service),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 1, end: isSelected ? 1.02 : 1),
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  child: _LuxuryServiceCard(
-                    title: title,
-                    icon: icon,
-                    isSelected: isSelected,
-                    subtitle: isSelected ? selectedSubService : null,
-                  ),
-                  builder: (context, scale, child) {
-                    return Transform.scale(scale: scale, child: child);
-                  },
-                ),
-              );
-            },
-          ),
+          ],
+          AppGap.h20,
+          _buildServiceGrid(context, services),
         ],
       ),
     );
@@ -89,190 +73,399 @@ class StepService extends StatelessWidget {
   void _showSubServices(BuildContext context, Map<String, dynamic> service) {
     showAppBottomSheet(
       context: context,
+      isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.96),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(16, 20, 24, 0.06),
-              blurRadius: 20,
-              offset: Offset(0, -4),
+      builder: (context) => _SubServicesSheet(
+        serviceName: service['name'] as String? ?? 'Service',
+        serviceIcon: service['icon'] as IconData? ?? Icons.category_rounded,
+        serviceColor: service['color'] as Color? ?? AppColors.primary,
+        subServices: _readSubServices(service['subServices']),
+        selectedSubService:
+            selectedService == service['id'] ? selectedSubService : null,
+        onSelected: (subService) {
+          onServiceSelected(
+            service['id'] as String,
+            subService,
+          );
+          Navigator.pop(context);
+          Future.delayed(
+            const Duration(milliseconds: 240),
+            onCompleted,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildServiceGrid(
+    BuildContext context,
+    List<Map<String, dynamic>> items,
+  ) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.02,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final service = items[index];
+        final isSelected = selectedService == service['id'];
+        final color = service['color'] as Color? ?? AppColors.primary;
+        final subServices = _readSubServices(service['subServices']);
+        return GestureDetector(
+          onTap: () => _showSubServices(context, service),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 1, end: isSelected ? 1.015 : 1),
+            duration: const Duration(milliseconds: 170),
+            curve: Curves.easeOutCubic,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            child: _ServiceCategoryCard(
+              title: service['name'] as String? ?? 'Service',
+              icon: service['icon'] as IconData? ?? Icons.category_rounded,
+              color: color,
+              isSelected: isSelected,
+              subtitle: isSelected
+                  ? selectedSubService
+                  : '${subServices.length} options',
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
+          ),
+        );
+      },
+    );
+  }
+
+  List<String> _readSubServices(dynamic raw) {
+    if (raw is List) {
+      return raw
+          .map((entry) => '$entry'.trim())
+          .where((entry) => entry.isNotEmpty)
+          .toList();
+    }
+    return const [];
+  }
+}
+
+class _SubServicesSheet extends StatefulWidget {
+  final String serviceName;
+  final IconData serviceIcon;
+  final Color serviceColor;
+  final List<String> subServices;
+  final String? selectedSubService;
+  final ValueChanged<String> onSelected;
+
+  const _SubServicesSheet({
+    required this.serviceName,
+    required this.serviceIcon,
+    required this.serviceColor,
+    required this.subServices,
+    required this.selectedSubService,
+    required this.onSelected,
+  });
+
+  @override
+  State<_SubServicesSheet> createState() => _SubServicesSheetState();
+}
+
+class _SubServicesSheetState extends State<_SubServicesSheet> {
+  @override
+  Widget build(BuildContext context) {
+    final subServices = widget.subServices;
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(16, 20, 24, 0.08),
+            blurRadius: 24,
+            offset: Offset(0, -6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
               margin: const EdgeInsets.only(top: 12),
               width: 34,
-              height: 3,
+              height: 4,
               decoration: BoxDecoration(
                 color: const Color(0xFFD8DCE0),
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                children: [
-                  Icon(
-                    service['icon'] as IconData,
-                    size: 22,
-                    color: AppColors.gray700,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: widget.serviceColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  AppGap.w12,
-                  Text(
-                    service['name'] as String,
+                  child: Icon(
+                    widget.serviceIcon,
+                    size: 19,
+                    color: widget.serviceColor,
+                  ),
+                ),
+                AppGap.w10,
+                Expanded(
+                  child: Text(
+                    widget.serviceName,
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
                       color: AppColors.inkDark,
                     ),
                   ),
-                ],
-              ),
-            ),
-            const Divider(height: 1, color: AppColors.gray50),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...(service['subServices'] as List).map((subService) {
-                      final isSelected =
-                          selectedService == service['id'] &&
-                          selectedSubService == subService;
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 2,
-                        ),
-                        title: Text(
-                          subService,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? AppColors.stepBlue
-                                : AppColors.gray700,
-                          ),
-                        ),
-                        trailing: isSelected
-                            ? const Icon(
-                                Icons.check_rounded,
-                                size: 18,
-                                color: AppColors.stepBlue,
-                              )
-                            : null,
-                        onTap: () {
-                          onServiceSelected(
-                            service['id'] as String,
-                            subService as String,
-                          );
-                          Navigator.pop(context);
-                          Future.delayed(
-                            const Duration(milliseconds: 280),
-                            onCompleted,
-                          );
-                        },
-                      );
-                    }),
-                    SizedBox(
-                      height: MediaQuery.of(context).padding.bottom + 16,
-                    ),
-                  ],
                 ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(
+              'Sélectionnez le service exact pour votre mission',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: context.colors.textSecondary,
               ),
             ),
-          ],
-        ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                MediaQuery.of(context).padding.bottom + 16,
+              ),
+              child: subServices.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 28),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 28,
+                              color: context.colors.textTertiary,
+                            ),
+                            AppGap.h8,
+                            Text(
+                              'Aucun sous-service disponible',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: context.colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: subServices.map((subService) {
+                        final isSelected = widget.selectedSubService == subService;
+                        return AppPillChip(
+                          label: subService,
+                          selected: isSelected,
+                          onTap: () => widget.onSelected(subService),
+                          backgroundColor: widget.serviceColor.withValues(
+                            alpha: 0.10,
+                          ),
+                          foregroundColor: AppColors.inkDark,
+                          selectedBackgroundColor: widget.serviceColor,
+                          selectedForegroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        );
+                      }).toList(),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _LuxuryServiceCard extends StatelessWidget {
+class _SelectedServiceSummary extends StatelessWidget {
   final String title;
+  final String subtitle;
   final IconData icon;
-  final bool isSelected;
-  final String? subtitle;
+  final Color color;
 
-  const _LuxuryServiceCard({
+  const _SelectedServiceSummary({
     required this.title,
-    required this.icon,
-    required this.isSelected,
     required this.subtitle,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          AppGap.w10,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.inkDark,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.gray700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.check_circle_rounded,
+            size: 18,
+            color: color,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceCategoryCard extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final Color color;
+  final bool isSelected;
+
+  const _ServiceCategoryCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.isSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 170),
+      curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: isSelected
+            ? color.withValues(alpha: 0.10)
+            : context.colors.surface,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isSelected ? AppColors.stepBlue : Colors.transparent,
+          color: isSelected ? color : context.colors.border,
           width: isSelected ? 1.4 : 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isSelected
-                ? const Color.fromRGBO(24, 71, 168, 0.10)
-                : const Color.fromRGBO(16, 20, 24, 0.04),
-            blurRadius: isSelected ? 18 : 14,
-            offset: const Offset(0, 6),
+                ? color.withValues(alpha: 0.18)
+                : Colors.black.withValues(alpha: 0.05),
+            blurRadius: isSelected ? 14 : 8,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: isSelected ? 1 : 0),
-              duration: const Duration(milliseconds: 220),
-              builder: (context, value, child) {
-                return Transform.rotate(
-                  angle: value * 0.06,
-                  child: Transform.translate(
-                    offset: Offset(0, -1.5 * value),
-                    child: child,
+            Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(11),
                   ),
-                );
-              },
-              child: Icon(icon, size: 31, color: AppColors.gray700),
+                  child: Icon(icon, size: 19, color: color),
+                ),
+                const Spacer(),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 18,
+                    color: color,
+                  ),
+              ],
             ),
-            AppGap.h16,
+            const Spacer(),
             Text(
               title,
-              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
                 color: AppColors.inkDark,
+                letterSpacing: -0.2,
               ),
             ),
             if (subtitle != null && subtitle!.isNotEmpty) ...[
-              AppGap.h8,
+              AppGap.h5,
               Text(
                 subtitle!,
-                textAlign: TextAlign.center,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  height: 1.35,
-                  color: const Color(0xFF7E8790),
+                  color: isSelected ? color : context.colors.textSecondary,
                 ),
               ),
             ],

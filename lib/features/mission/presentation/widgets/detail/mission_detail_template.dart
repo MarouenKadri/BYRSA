@@ -103,8 +103,6 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                     ),
                   _buildMap(context),
                   AppGap.h20,
-                  _buildInfoList(context),
-                  AppGap.h20,
                   _buildDescription(context),
                   AppGap.h20,
                   _buildStatusBanner(context),
@@ -285,48 +283,6 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                   ),
                 ),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoList(BuildContext context) {
-    return Padding(
-      padding: AppInsets.h16,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 24,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            DetailInfoRow(
-              icon: Icons.event_outlined,
-              label: 'Date',
-              text: mission.formattedDate,
-            ),
-            const DetailListDivider(),
-            DetailInfoRow(
-              icon: Icons.schedule_outlined,
-              label: 'Heure',
-              text: mission.timeSlot,
-            ),
-            const DetailListDivider(),
-            DetailInfoRow(
-              icon: Icons.location_on_outlined,
-              label: 'Adresse',
-              text: mission.address.shortAddress,
-              twoLines: true,
             ),
           ],
         ),

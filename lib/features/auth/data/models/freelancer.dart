@@ -4,6 +4,7 @@ class Freelancer {
   final double rating;
   final String subtitle;
   final String imageUrl;
+  final bool isVerified;
 
   const Freelancer({
     required this.name,
@@ -11,5 +12,6 @@ class Freelancer {
     required this.rating,
     required this.subtitle,
     required this.imageUrl,
+    this.isVerified = false,
   });
 }

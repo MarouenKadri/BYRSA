@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
+import '../../../../app/widgets/app_category_filter_bar.dart';
 import '../../../../app/app_bar/location_app_bar.dart';
 import '../../../story/story.dart';
 import '../../../profile/profile_provider.dart';
@@ -9,12 +10,71 @@ import '../../../mission/presentation/pages/client/create_mission_page.dart';
 import '../../../mission/presentation/pages/client/client_mission_detail_page.dart';
 import '../../../mission/presentation/mission_provider.dart';
 import '../../../mission/data/models/mission.dart';
+import '../../../mission/data/models/service_category.dart';
 import '../../../mission/presentation/widgets/cards/variants/mission_focus_card.dart';
+import '../../../auth/data/models/freelancer.dart';
+import '../../../auth/presentation/widgets/freelancer_preview_card.dart';
 import 'freelancer_profile_view.dart';
+
+List<AppCategoryItem> _categoryItems() => [
+  const AppCategoryItem(
+    id: null,
+    label: ServiceCategory.allFilterLabel,
+    icon: Icons.apps_outlined,
+    color: Color(0xFF64748B),
+  ),
+  ...ServiceCategory.ordered.map(
+    (category) => AppCategoryItem(
+      id: category.id,
+      label: category.chipLabel,
+      icon: category.icon,
+      color: category.color,
+    ),
+  ),
+];
+
+Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
+  final firstName = (row['first_name'] ?? '') as String;
+  final lastName = (row['last_name'] ?? '') as String;
+  final fullName = '$firstName $lastName'.trim();
+  final rawHourlyRate = row['hourly_rate'];
+  final hourlyRate = rawHourlyRate is num
+      ? rawHourlyRate.toInt()
+      : int.tryParse('$rawHourlyRate') ?? 0;
+  final categoryIds = ServiceCategory.resolveIds(row['service_categories']);
+  final categoryNames = ServiceCategory.resolveNames(row['service_categories']);
+
+  return {
+    'id': row['id'] ?? '',
+    'name': fullName.isEmpty ? 'Prestataire' : fullName,
+    'avatar': (row['avatar_url'] ?? '') as String,
+    'category': categoryNames.isNotEmpty ? categoryNames.first : 'Multi-services',
+    'categoryIds': categoryIds,
+    'services': categoryNames,
+    'rating': 0.0,
+    'reviewsCount': 0,
+    'hourlyRate': hourlyRate,
+    'isVerified': (row['is_verified'] ?? false) as bool,
+    'isOnline': false,
+    'missionsCount': 0,
+    'responseTime': '2h',
+    'experienceLevel': categoryNames.isNotEmpty ? 'Spécialisé' : 'Pro',
+    'zone': (row['address'] ?? '') as String,
+  };
+}
+
+bool _matchesCategoryFilter(
+  Map<String, dynamic> freelancer,
+  String? selectedCategoryId,
+) {
+  if (selectedCategoryId == null) return true;
+  final ids = (freelancer['categoryIds'] as List?)?.cast<String>() ?? const [];
+  return ids.contains(selectedCategoryId);
+}
 
 /// ─────────────────────────────────────────────────────────────
 /// 🏠 Inkern - Page d'accueil Client
-/// Haut : aperçu freelancers + "Voir plus"
+/// Haut : CTA mission + catégories + accès prestataires + stories
 /// Bas  : fil d'actualité
 /// ─────────────────────────────────────────────────────────────
 class ClientDiscoverContent extends StatefulWidget {
@@ -26,7 +86,7 @@ class ClientDiscoverContent extends StatefulWidget {
 }
 
 class _ClientDiscoverContentState extends State<ClientDiscoverContent> {
-  String _selectedCategory = 'Tous';
+  String? _selectedCategoryId;
 
   @override
   void initState() {
@@ -41,27 +101,6 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent> {
       context.read<ProfileProvider>().loadFreelancers(),
       context.read<StoryProvider>().refresh(),
     ]);
-  }
-
-  static Map<String, dynamic> _normalize(Map<String, dynamic> row) {
-    final firstName = (row['first_name'] ?? '') as String;
-    final lastName = (row['last_name'] ?? '') as String;
-    final fullName = '$firstName $lastName'.trim();
-    final hourlyRate = (row['hourly_rate'] ?? 0);
-    return {
-      'id': row['id'] ?? '',
-      'name': fullName.isEmpty ? 'Prestataire' : fullName,
-      'avatar': (row['avatar_url'] ?? '') as String,
-      'rating': 0.0,
-      'reviewsCount': 0,
-      'hourlyRate': (hourlyRate is int)
-          ? hourlyRate
-          : (hourlyRate as num).toInt(),
-      'isVerified': (row['is_verified'] ?? false) as bool,
-      'missionsCount': 0,
-      'responseTime': '2h',
-      'experienceLevel': 'Pro',
-    };
   }
 
   void _openFreelancerProfile(Map<String, dynamic> f) {
@@ -116,9 +155,15 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent> {
             // ── Catégories ───────────────────────────────────────
             SliverToBoxAdapter(
               child: _CategoriesRow(
-                selected: _selectedCategory,
-                onSelect: (c) => setState(() => _selectedCategory = c),
+                selectedCategoryId: _selectedCategoryId,
+                onSelect: (categoryId) =>
+                    setState(() => _selectedCategoryId = categoryId),
               ),
+            ),
+
+            // ── Entrée vers la découverte prestataires ───────────
+            SliverToBoxAdapter(
+              child: _FreelancerDiscoveryEntryCta(onTap: _goToDiscovery),
             ),
 
             // ── Stories des freelancers ──────────────────────────
@@ -130,40 +175,6 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent> {
               ),
             ),
 
-            // ── Section Freelancers (scroll horizontal) ──────────
-            SliverToBoxAdapter(
-              child: Consumer2<ProfileProvider, MissionProvider>(
-                builder: (context, provider, missionProvider, _) {
-                  final trackedMissions =
-                      missionProvider.clientMissions
-                          .where(
-                            (mission) =>
-                                mission.status == MissionStatus.confirmed ||
-                                mission.status == MissionStatus.onTheWay ||
-                                mission.status == MissionStatus.inProgress,
-                          )
-                          .toList()
-                        ..sort(
-                          (a, b) =>
-                              a.scheduledStart.compareTo(b.scheduledStart),
-                        );
-
-                  final items = provider.freelancers
-                      .take(8)
-                      .map(_normalize)
-                      .toList();
-                  return _FreelancersSection(
-                    nextMission: trackedMissions.isEmpty
-                        ? null
-                        : trackedMissions.first,
-                    isLoading: provider.isLoadingFreelancers,
-                    freelancers: items,
-                    onTap: _openFreelancerProfile,
-                    onSeeAll: _goToDiscovery,
-                  );
-                },
-              ),
-            ),
           ],
         ),
       ),
@@ -423,67 +434,78 @@ class _MissionCtaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = context.colors.primary;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
+          borderRadius: BorderRadius.circular(16),
+          child: Ink(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [primary, context.colors.primaryDark],
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-            child: Row(
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Créer une mission',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                      Text(
-                        'Reçois des candidatures rapidement',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withValues(alpha: 0.75),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: Colors.white.withValues(alpha: 0.7),
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.colors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
               ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Icon(
+                      Icons.add_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Créer une mission',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                            color: context.colors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Publiez votre besoin en moins d’une minute',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: context.colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: context.colors.textTertiary,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -496,99 +518,77 @@ class _MissionCtaSection extends StatelessWidget {
 // Catégories horizontales
 // ─────────────────────────────────────────────────────────────
 class _CategoriesRow extends StatelessWidget {
-  final String selected;
-  final void Function(String) onSelect;
+  final String? selectedCategoryId;
+  final void Function(String?) onSelect;
 
-  static const _items = [
-    (Icons.apps_outlined, 'Toutes'),
-    (Icons.cleaning_services_outlined, 'Ménage'),
-    (Icons.yard_outlined, 'Jardinage'),
-    (Icons.handyman_outlined, 'Brico'),
-    (Icons.plumbing_outlined, 'Plomberie'),
-    (Icons.bolt_outlined, 'Électricité'),
-  ];
-
-  const _CategoriesRow({required this.selected, required this.onSelect});
+  const _CategoriesRow({
+    required this.selectedCategoryId,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AppSection(
       color: context.colors.surface,
-      padding: const EdgeInsets.only(bottom: 16),
-      child: SizedBox(
-        height: 46,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: _items.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 18),
-          itemBuilder: (context, index) {
-            final (icon, label) = _items[index];
-            final isSelected =
-                label == selected || (selected == 'Tous' && label == 'Toutes');
-            if (isSelected) {
-              return GestureDetector(
-                onTap: () => onSelect(label),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEAF3FF),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.1,
-                      color: const Color(0xFF4A78B6),
-                    ),
-                  ),
-                ),
-              );
-            }
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppCategoryFilterBar(
+        items: _categoryItems(),
+        selectedId: selectedCategoryId,
+        onSelect: onSelect,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        spacing: 10,
+        height: 50,
+      ),
+    );
+  }
+}
 
-            return GestureDetector(
-              onTap: () => onSelect(label),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 9, bottom: 7),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(icon, size: 14, color: const Color(0xFF646B73)),
-                        const SizedBox(width: 6),
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.1,
-                            color: const Color(0xFF646B73),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    Container(
-                      width: (label.length * 6).toDouble(),
-                      height: 1,
-                      color: const Color(0xFFD2D7DD),
-                    ),
-                  ],
+class _FreelancerDiscoveryEntryCta extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _FreelancerDiscoveryEntryCta({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Material(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Ink(
+            padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.travel_explore_rounded,
+                  size: 18,
+                  color: context.colors.primary,
                 ),
-              ),
-            );
-          },
+                AppGap.w8,
+                Expanded(
+                  child: Text(
+                    'Voir tous les prestataires',
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textPrimary,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13,
+                  color: context.colors.textTertiary,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -697,273 +697,28 @@ class _FreelancersSection extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: AppInsets.h16,
                 itemCount: freelancers.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: EdgeInsets.only(
-                    right: index < freelancers.length - 1 ? 12 : 0,
-                  ),
-                  child: _FreelancerChip(
-                    freelancer: freelancers[index],
-                    onTap: () => onTap(freelancers[index]),
-                  ),
-                ),
+                itemBuilder: (context, index) {
+                  final f = freelancers[index];
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index < freelancers.length - 1 ? 12 : 0,
+                    ),
+                    child: FreelancerPreviewCard(
+                      freelancer: Freelancer(
+                        name: f['name'] as String,
+                        imageUrl: f['avatar'] as String,
+                        rating: f['rating'] as double,
+                        job: '${f['hourlyRate']}€/h',
+                        subtitle: '',
+                        isVerified: f['isVerified'] as bool,
+                      ),
+                      onTap: () => onTap(f),
+                    ),
+                  );
+                },
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Carte freelancer — photo pleine + infos en bas
-// ─────────────────────────────────────────────────────────────
-class _FreelancerChip extends StatelessWidget {
-  final Map<String, dynamic> freelancer;
-  final VoidCallback onTap;
-
-  const _FreelancerChip({required this.freelancer, required this.onTap});
-
-  static String _level(int missions) {
-    if (missions >= 50) return 'Ambassadeur';
-    if (missions >= 20) return 'Expert';
-    if (missions >= 5) return 'Pro';
-    return 'Nouveau';
-  }
-
-  _LevelStyle _levelStyle(String level, BuildContext context) {
-    switch (level) {
-      case 'Ambassadeur':
-        return _LevelStyle(
-          bg: AppColors.amberBg,
-          fg: AppColors.amberText,
-          icon: Icons.workspace_premium_rounded,
-        );
-      case 'Expert':
-        return _LevelStyle(
-          bg: AppColors.blueBg,
-          fg: AppColors.blueDark,
-          icon: Icons.military_tech_rounded,
-        );
-      case 'Pro':
-        return _LevelStyle(
-          bg: AppColors.primary.withValues(alpha: 0.12),
-          fg: AppColors.primary,
-          icon: Icons.verified_rounded,
-        );
-      default:
-        return _LevelStyle(
-          bg: context.colors.background,
-          fg: context.colors.textSecondary,
-          icon: Icons.person_rounded,
-        );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final name = freelancer['name'] as String;
-    final avatar = freelancer['avatar'] as String;
-    final rating = freelancer['rating'] as double;
-    final isVerified = freelancer['isVerified'] as bool;
-    final hourlyRate = freelancer['hourlyRate'] as int;
-    final missions = freelancer['missionsCount'] as int;
-    final level = _level(missions);
-    final lvlStyle = _levelStyle(level, context);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AppSurfaceCard(
-        padding: EdgeInsets.zero,
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(AppRadius.cardLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.14),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.cardLg),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // ── Photo pleine carte ──────────────────────────
-              avatar.isNotEmpty
-                  ? Image.network(
-                      avatar,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          _AvatarPlaceholder(name: name),
-                    )
-                  : _AvatarPlaceholder(name: name),
-
-              // ── Dégradé noir en bas ─────────────────────────
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.35, 1.0],
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.78),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // ── Badge niveau — haut droite ──────────────────
-              Positioned(
-                top: 10,
-                right: 10,
-                child: AppTagPill(
-                  label: level,
-                  icon: lvlStyle.icon,
-                  backgroundColor: lvlStyle.bg.withValues(alpha: 0.92),
-                  foregroundColor: lvlStyle.fg,
-                  padding: AppInsets.h8v4,
-                  fontSize: AppFontSize.micro,
-                ),
-              ),
-
-              // ── Badge vérifié — haut gauche ─────────────────
-              if (isVerified)
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: AppIconCircle(
-                    icon: Icons.verified_rounded,
-                    size: 22,
-                    iconSize: 12,
-                    backgroundColor: context.colors.surfaceAlt,
-                    iconColor: AppColors.primary,
-                  ),
-                ),
-
-              // ── Infos overlay bas ───────────────────────────
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Nom
-                      Text(
-                        name,
-                        style: context.text.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(blurRadius: 4, color: Colors.black54),
-                          ],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      AppGap.h5,
-
-                      // Rating · missions · tarif
-                      Row(
-                        children: [
-                          // Rating
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 12,
-                            color: AppColors.amber,
-                          ),
-                          AppGap.w3,
-                          Text(
-                            rating > 0 ? rating.toStringAsFixed(1) : '—',
-                            style: context.text.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          AppGap.w8,
-                          // Séparateur
-                          Container(
-                            width: 3,
-                            height: 3,
-                            decoration: const BoxDecoration(
-                              color: Colors.white54,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          AppGap.w8,
-                          // Missions
-                          Icon(
-                            Icons.check_circle_rounded,
-                            size: 11,
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                          AppGap.w3,
-                          Text(
-                            '$missions missions',
-                            style: context.text.labelSmall?.copyWith(
-                              fontSize: AppFontSize.tiny,
-                              color: Colors.white.withValues(alpha: 0.85),
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppGap.h6,
-
-                      // Tarif
-                      AppTagPill(
-                        label: '$hourlyRate€/h',
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LevelStyle {
-  final Color bg;
-  final Color fg;
-  final IconData icon;
-  const _LevelStyle({required this.bg, required this.fg, required this.icon});
-}
-
-class _AvatarPlaceholder extends StatelessWidget {
-  final String name;
-  const _AvatarPlaceholder({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.25),
-            AppColors.primary.withValues(alpha: 0.08),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: context.text.displayLarge?.copyWith(
-            fontSize: AppFontSize.d4,
-            color: AppColors.primary,
-          ),
-        ),
       ),
     );
   }
@@ -998,10 +753,12 @@ class _FreelancerDiscoveryView extends StatefulWidget {
 }
 
 class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
+  static const double _priceMin = 0;
+  static const double _priceMax = 500;
+
   final _searchController = TextEditingController();
-  String _selectedCategory = 'Tous';
   String _sortBy = 'recommended';
-  RangeValues _priceRange = const RangeValues(10, 100);
+  RangeValues _priceRange = const RangeValues(_priceMin, _priceMax);
   double _minRating = 0;
   bool _onlineOnly = false;
   bool _verifiedOnly = false;
@@ -1014,47 +771,9 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
     });
   }
 
-  final List<String> _categories = [
-    'Tous',
-    'Ménage',
-    'Jardinage',
-    'Bricolage',
-    'Plomberie',
-    'Électricité',
-    'Peinture',
-    'Déménagement',
-    'Repassage',
-  ];
-
-  /// Normalise une entrée Supabase en Map uniforme pour les cards/filtres.
-  Map<String, dynamic> _normalize(Map<String, dynamic> row) {
-    final firstName = (row['first_name'] ?? '') as String;
-    final lastName = (row['last_name'] ?? '') as String;
-    final fullName = '$firstName $lastName'.trim();
-    final hourlyRate = (row['hourly_rate'] ?? 0);
-    return {
-      'id': row['id'] ?? '',
-      'name': fullName.isEmpty ? 'Prestataire' : fullName,
-      'avatar': (row['avatar_url'] ?? '') as String,
-      'category': 'Pro',
-      'rating': 0.0,
-      'reviewsCount': 0,
-      'hourlyRate': (hourlyRate is int)
-          ? hourlyRate
-          : (hourlyRate as num).toInt(),
-      'isVerified': (row['is_verified'] ?? false) as bool,
-      'isOnline': false,
-      'experienceLevel': 'Pro',
-      'missionsCount': 0,
-      'responseTime': '2h',
-      'zone': (row['address'] ?? '') as String,
-      'services': <String>[],
-    };
-  }
-
   List<Map<String, dynamic>> get _filteredFreelancers {
     final rawList = context.watch<ProfileProvider>().freelancers;
-    final normalized = rawList.map(_normalize).toList();
+    final normalized = rawList.map(_normalizeFreelancerRow).toList();
 
     return normalized.where((f) {
       // Filtre par recherche (côté client sur le nom)
@@ -1066,11 +785,6 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
           return false;
         }
       }
-
-      // Filtre par catégorie (non disponible en DB pour l'instant — ignoré)
-      // if (_selectedCategory != 'Tous' && f['category'] != _selectedCategory) {
-      //   return false;
-      // }
 
       // Filtre par prix
       final rate = f['hourlyRate'] as int;
@@ -1171,30 +885,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                   ),
                 ),
 
-                AppGap.h12,
-
-                // Categories chips
-                SizedBox(
-                  height: 36,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
-                    itemBuilder: (context, index) {
-                      final category = _categories[index];
-                      final isSelected = _selectedCategory == category;
-                      return AppPillChip(
-                        label: category,
-                        selected: isSelected,
-                        onTap: () =>
-                            setState(() => _selectedCategory = category),
-                        foregroundColor: context.colors.textSecondary,
-                        margin: EdgeInsets.only(
-                          right: index < _categories.length - 1 ? 8 : 0,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                AppGap.h4,
               ],
             ),
           ),
@@ -1308,13 +999,33 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                 }
                 final items = _filteredFreelancers;
                 if (items.isEmpty) return _buildEmptyState();
-                return ListView.builder(
-                  padding: AppInsets.a16,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return _FreelancerCard(
-                      freelancer: items[index],
-                      onTap: () => _openFreelancerProfile(items[index]),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 700;
+                    final crossAxisCount = isWide ? 3 : 2;
+                    return GridView.builder(
+                      padding: AppInsets.a16,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: isWide ? 0.74 : 0.72,
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final f = items[index];
+                        return FreelancerPreviewCard(
+                          freelancer: Freelancer(
+                            name: f['name'] as String,
+                            imageUrl: f['avatar'] as String,
+                            rating: f['rating'] as double,
+                            job: '${f['hourlyRate']}€/h',
+                            subtitle: '',
+                            isVerified: f['isVerified'] as bool,
+                          ),
+                          onTap: () => _openFreelancerProfile(f),
+                        );
+                      },
                     );
                   },
                 );
@@ -1363,8 +1074,8 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
   }
 
   bool _hasActiveFilters() {
-    return _priceRange.start > 10 ||
-        _priceRange.end < 100 ||
+    return _priceRange.start > _priceMin ||
+        _priceRange.end < _priceMax ||
         _minRating > 0 ||
         _onlineOnly ||
         _verifiedOnly;
@@ -1372,7 +1083,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
 
   int _countActiveFilters() {
     int count = 0;
-    if (_priceRange.start > 10 || _priceRange.end < 100) count++;
+    if (_priceRange.start > _priceMin || _priceRange.end < _priceMax) count++;
     if (_minRating > 0) count++;
     if (_onlineOnly) count++;
     if (_verifiedOnly) count++;
@@ -1397,8 +1108,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
   void _resetFilters() {
     setState(() {
       _searchController.clear();
-      _selectedCategory = 'Tous';
-      _priceRange = const RangeValues(10, 100);
+      _priceRange = const RangeValues(_priceMin, _priceMax);
       _minRating = 0;
       _onlineOnly = false;
       _verifiedOnly = false;
@@ -1414,6 +1124,8 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
       wrapWithSurface: false,
       builder: (context) => _FiltersSheet(
         priceRange: _priceRange,
+        minPrice: _priceMin,
+        maxPrice: _priceMax,
         minRating: _minRating,
         onlineOnly: _onlineOnly,
         verifiedOnly: _verifiedOnly,
@@ -1465,323 +1177,12 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
 }
 
 /// ─────────────────────────────────────────────────────────────
-/// 📇 Card Freelancer (Modern Card Design)
-/// ─────────────────────────────────────────────────────────────
-class _FreelancerCard extends StatefulWidget {
-  final Map<String, dynamic> freelancer;
-  final VoidCallback onTap;
-
-  const _FreelancerCard({required this.freelancer, required this.onTap});
-
-  @override
-  State<_FreelancerCard> createState() => _FreelancerCardState();
-}
-
-class _FreelancerCardState extends State<_FreelancerCard> {
-  bool _isFavorite = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final freelancer = widget.freelancer;
-    final isOnline = freelancer['isOnline'] as bool;
-    final isVerified = freelancer['isVerified'] as bool;
-
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.cardLg),
-          border: Border.all(color: context.colors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Top section with background
-            Container(
-              padding: AppInsets.a16,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.08),
-                    AppColors.primary.withValues(alpha: 0.02),
-                  ],
-                ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.cardLg),
-                ),
-              ),
-              child: Row(
-                children: [
-                  // Avatar with ring
-                  Container(
-                    padding: AppInsets.a3,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isOnline ? Colors.green : context.colors.border,
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppColors.primary.withValues(
-                        alpha: 0.15,
-                      ),
-                      backgroundImage:
-                          (freelancer['avatar'] as String).isNotEmpty
-                          ? NetworkImage(freelancer['avatar'] as String)
-                          : null,
-                      child: (freelancer['avatar'] as String).isEmpty
-                          ? Text(
-                              (freelancer['name'] as String).isNotEmpty
-                                  ? (freelancer['name'] as String)[0]
-                                        .toUpperCase()
-                                  : '?',
-                              style: context.text.headlineLarge?.copyWith(
-                                color: AppColors.primary,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-
-                  AppGap.w14,
-
-                  // Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Name + Verified
-                        Row(
-                          children: [
-                            Text(
-                              freelancer['name'],
-                              style: context.text.titleLarge?.copyWith(),
-                            ),
-                            if (isVerified) ...[
-                              AppGap.w6,
-                              Icon(
-                                Icons.verified,
-                                size: 18,
-                                color: AppColors.primary,
-                              ),
-                            ],
-                          ],
-                        ),
-                        AppGap.h4,
-                        // Category + Level
-                        Row(
-                          children: [
-                            Text(
-                              freelancer['category'],
-                              style: context.text.bodySmall,
-                            ),
-                            Container(
-                              margin: AppInsets.h8,
-                              width: 4,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: context.colors.textTertiary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            Text(
-                              freelancer['experienceLevel'],
-                              style: context.text.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Favorite
-                  GestureDetector(
-                    onTap: () => setState(() => _isFavorite = !_isFavorite),
-                    child: Container(
-                      padding: AppInsets.a8,
-                      decoration: BoxDecoration(
-                        color: context.colors.surfaceAlt,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        _isFavorite ? Icons.favorite : Icons.favorite_border,
-                        size: 20,
-                        color: _isFavorite
-                            ? Colors.red
-                            : context.colors.textTertiary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Middle section - Stats
-            Padding(
-              padding: AppInsets.h16v14,
-              child: Row(
-                children: [
-                  _StatItem(
-                    icon: Icons.star_rounded,
-                    iconColor: AppColors.amber,
-                    value: '${freelancer['rating']}',
-                    label: '${freelancer['reviewsCount']} avis',
-                  ),
-                  AppGap.w20,
-                  _StatItem(
-                    icon: Icons.check_circle_rounded,
-                    iconColor: AppColors.primary,
-                    value: '${freelancer['missionsCount']}',
-                    label: 'missions',
-                  ),
-                  AppGap.w20,
-                  _StatItem(
-                    icon: Icons.flash_on_rounded,
-                    iconColor: Colors.orange,
-                    value: freelancer['responseTime'] ?? '2h',
-                    label: 'réponse',
-                  ),
-                  const Spacer(),
-                  // Price tag
-                  Container(
-                    padding: AppInsets.h14v8,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(AppRadius.button),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${freelancer['hourlyRate']}€',
-                          style: context.text.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          '/h',
-                          style: context.text.labelMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom section - Services
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: (freelancer['services'] as List)
-                          .take(3)
-                          .map<Widget>((service) {
-                            return Container(
-                              padding: AppInsets.h12v6,
-                              decoration: BoxDecoration(
-                                color: context.colors.surfaceAlt,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.cardLg,
-                                ),
-                              ),
-                              child: Text(
-                                service,
-                                style: context.text.labelMedium,
-                              ),
-                            );
-                          })
-                          .toList(),
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 16,
-                    color: context.colors.textTertiary,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String value;
-  final String label;
-
-  const _StatItem({
-    required this.icon,
-    required this.iconColor,
-    required this.value,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: iconColor),
-        AppGap.w6,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: context.text.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              label,
-              style: context.text.labelSmall?.copyWith(
-                fontSize: AppFontSize.tiny,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// ─────────────────────────────────────────────────────────────
 /// 🎛️ Sheet Filtres
 /// ─────────────────────────────────────────────────────────────
 class _FiltersSheet extends StatefulWidget {
   final RangeValues priceRange;
+  final double minPrice;
+  final double maxPrice;
   final double minRating;
   final bool onlineOnly;
   final bool verifiedOnly;
@@ -1790,6 +1191,8 @@ class _FiltersSheet extends StatefulWidget {
 
   const _FiltersSheet({
     required this.priceRange,
+    required this.minPrice,
+    required this.maxPrice,
     required this.minRating,
     required this.onlineOnly,
     required this.verifiedOnly,
@@ -1818,6 +1221,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final priceDivisions = ((widget.maxPrice - widget.minPrice) / 5).round();
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -1881,9 +1285,9 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                   ),
                   RangeSlider(
                     values: _priceRange,
-                    min: 10,
-                    max: 100,
-                    divisions: 18,
+                    min: widget.minPrice,
+                    max: widget.maxPrice,
+                    divisions: priceDivisions > 0 ? priceDivisions : null,
                     activeColor: AppColors.primary,
                     inactiveColor: context.colors.border,
                     onChanged: (values) => setState(() => _priceRange = values),

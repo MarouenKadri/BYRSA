@@ -34,17 +34,19 @@ class WelcomePage extends StatelessWidget {
                         AppSectionHeader(title: 'Catégories populaires', padding: EdgeInsets.zero),
                         AppGap.h14,
                         const CategoriesRow(),
-                        AppGap.h32,
-                        AppSectionHeader(title: 'Prestataires de confiance', padding: EdgeInsets.zero),
+                        AppGap.h16,
+                        AppSectionHeader(
+                          title: 'Prestataires de confiance',
+                          padding: EdgeInsets.zero,
+                        ),
                         AppGap.h6,
                         Text(
-                          'Basés sur les avis, la fiabilité et la réactivité',
-                          style: context.text.bodyMedium?.copyWith(
-                            fontSize: AppFontSize.base,
-                            color: context.colors.textTertiary,
+                          'Des freelancers vérifiés, notés par la communauté.',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.colors.textSecondary,
                           ),
                         ),
-                        AppGap.h20,
+                        AppGap.h12,
                         const FreelancersRow(),
                         AppGap.h8,
                       ]),

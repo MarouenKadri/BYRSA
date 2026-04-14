@@ -5,12 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
-import '../../../mission/data/models/mission.dart';
-import '../../../mission/data/models/service_category.dart';
-import '../../../mission/presentation/mission_provider.dart';
-import '../../../mission/presentation/pages/client/create_mission_page.dart';
+import '../../../messaging/messaging_provider.dart';
+import '../../../messaging/presentation/pages/chat_page.dart';
 import '../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
-import '../../../story/story.dart';
 import '../providers/freelancer_public_profile_provider.dart';
 import 'freelancer_reviews_page.dart';
 
@@ -44,6 +41,8 @@ extension CancellationLevelExtension on CancellationLevel {
   }
 }
 
+enum FreelancerContactMode { spontaneous, pendingCandidate, confirmedPresta }
+
 class FreelancerProfileView extends StatefulWidget {
   final String freelancerName;
   final String freelancerAvatar;
@@ -57,6 +56,14 @@ class FreelancerProfileView extends StatefulWidget {
   final String? proposedPrice;
   final String? responseTime;
   final String? freelancerId;
+
+  /// Contexte du bouton "Contacter" :
+  /// - `spontaneous` (défaut) → chat + bouton "Réserver"
+  /// - `pendingCandidate`     → chat + bouton "Accepter"
+  /// - `confirmedPresta`      → chat simple, aucun bouton spécial
+  final FreelancerContactMode contactMode;
+  final VoidCallback? onCandidateAccepted;
+  final String? candidatePrice;
 
   const FreelancerProfileView({
     super.key,
@@ -72,6 +79,9 @@ class FreelancerProfileView extends StatefulWidget {
     this.proposedPrice,
     this.responseTime,
     this.freelancerId,
+    this.contactMode = FreelancerContactMode.spontaneous,
+    this.onCandidateAccepted,
+    this.candidatePrice,
   });
 
   @override
@@ -80,6 +90,7 @@ class FreelancerProfileView extends StatefulWidget {
 
 class _FreelancerProfilePageState extends State<FreelancerProfileView> {
   late final FreelancerPublicProfileProvider _profileProvider;
+  bool _isOpeningChat = false;
 
   String get _name => _profileProvider.profile?.fullName ?? widget.freelancerName;
   String get _avatar =>
@@ -92,8 +103,6 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
       _profileProvider.profile?.reviewsCount ?? widget.reviewsCount;
   int get _missionsCount =>
       _profileProvider.profile?.missionsCount ?? widget.missionsCount;
-  List<String> get _serviceCategories =>
-      _profileProvider.profile?.serviceCategories ?? const [];
   double? get _latitude => _profileProvider.profile?.latitude;
   double? get _longitude => _profileProvider.profile?.longitude;
   double get _zoneRadius => _profileProvider.profile?.zoneRadius ?? 10;
@@ -169,28 +178,40 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
     return '${months[createdAt.month - 1]} ${createdAt.year}';
   }
 
-  void _openInvite(BuildContext context) {
-    final missions = context
-        .read<MissionProvider>()
-        .clientMissions
-        .where((m) =>
-            m.status == MissionStatus.waitingCandidates ||
-            m.status == MissionStatus.draft)
-        .toList();
+  Future<void> _openChat(BuildContext context) async {
+    if (_isOpeningChat) return;
+    setState(() => _isOpeningChat = true);
 
-    showAppBottomSheet(
-      context: context,
-      wrapWithSurface: false,
-      builder: (_) => _InviteMissionSheet(
-        freelancerName: _name,
-        missions: missions,
-        onCreateMission: () {
-          Navigator.pop(context);
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PostMissionFlow()),
-          );
-        },
+    String? conversationId;
+    if (widget.freelancerId != null) {
+      try {
+        conversationId = await context.read<MessagingProvider>()
+            .getOrCreateConversation(
+              otherUserId: widget.freelancerId!,
+              iAmClient: true,
+            );
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+    setState(() => _isOpeningChat = false);
+
+    final isPending = widget.contactMode == FreelancerContactMode.pendingCandidate;
+    final isSpontaneous = widget.contactMode == FreelancerContactMode.spontaneous;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatPage(
+          conversationId: conversationId,
+          contactName: _name,
+          contactAvatar: _avatar,
+          isVerified: true,
+          candidateMode: isPending,
+          candidatePrice: isPending ? widget.candidatePrice : null,
+          onAcceptCandidate: isPending ? widget.onCandidateAccepted : null,
+          showReserveButton: isSpontaneous,
+        ),
       ),
     );
   }
@@ -221,44 +242,47 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               decoration: BoxDecoration(
                 color: context.colors.background,
-                border: Border(
-                  top: BorderSide(color: context.colors.divider),
-                ),
+                border: Border(top: BorderSide(color: context.colors.divider)),
               ),
               child: AppButton(
-                label: 'Inviter à une mission',
+                label: _isOpeningChat
+                    ? 'Connexion...'
+                    : widget.contactMode == FreelancerContactMode.pendingCandidate
+                        ? 'Contacter & Accepter'
+                        : 'Contacter',
                 variant: ButtonVariant.black,
-                icon: Icons.add_task_rounded,
-                onPressed: () => _openInvite(context),
+                icon: Icons.chat_bubble_outline_rounded,
+                onPressed: _isOpeningChat ? null : () => _openChat(context),
               ),
             ),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildProfileHeader(context),
-                _buildProposalCard(context),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 6, 20, 2),
-                  child: _ServicesStoriesSection(
-                    freelancerId: widget.freelancerId,
-                    serviceCategories: _serviceCategories,
+          body: Column(
+            children: [
+              _buildProfileHeader(context),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildReviewsPill(context),
+                      _buildProposalCard(context),
+                      _buildProfileMetaSection(context),
+                      _AboutSection(
+                        memberSince: _memberSince,
+                        missionsCount: _missionsCount,
+                        cancellationLevel: _cancellationLevel,
+                        bio: _bio,
+                        address: _address,
+                        latitude: _latitude,
+                        longitude: _longitude,
+                        zoneRadius: _zoneRadius,
+                      ),
+                      AppGap.h32,
+                    ],
                   ),
                 ),
-                _AboutSection(
-                  memberSince: _memberSince,
-                  missionsCount: _missionsCount,
-                  cancellationLevel: _cancellationLevel,
-                  bio: _bio,
-                  address: _address,
-                  latitude: _latitude,
-                  longitude: _longitude,
-                  zoneRadius: _zoneRadius,
-                ),
-                AppGap.h32,
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -320,6 +344,8 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
                       icon: Icons.arrow_back_ios_new_rounded,
                       onTap: () => Navigator.pop(context),
                     ),
+                    const Spacer(),
+                    _HeroRateBadge(rate: _rate),
                   ],
                 ),
               ),
@@ -346,57 +372,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
                     FittedBox(
                       alignment: Alignment.centerLeft,
                       fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.94),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: const Color(0xFFE6E9ED),
-                                width: 0.7,
-                              ),
-                            ),
-                            child: Text(
-                              '${_rate.toInt()}€/h',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                          ),
-                          AppGap.w8,
-                          _LevelPill(level: widget.experienceLevel),
-                        ],
-                      ),
-                    ),
-                    AppGap.h12,
-                    GestureDetector(
-                      onTap: () => _openReviews(context),
-                      child: Row(
-                        children: [
-                          Text(
-                            '${_rating.toStringAsFixed(1)} · $_reviewsCount avis',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Spacer(),
-                          const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 11,
-                            color: Colors.white70,
-                          ),
-                        ],
-                      ),
+                      child: _LevelPill(level: widget.experienceLevel),
                     ),
                   ],
                 ),
@@ -404,34 +380,40 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: DetailMetaChip(
-                  icon: Icons.workspace_premium_rounded,
-                  label: '$_experienceStat d\'experience',
-                ),
-              ),
-              const DetailInlineDivider(),
-              Expanded(
-                child: DetailMetaChip(
-                  icon: Icons.assignment_turned_in_outlined,
-                  label: '$_missionsStat missions',
-                ),
-              ),
-              const DetailInlineDivider(),
-              Expanded(
-                child: DetailMetaChip(
-                  icon: Icons.schedule_outlined,
-                  label: 'Repond en $_responseStat',
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
+    );
+  }
+
+  Widget _buildProfileMetaSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Column(
+        children: [
+          _ProfileStatsCard(
+            experience: _experienceStat,
+            missions: _missionsStat,
+            response: _responseStat,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsPill(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: AppPillChip(
+          label: '${_rating.toStringAsFixed(1)} · $_reviewsCount avis',
+          icon: Icons.star_rounded,
+          onTap: () => _openReviews(context),
+          foregroundColor: AppColors.inkDark,
+          backgroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
     );
   }
 
@@ -444,7 +426,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
           boxShadow: const [
             BoxShadow(
               color: Color(0x08000000),
@@ -458,18 +440,15 @@ class _FreelancerProfilePageState extends State<FreelancerProfileView> {
           children: [
             Text(
               'Tarif proposé',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF9AA3AE),
+              style: context.text.bodyMedium?.copyWith(
+                color: context.colors.textHint,
               ),
             ),
             Text(
               widget.proposedPrice!,
-              style: const TextStyle(
-                fontSize: 22,
+              style: context.text.displaySmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: AppColors.ink,
+                letterSpacing: -0.5,
               ),
             ),
           ],
@@ -518,7 +497,7 @@ class _AboutSection extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x08000000),
@@ -530,20 +509,16 @@ class _AboutSection extends StatelessWidget {
             child: bio.isNotEmpty
                 ? Text(
                     bio,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
+                    style: context.text.bodyMedium?.copyWith(
                       height: 1.65,
-                      color: Color(0xFF5F6975),
+                      color: context.colors.textSecondary,
                     ),
                   )
                 : Text(
                     "Ce prestataire n'a pas encore rédigé sa présentation.",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
+                    style: context.text.bodyMedium?.copyWith(
                       height: 1.6,
-                      color: Color(0xFF9AA3AE),
+                      color: context.colors.textHint,
                     ),
                   ),
           ),
@@ -555,7 +530,7 @@ class _AboutSection extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x08000000),
@@ -596,7 +571,7 @@ class _AboutSection extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x08000000),
@@ -613,8 +588,8 @@ class _AboutSection extends StatelessWidget {
                   Container(
                     height: 182,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE8EBEF)),
+                      borderRadius: BorderRadius.circular(AppRadius.cardLg),
+                      border: Border.all(color: AppColors.gray50),
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: FlutterMap(
@@ -650,23 +625,21 @@ class _AboutSection extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 2),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
                           child: Icon(
                             Icons.location_on_outlined,
                             size: 16,
-                            color: Color(0xFF9AA3AE),
+                            color: context.colors.textHint,
                           ),
                         ),
                         AppGap.w8,
                         Expanded(
                           child: Text(
                             address,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: context.text.titleSmall?.copyWith(
                               height: 1.35,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
                             ),
                           ),
                         ),
@@ -680,10 +653,8 @@ class _AboutSection extends StatelessWidget {
           AppGap.h10,
           Text(
             "Zone d'intervention : ${zoneRadius.toInt()} km autour de ${address.isNotEmpty ? address : 'sa position'}",
-            style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF5F6975),
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.textSecondary,
             ),
           ),
         ],
@@ -692,161 +663,6 @@ class _AboutSection extends StatelessWidget {
   }
 }
 
-class _ServicesStoriesSection extends StatefulWidget {
-  final String? freelancerId;
-  final List<String> serviceCategories;
-
-  const _ServicesStoriesSection({
-    this.freelancerId,
-    this.serviceCategories = const [],
-  });
-
-  @override
-  State<_ServicesStoriesSection> createState() => _ServicesStoriesSectionState();
-}
-
-class _ServicesStoriesSectionState extends State<_ServicesStoriesSection> {
-  final Set<String> _viewed = {};
-
-  @override
-  Widget build(BuildContext context) {
-    final storyProvider = context.watch<StoryProvider>();
-    final groups = widget.freelancerId != null
-        ? storyProvider.storyGroupsForFreelancer(widget.freelancerId!)
-        : <StoryGroup>[];
-
-    final activeIds = {for (final g in groups) g.categoryId};
-
-    final allIds = <String>{
-      ...widget.serviceCategories,
-      ...activeIds,
-    }.toList();
-
-    if (allIds.isEmpty) return const SizedBox.shrink();
-
-    allIds.sort((a, b) {
-      final aActive = activeIds.contains(a) ? 0 : 1;
-      final bActive = activeIds.contains(b) ? 0 : 1;
-      return aActive.compareTo(bActive);
-    });
-
-    final activeGroups = groups.where((g) => g.categoryId.isNotEmpty).toList();
-
-    return SizedBox(
-      height: 104,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        itemCount: allIds.length,
-        itemBuilder: (context, i) {
-          final catId = allIds[i];
-          final cat = ServiceCategory.findById(catId);
-          if (cat == null) return const SizedBox.shrink();
-          final hasStory = activeIds.contains(catId);
-          final isViewed = _viewed.contains(catId);
-          final accent = hasStory ? AppColors.ink : const Color(0xFFE8EAED);
-
-          return GestureDetector(
-            onTap: hasStory
-                ? () {
-                    final idx = activeGroups.indexWhere((g) => g.categoryId == catId);
-                    if (idx >= 0) {
-                      setState(() => _viewed.add(catId));
-                      _openViewer(context, activeGroups, idx);
-                    }
-                  }
-                : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 64,
-                    height: 64,
-                    padding: const EdgeInsets.all(1.2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: hasStory && !isViewed
-                          ? const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFF596372), Color(0xFF2C343F)],
-                            )
-                          : null,
-                      color: hasStory && isViewed ? const Color(0xFFEAEEF3) : null,
-                      boxShadow: hasStory
-                          ? const [
-                              BoxShadow(
-                                color: Color.fromRGBO(16, 20, 24, 0.06),
-                                blurRadius: 14,
-                                offset: Offset(0, 6),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(
-                          color: hasStory
-                              ? accent.withValues(alpha: 0.26)
-                              : const Color(0xFFE8EAED),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          cat.icon,
-                          size: 23,
-                          color: hasStory ? AppColors.ink : const Color(0xFFB1B7BF),
-                        ),
-                      ),
-                    ),
-                  ),
-                  AppGap.h8,
-                  SizedBox(
-                    width: 72,
-                    child: Text(
-                      cat.name,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: hasStory ? FontWeight.w600 : FontWeight.w500,
-                        letterSpacing: 0.2,
-                        color: hasStory ? AppColors.ink : const Color(0xFF9EA5AE),
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _openViewer(BuildContext context, List<StoryGroup> groups, int index) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (_, __, ___) => StoryViewerPage(
-          groups: groups,
-          initialIndex: index,
-          onViewed: (id) => setState(() => _viewed.add(id)),
-        ),
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 200),
-      ),
-    );
-  }
-}
 
 class _SectionTitle extends StatelessWidget {
   final String title;
@@ -857,10 +673,122 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 19,
-        fontWeight: FontWeight.w700,
-        color: AppColors.ink,
+      style: context.text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+class _ProfileStatsCard extends StatelessWidget {
+  final String experience;
+  final String missions;
+  final String response;
+
+  const _ProfileStatsCard({
+    required this.experience,
+    required this.missions,
+    required this.response,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        border: Border.all(color: AppColors.gray50),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 14,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ProfileStatCell(
+              icon: Icons.workspace_premium_rounded,
+              value: experience,
+              label: 'Expérience',
+            ),
+          ),
+          _ProfileStatDivider(),
+          Expanded(
+            child: _ProfileStatCell(
+              icon: Icons.task_alt_rounded,
+              value: missions,
+              label: 'Missions',
+            ),
+          ),
+          _ProfileStatDivider(),
+          Expanded(
+            child: _ProfileStatCell(
+              icon: Icons.schedule_outlined,
+              value: response,
+              label: 'Réponse',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileStatDivider extends StatelessWidget {
+  const _ProfileStatDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 42,
+      color: AppColors.gray50,
+    );
+  }
+}
+
+class _ProfileStatCell extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _ProfileStatCell({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.gray600),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -883,13 +811,13 @@ class _VerificationItem extends StatelessWidget {
     final IconData iconData;
 
     if (warning) {
-      iconColor = const Color(0xFFF59E0B);
+      iconColor = AppColors.warning;
       iconData = Icons.warning_amber_rounded;
     } else if (verified) {
-      iconColor = const Color(0xFF22C55E);
+      iconColor = AppColors.successDark;
       iconData = Icons.check_circle_rounded;
     } else {
-      iconColor = const Color(0xFFEF4444);
+      iconColor = AppColors.error;
       iconData = Icons.cancel_rounded;
     }
 
@@ -902,10 +830,8 @@ class _VerificationItem extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 15,
+              style: context.text.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink,
               ),
             ),
           ),
@@ -989,22 +915,17 @@ class _LevelPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: const Color(0xFFE6E9ED),
-          width: 0.7,
-        ),
+        border: Border.all(color: AppColors.gray50, width: 0.7),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: const Color(0xFF66707C)),
+          Icon(icon, size: 13, color: AppColors.gray600),
           const SizedBox(width: 5),
           Text(
             level,
-            style: const TextStyle(
-              fontSize: 13,
+            style: context.text.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.ink,
             ),
           ),
         ],
@@ -1013,102 +934,51 @@ class _LevelPill extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Sheet — Inviter à une mission
-// ─────────────────────────────────────────────────────────────
-class _InviteMissionSheet extends StatelessWidget {
-  final String freelancerName;
-  final List<Mission> missions;
-  final VoidCallback onCreateMission;
+class _HeroRateBadge extends StatelessWidget {
+  final double rate;
 
-  const _InviteMissionSheet({
-    required this.freelancerName,
-    required this.missions,
-    required this.onCreateMission,
-  });
+  const _HeroRateBadge({required this.rate});
 
   @override
   Widget build(BuildContext context) {
-    return AppPickerSheet(
-      title: 'Inviter à une mission',
-      footer: Padding(
-        padding: EdgeInsets.fromLTRB(
-            20, 12, 20, 16 + MediaQuery.of(context).padding.bottom),
-        child: AppButton(
-          label: 'Créer une nouvelle mission',
-          variant: ButtonVariant.outline,
-          icon: Icons.add_rounded,
-          onPressed: onCreateMission,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.primary, AppColors.primaryDark],
         ),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.35),
+          width: 0.9,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x26000000),
+            blurRadius: 12,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        child: missions.isEmpty
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppGap.h16,
-                  Icon(Icons.inbox_outlined,
-                      size: 48, color: context.colors.border),
-                  AppGap.h12,
-                  Text(
-                    'Aucune mission ouverte',
-                    style: context.text.titleSmall
-                        ?.copyWith(color: context.colors.textSecondary),
-                  ),
-                  AppGap.h6,
-                  Text(
-                    'Créez une mission pour inviter $freelancerName',
-                    style: context.text.bodySmall
-                        ?.copyWith(color: context.colors.textTertiary),
-                    textAlign: TextAlign.center,
-                  ),
-                  AppGap.h24,
-                ],
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: missions
-                    .map(
-                      (m) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: context.colors.surfaceAlt,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.home_repair_service_outlined,
-                            size: 18,
-                            color: context.colors.textSecondary,
-                          ),
-                        ),
-                        title: Text(
-                          m.title,
-                          style: context.text.bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          m.status.label,
-                          style: context.text.labelSmall
-                              ?.copyWith(color: context.colors.textTertiary),
-                        ),
-                        trailing: AppButton(
-                          label: 'Inviter',
-                          variant: ButtonVariant.primary,
-                          width: null,
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.sell_rounded, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            '${rate.toInt()}€/h',
+            style: context.text.labelLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
 

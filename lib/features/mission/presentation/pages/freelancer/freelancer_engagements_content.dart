@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
-import '../../../../../app/widgets/cigale_tab_bar.dart';
+import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
@@ -25,10 +25,10 @@ class FreelancerEngagementsContent extends StatelessWidget {
         appBar: AppSectionBar(
           pageTitle: 'Mes missions',
           onGoToAccount: onGoToAccount,
-          bottom: const CigaleTabBar(
+          bottom: const AppSegmentedTabBar(
             tabs: [
-              CigaleTab(label: 'Postulees'),
-              CigaleTab(label: 'En cours'),
+              AppSegmentedTab(label: 'Postulees'),
+              AppSegmentedTab(label: 'En cours'),
             ],
           ),
         ),
