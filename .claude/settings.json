@@ -12,7 +12,9 @@
       "Bash(grep -n \"input\\\\s*=\" lib/core/design/tokens/app_radius.dart)",
       "Bash(grep -rn \"static.*input\" lib/core/design/tokens/app_radius.dart)",
       "Read(//tmp/**)",
-      "Bash(del \"c:\\\\Users\\\\marou\\\\Downloads\\\\service-home-main\\\\lib\\\\features\\\\client\\\\presentation\\\\pages\\\\freelancer_reviews_page.dart\")"
+      "Bash(del \"c:\\\\Users\\\\marou\\\\Downloads\\\\service-home-main\\\\lib\\\\features\\\\client\\\\presentation\\\\pages\\\\freelancer_reviews_page.dart\")",
+      "Bash(head -847 \"c:\\\\Users\\\\marou\\\\Downloads\\\\service-home-main\\\\lib\\\\features\\\\client\\\\presentation\\\\pages\\\\client_discover_content.dart\")",
+      "Bash(mv /tmp/discover_trimmed.dart \"c:\\\\Users\\\\marou\\\\Downloads\\\\service-home-main\\\\lib\\\\features\\\\client\\\\presentation\\\\pages\\\\client_discover_content.dart\")"
     ]
   }
 }

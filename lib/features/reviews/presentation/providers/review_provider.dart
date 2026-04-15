@@ -17,20 +17,25 @@ class ReviewProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  /// [autoLoad] à false pour les providers isolés (profil public)
+  /// qui ne doivent pas écouter l'auth globale.
   ReviewProvider({
     GetReceivedReviews? getReceivedReviews,
     GetGivenReviews? getGivenReviews,
+    bool autoLoad = true,
   })  : _getReceivedReviews = getReceivedReviews ??
             GetReceivedReviews(SupabaseReviewRepository()),
         _getGivenReviews =
             getGivenReviews ?? GetGivenReviews(SupabaseReviewRepository()) {
-    _supabase.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn) {
-        _reset();
-      } else if (data.event == AuthChangeEvent.signedOut) {
-        _reset();
-      }
-    });
+    if (autoLoad) {
+      _supabase.auth.onAuthStateChange.listen((data) {
+        if (data.event == AuthChangeEvent.signedIn) {
+          _reset();
+        } else if (data.event == AuthChangeEvent.signedOut) {
+          _reset();
+        }
+      });
+    }
   }
 
   List<Review> get receivedReviews => List.unmodifiable(_receivedReviews);
@@ -66,6 +71,22 @@ class ReviewProvider extends ChangeNotifier {
       _givenReviews = results[1];
     } catch (e) {
       debugPrint('ReviewProvider loadReviews error: $e');
+      error = 'Impossible de charger les avis';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Charge uniquement les avis reçus pour un utilisateur public (profil tiers).
+  Future<void> loadReceivedFor(String userId) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+    try {
+      _receivedReviews = await _getReceivedReviews(userId);
+    } catch (e) {
+      debugPrint('ReviewProvider loadReceivedFor error: $e');
       error = 'Impossible de charger les avis';
     } finally {
       isLoading = false;

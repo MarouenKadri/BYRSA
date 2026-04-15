@@ -11,15 +11,19 @@ import '../../../features/freelancer/freelancer_explore_content.dart';
 /// selon le rôle actif — sans logique UI propre.
 class DiscoverShell extends StatelessWidget {
   final VoidCallback? onGoToAccount;
+  final VoidCallback? onGoToMissions;
 
-  const DiscoverShell({super.key, this.onGoToAccount});
+  const DiscoverShell({super.key, this.onGoToAccount, this.onGoToMissions});
 
   @override
   Widget build(BuildContext context) {
     final role = context.watch<AuthProvider>().currentRole;
 
     return switch (role) {
-      UserRole.client   => ClientDiscoverContent(onGoToAccount: onGoToAccount),
+      UserRole.client   => ClientDiscoverContent(
+          onGoToAccount: onGoToAccount,
+          onGoToMissions: onGoToMissions,
+        ),
       UserRole.provider => FreelancerExploreContent(onGoToAccount: onGoToAccount),
       _                 => const SizedBox.shrink(),
     };

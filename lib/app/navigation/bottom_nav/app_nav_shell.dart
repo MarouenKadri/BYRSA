@@ -95,7 +95,7 @@ class _CenterAlignedNavFabLocation extends FloatingActionButtonLocation {
         (geometry.scaffoldSize.width - geometry.floatingActionButtonSize.width) /
             2;
 
-    final barTop = geometry.bottomNavigationBarTop;
+    final barTop = geometry.contentBottom;
     final barHeight = geometry.scaffoldSize.height - barTop;
     final centeredY =
         barTop + (barHeight - geometry.floatingActionButtonSize.height) / 2;
