@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 // ─── Primitive : Decorator ────────────────────────────────────────────────────
-// Responsabilité unique : encadrement visuel partagé (shadow, radius, ripple).
-// Les variants composent ce widget sans en connaître les détails.
+// Responsabilité unique : encadrement visuel partagé (shadow, radius, ripple)
+// + contrat typographique partagé entre tous les variants.
+// Les variants composent ce widget sans redéfinir les styles de texte.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class MissionCardFrame extends StatelessWidget {
@@ -11,6 +12,57 @@ class MissionCardFrame extends StatelessWidget {
   final double radius;
   final Color color;
   final List<BoxShadow> shadows;
+
+  // ── Typographie ──────────────────────────────────────────────────────────────
+
+  /// Titre principal — catégorie ou intitulé mission
+  static const TextStyle titleStyle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: Color(0xFF1A1A1A),
+    letterSpacing: -0.2,
+    height: 1.25,
+  );
+
+  /// Sous-titre — intitulé secondaire ou description courte
+  static const TextStyle subtitleStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    color: Color(0xFF6F7782),
+    height: 1.45,
+  );
+
+  /// Label catégorie / meta compacte
+  static const TextStyle metaStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF9AA3AE),
+    letterSpacing: 0.1,
+  );
+
+  /// Titre compact pour les cards petites (archive)
+  static const TextStyle titleCompactStyle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: Color(0xFF1A1A1A),
+    letterSpacing: -0.2,
+  );
+
+  /// Texte d'action / info courte semi-bold (ex: "Commence le...", badges)
+  static const TextStyle captionStyle = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: Color(0xFF24313D),
+  );
+
+  // ── Spacing ──────────────────────────────────────────────────────────────────
+
+  static const double paddingDefault = 18.0;
+  static const double radiusDefault  = 24.0;
+  static const double radiusLarge    = 26.0;
+  static const double radiusSmall    = 20.0;
+
+  // ── Shadows ──────────────────────────────────────────────────────────────────
 
   static const List<BoxShadow> defaultShadow = [
     BoxShadow(

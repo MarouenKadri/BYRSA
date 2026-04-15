@@ -74,7 +74,10 @@
       "Bash(bash:*)",
       "Bash(/mnt/c/Users/marouen/Documents/flutter/bin/dart analyze:*)",
       "Bash(cmd.exe /c \"flutter analyze lib/features/client/presentation/pages/client_discover_content.dart\")",
-      "Bash(cmd.exe:*)"
+      "Bash(cmd.exe:*)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__apply_migration"
     ]
   }
 }

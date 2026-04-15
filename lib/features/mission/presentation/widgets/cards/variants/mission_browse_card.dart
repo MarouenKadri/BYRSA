@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../data/models/mission.dart';
 import '../../shared/mission_shared_widgets.dart';
-import '../../freelancer_list_widgets.dart';
+import '../../freelancer_list_widgets.dart' show DistanceBadge;
 import '../primitives/mission_card_frame.dart';
+import '../primitives/mission_meta_row.dart';
 
 // ─── Variant : Marketplace freelancer ────────────────────────────────────────
 // Responsabilité : afficher une mission disponible dans le marketplace.
@@ -25,15 +24,13 @@ class MissionBrowseCard extends StatelessWidget {
     this.isApplied = false,
   });
 
-  static const double _radius = 24;
-
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: isApplied ? 0.72 : 1.0,
       child: MissionCardFrame(
         onTap: onTap,
-        radius: _radius,
+        radius: MissionCardFrame.radiusDefault,
         color: context.colors.surface,
         shadows: MissionCardFrame.browseShadow,
         child: Column(
@@ -42,7 +39,7 @@ class MissionBrowseCard extends StatelessWidget {
             if (mission.images.isNotEmpty)
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(_radius),
+                  top: Radius.circular(MissionCardFrame.radiusDefault),
                 ),
                 child: MissionImageHeader(
                   images: mission.images,
@@ -51,7 +48,7 @@ class MissionBrowseCard extends StatelessWidget {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+              padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,37 +58,25 @@ class MissionBrowseCard extends StatelessWidget {
                     mission.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.dmSerifDisplay(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                      height: 1.15,
-                      color: AppColors.inkDark,
-                    ),
+                    style: MissionCardFrame.titleStyle,
                   ),
                   AppGap.h10,
                   Text(
                     mission.description,
-                    style: context.text.bodySmall?.copyWith(
-                      height: 1.5,
-                      color: context.colors.textSecondary,
-                    ),
+                    style: MissionCardFrame.subtitleStyle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   AppGap.h14,
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      InfoChip(icon: Icons.calendar_today_rounded, text: mission.formattedDate, compact: true),
-                      InfoChip(icon: Icons.schedule_rounded, text: mission.timeSlot, compact: true),
-                      InfoChip(icon: Icons.location_on_outlined, text: mission.address.shortAddress, compact: true),
-                    ],
-                  ),
+                  MissionMetaRow(items: [
+                    MissionMetaItem(icon: Icons.calendar_today_outlined, text: mission.formattedDate),
+                    MissionMetaItem(icon: Icons.schedule_outlined, text: mission.timeSlot),
+                    MissionMetaItem(icon: Icons.location_on_outlined, text: mission.address.shortAddress),
+                  ]),
                   AppGap.h16,
                   Divider(height: 1, color: context.colors.divider),
                   AppGap.h16,
-                  _Footer(mission: mission, context: context),
+                  _Footer(mission: mission),
                 ],
               ),
             ),
@@ -133,10 +118,7 @@ class _CategoryRow extends StatelessWidget {
               AppGap.w6,
               Text(
                 mission.categoryName,
-                style: context.text.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textSecondary,
-                ),
+                style: MissionCardFrame.metaStyle,
               ),
             ],
           ),
@@ -151,10 +133,7 @@ class _CategoryRow extends StatelessWidget {
             ),
             child: Text(
               'Déjà postulé',
-              style: context.text.labelMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: context.colors.textSecondary,
-              ),
+              style: MissionCardFrame.metaStyle,
             ),
           )
         else if (mission.address.distance != null)
@@ -166,23 +145,14 @@ class _CategoryRow extends StatelessWidget {
 
 class _Footer extends StatelessWidget {
   final Mission mission;
-  final BuildContext context;
 
-  const _Footer({required this.mission, required this.context});
+  const _Footer({required this.mission});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          mission.budget.displayText,
-          style: context.text.headlineSmall?.copyWith(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF163127),
-            letterSpacing: -0.3,
-          ),
-        ),
+        BudgetBadge(budget: mission.budget, large: true),
         AppGap.w16,
         if (mission.client != null) ...[
           UserAvatar(
@@ -194,9 +164,7 @@ class _Footer extends StatelessWidget {
           Flexible(
             child: Text(
               mission.client!.name,
-              style: context.text.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
+              style: MissionCardFrame.metaStyle,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -206,9 +174,7 @@ class _Footer extends StatelessWidget {
         AppGap.w4,
         Text(
           '${mission.candidatesCount}',
-          style: context.text.labelMedium?.copyWith(
-            color: context.colors.textTertiary,
-          ),
+          style: MissionCardFrame.metaStyle,
         ),
       ],
     );

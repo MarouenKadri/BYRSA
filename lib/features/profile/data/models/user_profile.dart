@@ -1,3 +1,5 @@
+import '../utils/service_categories_resolver.dart';
+
 class UserProfile {
   final String id;
   final String firstName;
@@ -50,7 +52,9 @@ class UserProfile {
         userType: json['user_type'] as String? ?? 'client',
         hourlyRate: (json['hourly_rate'] as num?)?.toDouble(),
         isVerified: json['is_verified'] as bool? ?? false,
-        serviceCategories: List<String>.from(json['service_categories'] as List? ?? []),
+        serviceCategories: ServiceCategoriesResolver.parse(
+          json['service_categories'],
+        ),
       );
 
   Map<String, dynamic> toUpdateJson() => {
@@ -62,6 +66,7 @@ class UserProfile {
         if (gender != null) 'gender': gender,
         'bio': bio,
         'address': address,
+        'service_categories': serviceCategories,
         if (hourlyRate != null) 'hourly_rate': hourlyRate,
       };
 

@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
 import '../../../../app/widgets/app_category_filter_bar.dart';
+import '../../../../app/widgets/service_category_filter_items.dart';
 import '../../../../app/app_bar/location_app_bar.dart';
 import '../../../story/story.dart';
+import '../../../story/presentation/widgets/stories_section.dart';
 import '../../../profile/profile_provider.dart';
 import '../../../mission/presentation/pages/client/create_mission_page.dart';
 import '../../../mission/presentation/pages/client/client_mission_detail_page.dart';
@@ -15,23 +17,6 @@ import '../../../mission/presentation/widgets/cards/variants/mission_focus_card.
 import '../../../auth/data/models/freelancer.dart';
 import '../../../auth/presentation/widgets/freelancer_preview_card.dart';
 import 'freelancer_profile_view.dart';
-
-List<AppCategoryItem> _categoryItems() => [
-  const AppCategoryItem(
-    id: null,
-    label: ServiceCategory.allFilterLabel,
-    icon: Icons.apps_outlined,
-    color: Color(0xFF64748B),
-  ),
-  ...ServiceCategory.ordered.map(
-    (category) => AppCategoryItem(
-      id: category.id,
-      label: category.chipLabel,
-      icon: category.icon,
-      color: category.color,
-    ),
-  ),
-];
 
 Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
   final firstName = (row['first_name'] ?? '') as String;
@@ -169,254 +154,24 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent> {
             // ── Stories des freelancers ──────────────────────────
             SliverToBoxAdapter(
               child: Consumer<StoryProvider>(
-                builder: (context, storyProvider, _) => _ClientStoriesWidget(
+                builder: (context, storyProvider, _) => StoriesSection(
                   storyGroups: storyProvider.storyGroups,
+                  isFreelancer: false,
+                  onProfileTap: (group) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FreelancerProfileView(
+                        freelancerId: group.groupId,
+                        freelancerName: group.groupName,
+                        freelancerAvatar: group.avatarUrl,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
 
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Stories des freelancers (client view)
-// ─────────────────────────────────────────────────────────────
-class _ClientStoriesWidget extends StatefulWidget {
-  final List<StoryGroup> storyGroups;
-  const _ClientStoriesWidget({required this.storyGroups});
-  @override
-  State<_ClientStoriesWidget> createState() => _ClientStoriesWidgetState();
-}
-
-class _ClientStoriesWidgetState extends State<_ClientStoriesWidget> {
-  final Set<String> _viewed = {};
-
-  @override
-  Widget build(BuildContext context) {
-    final groups = widget.storyGroups
-        .where((group) => group.stories.isNotEmpty)
-        .take(8)
-        .toList();
-    if (groups.isEmpty) return const SizedBox.shrink();
-
-    return SizedBox(
-      height: 194,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-        itemCount: groups.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final group = groups[index];
-          final story = group.stories.first;
-          final isViewed = group.stories.every(
-            (item) => _viewed.contains(item.id),
-          );
-          return GestureDetector(
-            onTap: () => _openViewer(context, groups, index),
-            child: Container(
-              width: 128,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isViewed
-                      ? const Color(0xFFE5E7EB)
-                      : const Color(0xFFDADFE6),
-                  width: 1,
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x10000000),
-                    blurRadius: 18,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  story.imageUrl.isNotEmpty
-                      ? Image.network(
-                          story.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _ClientStoryPhotoFallback(
-                                label: story.serviceCategory,
-                              ),
-                        )
-                      : _ClientStoryPhotoFallback(label: story.serviceCategory),
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.10),
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.54),
-                          ],
-                          stops: const [0.0, 0.45, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.34),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        'Expertise',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              width: 1.2,
-                            ),
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          child: group.avatarUrl.isNotEmpty
-                              ? Image.network(
-                                  group.avatarUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _ClientStoryAvatarFallback(
-                                        name: group.groupName,
-                                      ),
-                                )
-                              : _ClientStoryAvatarFallback(
-                                  name: group.groupName,
-                                ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            group.groupName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _openViewer(BuildContext context, List<StoryGroup> groups, int index) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (_, __, ___) => StoryViewerPage(
-          groups: groups,
-          initialIndex: index,
-          onViewed: (id) => setState(() => _viewed.add(id)),
-        ),
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 200),
-      ),
-    );
-  }
-}
-
-class _ClientStoryPhotoFallback extends StatelessWidget {
-  final String label;
-  const _ClientStoryPhotoFallback({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final normalized = label.toLowerCase();
-    final icon = normalized.contains('jardin')
-        ? Icons.yard_outlined
-        : normalized.contains('plomb')
-        ? Icons.plumbing_outlined
-        : normalized.contains('menage')
-        ? Icons.bed_outlined
-        : Icons.home_repair_service_outlined;
-
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFDCE6DB), Color(0xFFC8D6D8)],
-        ),
-      ),
-      child: Center(
-        child: Icon(icon, size: 30, color: const Color(0xFF6E7781)),
-      ),
-    );
-  }
-}
-
-class _ClientStoryAvatarFallback extends StatelessWidget {
-  final String name;
-  const _ClientStoryAvatarFallback({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = name
-        .trim()
-        .split(' ')
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
-    return Container(
-      color: const Color(0xFFE9EEF2),
-      alignment: Alignment.center,
-      child: Text(
-        initials.isEmpty ? '?' : initials,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF4A4F55),
         ),
       ),
     );
@@ -532,7 +287,7 @@ class _CategoriesRow extends StatelessWidget {
       color: context.colors.surface,
       padding: const EdgeInsets.only(bottom: 12),
       child: AppCategoryFilterBar(
-        items: _categoryItems(),
+        items: ServiceCategoryFilterItems.build(),
         selectedId: selectedCategoryId,
         onSelect: onSelect,
         padding: const EdgeInsets.symmetric(horizontal: 16),

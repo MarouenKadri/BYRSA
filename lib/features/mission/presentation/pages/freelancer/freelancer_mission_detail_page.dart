@@ -8,6 +8,7 @@ import '../../mission_provider.dart';
 import '../../widgets/detail/mission_detail_primitives.dart';
 import '../../widgets/detail/mission_detail_template.dart';
 import '../../widgets/shared/mission_status_ui.dart';
+import '../../widgets/shared/mission_shared_widgets.dart';
 import '../../../../messaging/presentation/pages/chat_page.dart';
 import '../../widgets/detail/freelancer_detail_sections.dart';
 import 'freelancer_tracking_page.dart';
@@ -123,15 +124,7 @@ class _FreelancerMissionDetailPageState
         AppGap.w10,
         DetailLuxuryPill(label: secondaryLabel),
         const Spacer(),
-        Text(
-          mission.budget.displayText,
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
-            color: AppColors.ink,
-          ),
-        ),
+        BudgetBadge(budget: mission.budget, large: true),
       ],
     );
   }

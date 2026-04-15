@@ -1,3 +1,5 @@
+import '../../shared/story_category_mapper.dart';
+
 /// Story model (stored in Supabase `posts` table — images-only subset)
 class Story {
   final String id;
@@ -141,17 +143,6 @@ class StoryGroup {
   }
 
   static String _categoryLabel(String id) {
-    const labels = {
-      'menage': 'Ménage',
-      'jardinage': 'Jardinage',
-      'bricolage': 'Bricolage',
-      'plomberie': 'Plomberie',
-      'electricite': 'Électricité',
-      'demenagement': 'Déménagement',
-      'petsitting': 'Pet-sitting',
-      'cours': 'Cours',
-      'autres': 'Autres',
-    };
-    return labels[id] ?? id;
+    return StoryCategoryMapper.label(id, fallback: 'Autres');
   }
 }

@@ -11,12 +11,14 @@ class StoryViewerPage extends StatefulWidget {
   final List<StoryGroup> groups;
   final int initialIndex;
   final void Function(String groupId) onViewed;
+  final void Function(StoryGroup group)? onProfileTap;
 
   const StoryViewerPage({
     super.key,
     required this.groups,
     required this.initialIndex,
     required this.onViewed,
+    this.onProfileTap,
   });
 
   @override
@@ -388,60 +390,78 @@ class _StoryViewerPageState extends State<StoryViewerPage>
       padding: AppInsets.h12,
       child: Row(
         children: [
-          // Avatar or category icon
-          if (group.isAuthorGroup)
-            Container(
-              width: 42, height: 42,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-              child: ClipOval(
-                child: group.avatarUrl.isNotEmpty
-                    ? Image.network(group.avatarUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            _avatarFallback(context, group.groupName))
-                    : _avatarFallback(context, group.groupName),
-              ),
-            )
-          else
-            Builder(builder: (_) {
-              final cat = ServiceCategory.findById(group.categoryId);
-              return Container(
-                width: 42, height: 42,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: (cat?.themedColor(context) ?? context.colors.primary).withOpacity(
-                    AppStoryMetrics.viewerCategoryBadgeAlpha,
-                  ),
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: Icon(
-                    cat?.icon ?? Icons.photo_library_rounded,
-                    color: Colors.white,
-                    size: 22),
-              );
-            }),
-          AppGap.w10,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Avatar + nom — tap → profil freelancer
+          GestureDetector(
+            onTap: widget.onProfileTap != null
+                ? () {
+                    Navigator.pop(context);
+                    widget.onProfileTap!(group);
+                  }
+                : null,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  group.groupName,
-                  style: context.storyActionStyle.copyWith(
-                    fontSize: AppFontSize.body,
-                  ),
+                if (group.isAuthorGroup)
+                  Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: ClipOval(
+                      child: group.avatarUrl.isNotEmpty
+                          ? Image.network(group.avatarUrl, fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _avatarFallback(context, group.groupName))
+                          : _avatarFallback(context, group.groupName),
+                    ),
+                  )
+                else
+                  Builder(builder: (_) {
+                    final cat = ServiceCategory.findById(group.categoryId);
+                    return Container(
+                      width: 42, height: 42,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (cat?.themedColor(context) ?? context.colors.primary).withOpacity(
+                          AppStoryMetrics.viewerCategoryBadgeAlpha,
+                        ),
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: Icon(
+                          cat?.icon ?? Icons.photo_library_rounded,
+                          color: Colors.white,
+                          size: 22),
+                    );
+                  }),
+                AppGap.w10,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      group.groupName,
+                      style: context.storyActionStyle.copyWith(
+                        fontSize: AppFontSize.body,
+                      ),
+                    ),
+                    Text(
+                      group.isAuthorGroup
+                          ? 'Prestataire'
+                          : '${group.stories.length} réalisation${group.stories.length > 1 ? 's' : ''}',
+                      style: context.storyMetaStyle,
+                    ),
+                  ],
                 ),
-                Text(
-                  group.isAuthorGroup
-                      ? 'Prestataire'
-                      : '${group.stories.length} réalisation${group.stories.length > 1 ? 's' : ''}',
-                  style: context.storyMetaStyle,
-                ),
+                if (widget.onProfileTap != null) ...[
+                  AppGap.w6,
+                  const Icon(Icons.chevron_right_rounded,
+                      color: Colors.white70, size: 18),
+                ],
               ],
             ),
           ),
+          const Spacer(),
           // ⋯ options (owner only)
           if (isOwner) ...[
             GestureDetector(
@@ -514,83 +534,57 @@ class _StoryViewerPageState extends State<StoryViewerPage>
             AppGap.h8,
           ],
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Mini avatar
-              Container(
-                width: 26, height: 26,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white54, width: 1.5),
-                ),
-                child: ClipOval(
-                  child: story.authorAvatar.isNotEmpty
-                      ? Image.network(story.authorAvatar, fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _authorFallback(context, story))
-                      : _authorFallback(context, story),
-                ),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  story.authorName,
-                  style: context.storyAuthorNameStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              AppGap.w8,
+              // ── Heure ───────────────────────────────────────
               Icon(Icons.access_time_rounded,
                   size: 12,
                   color: Colors.white.withOpacity(AppStoryMetrics.viewerMetaAlpha)),
               AppGap.w3,
-              Text(_timeAgo(story.createdAt),
-                  style: context.storyMetaStyle.copyWith(
-                    color: Colors.white.withOpacity(AppStoryMetrics.viewerMetaAlpha),
-                  )),
-              AppGap.w12,
+              Text(
+                _timeAgo(story.createdAt),
+                style: context.storyMetaStyle.copyWith(
+                  color: Colors.white.withOpacity(AppStoryMetrics.viewerMetaAlpha),
+                ),
+              ),
+              AppGap.w16,
               // ── Like button ─────────────────────────────────
               GestureDetector(
                 onTap: () => _toggleLike(story.id),
                 behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: AppInsets.a6,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, anim) =>
-                            ScaleTransition(scale: anim, child: child),
-                        child: Icon(
-                          isLiked
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          key: ValueKey(isLiked),
-                          color: isLiked
-                              ? AppColors.pinkRed
-                              : Colors.white,
-                          size: 30,
-                          shadows: const [
-                            Shadow(color: Colors.black54, blurRadius: 6),
-                          ],
-                        ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, anim) =>
+                          ScaleTransition(scale: anim, child: child),
+                      child: Icon(
+                        isLiked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        key: ValueKey(isLiked),
+                        color: isLiked ? AppColors.pinkRed : Colors.white,
+                        size: 26,
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 6),
+                        ],
                       ),
-                      AppGap.h2,
-                      Text(
-                        '$count',
-                        style: context.text.labelSmall?.copyWith(
-                          color: isLiked
-                              ? Colors.white
-                              : Colors.white.withOpacity(AppStoryMetrics.viewerMetaAlpha),
-                          fontWeight: FontWeight.w700,
-                          shadows: const [
-                            Shadow(color: Colors.black45, blurRadius: 4),
-                          ],
-                        ),
+                    ),
+                    AppGap.w5,
+                    Text(
+                      '$count',
+                      style: context.text.labelSmall?.copyWith(
+                        color: isLiked
+                            ? Colors.white
+                            : Colors.white.withOpacity(AppStoryMetrics.viewerMetaAlpha),
+                        fontWeight: FontWeight.w700,
+                        shadows: const [
+                          Shadow(color: Colors.black45, blurRadius: 4),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -600,19 +594,6 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     );
   }
 
-  Widget _authorFallback(BuildContext context, Story story) => Container(
-        color: context.colors.primary.withValues(alpha: 0.18),
-        child: Center(
-          child: Text(
-            story.authorName.isNotEmpty
-                ? story.authorName[0].toUpperCase()
-                : '?',
-            style: context.storyFallbackStyle.copyWith(
-              fontSize: AppFontSize.tiny,
-            ),
-          ),
-        ),
-      );
 
   String _timeAgo(DateTime dt) {
     final diff = DateTime.now().difference(dt);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/mission.dart';
+import '../../shared/mission_shared_widgets.dart';
 import '../../shared/mission_status_ui.dart';
 import '../primitives/mission_card_frame.dart';
 import '../primitives/mission_meta_row.dart';
@@ -53,7 +54,7 @@ class MissionSummaryCard extends StatelessWidget {
     return MissionCardFrame(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+        padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,38 +67,20 @@ class MissionSummaryCard extends StatelessWidget {
                     children: [
                       Text(
                         mission.categoryName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A1A),
-                          letterSpacing: -0.2,
-                        ),
+                        style: MissionCardFrame.titleStyle,
                       ),
                       const SizedBox(height: 6),
                       Text(
                         mission.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6F7782),
-                          height: 1.35,
-                        ),
+                        style: MissionCardFrame.subtitleStyle,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  mission.budget.displayText,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF101214),
-                    letterSpacing: -0.4,
-                  ),
-                ),
+                BudgetBadge(budget: mission.budget),
               ],
             ),
             if (showDescription && mission.description.trim().isNotEmpty) ...[
@@ -106,12 +89,7 @@ class MissionSummaryCard extends StatelessWidget {
                 mission.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF8A929B),
-                  height: 1.45,
-                ),
+                style: MissionCardFrame.subtitleStyle,
               ),
             ],
             const SizedBox(height: 18),

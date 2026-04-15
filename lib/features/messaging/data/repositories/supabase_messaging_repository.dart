@@ -11,7 +11,7 @@ class SupabaseMessagingRepository implements MessagingRepository {
     try {
       final rows = await _supabase
           .from('conversations')
-          .select('*, missions(title)')
+          .select('*')
           .or('client_id.eq.$userId,freelancer_id.eq.$userId')
           .order('last_message_at', ascending: false);
 
@@ -42,18 +42,17 @@ class SupabaseMessagingRepository implements MessagingRepository {
               .from('messages')
               .select('id')
               .eq('conversation_id', row['id'] as String)
-              .eq('is_read', false)
+              .neq('status', 'read')
               .neq('sender_id', userId);
           unreadCount = (countResult as List).length;
         } catch (_) {}
 
-        final missionData = row['missions'] as Map<String, dynamic>?;
         result.add(Conversation(
           id: row['id'] as String,
           clientId: row['client_id'] as String,
           freelancerId: row['freelancer_id'] as String,
           missionId: row['mission_id'] as String?,
-          missionTitle: missionData?['title'] as String?,
+          missionTitle: row['mission_title'] as String?,
           lastMessage: row['last_message'] as String?,
           lastMessageAt: row['last_message_at'] != null
               ? DateTime.parse(row['last_message_at'] as String)
@@ -97,7 +96,7 @@ class SupabaseMessagingRepository implements MessagingRepository {
         'conversation_id': conversationId,
         'sender_id': senderId,
         'content': content,
-        'is_read': false,
+        'status': 'sent',
       }).select().single();
       return ChatMessage.fromJson(row, senderId);
     } catch (e) {
@@ -148,7 +147,7 @@ class SupabaseMessagingRepository implements MessagingRepository {
     try {
       await _supabase
           .from('messages')
-          .update({'is_read': true})
+          .update({'status': 'read'})
           .eq('conversation_id', conversationId)
           .neq('sender_id', userId);
     } catch (e) {

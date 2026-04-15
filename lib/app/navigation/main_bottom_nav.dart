@@ -16,6 +16,8 @@ class MainBottomNav extends StatelessWidget {
   final ValueChanged<int> onItemSelected;
   final List<NavItem> items;
   final Map<int, int> badgeCounts;
+  final bool hasCenterGap;
+  final double centerGapWidth;
 
   const MainBottomNav({
     super.key,
@@ -23,24 +25,39 @@ class MainBottomNav extends StatelessWidget {
     required this.onItemSelected,
     required this.items,
     this.badgeCounts = const {},
+    this.hasCenterGap = false,
+    this.centerGapWidth = 66,
   });
 
   @override
   Widget build(BuildContext context) {
+    final navTiles = List.generate(
+      items.length,
+      (i) => Expanded(
+        child: _NavTile(
+          item: items[i],
+          selected: currentIndex == i,
+          onTap: () => onItemSelected(i),
+          badgeCount: badgeCounts[i] ?? 0,
+          isFirst: i == 0,
+          isLast: i == items.length - 1,
+        ),
+      ),
+    );
+    final useCenterGap = hasCenterGap && items.length.isEven && items.length >= 4;
+    final rowChildren = useCenterGap
+        ? <Widget>[
+            ...navTiles.take(items.length ~/ 2),
+            SizedBox(width: centerGapWidth),
+            ...navTiles.skip(items.length ~/ 2),
+          ]
+        : navTiles;
+
     return AppNavBarSurface(
       child: SizedBox(
         height: 80,
         child: Row(
-          children: List.generate(items.length, (i) => Expanded(
-            child: _NavTile(
-              item: items[i],
-              selected: currentIndex == i,
-              onTap: () => onItemSelected(i),
-              badgeCount: badgeCounts[i] ?? 0,
-              isFirst: i == 0,
-              isLast: i == items.length - 1,
-            ),
-          )),
+          children: rowChildren,
         ),
       ),
     );

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
+import '../../../../reviews/data/repositories/supabase_review_repository.dart';
+import '../../../../reviews/domain/entities/review.dart';
+import '../../../../reviews/presentation/widgets/review_card.dart';
+import '../../../../reviews/presentation/widgets/reviews_summary.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// Data classes
@@ -22,6 +26,8 @@ class VerifiedItemData {
   const VerifiedItemData({required this.label, this.verified = false, this.warning = false});
 }
 
+enum _ProfileContentTab { information, reviews }
+
 /// ═══════════════════════════════════════════════════════════════════════════
 /// BaseProfileState — Template Method
 ///
@@ -32,6 +38,12 @@ class VerifiedItemData {
 
 abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   bool isOpeningChat = false;
+  final SupabaseReviewRepository _reviewsRepository = SupabaseReviewRepository();
+  _ProfileContentTab _activeTab = _ProfileContentTab.information;
+  List<Review> _profileReviews = const [];
+  bool _isLoadingReviews = false;
+  bool _hasLoadedReviews = false;
+  String? _reviewsError;
 
   // ── À fournir par la sous-classe ─────────────────────────────────────────
 
@@ -41,6 +53,9 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   int get profileReviewsCount;
   String get profileLevel;
   bool get isLoadingProfile;
+  String? get profileUserId => null;
+  String get expectedReviewerUserType;
+  bool get showPublicationsTab => false;
 
   /// Badge hero haut-droite (tarif chez freelancer, rating chez client)
   Widget buildHeroBadge(BuildContext context);
@@ -58,7 +73,8 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   List<VerifiedItemData> get verifiedItems;
 
   /// Ouvre la page avis
-  void openReviews(BuildContext context);
+  Widget? buildStoriesBar(BuildContext context) => null;
+  Widget buildPublicationsContent(BuildContext context) => const SizedBox.shrink();
 
   /// Construit le ChatPage à ouvrir (params différents selon le rôle)
   Widget buildChatPage(String? conversationId);
@@ -122,10 +138,7 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTabPills(context),
-                  if (proposal != null) proposal,
-                  _buildProfileMetaSection(context),
-                  _buildVerifiedSection(context),
-                  if (extra != null) extra,
+                  _buildTabContent(context, proposal: proposal, extra: extra),
                   AppGap.h32,
                 ],
               ),
@@ -245,18 +258,176 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
           ProfileTabPill(
             label: 'Information',
             icon: Icons.info_outline_rounded,
-            active: true,
-            onTap: () {},
+            active: _activeTab == _ProfileContentTab.information,
+            onTap: () => _selectTab(_ProfileContentTab.information),
           ),
           AppGap.w10,
           ProfileTabPill(
             label: '${profileRating.toStringAsFixed(1)} · $profileReviewsCount avis',
             icon: Icons.star_rounded,
-            active: false,
-            onTap: () => openReviews(context),
+            active: _activeTab == _ProfileContentTab.reviews,
+            onTap: () => _selectTab(_ProfileContentTab.reviews),
           ),
         ],
       ),
+    );
+  }
+
+  void _selectTab(_ProfileContentTab tab) {
+    if (_activeTab == tab) return;
+
+    setState(() => _activeTab = tab);
+    if (tab == _ProfileContentTab.reviews && !_hasLoadedReviews) {
+      _loadProfileReviews();
+    }
+  }
+
+  Future<void> _loadProfileReviews() async {
+    final userId = profileUserId;
+    if (userId == null || userId.isEmpty) {
+      setState(() {
+        _hasLoadedReviews = true;
+        _isLoadingReviews = false;
+        _profileReviews = const [];
+        _reviewsError = 'Impossible de charger les avis (profil introuvable)';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingReviews = true;
+      _reviewsError = null;
+    });
+
+    try {
+      final reviews = await _reviewsRepository.getReceivedReviewsByReviewerType(
+        revieweeId: userId,
+        reviewerUserType: expectedReviewerUserType,
+      );
+      if (!mounted) return;
+      setState(() {
+        _profileReviews = reviews;
+        _hasLoadedReviews = true;
+        _reviewsError = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _profileReviews = const [];
+        _hasLoadedReviews = true;
+        _reviewsError = 'Impossible de charger les avis';
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() => _isLoadingReviews = false);
+    }
+  }
+
+  Widget _buildTabContent(
+    BuildContext context, {
+    required Widget? proposal,
+    required Widget? extra,
+  }) {
+    if (_activeTab == _ProfileContentTab.reviews) {
+      return _buildReviewsSection(context);
+    }
+
+    final stories = buildStoriesBar(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (proposal != null) proposal,
+        _buildProfileMetaSection(context),
+        if (stories != null) stories,
+        _buildVerifiedSection(context),
+        if (extra != null) extra,
+      ],
+    );
+  }
+
+  Widget _buildReviewsSection(BuildContext context) {
+    if (_isLoadingReviews && !_hasLoadedReviews) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 36),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ReviewsSummary(reviews: _profileReviews),
+        if (_reviewsError != null && _profileReviews.isEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: AppSurfaceCard(
+              padding: const EdgeInsets.all(16),
+              border: Border.all(color: context.colors.border),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: context.colors.textSecondary,
+                    size: 18,
+                  ),
+                  AppGap.w10,
+                  Expanded(
+                    child: Text(
+                      _reviewsError!,
+                      style: context.text.bodyMedium?.copyWith(
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  AppGap.w10,
+                  TextButton(
+                    onPressed: _loadProfileReviews,
+                    child: const Text('Réessayer'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (_profileReviews.isEmpty && _reviewsError == null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: AppSurfaceCard(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+              border: Border.all(color: context.colors.border),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.sentiment_neutral_rounded,
+                    size: 22,
+                    color: context.colors.textHint,
+                  ),
+                  AppGap.w10,
+                  Expanded(
+                    child: Text(
+                      'Aucun avis pour le moment',
+                      style: context.text.bodyMedium?.copyWith(
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (_profileReviews.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Column(
+              children: [
+                for (final review in _profileReviews) ...[
+                  ReviewCard(review: review, isReceived: true),
+                  AppGap.h12,
+                ],
+              ],
+            ),
+          ),
+      ],
     );
   }
 

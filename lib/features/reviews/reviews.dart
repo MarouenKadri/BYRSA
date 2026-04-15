@@ -15,3 +15,4 @@ export 'presentation/widgets/reviews_tab.dart';
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
 export 'presentation/pages/my_reviews_page.dart';
+export 'presentation/pages/profile_reviews_page.dart';

@@ -6,6 +6,8 @@ import '../../data/models/message.dart';
 import '../../messaging_provider.dart';
 import 'chat_page.dart';
 import '../../../../app/app_bar/app_section_bar.dart';
+import '../../../client/presentation/pages/freelancer_profile_view.dart';
+import '../../../freelancer/presentation/pages/client_profile_view.dart';
 
 class MessagesPage extends StatefulWidget {
   final VoidCallback? onGoToAccount;
@@ -101,21 +103,53 @@ class _ConversationTile extends StatelessWidget {
     final hasUnread = conversation.unreadCount > 0;
 
     return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChatPage(
-            conversationId: conversation.id,
-            contactName: conversation.otherUserName,
-            contactAvatar: conversation.otherUserAvatar ??
-                'https://api.dicebear.com/7.x/avataaars/png?seed=${conversation.otherUserId}',
-            isVerified: conversation.isOtherVerified,
-            missionTitle: conversation.missionTitle,
+      onTap: () {
+        final isOtherFreelancer = currentUserId == conversation.clientId;
+        final avatar = conversation.otherUserAvatar ??
+            'https://api.dicebear.com/7.x/avataaars/png?seed=${conversation.otherUserId}';
+
+        void goToProfile() {
+          if (isOtherFreelancer) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FreelancerProfileView(
+                  freelancerId: conversation.otherUserId,
+                  freelancerName: conversation.otherUserName,
+                  freelancerAvatar: avatar,
+                ),
+              ),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ClientProfileView(
+                  clientId: conversation.otherUserId,
+                  clientName: conversation.otherUserName,
+                  clientAvatar: avatar,
+                ),
+              ),
+            );
+          }
+        }
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatPage(
+              conversationId: conversation.id,
+              contactName: conversation.otherUserName,
+              contactAvatar: avatar,
+              isVerified: conversation.isOtherVerified,
+              missionTitle: conversation.missionTitle,
+              onProfileTap: goToProfile,
+            ),
           ),
-        ),
-      ).then((_) {
-        if (context.mounted) context.read<MessagingProvider>().loadConversations();
-      }),
+        ).then((_) {
+          if (context.mounted) context.read<MessagingProvider>().loadConversations();
+        });
+      },
       child: Padding(
         padding: AppInsets.h16v12,
         child: Row(

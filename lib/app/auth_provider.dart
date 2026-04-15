@@ -553,7 +553,7 @@ class AuthProvider extends ChangeNotifier {
         // 10. Compétences (freelancer)
         await _supabase.from('skills').delete().eq('freelancer_id', userId);
 
-        // 11. Votes sur mes publications + mes votes
+        // 11. Likes sur mes publications + mes likes
         final myPostsRaw = await _supabase
             .from('posts')
             .select('id')
@@ -563,11 +563,11 @@ class AuthProvider extends ChangeNotifier {
             .toList();
         if (myPostIds.isNotEmpty) {
           await _supabase
-              .from('post_votes')
+              .from('post_likes')
               .delete()
               .inFilter('post_id', myPostIds);
         }
-        await _supabase.from('post_votes').delete().eq('user_id', userId);
+        await _supabase.from('post_likes').delete().eq('user_id', userId);
 
         // 12. Publications (colonne author_id, pas user_id)
         await _supabase.from('posts').delete().eq('author_id', userId);

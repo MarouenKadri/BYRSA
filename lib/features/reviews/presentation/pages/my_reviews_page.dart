@@ -26,7 +26,9 @@ class _MyReviewsPageState extends State<MyReviewsPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ReviewProvider>().loadReviews();
+      context.read<ReviewProvider>().loadReviewsForMode(
+            isFreelancer: widget.isFreelancer,
+          );
     });
   }
 
@@ -71,12 +73,16 @@ class _MyReviewsPageState extends State<MyReviewsPage>
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: ReviewsErrorCard(
                       message: provider.error!,
-                      onRetry: () => context.read<ReviewProvider>().loadReviews(),
+                      onRetry: () => context.read<ReviewProvider>().loadReviewsForMode(
+                            isFreelancer: widget.isFreelancer,
+                          ),
                     ),
                   ),
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: () => context.read<ReviewProvider>().loadReviews(),
+                    onRefresh: () => context.read<ReviewProvider>().loadReviewsForMode(
+                          isFreelancer: widget.isFreelancer,
+                        ),
                     child: TabBarView(
                       controller: _tabController,
                       children: [

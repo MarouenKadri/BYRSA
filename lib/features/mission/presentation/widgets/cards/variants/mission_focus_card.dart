@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../data/models/mission.dart';
 import '../../shared/mission_status_ui.dart';
+import '../../shared/mission_shared_widgets.dart';
 import '../primitives/mission_card_frame.dart';
 import '../primitives/mission_meta_row.dart';
 import '../primitives/mission_status_chip.dart';
@@ -50,7 +51,7 @@ class MissionFocusCard extends StatelessWidget {
 
     return MissionCardFrame(
       onTap: onTap,
-      radius: 26,
+      radius: MissionCardFrame.radiusLarge,
       color: context.colors.surface,
       shadows: MissionCardFrame.defaultShadow,
       child: Column(
@@ -60,7 +61,7 @@ class MissionFocusCard extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(26),
+                top: Radius.circular(MissionCardFrame.radiusLarge),
               ),
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
@@ -73,7 +74,7 @@ class MissionFocusCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+            padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -100,23 +101,14 @@ class MissionFocusCard extends StatelessWidget {
                         children: [
                           Text(
                             'Votre prochaine mission',
-                            style: context.text.labelLarge?.copyWith(
-                              color: context.colors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: MissionCardFrame.metaStyle,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             mission.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              height: 1.2,
-                              color: AppColors.inkDark,
-                              letterSpacing: -0.2,
-                            ),
+                            style: MissionCardFrame.titleStyle,
                           ),
                         ],
                       ),
@@ -150,22 +142,11 @@ class MissionFocusCard extends StatelessWidget {
                           'Commence ${mission.formattedDate.toLowerCase()}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: context.text.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF24313D),
-                          ),
+                          style: MissionCardFrame.captionStyle,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        mission.budget.displayText,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.inkDark,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
+                      BudgetBadge(budget: mission.budget),
                     ],
                   ),
                 ),
@@ -179,10 +160,7 @@ class MissionFocusCard extends StatelessWidget {
                     mission.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.text.bodySmall?.copyWith(
-                      height: 1.45,
-                      color: context.colors.textSecondary,
-                    ),
+                    style: MissionCardFrame.subtitleStyle,
                   ),
                 ],
               ],

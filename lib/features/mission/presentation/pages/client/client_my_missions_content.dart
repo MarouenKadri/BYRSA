@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
@@ -118,6 +119,9 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
                     context,
                     slideUpRoute(page: ClientMissionDetailPage(mission: missions[index])),
                   ),
+                  extra: widget.filter == _ClientTabFilter.published
+                      ? _CandidatesBadge(count: missions[index].candidatesCount)
+                      : null,
                 ),
               ),
             ),
@@ -138,5 +142,50 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
     _ClientTabFilter.published   => 'Créez une mission pour trouver un prestataire',
     _ClientTabFilter.inProgress  => 'Vos missions acceptées apparaîtront ici',
   };
+}
+
+class _CandidatesBadge extends StatelessWidget {
+  final int count;
+  const _CandidatesBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasOffers = count > 0;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: hasOffers
+            ? context.colors.primary.withOpacity(0.08)
+            : context.colors.surfaceAlt,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: hasOffers
+              ? context.colors.primary.withOpacity(0.25)
+              : context.colors.border,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            hasOffers ? Icons.people_alt_rounded : Icons.hourglass_empty_rounded,
+            size: 14,
+            color: hasOffers ? context.colors.primary : context.colors.textTertiary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            hasOffers
+                ? '$count offre${count > 1 ? 's' : ''} reçue${count > 1 ? 's' : ''}'
+                : 'Aucune offre pour l\'instant',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: hasOffers ? context.colors.primary : context.colors.textTertiary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 

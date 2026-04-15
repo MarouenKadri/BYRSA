@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../../../core/design/app_primitives.dart';
 import '../../data/models/message.dart';
@@ -32,6 +34,9 @@ class ChatPage extends StatefulWidget {
   // Mode réservation : affiche le bouton "Réserver ce service"
   final bool showReserveButton;
 
+  // Navigation vers le profil du contact
+  final VoidCallback? onProfileTap;
+
   const ChatPage({
     super.key,
     this.conversationId,
@@ -44,6 +49,7 @@ class ChatPage extends StatefulWidget {
     this.candidatePrice,
     this.onAcceptCandidate,
     this.showReserveButton = false,
+    this.onProfileTap,
   });
 
   @override
@@ -64,7 +70,7 @@ class _ChatPageState extends State<ChatPage> {
     RegExp(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', caseSensitive: false),
     RegExp(r'(\+33|0033|0)[1-9](\s?[0-9]{2}){4}', caseSensitive: false),
     RegExp(r'\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}', caseSensitive: false),
-    RegExp(r'\b(whatsapp|telegram|signal|viber|messenger|mon\s*(numéro|tel|téléphone|mail|email)|contacte[rz]?\s*moi\s*(sur|via|par)|appelle[rz]?\s*moi|envoie|sms)\b', caseSensitive: false),
+    RegExp(r'\b(whatsapp|telegram|signal|viber|messenger|mon\s*(numéro|tel|téléphone|mail|email)|contacte[rz]?\s*moi\s*(sur|via|par)|appelle[rz]?\s*moi|sms)\b', caseSensitive: false),
     RegExp(r'\b(gmail|yahoo|hotmail|outlook|orange|sfr|free|wanadoo)\b', caseSensitive: false),
   ];
 
@@ -240,10 +246,13 @@ class _ChatPageState extends State<ChatPage> {
       titleSpacing: 0,
       title: Row(
         children: [
-          CircleAvatar(
-            radius: 19,
-            backgroundImage: NetworkImage(widget.contactAvatar),
-            backgroundColor: _kBorder,
+          GestureDetector(
+            onTap: widget.onProfileTap,
+            child: CircleAvatar(
+              radius: 19,
+              backgroundImage: NetworkImage(widget.contactAvatar),
+              backgroundColor: _kBorder,
+            ),
           ),
           AppGap.w12,
           Expanded(
@@ -519,12 +528,12 @@ class _ChatPageState extends State<ChatPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // '+' icon
+                  // Localisation
                   Padding(
                     padding: const EdgeInsets.only(left: 14, bottom: 11),
                     child: GestureDetector(
-                      onTap: _showAttachmentOptions,
-                      child: const Icon(Icons.add_rounded, color: _kGrayLight, size: 20),
+                      onTap: _sendLocation,
+                      child: const Icon(Icons.location_on_outlined, color: _kGrayMid, size: 22),
                     ),
                   ),
                   // TextField
@@ -611,152 +620,63 @@ class _ChatPageState extends State<ChatPage> {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      builder: (ctx) {
-        final bottomPad = MediaQuery.of(ctx).padding.bottom;
-        return Container(
-          decoration: const BoxDecoration(
-            color: _kBg,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      child: AppActionSheet(
+        title: widget.contactName,
+        dark: false,
+        children: [
+          if (widget.onProfileTap != null) ...[
+            AppActionSheetItem(
+              icon: Icons.person_outline_rounded,
+              title: 'Voir le profil',
+              dark: false,
+              onTap: () {
+                Navigator.pop(context);
+                widget.onProfileTap!();
+              },
+            ),
+          ],
+          if (widget.missionTitle != null)
+            AppActionSheetItem(
+              icon: Icons.assignment_outlined,
+              title: 'Voir la mission',
+              subtitle: widget.missionTitle,
+              dark: false,
+              onTap: () => Navigator.pop(context),
+            ),
+          const Divider(height: 1, indent: 20, endIndent: 20),
+          AppActionSheetItem(
+            icon: Icons.flag_outlined,
+            title: 'Signaler',
+            dark: false,
+            destructive: true,
+            onTap: () => Navigator.pop(context),
           ),
-          padding: EdgeInsets.fromLTRB(18, 0, 18, 18 + bottomPad),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 20),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: _kBorder,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              // Rows container
-              Container(
-                decoration: BoxDecoration(
-                  color: _kWhite,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: _kBorder, width: 0.8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _ChatSheetRow(
-                      icon: Icons.person_outline_rounded,
-                      label: 'Voir le profil',
-                      onTap: () => Navigator.pop(ctx),
-                    ),
-                    if (widget.missionTitle != null) ...[
-                      const _ChatSheetDivider(),
-                      _ChatSheetRow(
-                        icon: Icons.assignment_outlined,
-                        label: 'Voir la mission',
-                        onTap: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                    const _ChatSheetDivider(),
-                    _ChatSheetRow(
-                      icon: Icons.flag_outlined,
-                      label: 'Signaler',
-                      labelColor: const Color(0xFFB45C5C),
-                      trailingColor: const Color(0xFFB45C5C),
-                      onTap: () => Navigator.pop(ctx),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Bouton Fermer
-              GestureDetector(
-                onTap: () => Navigator.pop(ctx),
-                child: Container(
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: _kWhite,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: _kBorder, width: 0.8),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Fermer',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: _kGrayMid,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  void _showAttachmentOptions() {
-    showAppBottomSheet(
-      context: context,
-      wrapWithSurface: false,
-      builder: (ctx) {
-        return AppPickerSheet(
-          title: 'Pièces jointes',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppRoundIconTile(
-                icon: Icons.image_rounded,
-                iconColor: AppColors.primary,
-                title: 'Photo',
-                subtitle: 'Envoyer une image',
-                onTap: () => Navigator.pop(ctx),
-              ),
-              Divider(height: 1, color: ctx.colors.divider, indent: 16, endIndent: 16),
-              AppRoundIconTile(
-                icon: Icons.camera_alt_rounded,
-                iconColor: AppColors.primary,
-                title: 'Caméra',
-                subtitle: 'Prendre une photo',
-                onTap: () => Navigator.pop(ctx),
-              ),
-              Divider(height: 1, color: ctx.colors.divider, indent: 16, endIndent: 16),
-              AppRoundIconTile(
-                icon: Icons.insert_drive_file_rounded,
-                iconColor: AppColors.primary,
-                title: 'Document',
-                subtitle: 'Partager un fichier',
-                onTap: () => Navigator.pop(ctx),
-              ),
-              Divider(height: 1, color: ctx.colors.divider, indent: 16, endIndent: 16),
-              AppRoundIconTile(
-                icon: Icons.location_on_rounded,
-                iconColor: AppColors.primary,
-                title: 'Position',
-                subtitle: 'Partager votre localisation',
-                onTap: () => Navigator.pop(ctx),
-              ),
-            ],
-          ),
-          footer: Padding(
-            padding: EdgeInsets.only(top: 12, bottom: 16 + MediaQuery.of(ctx).padding.bottom),
-            child: GestureDetector(
-              onTap: () => Navigator.pop(ctx),
-              child: Text(
-                'Fermer',
-                style: ctx.text.bodyMedium?.copyWith(
-                  fontSize: AppFontSize.body,
-                  fontWeight: FontWeight.w500,
-                  color: ctx.colors.textTertiary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  Future<void> _sendLocation() async {
+    LocationPermission perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.denied) {
+      perm = await Geolocator.requestPermission();
+    }
+    if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+      if (mounted) showAppSnackBar(context, 'Permission de localisation refusée');
+      return;
+    }
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+      await context.read<MessagingProvider>().sendMessage('📍 ${pos.latitude},${pos.longitude}');
+      _scrollToBottom();
+    } catch (_) {
+      if (mounted) showAppSnackBar(context, 'Impossible d\'obtenir la position');
+    }
   }
 }
 
@@ -818,66 +738,46 @@ class _MessageBubbleFromModel extends StatelessWidget {
                 : const SizedBox(width: 30),
           if (!isMe) AppGap.w6,
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: isMe ? _kInk : _kWhite,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(18),
-                  topRight: const Radius.circular(18),
-                  bottomLeft: Radius.circular(isMe ? 18 : 4),
-                  bottomRight: Radius.circular(isMe ? 4 : 18),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    message.content,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: isMe ? _kWhite : _kInk,
-                      height: 1.45,
-                    ),
-                  ),
-                  AppGap.h3,
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: isMe
-                              ? _kWhite.withValues(alpha: 0.55)
-                              : _kGrayLight,
-                        ),
+            child: _isLocationMessage(message.content)
+                ? _LocationBubble(
+                    message: message,
+                    isMe: isMe,
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isMe ? _kInk : _kWhite,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(18),
+                        topRight: const Radius.circular(18),
+                        bottomLeft: Radius.circular(isMe ? 18 : 4),
+                        bottomRight: Radius.circular(isMe ? 4 : 18),
                       ),
-                      if (isMe) ...[
-                        AppGap.w4,
-                        Icon(
-                          message.status == MessageStatus.read
-                              ? Icons.done_all_rounded
-                              : Icons.done_rounded,
-                          size: 13,
-                          color: message.status == MessageStatus.read
-                              ? _kWhite
-                              : _kWhite.withValues(alpha: 0.45),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
-                    ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          message.content,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: isMe ? _kWhite : _kInk,
+                            height: 1.45,
+                          ),
+                        ),
+                        AppGap.h3,
+                        _TimeStatus(message: message, isMe: isMe),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
@@ -885,68 +785,175 @@ class _MessageBubbleFromModel extends StatelessWidget {
   }
 }
 
-// ─── Bottom sheet row ─────────────────────────────────────────────────────────
+// ─── Helpers localisation ─────────────────────────────────────────────────────
 
-class _ChatSheetRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? labelColor;
-  final Color? trailingColor;
-  final VoidCallback onTap;
+bool _isLocationMessage(String content) {
+  if (!content.startsWith('📍 ')) return false;
+  final coords = content.substring(3).split(',');
+  if (coords.length != 2) return false;
+  return double.tryParse(coords[0].trim()) != null &&
+      double.tryParse(coords[1].trim()) != null;
+}
 
-  const _ChatSheetRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.labelColor,
-    this.trailingColor,
-  });
+({double lat, double lng})? _parseLocation(String content) {
+  try {
+    final coords = content.substring(3).split(',');
+    return (
+      lat: double.parse(coords[0].trim()),
+      lng: double.parse(coords[1].trim()),
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+// ─── Heure + statut (réutilisable) ───────────────────────────────────────────
+
+class _TimeStatus extends StatelessWidget {
+  final ChatMessage message;
+  final bool isMe;
+  const _TimeStatus({required this.message, required this.isMe});
 
   @override
   Widget build(BuildContext context) {
-    final color = labelColor ?? _kInk;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: color),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: color,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
+          style: TextStyle(
+            fontSize: 10,
+            color: isMe ? _kWhite.withValues(alpha: 0.55) : _kGrayLight,
+          ),
+        ),
+        if (isMe) ...[
+          AppGap.w4,
+          Icon(
+            message.status == MessageStatus.read
+                ? Icons.done_all_rounded
+                : Icons.done_rounded,
+            size: 13,
+            color: message.status == MessageStatus.read
+                ? _kWhite
+                : _kWhite.withValues(alpha: 0.45),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// ─── Bulle localisation ───────────────────────────────────────────────────────
+
+class _LocationBubble extends StatelessWidget {
+  final ChatMessage message;
+  final bool isMe;
+  const _LocationBubble({required this.message, required this.isMe});
+
+  @override
+  Widget build(BuildContext context) {
+    final pos = _parseLocation(message.content);
+    if (pos == null) return const SizedBox.shrink();
+
+    // Image statique OpenStreetMap — aucune dépendance externe
+    final mapUrl =
+        'https://staticmap.openstreetmap.de/staticmap.php'
+        '?center=${pos.lat},${pos.lng}'
+        '&zoom=15&size=300x150'
+        '&markers=${pos.lat},${pos.lng},red-pushpin';
+
+    return GestureDetector(
+      onTap: () => launchUrl(
+        Uri.parse('https://maps.google.com/?q=${pos.lat},${pos.lng}'),
+        mode: LaunchMode.externalApplication,
+      ),
+      child: Container(
+        width: 230,
+        decoration: BoxDecoration(
+          color: isMe ? _kInk : _kWhite,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(isMe ? 18 : 4),
+            bottomRight: Radius.circular(isMe ? 4 : 18),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Aperçu carte statique
+            Stack(
+              children: [
+                Image.network(
+                  mapUrl,
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 140,
+                    color: const Color(0xFFE8EDF2),
+                    child: const Center(
+                      child: Icon(Icons.map_outlined, size: 36, color: Color(0xFF9AA3AE)),
+                    ),
                   ),
                 ),
+                Positioned(
+                  bottom: 6, right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text('Ouvrir', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Label + heure
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on_rounded,
+                      size: 14,
+                      color: isMe ? _kWhite.withValues(alpha: 0.8) : AppColors.primary),
+                  AppGap.w4,
+                  Expanded(
+                    child: Text(
+                      'Position partagée',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isMe ? _kWhite : _kInk,
+                      ),
+                    ),
+                  ),
+                  _TimeStatus(message: message, isMe: isMe),
+                ],
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: trailingColor ?? _kGrayLight,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ChatSheetDivider extends StatelessWidget {
-  const _ChatSheetDivider();
+// ─── Bottom sheet row ─────────────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) => const Divider(
-        height: 1,
-        color: _kBorder,
-        indent: 18,
-        endIndent: 18,
-      );
-}

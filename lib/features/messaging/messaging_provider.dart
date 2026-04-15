@@ -99,7 +99,7 @@ class MessagingProvider extends ChangeNotifier {
     currentMessages = currentMessages
         .where((m) => m.id != tempId)
         .toList()
-      ..add(sent.copyWith(status: MessageStatus.sent));
+      ..add(sent);
     notifyListeners();
 
     // Update conversation last_message
@@ -162,6 +162,10 @@ class MessagingProvider extends ChangeNotifier {
             if (!currentMessages.any((m) => m.id == newMsg.id)) {
               currentMessages = [...currentMessages, newMsg];
               notifyListeners();
+              // Mark as read immediately if it's from the other person
+              if (newMsg.senderId != userId) {
+                _repo.markAsRead(conversationId, userId);
+              }
             }
           },
         )

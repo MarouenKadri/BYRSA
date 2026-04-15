@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../../../features/story/story.dart';
-import '../../../../../features/freelancer/presentation/widgets/home/freelancer_stories_section.dart';
+import '../../../../../features/story/presentation/widgets/stories_section.dart';
+import '../../../../../features/client/presentation/pages/freelancer_profile_view.dart';
 import '../../../../../features/freelancer/presentation/widgets/home/freelancer_category_filter.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
@@ -108,7 +109,20 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: FreelancerStoriesSection(storyGroups: storyGroups),
+              child: StoriesSection(
+                storyGroups: storyGroups,
+                isFreelancer: true,
+                onProfileTap: (group) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FreelancerProfileView(
+                      freelancerId: group.groupId,
+                      freelancerName: group.groupName,
+                      freelancerAvatar: group.avatarUrl,
+                    ),
+                  ),
+                ),
+              ),
             ),
             SliverToBoxAdapter(child: _buildHeader()),
             SliverToBoxAdapter(

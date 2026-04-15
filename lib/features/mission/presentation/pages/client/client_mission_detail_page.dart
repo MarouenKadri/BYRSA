@@ -12,6 +12,7 @@ import '../../../../client/presentation/pages/freelancer_profile_view.dart';
 import '../../../../messaging/presentation/pages/chat_page.dart';
 import 'candidates_page.dart';
 import '../../widgets/detail/client_detail_sections.dart';
+import '../../widgets/shared/mission_shared_widgets.dart';
 import 'create_mission_page.dart';
 import 'mission_validation_page.dart';
 import 'tracking_page.dart';
@@ -98,15 +99,7 @@ class _ClientMissionDetailPageState
               '${mission.candidatesCount} candidat${mission.candidatesCount > 1 ? 's' : ''}',
         ),
         const Spacer(),
-        Text(
-          mission.budget.displayText,
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
-            color: AppColors.ink,
-          ),
-        ),
+        BudgetBadge(budget: mission.budget, large: true),
       ],
     );
   }

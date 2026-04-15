@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/models/user_profile.dart';
+import 'data/utils/service_categories_resolver.dart';
 import 'data/repositories/freelancer_catalog_repository.dart';
 import 'data/repositories/supabase_freelancer_catalog_repository.dart';
 
@@ -57,6 +58,10 @@ class ProfileProvider extends ChangeNotifier {
         'gender': (row['gender'] as String?)?.isNotEmpty == true
             ? row['gender']
             : metadata['gender'],
+        'service_categories': ServiceCategoriesResolver.resolve(
+          rowValue: row['service_categories'],
+          metadataValue: metadata['service_categories'],
+        ),
       };
 
       profile = UserProfile.fromJson(mergedRow);
@@ -96,10 +101,22 @@ class ProfileProvider extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
-      await _supabase
-          .from('profiles')
-          .update(updated.toUpdateJson())
-          .eq('id', userId);
+      final payload = updated.toUpdateJson();
+      try {
+        await _supabase.from('profiles').update(payload).eq('id', userId);
+      } on PostgrestException catch (e) {
+        final missingServiceCategoriesColumn =
+            _isMissingServiceCategoriesColumnError(e) &&
+            payload.containsKey('service_categories');
+        if (!missingServiceCategoriesColumn) rethrow;
+
+        final fallbackPayload = Map<String, dynamic>.from(payload)
+          ..remove('service_categories');
+        await _supabase.from('profiles').update(fallbackPayload).eq('id', userId);
+        await _persistServiceCategoriesInUserMetadata(
+          updated.serviceCategories,
+        );
+      }
       profile = updated;
       return null;
     } catch (e) {
@@ -109,6 +126,34 @@ class ProfileProvider extends ChangeNotifier {
     } finally {
       isSaving = false;
       notifyListeners();
+    }
+  }
+
+  bool _isMissingServiceCategoriesColumnError(PostgrestException e) {
+    final message = '${e.message} ${e.details ?? ''} ${e.hint ?? ''}'
+        .toLowerCase();
+    return e.code == '42703' && message.contains('service_categories');
+  }
+
+  Future<void> _persistServiceCategoriesInUserMetadata(
+    List<String> categories,
+  ) async {
+    final normalized = categories
+        .map((entry) => entry.trim())
+        .where((entry) => entry.isNotEmpty)
+        .toList(growable: false);
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(
+          data: {
+            'service_categories': normalized,
+          },
+        ),
+      );
+    } catch (e) {
+      debugPrint(
+        'persistServiceCategoriesInUserMetadata error: $e',
+      );
     }
   }
 
@@ -135,7 +180,9 @@ class ProfileProvider extends ChangeNotifier {
           final name =
               '${f['first_name'] ?? ''} ${f['last_name'] ?? ''}'.toLowerCase();
           final categories =
-              _readStringList(f['service_categories']).join(' ').toLowerCase();
+              ServiceCategoriesResolver.parse(
+                f['service_categories'],
+              ).join(' ').toLowerCase();
           return name.contains(q) || categories.contains(q);
         }).toList();
       }
@@ -147,7 +194,9 @@ class ProfileProvider extends ChangeNotifier {
             normalizedCategory != 'tous' &&
             normalizedCategory != 'toutes') {
           results = results.where((f) {
-            final categories = _readStringList(f['service_categories']);
+            final categories = ServiceCategoriesResolver.parse(
+              f['service_categories'],
+            );
             if (categories.isEmpty) return false;
             return categories.any(
               (entry) => _normalizeToken(entry) == normalizedCategory,
@@ -216,23 +265,6 @@ class ProfileProvider extends ChangeNotifier {
     profile = null;
     error = null;
     notifyListeners();
-  }
-
-  static List<String> _readStringList(dynamic value) {
-    if (value is List) {
-      return value
-          .map((entry) => '$entry'.trim())
-          .where((entry) => entry.isNotEmpty)
-          .toList();
-    }
-    if (value is String && value.trim().isNotEmpty) {
-      return value
-          .split(',')
-          .map((entry) => entry.trim())
-          .where((entry) => entry.isNotEmpty)
-          .toList();
-    }
-    return const [];
   }
 
   static String _normalizeToken(String raw) {

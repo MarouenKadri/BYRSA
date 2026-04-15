@@ -20,13 +20,21 @@ class ChatMessage {
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, String currentUserId) {
+    final statusStr = json['status'] as String? ?? 'sent';
+    final status = switch (statusStr) {
+      'sending'   => MessageStatus.sending,
+      'delivered' => MessageStatus.delivered,
+      'read'      => MessageStatus.read,
+      'failed'    => MessageStatus.failed,
+      _           => MessageStatus.sent,
+    };
     return ChatMessage(
       id: json['id'] as String,
       conversationId: json['conversation_id'] as String,
       senderId: json['sender_id'] as String,
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      status: json['is_read'] == true ? MessageStatus.read : MessageStatus.delivered,
+      status: status,
     );
   }
 

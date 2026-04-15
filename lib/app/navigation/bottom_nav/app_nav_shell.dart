@@ -69,12 +69,40 @@ class _AppNavShellState extends State<AppNavShell> {
         _setFabExpanded,
         _goToIndex,
       ),
+      floatingActionButtonLocation: widget.config.fabBuilder != null
+          ? const _CenterAlignedNavFabLocation()
+          : FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: MainBottomNav(
         currentIndex: _index,
         onItemSelected: _goToIndex,
         items: widget.config.items,
         badgeCounts: widget.badgeCounts,
+        hasCenterGap: widget.config.fabBuilder != null,
       ),
     );
+  }
+}
+
+/// Places the center action at the same visual level as nav icons.
+class _CenterAlignedNavFabLocation extends FloatingActionButtonLocation {
+  const _CenterAlignedNavFabLocation();
+
+  static const double _iconRowOffset = 8;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry geometry) {
+    final fabX =
+        (geometry.scaffoldSize.width - geometry.floatingActionButtonSize.width) /
+            2;
+
+    final barTop = geometry.bottomNavigationBarTop;
+    final barHeight = geometry.scaffoldSize.height - barTop;
+    final centeredY =
+        barTop + (barHeight - geometry.floatingActionButtonSize.height) / 2;
+    final minY = barTop;
+    final maxY = barTop + barHeight - geometry.floatingActionButtonSize.height;
+    final fabY = (centeredY - _iconRowOffset).clamp(minY, maxY).toDouble();
+
+    return Offset(fabX, fabY);
   }
 }

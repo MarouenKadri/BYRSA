@@ -175,47 +175,91 @@ class InfoChip extends StatelessWidget {
 
 class BudgetBadge extends StatelessWidget {
   final BudgetInfo budget;
+  /// large = true → badge hero dans les pages détail (fontSize 22)
+  /// large = false → badge compact dans les cartes (fontSize 15)
   final bool large;
-  final bool outlined;
 
   const BudgetBadge({
     super.key,
     required this.budget,
     this.large = false,
-    this.outlined = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isQuote = budget.type == BudgetType.quote;
+    final isHourly = budget.type == BudgetType.hourly;
+
+    if (isQuote) {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: large ? 14 : 12,
+          vertical: large ? 9 : 7,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F4F5),
+          borderRadius: BorderRadius.circular(large ? 14 : 10),
+          border: Border.all(color: const Color(0xFFE4E4E7)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.request_quote_outlined,
+                size: large ? 16 : 14, color: const Color(0xFF6F7782)),
+            SizedBox(width: large ? 6 : 5),
+            Text(
+              'Sur devis',
+              style: TextStyle(
+                fontSize: large ? 15 : 13,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF6F7782),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final amount = budget.amount?.toInt() ?? 0;
+    final suffix = isHourly ? '/h' : '';
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: large ? 14 : 12,
-        vertical: large ? 8 : 6,
+        horizontal: large ? 16 : 13,
+        vertical: large ? 10 : 8,
       ),
       decoration: BoxDecoration(
-        color: outlined
-            ? Colors.transparent
-            : context.colors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(
-          large ? AppRadius.button : AppRadius.small,
-        ),
-        border: outlined
-            ? Border.all(
-                color: context.colors.primary.withOpacity(0.3),
-                width: 1,
-              )
-            : null,
+        color: const Color(0xFF101214),
+        borderRadius: BorderRadius.circular(large ? 14 : 12),
+        boxShadow: const [
+          BoxShadow(color: Color(0x22000000), blurRadius: 8, offset: Offset(0, 3)),
+        ],
       ),
-      child: Text(
-        budget.displayText,
-        style: large
-            ? context.text.headlineSmall?.copyWith(
-                color: context.colors.primary,
-              )
-            : context.text.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: context.colors.primary,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(
+            '$amount €',
+            style: TextStyle(
+              fontSize: large ? 22 : 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.4,
+              height: 1,
+            ),
+          ),
+          if (suffix.isNotEmpty)
+            Text(
+              suffix,
+              style: TextStyle(
+                fontSize: large ? 13 : 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.65),
               ),
+            ),
+        ],
       ),
     );
   }
@@ -228,14 +272,7 @@ class BudgetText extends StatelessWidget {
   const BudgetText({super.key, required this.budget, this.large = false});
 
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      budget.displayText,
-      style: large
-          ? context.text.displayMedium?.copyWith(color: context.colors.primary)
-          : context.text.titleLarge?.copyWith(color: context.colors.primary),
-    );
-  }
+  Widget build(BuildContext context) => BudgetBadge(budget: budget, large: large);
 }
 
 // ─── Avatar Utilisateur ───────────────────────────────────────────────────────

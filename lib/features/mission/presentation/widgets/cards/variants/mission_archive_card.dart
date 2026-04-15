@@ -34,11 +34,11 @@ class MissionArchiveCard extends StatelessWidget {
 
     return MissionCardFrame(
       onTap: onTap,
-      radius: 20,
+      radius: MissionCardFrame.radiusSmall,
       color: const Color(0xFFF9F9F9),
       shadows: MissionCardFrame.noShadow,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+        padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -50,21 +50,12 @@ class MissionArchiveCard extends StatelessWidget {
                     mission.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF181B1F),
-                      letterSpacing: -0.1,
-                    ),
+                    style: MissionCardFrame.titleCompactStyle,
                   ),
                   const SizedBox(height: 7),
                   Text(
                     _formatDate(mission.date),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF9AA1A8),
-                    ),
+                    style: MissionCardFrame.metaStyle,
                   ),
                 ],
               ),

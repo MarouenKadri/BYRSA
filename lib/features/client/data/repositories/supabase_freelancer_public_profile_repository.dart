@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/freelancer_public_profile.dart';
 import '../../domain/repositories/freelancer_public_profile_repository.dart';
 import '../../../reviews/data/repositories/supabase_review_repository.dart';
+import '../../../profile/data/utils/service_categories_resolver.dart';
 
 class SupabaseFreelancerPublicProfileRepository
     implements FreelancerPublicProfileRepository {
@@ -26,6 +27,11 @@ class SupabaseFreelancerPublicProfileRepository
           .maybeSingle();
 
       if (row == null) return null;
+
+      final resolvedServiceCategories = ServiceCategoriesResolver.resolve(
+        rowValue: row['service_categories'],
+        metadataValue: _serviceCategoriesFromCurrentUserMetadata(freelancerId),
+      );
 
       final reviews = await _reviewRepository.getReceivedReviews(freelancerId);
       final reviewsCount = _readInt(row['reviews_count']) ?? reviews.length;
@@ -50,7 +56,7 @@ class SupabaseFreelancerPublicProfileRepository
         address: row['address'] as String?,
         hourlyRate: _readDouble(row['hourly_rate']),
         isVerified: row['is_verified'] as bool? ?? false,
-        serviceCategories: _readStringList(row['service_categories']),
+        serviceCategories: resolvedServiceCategories,
         rating: rating,
         reviewsCount: reviewsCount,
         missionsCount: missionsCount,
@@ -118,17 +124,13 @@ class SupabaseFreelancerPublicProfileRepository
     return null;
   }
 
-  static List<String> _readStringList(dynamic value) {
-    if (value is List) {
-      return value.map((item) => '$item').where((item) => item.isNotEmpty).toList();
+  List<String> _serviceCategoriesFromCurrentUserMetadata(String freelancerId) {
+    final currentUser = _supabase.auth.currentUser;
+    if (currentUser == null || currentUser.id != freelancerId) {
+      return const [];
     }
-    if (value is String && value.trim().isNotEmpty) {
-      return value
-          .split(',')
-          .map((item) => item.trim())
-          .where((item) => item.isNotEmpty)
-          .toList();
-    }
-    return const [];
+    final metadata = currentUser.userMetadata;
+    if (metadata == null) return const [];
+    return ServiceCategoriesResolver.parse(metadata['service_categories']);
   }
 }

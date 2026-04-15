@@ -9,6 +9,7 @@ import '../../domain/usecases/get_received_reviews.dart';
 class ReviewProvider extends ChangeNotifier {
   final GetReceivedReviews _getReceivedReviews;
   final GetGivenReviews _getGivenReviews;
+  final SupabaseReviewRepository _reviewRepository = SupabaseReviewRepository();
   final _supabase = Supabase.instance.client;
 
   List<Review> _receivedReviews = [];
@@ -25,12 +26,11 @@ class ReviewProvider extends ChangeNotifier {
             getGivenReviews ?? GetGivenReviews(SupabaseReviewRepository()) {
     _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
-        loadReviews();
+        _reset();
       } else if (data.event == AuthChangeEvent.signedOut) {
         _reset();
       }
     });
-    if (_supabase.auth.currentUser != null) loadReviews();
   }
 
   List<Review> get receivedReviews => List.unmodifiable(_receivedReviews);
@@ -66,6 +66,41 @@ class ReviewProvider extends ChangeNotifier {
       _givenReviews = results[1];
     } catch (e) {
       debugPrint('ReviewProvider loadReviews error: $e');
+      error = 'Impossible de charger les avis';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadReviewsForMode({required bool isFreelancer}) async {
+    final userId = _userId;
+    if (userId == null) {
+      _reset();
+      return;
+    }
+
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final receivedFromType = isFreelancer ? 'client' : 'freelancer';
+      final givenToType = isFreelancer ? 'client' : 'freelancer';
+      final results = await Future.wait([
+        _reviewRepository.getReceivedReviewsByReviewerType(
+          revieweeId: userId,
+          reviewerUserType: receivedFromType,
+        ),
+        _reviewRepository.getGivenReviewsByRevieweeType(
+          reviewerId: userId,
+          revieweeUserType: givenToType,
+        ),
+      ]);
+      _receivedReviews = results[0];
+      _givenReviews = results[1];
+    } catch (e) {
+      debugPrint('ReviewProvider loadReviewsForMode error: $e');
       error = 'Impossible de charger les avis';
     } finally {
       isLoading = false;
