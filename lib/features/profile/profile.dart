@@ -17,11 +17,6 @@ export 'profile_provider.dart';
 // ─── Widgets - Shared ─────────────────────────────────────────────────────────
 export 'presentation/widgets/shared/user_common_widgets.dart';
 
-// ─── Widgets - Client ─────────────────────────────────────────────────────────
-export 'presentation/widgets/client/client_widgets.dart';
-
-// ─── Widgets - Freelancer ─────────────────────────────────────────────────────
-export 'presentation/widgets/freelancer/freelancer_widgets.dart';
 
 // ─── Pages - Shared ───────────────────────────────────────────────────────────
 export 'presentation/pages/shared/account_page.dart';
