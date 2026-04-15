@@ -14,4 +14,5 @@ export 'presentation/widgets/reviews_summary.dart';
 export 'presentation/widgets/reviews_tab.dart';
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
-export 'presentation/pages/my_reviews_page.dart';
+export 'presentation/pages/reviews_page.dart';
+export 'presentation/reviews_view_config.dart';

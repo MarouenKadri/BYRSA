@@ -9,8 +9,8 @@ import '../../../../core/design/app_primitives.dart';
 import '../../../messaging/messaging_provider.dart';
 import '../../../messaging/presentation/pages/chat_page.dart';
 import '../../../profile/presentation/pages/shared/base_profile_view.dart';
+import '../../../story/story.dart';
 import '../providers/freelancer_public_profile_provider.dart';
-import 'freelancer_reviews_page.dart';
 
 export '../../../profile/presentation/pages/shared/base_profile_view.dart'
     show ProfileStatData, VerifiedItemData;
@@ -118,6 +118,22 @@ class _FreelancerProfilePageState
 
   @override
   bool get isLoadingProfile => _profileProvider.isLoading;
+
+  @override
+  String? get profileUserId => widget.freelancerId;
+
+  @override
+  bool get showPublicationsTab => widget.freelancerId != null;
+
+  @override
+  Widget? buildStoriesBar(BuildContext context) {
+    if (widget.freelancerId == null) return null;
+    return _FreelancerStoriesBar(freelancerId: widget.freelancerId!);
+  }
+
+  @override
+  Widget buildPublicationsContent(BuildContext context) =>
+      _FreelancerPublicationsContent(freelancerId: widget.freelancerId!);
 
   int get _missionsCount =>
       _profileProvider.profile?.missionsCount ?? widget.missionsCount;
@@ -413,19 +429,6 @@ class _FreelancerProfilePageState
     );
   }
 
-  @override
-  void openReviews(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FreelancerReviewsPage(
-          freelancerName: profileName,
-          freelancerAvatar: profileAvatar,
-          reviewsCount: profileReviewsCount,
-        ),
-      ),
-    );
-  }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -526,4 +529,201 @@ class _PinTailPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_) => false;
+}
+
+// ── Stories bar (info tab) ────────────────────────────────────────────────────
+
+class _FreelancerStoriesBar extends StatefulWidget {
+  final String freelancerId;
+  const _FreelancerStoriesBar({required this.freelancerId});
+
+  @override
+  State<_FreelancerStoriesBar> createState() => _FreelancerStoriesBarState();
+}
+
+class _FreelancerStoriesBarState extends State<_FreelancerStoriesBar> {
+  final Set<String> _viewed = {};
+
+  void _openViewer(BuildContext context, List<StoryGroup> groups, int index) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => StoryViewerPage(
+          groups: groups,
+          initialIndex: index,
+          onViewed: (id) => setState(() => _viewed.add(id)),
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 200),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final groups = context
+        .watch<StoryProvider>()
+        .storyGroupsForFreelancer(widget.freelancerId);
+
+    if (groups.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 96,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: AppInsets.h12v8,
+        itemCount: groups.length,
+        itemBuilder: (context, i) {
+          final group = groups[i];
+          final viewed = _viewed.contains(group.groupId);
+          return StoryOwnerCircle(
+            categoryId: group.categoryId,
+            label: group.groupName,
+            count: group.stories.length,
+            viewed: viewed,
+            onTap: () => _openViewer(context, groups, i),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ── Publications tab ──────────────────────────────────────────────────────────
+
+class _FreelancerPublicationsContent extends StatefulWidget {
+  final String freelancerId;
+  const _FreelancerPublicationsContent({required this.freelancerId});
+
+  @override
+  State<_FreelancerPublicationsContent> createState() =>
+      _FreelancerPublicationsContentState();
+}
+
+class _FreelancerPublicationsContentState
+    extends State<_FreelancerPublicationsContent> {
+  void _openViewer(
+      BuildContext context, List<StoryGroup> groups, Story story) {
+    final groupIdx = groups.indexWhere((g) => g.stories.contains(story));
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => StoryViewerPage(
+          groups: groups,
+          initialIndex: groupIdx >= 0 ? groupIdx : 0,
+          onViewed: (_) {},
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 200),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<StoryProvider>();
+    final groups = provider.storyGroupsForFreelancer(widget.freelancerId);
+    final stories = groups.expand((g) => g.stories).toList();
+
+    if (provider.isLoading && stories.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (stories.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: context.colors.surfaceAlt,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.auto_stories_rounded,
+                  size: 26, color: context.colors.textSecondary),
+            ),
+            AppGap.h16,
+            Text(
+              'Aucune publication',
+              style: context.text.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            AppGap.h6,
+            Text(
+              "Ce prestataire n'a pas encore publié de contenu.",
+              textAlign: TextAlign.center,
+              style: context.text.bodyMedium?.copyWith(
+                  color: context.colors.textSecondary, height: 1.4),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(2),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
+        childAspectRatio: 1,
+      ),
+      itemCount: stories.length,
+      itemBuilder: (context, i) {
+        final story = stories[i];
+        return GestureDetector(
+          onTap: () => _openViewer(context, groups, story),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              story.imageUrl.isNotEmpty
+                  ? Image.network(
+                      story.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.primaryLight,
+                        child: const Icon(Icons.image_rounded,
+                            color: AppColors.primary),
+                      ),
+                    )
+                  : Container(
+                      color: AppColors.primaryLight,
+                      child: const Icon(Icons.image_rounded,
+                          color: AppColors.primary),
+                    ),
+              if (story.caption.isNotEmpty)
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(5, 0, 5, 4),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: [0, 0.7],
+                        colors: [Colors.black45, Colors.transparent],
+                      ),
+                    ),
+                    child: Text(
+                      story.caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: AppFontSize.tiny),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

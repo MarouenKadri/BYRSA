@@ -7,7 +7,8 @@ import '../../../../../app/enum/user_role.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
 import '../../../../auth/services/image_picker_service.dart';
 import '../freelancer/my_posts_page.dart';
-import '../../../../reviews/presentation/pages/my_reviews_page.dart';
+import '../../../../reviews/presentation/pages/reviews_page.dart';
+import '../../../../reviews/presentation/reviews_view_config.dart';
 import '../../../../story/story.dart';
 import '../../../../mission/data/models/service_category.dart';
 import '../client/client_payment_methods_page.dart';
@@ -115,12 +116,18 @@ class _AccountPageState extends State<AccountPage> {
                   subtitle: isFreelancer
                       ? '112 avis · 4.9 / 5'
                       : '24 avis · 4.7 / 5',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MyReviewsPage(isFreelancer: isFreelancer),
-                    ),
-                  ),
+                  onTap: () {
+                    final userId = context.read<ProfileProvider>().profile?.id;
+                    if (userId == null) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReviewsPage(
+                          config: ReviewsViewConfig.myAccount(userId: userId),
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 if (isFreelancer)
                   _AccountMenuTile(
@@ -840,7 +847,7 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
         itemCount: groups.length + 1,
         itemBuilder: (context, i) {
           if (i == 0) {
-            return _StoryOwnerCircle(
+            return StoryOwnerCircle(
               isAdd: true,
               label: 'Ajouter',
               onTap: () => pickAndOpenComposer(context),
@@ -848,7 +855,7 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
           }
           final group = groups[i - 1];
           final viewed = _viewed.contains(group.groupId);
-          return _StoryOwnerCircle(
+          return StoryOwnerCircle(
             categoryId: group.categoryId,
             label: group.groupName,
             count: group.stories.length,
@@ -986,139 +993,3 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
   }
 }
 
-// ─── Cercle story ─────────────────────────────────────────────────────────────
-
-class _StoryOwnerCircle extends StatelessWidget {
-  final String? categoryId;
-  final String label;
-  final int count;
-  final bool viewed;
-  final bool isAdd;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  const _StoryOwnerCircle({
-    this.categoryId,
-    required this.label,
-    this.count = 0,
-    this.viewed = false,
-    this.isAdd = false,
-    required this.onTap,
-    this.onLongPress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cat = categoryId != null
-        ? ServiceCategory.findById(categoryId!)
-        : null;
-    final accent = cat?.color ?? const Color(0xFFB8C0CC);
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isAdd
-                        ? const Color(0xFFFAFBFC)
-                        : viewed
-                        ? const Color(0xFFF6F8F9)
-                        : Colors.white,
-                    border: Border.all(
-                      color: isAdd
-                          ? const Color(0xFFE3E8EC)
-                          : viewed
-                          ? const Color(0xFFE7ECEF)
-                          : accent.withValues(alpha: 0.42),
-                      width: 1.15,
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(15, 23, 42, 0.04),
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: isAdd
-                      ? const Center(
-                          child: Icon(
-                            Icons.add_rounded,
-                            color: Color(0xFF98A2AD),
-                            size: 21,
-                          ),
-                        )
-                      : Center(
-                          child: Icon(
-                            cat?.icon ?? Icons.photo_library_outlined,
-                            size: 21,
-                            color: viewed
-                                ? const Color(0xFFADB5BE)
-                                : const Color(0xFF5F6B76),
-                          ),
-                        ),
-                ),
-                if (!isAdd && count > 1)
-                  Positioned(
-                    top: -4,
-                    right: -2,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.96),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: accent.withValues(alpha: 0.22),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        '$count',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF66707A),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            AppGap.h6,
-            SizedBox(
-              width: 64,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: viewed
-                      ? const Color(0xFF9BA6B1)
-                      : const Color(0xFF4D5965),
-                  letterSpacing: -0.1,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

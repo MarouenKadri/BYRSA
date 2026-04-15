@@ -11,7 +11,8 @@
       "Bash(sed -n '878,910p' lib/features/profile/presentation/pages/shared/privacy_settings_page.dart)",
       "Bash(grep -n \"input\\\\s*=\" lib/core/design/tokens/app_radius.dart)",
       "Bash(grep -rn \"static.*input\" lib/core/design/tokens/app_radius.dart)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(del \"c:\\\\Users\\\\marou\\\\Downloads\\\\service-home-main\\\\lib\\\\features\\\\client\\\\presentation\\\\pages\\\\freelancer_reviews_page.dart\")"
     ]
   }
 }

@@ -16,21 +16,25 @@ class ReviewProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  /// [autoLoad] = false pour les providers isolés créés par les vues profil.
   ReviewProvider({
     GetReceivedReviews? getReceivedReviews,
     GetGivenReviews? getGivenReviews,
+    bool autoLoad = true,
   })  : _getReceivedReviews = getReceivedReviews ??
             GetReceivedReviews(SupabaseReviewRepository()),
         _getGivenReviews =
             getGivenReviews ?? GetGivenReviews(SupabaseReviewRepository()) {
-    _supabase.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn) {
-        loadReviews();
-      } else if (data.event == AuthChangeEvent.signedOut) {
-        _reset();
-      }
-    });
-    if (_supabase.auth.currentUser != null) loadReviews();
+    if (autoLoad) {
+      _supabase.auth.onAuthStateChange.listen((data) {
+        if (data.event == AuthChangeEvent.signedIn) {
+          loadReviews();
+        } else if (data.event == AuthChangeEvent.signedOut) {
+          _reset();
+        }
+      });
+      if (_supabase.auth.currentUser != null) loadReviews();
+    }
   }
 
   List<Review> get receivedReviews => List.unmodifiable(_receivedReviews);
@@ -46,17 +50,13 @@ class ReviewProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Charge les avis reçus ET donnés de l'utilisateur connecté.
   Future<void> loadReviews() async {
     final userId = _userId;
-    if (userId == null) {
-      _reset();
-      return;
-    }
-
+    if (userId == null) { _reset(); return; }
     isLoading = true;
     error = null;
     notifyListeners();
-
     try {
       final results = await Future.wait([
         _getReceivedReviews(userId),
@@ -66,6 +66,23 @@ class ReviewProvider extends ChangeNotifier {
       _givenReviews = results[1];
     } catch (e) {
       debugPrint('ReviewProvider loadReviews error: $e');
+      error = 'Impossible de charger les avis';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Charge uniquement les avis reçus d'un utilisateur public (vue profil).
+  /// N'affecte pas [givenReviews].
+  Future<void> loadReceivedFor(String userId) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+    try {
+      _receivedReviews = await _getReceivedReviews(userId);
+    } catch (e) {
+      debugPrint('ReviewProvider loadReceivedFor error: $e');
       error = 'Impossible de charger les avis';
     } finally {
       isLoading = false;

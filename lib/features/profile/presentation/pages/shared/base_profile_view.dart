@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
+import '../../../../reviews/presentation/providers/review_provider.dart';
+import '../../../../reviews/presentation/widgets/reviews_summary.dart';
+import '../../../../reviews/presentation/widgets/reviews_tab.dart';
+
+enum _ProfileTab { info, reviews, publications }
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// Data classes
@@ -32,6 +38,7 @@ class VerifiedItemData {
 
 abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   bool isOpeningChat = false;
+  _ProfileTab _activeTab = _ProfileTab.info;
 
   // ── À fournir par la sous-classe ─────────────────────────────────────────
 
@@ -41,6 +48,18 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   int get profileReviewsCount;
   String get profileLevel;
   bool get isLoadingProfile;
+
+  /// ID Supabase du profil affiché — pour charger ses avis reçus.
+  String? get profileUserId;
+
+  /// Affiche le 3ème onglet "Publications" (seulement FreelancerProfileView).
+  bool get showPublicationsTab => false;
+
+  /// Contenu de l'onglet Publications — surchargé par FreelancerProfileView.
+  Widget buildPublicationsContent(BuildContext context) => const SizedBox.shrink();
+
+  /// Barre de stories (cercles catégories) dans l'onglet Information — surchargé par FreelancerProfileView.
+  Widget? buildStoriesBar(BuildContext context) => null;
 
   /// Badge hero haut-droite (tarif chez freelancer, rating chez client)
   Widget buildHeroBadge(BuildContext context);
@@ -56,9 +75,6 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
 
   /// Éléments de la section "Informations vérifiées"
   List<VerifiedItemData> get verifiedItems;
-
-  /// Ouvre la page avis
-  void openReviews(BuildContext context);
 
   /// Construit le ChatPage à ouvrir (params différents selon le rôle)
   Widget buildChatPage(String? conversationId);
@@ -96,6 +112,8 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
     final proposal = buildProposalSection(context);
     final extra = buildExtraSection(context);
 
+    final storiesBar = buildStoriesBar(context);
+
     return Scaffold(
       backgroundColor: context.colors.background,
       bottomNavigationBar: SafeArea(
@@ -116,23 +134,55 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
       body: Column(
         children: [
           _buildProfileHeader(context),
+          // ── Pills toujours visibles ──
+          _buildTabPills(context),
+          // ── Contenu qui switche ──
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTabPills(context),
-                  if (proposal != null) proposal,
-                  _buildProfileMetaSection(context),
-                  _buildVerifiedSection(context),
-                  if (extra != null) extra,
-                  AppGap.h32,
-                ],
-              ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              child: _activeTab == _ProfileTab.publications
+                  ? KeyedSubtree(
+                      key: const ValueKey('publications'),
+                      child: buildPublicationsContent(context),
+                    )
+                  : _activeTab == _ProfileTab.reviews
+                      ? _buildInlineReviews(context)
+                      : SingleChildScrollView(
+                          key: const ValueKey('info'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (proposal != null) proposal,
+                              _buildProfileMetaSection(context),
+                              if (storiesBar != null) storiesBar,
+                              _buildVerifiedSection(context),
+                              if (extra != null) extra,
+                              AppGap.h32,
+                            ],
+                          ),
+                        ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInlineReviews(BuildContext context) {
+    final userId = profileUserId;
+    if (userId == null) {
+      return Center(
+        key: const ValueKey('reviews_empty'),
+        child: Text(
+          'Profil non disponible',
+          style: context.text.bodyMedium?.copyWith(color: context.colors.textSecondary),
+        ),
+      );
+    }
+    return ChangeNotifierProvider(
+      key: ValueKey('reviews_$userId'),
+      create: (_) => ReviewProvider(autoLoad: false)..loadReceivedFor(userId),
+      child: _InlineReviewsContent(userId: userId),
     );
   }
 
@@ -238,25 +288,45 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   // ── Tab pills ─────────────────────────────────────────────────────────────
 
   Widget _buildTabPills(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      child: Row(
-        children: [
-          ProfileTabPill(
-            label: 'Information',
-            icon: Icons.info_outline_rounded,
-            active: true,
-            onTap: () {},
-          ),
-          AppGap.w10,
-          ProfileTabPill(
-            label: '${profileRating.toStringAsFixed(1)} · $profileReviewsCount avis',
-            icon: Icons.star_rounded,
-            active: false,
-            onTap: () => openReviews(context),
-          ),
-        ],
+    final pills = [
+      ProfileTabPill(
+        label: 'Information',
+        icon: Icons.info_outline_rounded,
+        active: _activeTab == _ProfileTab.info,
+        onTap: () => setState(() => _activeTab = _ProfileTab.info),
       ),
+      AppGap.w8,
+      ProfileTabPill(
+        label: '$profileReviewsCount avis · ${profileRating.toStringAsFixed(1)}★',
+        icon: Icons.star_rounded,
+        active: _activeTab == _ProfileTab.reviews,
+        onTap: () => setState(() => _activeTab = _ProfileTab.reviews),
+      ),
+      if (showPublicationsTab) ...[
+        AppGap.w8,
+        ProfileTabPill(
+          label: 'Publications',
+          icon: Icons.photo_library_rounded,
+          active: _activeTab == _ProfileTab.publications,
+          onTap: () => setState(() => _activeTab = _ProfileTab.publications),
+        ),
+      ],
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: pills,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -330,6 +400,46 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Contenu avis inline (provider isolé, scoped au ChangeNotifierProvider parent)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _InlineReviewsContent extends StatelessWidget {
+  final String userId;
+  const _InlineReviewsContent({required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ReviewProvider>();
+    final reviews = provider.receivedReviews;
+
+    if (provider.isLoading && reviews.isEmpty) {
+      return const Center(
+        key: ValueKey('reviews_loading'),
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return Column(
+      key: const ValueKey('reviews'),
+      children: [
+        ReviewsSummary(reviews: reviews),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () =>
+                context.read<ReviewProvider>().loadReceivedFor(userId),
+            child: ReviewsTab(
+              reviews: reviews,
+              emptyLabel: 'Aucun avis pour le moment',
+              isReceived: true,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
