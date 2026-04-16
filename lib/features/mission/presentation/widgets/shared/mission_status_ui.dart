@@ -46,12 +46,13 @@ class MissionStatusUi {
                 status == MissionStatus.inProgress ||
                 status == MissionStatus.completionRequested ||
                 status == MissionStatus.completed ||
-                status == MissionStatus.waitingPayment;
+                status == MissionStatus.paymentHeld ||
+                status == MissionStatus.awaitingRelease;
           case MissionUiTab.archived:
             return status == MissionStatus.closed ||
                 status == MissionStatus.cancelled ||
                 status == MissionStatus.expired ||
-                status == MissionStatus.dispute;
+                status == MissionStatus.inDispute;
           case MissionUiTab.applied:
             return false;
         }
@@ -67,12 +68,13 @@ class MissionStatusUi {
                 status == MissionStatus.inProgress ||
                 status == MissionStatus.completionRequested ||
                 status == MissionStatus.completed ||
-                status == MissionStatus.waitingPayment;
+                status == MissionStatus.paymentHeld ||
+                status == MissionStatus.awaitingRelease;
           case MissionUiTab.archived:
             return status == MissionStatus.closed ||
                 status == MissionStatus.cancelled ||
                 status == MissionStatus.expired ||
-                status == MissionStatus.dispute;
+                status == MissionStatus.inDispute;
           case MissionUiTab.published:
             return false;
         }
@@ -103,10 +105,11 @@ class MissionStatusUi {
           MissionStatus.inProgress => 'En cours',
           MissionStatus.completionRequested => 'Validation requise',
           MissionStatus.completed => 'Terminee',
-          MissionStatus.waitingPayment => 'Terminee',
+          MissionStatus.paymentHeld => 'Paiement securise',
+          MissionStatus.awaitingRelease => 'Paiement securise',
           MissionStatus.closed => 'Terminee',
           MissionStatus.cancelled => 'Annulee',
-          MissionStatus.dispute => 'Annulee',
+          MissionStatus.inDispute => 'Litige',
           MissionStatus.expired => 'Annulee',
         };
       case MissionUiRole.freelancer:
@@ -120,10 +123,11 @@ class MissionStatusUi {
           MissionStatus.inProgress => 'En cours',
           MissionStatus.completionRequested => 'Validation client',
           MissionStatus.completed => 'Paiement en attente',
-          MissionStatus.waitingPayment => 'Paiement en attente',
+          MissionStatus.paymentHeld => 'Paiement en attente',
+          MissionStatus.awaitingRelease => 'Versement sous 24h',
           MissionStatus.closed => 'Terminee',
           MissionStatus.cancelled => 'Annulee',
-          MissionStatus.dispute => 'Annulee',
+          MissionStatus.inDispute => 'Litige en cours',
           MissionStatus.expired => 'Annulee',
         };
     }

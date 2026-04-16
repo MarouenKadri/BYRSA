@@ -8,35 +8,76 @@ import 'client_payment_history_page.dart';
 /// 💳 Inkern - Mon Portefeuille (Client)
 /// ─────────────────────────────────────────────────────────────
 class ClientWalletPage extends StatelessWidget {
-  const ClientWalletPage({super.key});
+  final bool embedded;
+
+  const ClientWalletPage({
+    super.key,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final content = _buildContent(context);
+
+    if (embedded) {
+      return content;
+    }
+
     return Scaffold(
       backgroundColor: context.colors.background,
-      body: CustomScrollView(
-        slivers: [
-          AppHeroSliverBar(
-            gradientColors: const [AppColors.blueAction, AppColors.blueDark],
-            expandedHeight: 220,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.history_rounded, color: Colors.white),
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const ClientPaymentHistoryPage())),
-              ),
-            ],
-            body: _WalletBalanceBody(),
-          ),
-          SliverToBoxAdapter(child: _buildQuickActions(context)),
-          SliverToBoxAdapter(child: _buildRecentPayments(context)),
-          const SliverToBoxAdapter(child: AppGap.h32),
-        ],
-      ),
+      body: content,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        AppHeroSliverBar(
+          gradientColors: const [AppColors.blueAction, AppColors.blueDark],
+          expandedHeight: 220,
+          leadingBack: embedded ? const SizedBox.shrink() : null,
+          actions: embedded
+              ? null
+              : [
+                  IconButton(
+                    icon: const Icon(Icons.history_rounded, color: Colors.white),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ClientPaymentHistoryPage(),
+                      ),
+                    ),
+                  ),
+                ],
+          body: _WalletBalanceBody(),
+        ),
+        SliverToBoxAdapter(child: _buildQuickActions(context)),
+        SliverToBoxAdapter(child: _buildPendingPayments(context)),
+        SliverToBoxAdapter(child: _buildRecentPayments(context)),
+        const SliverToBoxAdapter(child: AppGap.h32),
+      ],
     );
   }
 
   Widget _buildQuickActions(BuildContext context) {
+    if (embedded) {
+      return Padding(
+        padding: AppInsets.a16,
+        child: Row(
+          children: [
+            Expanded(
+              child: AppQuickActionCard(
+                icon: Icons.add_rounded,
+                label: 'Ajouter',
+                color: AppColors.blueAction,
+                onTap: () => _showAddFundsSheet(context),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: AppInsets.a16,
       child: Row(
@@ -74,6 +115,100 @@ class ClientWalletPage extends StatelessWidget {
     );
   }
 
+  Widget _buildPendingPayments(BuildContext context) {
+    final pending = [
+      _PendingPayment(title: 'Création logo',      amount: '100,00 €', hoursLeft: 14),
+      _PendingPayment(title: 'Réparation plomberie', amount: '65,00 €', hoursLeft: 6),
+    ];
+
+    return Padding(
+      padding: AppInsets.h16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lock_clock_rounded, size: 18, color: Colors.orange),
+              AppGap.w8,
+              Text(
+                'Paiements en cours',
+                style: context.text.titleMedium?.copyWith(
+                  fontSize: AppFontSize.xl,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          AppGap.h4,
+          Text(
+            'Les fonds sont sécurisés et seront versés au prestataire après confirmation.',
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          AppGap.h10,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.25)),
+            ),
+            child: Column(
+              children: List.generate(pending.length, (i) => Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.lock_clock_rounded, color: Colors.orange, size: 22),
+                        ),
+                        AppGap.w14,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                pending[i].title,
+                                style: context.text.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: context.colors.textPrimary,
+                                ),
+                              ),
+                              AppGap.h2,
+                              Text(
+                                '${pending[i].amount} sécurisés · confirmation dans ${pending[i].hoursLeft}h',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (i < pending.length - 1)
+                    Divider(height: 1, indent: 72, color: Colors.orange.withValues(alpha: 0.15)),
+                ],
+              )),
+            ),
+          ),
+          AppGap.h20,
+        ],
+      ),
+    );
+  }
+
   Widget _buildRecentPayments(BuildContext context) {
     final payments = [
       _Payment(title: 'Ménage appartement', subtitle: 'Thomas R.', amount: '-55,00 €', date: "Aujourd'hui"),
@@ -102,8 +237,14 @@ class ClientWalletPage extends StatelessWidget {
               AppButton(
                 label: 'Voir tout',
                 variant: ButtonVariant.ghost,
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const ClientPaymentHistoryPage())),
+                onPressed: embedded
+                    ? null
+                    : () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ClientPaymentHistoryPage(),
+                          ),
+                        ),
               ),
             ],
           ),
@@ -287,7 +428,7 @@ class _AddFundsSheet extends StatelessWidget {
   }
 }
 
-// ─── Modèle local ────────────────────────────────────────────────────────────
+// ─── Modèles locaux ───────────────────────────────────────────────────────────
 
 class _Payment {
   final String title, subtitle, amount, date;
@@ -296,5 +437,15 @@ class _Payment {
     required this.subtitle,
     required this.amount,
     required this.date,
+  });
+}
+
+class _PendingPayment {
+  final String title, amount;
+  final int hoursLeft;
+  const _PendingPayment({
+    required this.title,
+    required this.amount,
+    required this.hoursLeft,
   });
 }

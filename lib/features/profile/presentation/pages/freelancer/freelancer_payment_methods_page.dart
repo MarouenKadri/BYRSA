@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
+import '../shared/payment_history_page.dart';
+import '../shared/wallet_page.dart';
 import '../../widgets/shared/user_common_widgets.dart';
+import '../../widgets/shared/payment_common_widgets.dart';
 
 class FreelancerPaymentMethodsPage extends StatefulWidget {
   const FreelancerPaymentMethodsPage({super.key});
@@ -13,19 +17,18 @@ class FreelancerPaymentMethodsPage extends StatefulWidget {
 
 class _FreelancerPaymentMethodsPageState
     extends State<FreelancerPaymentMethodsPage> {
-  double _minPayout = 20;
-  bool _autoPayoutEnabled = false;
+  int _selectedTabIndex = 0;
 
   void _showIbanOptions(BuildContext context) {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
       child: AppActionSheet(
-        title: 'Compte bancaire',
+        title: 'Compte de virement SEPA',
         children: [
           AppActionSheetItem(
             icon: Icons.edit_outlined,
-            title: 'Modifier l\'IBAN',
+            title: 'Modifier l\'IBAN SEPA',
             onTap: () {
               Navigator.pop(context);
               _showEditIbanSheet(context);
@@ -41,9 +44,9 @@ class _FreelancerPaymentMethodsPageState
               showAppBottomSheet(
                 context: context,
                 wrapWithSurface: false,
-                child: _DeleteConfirmSheet(
+                child: PaymentDeleteConfirmSheet(
                   title: 'Supprimer le compte ?',
-                  subtitle: 'Le compte FR76 •••• 1234 sera supprimé définitivement.',
+                  subtitle: 'Le compte SEPA FR76 •••• 1234 sera supprimé définitivement.',
                   onConfirm: () {},
                 ),
               );
@@ -62,157 +65,25 @@ class _FreelancerPaymentMethodsPageState
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
         titleWidget: Text('Moyens de paiement', style: context.profilePageTitleStyle),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      body: Column(
         children: [
-
-          // ─── Statut paiements ──────────────────────────────────────────────
-          _StatusBanner(),
-          AppGap.h24,
-
-          // ─── Compte IBAN ───────────────────────────────────────────────────
-          Text('COMPTE BANCAIRE', style: _sectionStyle(context)),
-          AppGap.h10,
-          _IbanCard(onTap: () => _showIbanOptions(context)),
-          AppGap.h10,
-          _AddButton(
-            label: 'Ajouter un compte bancaire',
-            onTap: () => _showAddIbanSheet(context),
+          const SizedBox(height: 6),
+          AppSegmentedTabBar(
+            selectedIndex: _selectedTabIndex,
+            onChanged: (index) => setState(() => _selectedTabIndex = index),
+            tabs: const [
+              AppSegmentedTab(label: 'Moyens'),
+              AppSegmentedTab(label: 'Historique'),
+              AppSegmentedTab(label: 'Portefeuille'),
+            ],
           ),
-
-          AppGap.h28,
-
-          // ─── Préférences ───────────────────────────────────────────────────
-          Text('PRÉFÉRENCES DE VIREMENT', style: _sectionStyle(context)),
-          AppGap.h10,
-          Container(
-            decoration: BoxDecoration(
-              color: context.colors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.colors.divider),
-            ),
-            child: Column(
+          Expanded(
+            child: IndexedStack(
+              index: _selectedTabIndex,
               children: [
-                // Auto virement
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: context.colors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.autorenew_rounded, size: 20, color: context.colors.textSecondary),
-                      ),
-                      AppGap.w14,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Virement automatique',
-                                style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Chaque semaine si solde ≥ seuil',
-                                style: context.text.bodySmall?.copyWith(color: context.colors.textSecondary)),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _autoPayoutEnabled,
-                        onChanged: (v) => setState(() => _autoPayoutEnabled = v),
-                        activeColor: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(height: 1, indent: 16, color: context.colors.divider),
-                // Seuil
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: context.colors.surfaceAlt,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(Icons.tune_rounded, size: 20, color: context.colors.textSecondary),
-                          ),
-                          AppGap.w14,
-                          Expanded(
-                            child: Text('Seuil minimum de retrait',
-                                style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                          ),
-                          Text(
-                            '${_minPayout.toInt()} €',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppGap.h10,
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 3,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
-                        ),
-                        child: Slider(
-                          value: _minPayout,
-                          min: 10,
-                          max: 200,
-                          divisions: 19,
-                          activeColor: context.colors.primary,
-                          inactiveColor: context.colors.divider,
-                          onChanged: (v) => setState(() => _minPayout = v),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('10 €', style: context.text.labelSmall?.copyWith(color: context.colors.textTertiary)),
-                          Text('200 €', style: context.text.labelSmall?.copyWith(color: context.colors.textTertiary)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          AppGap.h28,
-
-          // ─── Info fiscale ──────────────────────────────────────────────────
-          Container(
-            padding: AppInsets.a16,
-            decoration: BoxDecoration(
-              color: context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.info_outline_rounded, size: 18, color: context.colors.textTertiary),
-                AppGap.w12,
-                Expanded(
-                  child: Text(
-                    'Les virements peuvent être soumis à déclaration fiscale. Conservez vos relevés pour votre déclaration de revenus.',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.55,
-                    ),
-                  ),
-                ),
+                _buildMethodsContent(context),
+                const PaymentHistoryPage(embedded: true),
+                const WalletPage(embedded: true),
               ],
             ),
           ),
@@ -221,19 +92,63 @@ class _FreelancerPaymentMethodsPageState
     );
   }
 
-  TextStyle _sectionStyle(BuildContext context) =>
-      context.text.labelSmall!.copyWith(
-        color: context.colors.textTertiary,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.8,
-      );
+  Widget _buildMethodsContent(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      children: [
+
+        // ─── Dashboard solde ───────────────────────────────────────────────
+        _BalanceDashboard(),
+        AppGap.h20,
+
+        // ─── Nouveau paiement en attente ───────────────────────────────────
+        _PendingPaymentBanner(),
+        AppGap.h24,
+
+        // ─── Compte de virement SEPA ──────────────────────────────────────
+        const PaymentSectionLabel('COMPTE DE VIREMENT SEPA'),
+        AppGap.h12,
+        _SepaPayoutAccountCard(onTap: () => _showIbanOptions(context)),
+        AppGap.h10,
+        PaymentAddButton(
+          label: 'Ajouter un IBAN SEPA',
+          onTap: () => _showAddIbanSheet(context),
+        ),
+
+        AppGap.h28,
+
+        // ─── Info versement automatique ────────────────────────────────────
+        PaymentInfoNote(
+          icon: Icons.autorenew_rounded,
+          body: 'Le versement est automatique 24h après chaque livraison validée. Aucune action requise de votre part.',
+        ),
+
+        AppGap.h12,
+
+        // ─── Pourquoi SEPA ────────────────────────────────────────────────
+        PaymentInfoNote(
+          icon: Icons.account_balance_rounded,
+          title: 'IBAN SEPA pour les payouts marketplace',
+          body: 'En France et en Europe, le virement SEPA est généralement moins coûteux en frais, plus fiable pour les payouts, et mieux adapté aux montants élevés. Compatible avec les flux Stripe, PayPal et MangoPay.',
+        ),
+
+        AppGap.h12,
+
+        // ─── Info fiscale ──────────────────────────────────────────────────
+        PaymentInfoNote(
+          icon: Icons.info_outline_rounded,
+          body: 'Les virements peuvent être soumis à déclaration fiscale. Conservez vos relevés pour votre déclaration de revenus.',
+        ),
+      ],
+    );
+  }
 
   void _showAddIbanSheet(BuildContext context) {
     showAppBottomSheet(
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      child: _IbanSheet(isEdit: false),
+      child: const _IbanSheet(isEdit: false),
     );
   }
 
@@ -242,47 +157,125 @@ class _FreelancerPaymentMethodsPageState
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      child: _IbanSheet(isEdit: true),
+      child: const _IbanSheet(isEdit: true),
     );
   }
 }
 
-// ─── Bannière statut ──────────────────────────────────────────────────────────
+// ─── Dashboard solde ──────────────────────────────────────────────────────────
 
-class _StatusBanner extends StatelessWidget {
+class _BalanceDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.success.withValues(alpha: 0.12), AppColors.success.withValues(alpha: 0.04)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
+          colors: [AppColors.primary, AppColors.primary.withGreen(200)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Solde disponible',
+              style: const TextStyle(fontSize: 13, color: Colors.white70, fontWeight: FontWeight.w500)),
+          AppGap.h4,
+          Text('145,50 €',
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),
+          AppGap.h16,
+          Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+          AppGap.h16,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                const Icon(Icons.lock_clock_rounded, size: 15, color: Colors.white70),
+                AppGap.w6,
+                const Text('En attente',
+                    style: TextStyle(fontSize: 13, color: Colors.white70, fontWeight: FontWeight.w500)),
+              ]),
+              const Text('100,00 €',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+            ],
+          ),
+          AppGap.h6,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(Icons.schedule_rounded, size: 13, color: Colors.white54),
+              AppGap.w4,
+              const Text('Versement prévu dans 18h',
+                  style: TextStyle(fontSize: 12, color: Colors.white54)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Bannière paiement en attente (sobre) ─────────────────────────────────────
+
+class _PendingPaymentBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceAlt,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+              color: AppColors.warning.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.check_rounded, color: AppColors.success, size: 22),
+            child: Icon(Icons.lock_clock_rounded, color: AppColors.warning, size: 18),
           ),
-          AppGap.w14,
+          AppGap.w12,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Compte actif', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.success)),
-                Text('Virements activés · délai 2–3 jours',
-                    style: context.text.bodySmall?.copyWith(color: AppColors.success.withValues(alpha: 0.75))),
+                Text(
+                  'Paiement sécurisé — Création logo',
+                  style: context.text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+                AppGap.h2,
+                Text(
+                  'Versement automatique dans 18h',
+                  style: context.text.labelSmall?.copyWith(
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
+            ),
+          ),
+          AppGap.w8,
+          Text(
+            '100,00 €',
+            style: context.text.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: context.colors.textPrimary,
             ),
           ),
         ],
@@ -291,11 +284,11 @@ class _StatusBanner extends StatelessWidget {
   }
 }
 
-// ─── Carte IBAN ───────────────────────────────────────────────────────────────
+// ─── Bloc compte SEPA (minimal) ───────────────────────────────────────────────
 
-class _IbanCard extends StatelessWidget {
+class _SepaPayoutAccountCard extends StatelessWidget {
   final VoidCallback onTap;
-  const _IbanCard({required this.onTap});
+  const _SepaPayoutAccountCard({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -306,111 +299,110 @@ class _IbanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+          border: Border.all(color: context.colors.border),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.account_balance_rounded, color: AppColors.success, size: 22),
-            ),
-            AppGap.w14,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Text('Compte principal',
-                        style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    AppGap.w8,
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
+            Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.account_balance_rounded,
+                    size: 18,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                AppGap.w10,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'IBAN SEPA',
+                        style: context.text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.textPrimary,
+                        ),
                       ),
-                      child: Text('Vérifié',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                      Text(
+                        'France + Europe',
+                        style: context.text.labelSmall?.copyWith(
+                          color: context.colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+                  ),
+                  child: Text(
+                    'Actif',
+                    style: context.text.labelSmall?.copyWith(
+                      color: AppColors.success,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ]),
-                  AppGap.h3,
-                  Text('FR76 •••• •••• •••• 1234',
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.colors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1,
-                      )),
-                  Text('BNP Paribas · Jean Dupont',
-                      style: context.text.labelSmall?.copyWith(color: context.colors.textTertiary)),
-                ],
+                  ),
+                ),
+              ],
+            ),
+            AppGap.h14,
+            Text(
+              'FR76 •••• •••• •••• 1234',
+              style: context.text.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.colors.textPrimary,
+                letterSpacing: 1.4,
               ),
             ),
-            Icon(Icons.more_vert_rounded, color: context.colors.textTertiary, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Bouton ajouter ───────────────────────────────────────────────────────────
-
-class _AddButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _AddButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.colors.border, width: 1.5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_rounded, size: 20, color: context.colors.primary),
-            AppGap.w8,
-            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.colors.primary)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Sheet row ────────────────────────────────────────────────────────────────
-
-class _SheetRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  const _SheetRow({required this.icon, required this.label, required this.onTap, this.isDestructive = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final color     = isDestructive ? const Color(0xFFE57373) : AppColors.snow;
-    final iconColor = isDestructive ? const Color(0xFFE57373) : const Color(0xFFD5DADE);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        child: Row(
-          children: [
-            Icon(icon, size: 21, color: iconColor),
-            AppGap.w14,
-            Expanded(child: Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: color))),
+            AppGap.h12,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Titulaire: Jean Dupont',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                ),
+                AppGap.w8,
+                Text(
+                  'BIC: BNPAFRPP',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.colors.textTertiary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            AppGap.h8,
+            Text(
+              'Utilisé pour les payouts marketplace (Stripe, PayPal, MangoPay).',
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.textTertiary,
+              ),
+            ),
+            AppGap.h8,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Icon(
+                Icons.more_horiz_rounded,
+                size: 18,
+                color: context.colors.textSecondary,
+              ),
+            ),
           ],
         ),
       ),
@@ -429,11 +421,11 @@ class _IbanSheet extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: AppFormSheet(
-        title: isEdit ? 'Modifier l\'IBAN' : 'Ajouter un compte',
+        title: isEdit ? 'Modifier l\'IBAN SEPA' : 'Ajouter un IBAN SEPA',
         footer: Column(
           children: [
             ProfileSheetPrimaryAction(
-              label: isEdit ? 'Enregistrer' : 'Ajouter',
+              label: isEdit ? 'Enregistrer' : 'Ajouter l\'IBAN',
               onPressed: () => Navigator.pop(context),
             ),
             AppGap.h12,
@@ -449,20 +441,20 @@ class _IbanSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _ShadowField(child: TextFormField(
+            PaymentShadowField(child: TextFormField(
               style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
               decoration: AppInputDecorations.profileField(context,
-                hintText: 'IBAN',
+                hintText: 'IBAN (FR76...)',
                 prefixIcon: const Icon(Icons.account_balance_rounded, size: 16, color: Color(0xFFB0BAC4)),
               ),
             )),
             AppGap.h16,
-            _ShadowField(child: TextFormField(
+            PaymentShadowField(child: TextFormField(
               style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
-              decoration: AppInputDecorations.profileField(context, hintText: 'BIC / SWIFT'),
+              decoration: AppInputDecorations.profileField(context, hintText: 'BIC / SWIFT (optionnel)'),
             )),
             AppGap.h16,
-            _ShadowField(child: TextFormField(
+            PaymentShadowField(child: TextFormField(
               style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
               decoration: AppInputDecorations.profileField(context,
                 hintText: 'Titulaire du compte',
@@ -472,91 +464,6 @@ class _IbanSheet extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ─── Confirmation suppression ─────────────────────────────────────────────────
-
-class _DeleteConfirmSheet extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback onConfirm;
-
-  const _DeleteConfirmSheet({required this.title, required this.subtitle, required this.onConfirm});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppFormSheet(
-      title: title,
-      footer: Column(
-        children: [
-          AppButton(
-            label: 'Supprimer',
-            variant: ButtonVariant.destructive,
-            onPressed: () {
-              Navigator.pop(context);
-              onConfirm();
-            },
-          ),
-          AppGap.h12,
-          Center(
-            child: ProfileSheetSecondaryAction(
-              label: 'Annuler',
-              onTap: () => Navigator.pop(context),
-            ),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 28),
-            ),
-          ),
-          AppGap.h16,
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: context.text.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShadowField extends StatelessWidget {
-  final Widget child;
-  const _ShadowField({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

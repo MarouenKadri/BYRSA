@@ -227,7 +227,7 @@ class _MissionValidationPageState extends State<MissionValidationPage> {
         final missionProvider = context.read<MissionProvider>();
         final notifProvider = context.read<NotificationProvider>();
 
-        missionProvider.updateMissionStatus(widget.mission.id, MissionStatus.dispute);
+        missionProvider.updateMissionStatus(widget.mission.id, MissionStatus.inDispute);
 
         notifProvider.addNotification(AppNotification(
           id: DateTime.now().millisecondsSinceEpoch.toString(),

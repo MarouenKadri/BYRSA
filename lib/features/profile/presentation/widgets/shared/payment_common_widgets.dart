@@ -1,0 +1,384 @@
+import 'package:flutter/material.dart';
+import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/design/app_primitives.dart';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Composants partagés — Paiements (Client & Freelancer)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── Champ avec ombre ────────────────────────────────────────────────────────
+
+class PaymentShadowField extends StatelessWidget {
+  final Widget child;
+  const PaymentShadowField({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+// ─── Bouton "Ajouter" unifié ──────────────────────────────────────────────────
+
+class PaymentAddButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const PaymentAddButton({super.key, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.colors.border, width: 1.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_rounded, size: 18, color: context.colors.textSecondary),
+            AppGap.w8,
+            Text(
+              label,
+              style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Titre de section (small caps) ───────────────────────────────────────────
+
+class PaymentSectionLabel extends StatelessWidget {
+  final String label;
+  const PaymentSectionLabel(this.label, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: context.text.labelSmall?.copyWith(
+        color: context.colors.textTertiary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.9,
+      ),
+    );
+  }
+}
+
+// ─── Note d'information sobre ─────────────────────────────────────────────────
+
+class PaymentInfoNote extends StatelessWidget {
+  final IconData icon;
+  final String body;
+  final String? title;
+
+  const PaymentInfoNote({
+    super.key,
+    required this.icon,
+    required this.body,
+    this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceAlt,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: context.colors.textTertiary),
+          AppGap.w10,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title != null) ...[
+                  Text(
+                    title!,
+                    style: context.text.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                  AppGap.h3,
+                ],
+                Text(
+                  body,
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.colors.textTertiary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Sheet confirmation suppression ──────────────────────────────────────────
+
+class PaymentDeleteConfirmSheet extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onConfirm;
+
+  const PaymentDeleteConfirmSheet({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.onConfirm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppFormSheet(
+      title: title,
+      footer: Column(
+        children: [
+          AppButton(
+            label: 'Supprimer',
+            variant: ButtonVariant.destructive,
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+          ),
+          AppGap.h12,
+          Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Text(
+                'Annuler',
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.colors.textTertiary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete_outline_rounded,
+                  color: AppColors.error, size: 26),
+            ),
+          ),
+          AppGap.h14,
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Tuile de transaction (partagée historique client & freelancer) ───────────
+
+class PaymentTxTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String amount;
+  final bool isPositive;
+  final String? badge;
+  final Color? badgeColor;
+  final VoidCallback? onTap;
+
+  const PaymentTxTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.amount,
+    required this.isPositive,
+    this.badge,
+    this.badgeColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            // ─── Icône ───
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.colors.surfaceAlt,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, size: 18, color: context.colors.textSecondary),
+            ),
+            AppGap.w14,
+            // ─── Titre + sous-titre ───
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  AppGap.h2,
+                  Text(
+                    subtitle,
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textTertiary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            AppGap.w12,
+            // ─── Montant + badge ───
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amount,
+                  style: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: isPositive
+                        ? AppColors.primary
+                        : context.colors.textPrimary,
+                  ),
+                ),
+                if (badge != null) ...[
+                  AppGap.h3,
+                  Text(
+                    badge!,
+                    style: context.text.labelSmall?.copyWith(
+                      color: badgeColor ?? context.colors.textTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Pills de filtre (Tout / Revenus / ...) ───────────────────────────────────
+
+class PaymentFilterPills extends StatelessWidget {
+  final List<String> filters;
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const PaymentFilterPills({
+    super.key,
+    required this.filters,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 34,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: filters.length,
+        separatorBuilder: (_, __) => AppGap.w8,
+        itemBuilder: (context, i) {
+          final f = filters[i];
+          final active = f == selected;
+          return GestureDetector(
+            onTap: () => onChanged(f),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: active
+                    ? context.colors.textPrimary
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: active
+                      ? context.colors.textPrimary
+                      : context.colors.border,
+                  width: 1.2,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                f,
+                style: context.text.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: active
+                      ? context.colors.background
+                      : context.colors.textSecondary,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

@@ -3,60 +3,80 @@ import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 
 class WalletPage extends StatelessWidget {
-  const WalletPage({super.key});
+  final bool embedded;
+
+  const WalletPage({
+    super.key,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final content = _buildContent(context);
+
+    if (embedded) {
+      return content;
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: context.colors.background,
-      body: CustomScrollView(
-        slivers: [
-          // ─── AppBar avec solde ───
-          SliverAppBar(
-            expandedHeight: 220,
-            pinned: true,
-            backgroundColor: AppColors.primary,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.history_rounded, color: Colors.white),
-                onPressed: () {},
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildBalanceHeader(context),
-            ),
-          ),
+      body: content,
+    );
+  }
 
-          // ─── Actions rapides ───
-          SliverToBoxAdapter(
-            child: _buildQuickActions(context),
+  Widget _buildContent(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        // ─── AppBar avec solde ───
+        SliverAppBar(
+          expandedHeight: 220,
+          pinned: true,
+          automaticallyImplyLeading: false,
+          backgroundColor: AppColors.primary,
+          leading: embedded
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+          actions: embedded
+              ? null
+              : [
+                  IconButton(
+                    icon: const Icon(Icons.history_rounded, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                ],
+          flexibleSpace: FlexibleSpaceBar(
+            background: _buildBalanceHeader(context),
           ),
+        ),
 
-          // ─── Transactions récentes ───
-          SliverToBoxAdapter(
-            child: _buildTransactionsSection(context),
-          ),
+        // ─── Actions rapides ───
+        SliverToBoxAdapter(
+          child: _buildQuickActions(context),
+        ),
 
-          // ─── Moyens de paiement ───
-          SliverToBoxAdapter(
-            child: _buildPaymentMethods(context),
-          ),
+        // ─── Transactions récentes ───
+        SliverToBoxAdapter(
+          child: _buildTransactionsSection(context),
+        ),
 
-          // ─── Coordonnées bancaires ───
-          SliverToBoxAdapter(
-            child: _buildBankDetails(context),
-          ),
+        // ─── Moyens de paiement ───
+        SliverToBoxAdapter(
+          child: _buildPaymentMethods(context),
+        ),
 
-          const SliverToBoxAdapter(
-            child: AppGap.h32,
-          ),
-        ],
-      ),
+        // ─── Coordonnées bancaires ───
+        SliverToBoxAdapter(
+          child: _buildBankDetails(context),
+        ),
+
+        const SliverToBoxAdapter(
+          child: AppGap.h32,
+        ),
+      ],
     );
   }
 
@@ -78,7 +98,8 @@ class WalletPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AppGap.h20,
+              AppGap.h16,
+              // ─── Solde disponible ───
               Text(
                 'Solde disponible',
                 style: context.profileSecondaryLabelStyle.copyWith(
@@ -86,14 +107,61 @@ class WalletPage extends StatelessWidget {
                   fontSize: AppFontSize.base,
                 ),
               ),
-              AppGap.h8,
+              AppGap.h6,
               Text(
-                '245,50 €',
+                '145,50 €',
                 style: context.profilePageTitleStyle.copyWith(
                   fontSize: AppFontSize.d5,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
+              ),
+              AppGap.h16,
+              // ─── Séparateur ───
+              Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+              AppGap.h16,
+              // ─── Solde en attente ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lock_clock_rounded, size: 16, color: Colors.white70),
+                      AppGap.w8,
+                      Text(
+                        'En attente de versement',
+                        style: context.profileSecondaryLabelStyle.copyWith(
+                          color: Colors.white70,
+                          fontSize: AppFontSize.base,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '100,00 €',
+                    style: context.profilePageTitleStyle.copyWith(
+                      fontSize: AppFontSize.xl,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              AppGap.h6,
+              // ─── Versement prévu ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(Icons.schedule_rounded, size: 13, color: Colors.white54),
+                  AppGap.w4,
+                  Text(
+                    'Versement prévu dans 18h',
+                    style: context.profileSecondaryLabelStyle.copyWith(
+                      color: Colors.white54,
+                      fontSize: AppFontSize.sm,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -118,18 +186,9 @@ class WalletPage extends StatelessWidget {
           AppGap.w12,
           Expanded(
             child: AppQuickActionCard(
-              icon: Icons.add_rounded,
-              label: 'Ajouter',
+              icon: Icons.history_rounded,
+              label: 'Historique',
               color: AppColors.info,
-              onTap: () => _showAddFundsSheet(context),
-            ),
-          ),
-          AppGap.w12,
-          Expanded(
-            child: AppQuickActionCard(
-              icon: Icons.send_rounded,
-              label: 'Envoyer',
-              color: Colors.orange,
               onTap: () {},
             ),
           ),
@@ -139,27 +198,37 @@ class WalletPage extends StatelessWidget {
   }
 
   Widget _buildTransactionsSection(BuildContext context) {
-    final transactions = [
+    final pendingTransactions = [
+      _Transaction(
+        title: 'Mission : Réparation plomberie',
+        subtitle: 'De Pierre D. · versement dans 6h',
+        amount: '+65,00 €',
+        date: "Aujourd'hui",
+        type: TransactionType.held,
+      ),
+      _Transaction(
+        title: 'Mission : Cours de maths',
+        subtitle: 'De Sarah K. · versement dans 18h',
+        amount: '+35,00 €',
+        date: "Aujourd'hui",
+        type: TransactionType.held,
+      ),
+    ];
+
+    final completedTransactions = [
       _Transaction(
         title: 'Mission : Ménage appartement',
         subtitle: 'De Marie L.',
         amount: '+55,00 €',
-        date: 'Aujourd\'hui',
+        date: 'Hier',
         type: TransactionType.income,
       ),
       _Transaction(
         title: 'Retrait vers compte bancaire',
         subtitle: 'IBAN •••• 1234',
         amount: '-100,00 €',
-        date: 'Hier',
+        date: 'Il y a 2j',
         type: TransactionType.withdrawal,
-      ),
-      _Transaction(
-        title: 'Mission : Réparation plomberie',
-        subtitle: 'De Pierre D.',
-        amount: '+65,00 €',
-        date: '25 Nov',
-        type: TransactionType.income,
       ),
       _Transaction(
         title: 'Mission : Montage meuble',
@@ -182,6 +251,30 @@ class WalletPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ─── Paiements en attente ───
+          AppSectionHeader(
+            title: 'En attente de versement',
+            padding: EdgeInsets.zero,
+          ),
+          AppGap.h8,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.25)),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < pendingTransactions.length; i++) ...[
+                  _TransactionTile(transaction: pendingTransactions[i]),
+                  if (i < pendingTransactions.length - 1)
+                    Divider(height: 1, indent: 72, color: Colors.orange.withValues(alpha: 0.15)),
+                ],
+              ],
+            ),
+          ),
+          AppGap.h20,
+          // ─── Transactions récentes ───
           AppSectionHeader(
             title: 'Transactions récentes',
             padding: EdgeInsets.zero,
@@ -198,9 +291,9 @@ class WalletPage extends StatelessWidget {
             border: Border.all(color: context.colors.border),
             child: Column(
               children: [
-                for (int i = 0; i < transactions.length; i++) ...[
-                  _TransactionTile(transaction: transactions[i]),
-                  if (i < transactions.length - 1)
+                for (int i = 0; i < completedTransactions.length; i++) ...[
+                  _TransactionTile(transaction: completedTransactions[i]),
+                  if (i < completedTransactions.length - 1)
                     Divider(height: 1, indent: 72, color: context.colors.divider),
                 ],
               ],
@@ -376,69 +469,6 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  void _showAddFundsSheet(BuildContext context) {
-    showAppBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      wrapWithSurface: false,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: AppFormSheet(
-          title: 'Ajouter des fonds',
-          footer: AppButton(
-            label: 'Ajouter',
-            onPressed: () => Navigator.pop(context),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: AppInputDecorations.formField(
-                  context,
-                  hintText: 'Ex: 50',
-                ).copyWith(
-                  labelText: 'Montant',
-                  labelStyle: context.profileSheetFieldLabelStyle,
-                  suffixText: '€',
-                ),
-                style: context.profileValueStyle.copyWith(
-                  fontSize: AppFontSize.h2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              AppGap.h16,
-              Text(
-                'Carte de paiement',
-                style: context.profilePrimaryLabelStyle.copyWith(fontSize: AppFontSize.base),
-              ),
-              AppGap.h8,
-              AppSurfaceCard(
-                padding: AppInsets.a12,
-                color: context.colors.background,
-                borderRadius: BorderRadius.circular(AppDesign.radius10),
-                border: Border.all(color: AppColors.primary),
-                child: Row(
-                  children: [
-                    Icon(Icons.credit_card_rounded, color: AppColors.info),
-                    AppGap.w12,
-                    Text(
-                      'Visa •••• 4242',
-                      style: context.profilePrimaryLabelStyle,
-                    ),
-                    const Spacer(),
-                    Icon(Icons.check_circle_rounded, color: AppColors.primary),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showAddCardSheet(BuildContext context) {
     showAppBottomSheet(
       context: context,
@@ -506,7 +536,7 @@ class WalletPage extends StatelessWidget {
   }
 }
 
-enum TransactionType { income, withdrawal, fee }
+enum TransactionType { income, held, withdrawal, fee }
 
 class _Transaction {
   final String title;
@@ -541,6 +571,11 @@ class _TransactionTile extends StatelessWidget {
         bgColor = AppColors.primary.withValues(alpha: 0.12);
         icon = Icons.arrow_downward_rounded;
         break;
+      case TransactionType.held:
+        iconColor = Colors.orange;
+        bgColor = Colors.orange.withValues(alpha: 0.12);
+        icon = Icons.lock_clock_rounded;
+        break;
       case TransactionType.withdrawal:
         iconColor = AppColors.info;
         bgColor = context.colors.surfaceAlt;
@@ -548,7 +583,7 @@ class _TransactionTile extends StatelessWidget {
         break;
       case TransactionType.fee:
         iconColor = Colors.orange;
-        bgColor = AppColors.warning.withValues(alpha:0.08);
+        bgColor = AppColors.warning.withValues(alpha: 0.08);
         icon = Icons.percent_rounded;
         break;
     }
@@ -596,7 +631,9 @@ class _TransactionTile extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: transaction.type == TransactionType.income
                       ? AppColors.primary
-                      : context.colors.textPrimary,
+                      : transaction.type == TransactionType.held
+                          ? Colors.orange
+                          : context.colors.textPrimary,
                 ),
               ),
               Text(

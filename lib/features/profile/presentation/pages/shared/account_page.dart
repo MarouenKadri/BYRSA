@@ -11,16 +11,10 @@ import '../../../../reviews/presentation/pages/my_reviews_page.dart';
 import '../../../../story/story.dart';
 import '../../../../mission/data/models/service_category.dart';
 import '../client/client_payment_methods_page.dart';
-import '../client/client_payment_history_page.dart';
-import '../client/client_wallet_page.dart';
-import '../shared/wallet_page.dart';
-import '../shared/payment_history_page.dart';
 import '../shared/archives_page.dart';
 import '../freelancer/freelancer_payment_methods_page.dart';
+import 'my_information_page.dart';
 import '../../widgets/shared/change_password_bottom_sheet.dart';
-import '../../widgets/shared/change_email_bottom_sheet.dart';
-import '../../widgets/shared/change_phone_bottom_sheet.dart';
-import '../../widgets/shared/personal_info_bottom_sheet.dart';
 import '../../widgets/shared/freelancer_profile_bottom_sheet.dart';
 import '../../../profile_provider.dart';
 
@@ -65,33 +59,15 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 _AccountMenuTile(
                   icon: Icons.badge_outlined,
-                  title: 'Informations personnelles',
-                  subtitle: 'Nom, prénom, naissance, genre',
-                  onTap: () => showPersonalInfoBottomSheet(context),
-                ),
-                _AccountMenuTile(
-                  icon: Icons.lock_outline_rounded,
-                  title: 'Adresse email',
-                  subtitle: "Modifier l'email associé",
-                  onTap: () {
-                    final profile = context.read<ProfileProvider>().profile;
-                    showChangeEmailBottomSheet(
-                      context,
-                      currentEmail: profile?.email ?? '',
-                    );
-                  },
-                ),
-                _AccountMenuTile(
-                  icon: Icons.phone_iphone_outlined,
-                  title: 'Numéro de téléphone',
-                  subtitle: 'Modifier le numéro associé',
-                  onTap: () {
-                    final profile = context.read<ProfileProvider>().profile;
-                    showChangePhoneBottomSheet(
-                      context,
-                      currentPhone: profile?.phone ?? '',
-                    );
-                  },
+                  title: 'Mes informations',
+                  subtitle:
+                      'Informations personnelles, email, numéro de téléphone',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MyInformationPage(),
+                    ),
+                  ),
                 ),
                 if (isFreelancer)
                   _AccountMenuTile(
@@ -140,25 +116,8 @@ class _AccountPageState extends State<AccountPage> {
               title: 'Paiements et sécurité',
               children: [
                 _AccountMenuTile(
-                  icon: Icons.account_balance_wallet_outlined,
-                  title: isFreelancer ? 'Portefeuille' : 'Crédit',
-                  subtitle: isFreelancer
-                      ? '245,50 € disponibles'
-                      : '50,00 € disponibles',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => isFreelancer
-                          ? const WalletPage()
-                          : const ClientWalletPage(),
-                    ),
-                  ),
-                ),
-                _AccountMenuTile(
                   icon: Icons.credit_card_outlined,
-                  title: isFreelancer
-                      ? 'Coordonnées bancaires'
-                      : 'Moyens de paiement',
+                  title: 'Moyens de paiement',
                   subtitle: isFreelancer ? 'IBAN •••• 1234' : 'Visa •••• 4242',
                   onTap: () => Navigator.push(
                     context,
@@ -166,21 +125,6 @@ class _AccountPageState extends State<AccountPage> {
                       builder: (_) => isFreelancer
                           ? const FreelancerPaymentMethodsPage()
                           : const ClientPaymentMethodsPage(),
-                    ),
-                  ),
-                ),
-                _AccountMenuTile(
-                  icon: Icons.receipt_long_outlined,
-                  title: 'Historique des paiements',
-                  subtitle: isFreelancer
-                      ? 'Revenus & retraits'
-                      : 'Paiements & remboursements',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => isFreelancer
-                          ? const PaymentHistoryPage()
-                          : const ClientPaymentHistoryPage(),
                     ),
                   ),
                 ),

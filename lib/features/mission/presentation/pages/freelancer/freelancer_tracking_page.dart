@@ -149,7 +149,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage>
         MissionStatus.onTheWay => 'Vous etes en route',
         MissionStatus.inProgress => 'Mission en cours',
         MissionStatus.completionRequested => 'Fin signalee au client',
-        MissionStatus.waitingPayment => 'Mission terminee',
+        MissionStatus.awaitingRelease => 'Mission terminee',
         _ => 'Suivi de mission',
       };
 

@@ -50,17 +50,19 @@ class _FreelancerMissionDetailPageState
     MissionStatus.onTheWay,
     MissionStatus.inProgress,
     MissionStatus.completionRequested,
-    MissionStatus.waitingPayment,
     MissionStatus.completed,
+    MissionStatus.paymentHeld,
+    MissionStatus.awaitingRelease,
     MissionStatus.closed,
   }.contains(mission.status);
 
   bool get _isArchived => const {
     MissionStatus.completed,
-    MissionStatus.waitingPayment,
+    MissionStatus.paymentHeld,
+    MissionStatus.awaitingRelease,
+    MissionStatus.inDispute,
     MissionStatus.closed,
     MissionStatus.cancelled,
-    MissionStatus.dispute,
     MissionStatus.expired,
   }.contains(mission.status);
 
@@ -169,14 +171,23 @@ class _FreelancerMissionDetailPageState
               'Le client doit maintenant confirmer la mission ou signaler un probleme.',
           style: DetailBannerStyle.card,
         );
+      case MissionStatus.paymentHeld:
+        return StatusBannerConfig(
+          color: Colors.orange,
+          icon: Icons.lock_clock_rounded,
+          title: '100€ sécurisés par le client',
+          subtitle:
+              'Le versement sera effectué automatiquement 24h après la livraison, sauf litige.',
+          style: DetailBannerStyle.card,
+        );
       case MissionStatus.completed:
-      case MissionStatus.waitingPayment:
+      case MissionStatus.awaitingRelease:
         return StatusBannerConfig(
           color: AppColors.warning,
-          icon: Icons.hourglass_top_rounded,
-          title: 'Paiement en attente',
+          icon: Icons.schedule_rounded,
+          title: 'Versement sous 24h',
           subtitle:
-              'Deblocage automatique sous 12h sauf contestation du client.',
+              'Le client dispose de 24h pour signaler un problème. Sans retour, le paiement est versé automatiquement.',
           style: DetailBannerStyle.card,
         );
       case MissionStatus.closed:
@@ -188,8 +199,16 @@ class _FreelancerMissionDetailPageState
               'Le paiement a ete envoye et la mission est maintenant cloturee.',
           style: DetailBannerStyle.card,
         );
+      case MissionStatus.inDispute:
+        return StatusBannerConfig(
+          color: AppColors.error,
+          icon: Icons.flag_rounded,
+          title: 'Litige en cours — paiement suspendu',
+          subtitle:
+              'Le client a signalé un problème. Le versement est suspendu jusqu\'à résolution du litige.',
+          style: DetailBannerStyle.card,
+        );
       case MissionStatus.cancelled:
-      case MissionStatus.dispute:
       case MissionStatus.expired:
         return StatusBannerConfig(
           color: AppColors.error,
@@ -253,10 +272,20 @@ class _FreelancerMissionDetailPageState
         String label,
         String caption,
       ) = switch (mission.status) {
-        MissionStatus.completed || MissionStatus.waitingPayment => (
-          Icons.hourglass_top_rounded,
-          'Paiement en attente',
-          'Deblocage automatique sous 12h sauf contestation du client',
+        MissionStatus.paymentHeld => (
+          Icons.lock_clock_rounded,
+          'Paiement sécurisé',
+          '100€ sécurisés par le client — versement après livraison',
+        ),
+        MissionStatus.completed || MissionStatus.awaitingRelease => (
+          Icons.schedule_rounded,
+          'Versement sous 24h',
+          'Le client dispose de 24h pour signaler un problème',
+        ),
+        MissionStatus.inDispute => (
+          Icons.flag_rounded,
+          'Litige en cours',
+          'Versement suspendu jusqu\'à résolution',
         ),
         MissionStatus.closed => (
           Icons.check_circle_outline_rounded,

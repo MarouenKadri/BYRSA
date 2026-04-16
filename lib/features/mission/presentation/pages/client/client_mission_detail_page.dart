@@ -134,30 +134,46 @@ class _ClientMissionDetailPageState
           subtitle:
               'Confirmez la mission ou signalez un probleme pour bloquer le paiement.',
         );
+      case MissionStatus.paymentHeld:
+        return StatusBannerConfig(
+          color: AppColors.success,
+          icon: Icons.shield_rounded,
+          title: 'Paiement sécurisé',
+          subtitle:
+              'Les fonds ont bien été reçus et seront conservés jusqu\'à confirmation du service.',
+        );
       case MissionStatus.completed:
-      case MissionStatus.waitingPayment:
+      case MissionStatus.awaitingRelease:
         return StatusBannerConfig(
           color: AppColors.warning,
-          icon: Icons.hourglass_top_rounded,
-          title: 'Validation en attente',
+          icon: Icons.schedule_rounded,
+          title: 'Livraison effectuée — 24h pour signaler un problème',
           subtitle:
-              'Vous disposez de 12h pour valider ou signaler un probleme avant le deblocage automatique.',
+              'Sans retour de votre part, le paiement sera versé automatiquement au prestataire dans 24h.',
+        );
+      case MissionStatus.inDispute:
+        return StatusBannerConfig(
+          color: AppColors.error,
+          icon: Icons.flag_rounded,
+          title: 'Litige en cours — paiement suspendu',
+          subtitle:
+              'Votre signalement est en cours de vérification. Aucun versement ne sera effectué pendant ce délai.',
         );
       case MissionStatus.closed:
         return StatusBannerConfig(
           color: AppColors.primary,
           icon: Icons.check_circle_outline_rounded,
-          title: 'Mission terminee',
+          title: 'Mission terminée',
           subtitle:
-              'Le paiement a ete libere et la mission est maintenant cloturee.',
+              'Le paiement a été versé au prestataire et la mission est maintenant clôturée.',
         );
       case MissionStatus.cancelled:
         return StatusBannerConfig(
           color: AppColors.error,
           icon: Icons.close_rounded,
-          title: 'Mission annulee',
+          title: 'Mission annulée',
           subtitle:
-              "Cette mission est closee et aucune action supplementaire n'est requise.",
+              "Cette mission est clôturée et aucune action supplémentaire n'est requise.",
         );
       default:
         return null;
@@ -175,7 +191,7 @@ class _ClientMissionDetailPageState
     }
     if (mission.assignedPresta != null) {
       final presta = mission.assignedPresta!;
-      final contactable = mission.status != MissionStatus.waitingPayment &&
+      final contactable = mission.status != MissionStatus.awaitingRelease &&
           mission.status != MissionStatus.closed;
       return Column(
         children: [
@@ -221,7 +237,7 @@ class _ClientMissionDetailPageState
 
   @override
   Widget buildBottom(BuildContext ctx) {
-    if (mission.status == MissionStatus.waitingPayment) {
+    if (mission.status == MissionStatus.awaitingRelease) {
       return DetailBottomArea(
         child: DetailTealButton(
           label: 'Valider et libérer le paiement',
@@ -395,7 +411,7 @@ class _ClientMissionDetailPageState
       onConfirm: () {
         context.read<MissionProvider>().updateMissionStatus(
               mission.id,
-              MissionStatus.dispute,
+              MissionStatus.inDispute,
             );
         Navigator.pop(context);
       },

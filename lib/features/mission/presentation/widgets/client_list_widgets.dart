@@ -319,7 +319,7 @@ class SelectedPrestaSection extends StatelessWidget {
             ),
           ],
 
-          if (status != MissionStatus.waitingPayment && status != MissionStatus.closed && status != MissionStatus.cancelled && status != MissionStatus.dispute && status != MissionStatus.expired && (onContact != null || onPhone != null)) ...[
+          if (status != MissionStatus.paymentHeld && status != MissionStatus.awaitingRelease && status != MissionStatus.closed && status != MissionStatus.cancelled && status != MissionStatus.inDispute && status != MissionStatus.expired && (onContact != null || onPhone != null)) ...[
             AppGap.h16,
             Row(
               children: [

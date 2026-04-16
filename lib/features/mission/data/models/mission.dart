@@ -19,72 +19,76 @@ export 'user_models.dart';
 // ─── Statuts ─────────────────────────────────────────────────────────────────
 
 enum MissionStatus {
-  draft,              // Brouillon (création en cours)
-  waitingCandidates,  // Publiée, aucune candidature
-  candidateReceived,  // ≥1 candidature reçue
-  prestaChosen,       // Client a choisi, attente confirmation freelancer
-  confirmed,          // Les deux ont confirmé → prêt à démarrer
-  onTheWay,           // Freelancer en route
-  inProgress,         // Mission démarrée (timer actif)
+  draft,               // Brouillon (création en cours)
+  waitingCandidates,   // Publiée, aucune candidature
+  candidateReceived,   // ≥1 candidature reçue
+  prestaChosen,        // Client a choisi, attente confirmation freelancer
+  confirmed,           // Les deux ont confirmé → prêt à démarrer
+  onTheWay,            // Freelancer en route
+  inProgress,          // Mission démarrée (timer actif)
   completionRequested, // Freelancer a signalé la fin, attente action client
-  completed,          // Mission terminee cote execution
-  waitingPayment,     // Attente validation client (48h max)
-  closed,             // Payé, archivé
-  cancelled,          // Annulée
-  dispute,            // Litige ouvert
-  expired,            // Pas de candidat dans le délai
+  completed,           // Mission terminée côté exécution
+  paymentHeld,         // Fonds débités et sécurisés (Stripe hold)
+  awaitingRelease,     // Délai 24h après livraison — client peut signaler un problème
+  inDispute,           // Litige ouvert — paiement suspendu
+  closed,              // Versement effectué, archivé
+  cancelled,           // Annulée
+  expired,             // Pas de candidat dans le délai
 }
 
 extension MissionStatusX on MissionStatus {
   String get label => switch (this) {
-    MissionStatus.draft            => 'Brouillon',
-    MissionStatus.waitingCandidates => 'En attente',
-    MissionStatus.candidateReceived => 'Candidatures',
-    MissionStatus.prestaChosen     => 'Presta choisi',
-    MissionStatus.confirmed        => 'Confirmée',
-    MissionStatus.onTheWay         => 'En route',
-    MissionStatus.inProgress       => 'En cours',
-    MissionStatus.completionRequested => 'Fin demandee',
-    MissionStatus.completed        => 'Terminée',
-    MissionStatus.waitingPayment   => 'Validation requise',
-    MissionStatus.closed           => 'Clôturée',
-    MissionStatus.cancelled        => 'Annulée',
-    MissionStatus.dispute          => 'Litige',
-    MissionStatus.expired          => 'Expirée',
+    MissionStatus.draft                => 'Brouillon',
+    MissionStatus.waitingCandidates    => 'En attente',
+    MissionStatus.candidateReceived    => 'Candidatures',
+    MissionStatus.prestaChosen         => 'Presta choisi',
+    MissionStatus.confirmed            => 'Confirmée',
+    MissionStatus.onTheWay             => 'En route',
+    MissionStatus.inProgress           => 'En cours',
+    MissionStatus.completionRequested  => 'Fin demandée',
+    MissionStatus.completed            => 'Terminée',
+    MissionStatus.paymentHeld          => 'Paiement sécurisé',
+    MissionStatus.awaitingRelease      => 'Versement sous 24h',
+    MissionStatus.inDispute            => 'Litige en cours',
+    MissionStatus.closed               => 'Clôturée',
+    MissionStatus.cancelled            => 'Annulée',
+    MissionStatus.expired              => 'Expirée',
   };
 
   Color get color => switch (this) {
-    MissionStatus.draft            => AppColors.draftAmber,
-    MissionStatus.waitingCandidates => AppColors.warning,
-    MissionStatus.candidateReceived => AppColors.iosBlue,
-    MissionStatus.prestaChosen     => AppColors.indigo,
-    MissionStatus.confirmed        => AppColors.primary,
-    MissionStatus.onTheWay         => AppColors.iosBlue,
-    MissionStatus.inProgress       => AppColors.indigo,
+    MissionStatus.draft               => AppColors.draftAmber,
+    MissionStatus.waitingCandidates   => AppColors.warning,
+    MissionStatus.candidateReceived   => AppColors.iosBlue,
+    MissionStatus.prestaChosen        => AppColors.indigo,
+    MissionStatus.confirmed           => AppColors.primary,
+    MissionStatus.onTheWay            => AppColors.iosBlue,
+    MissionStatus.inProgress          => AppColors.indigo,
     MissionStatus.completionRequested => AppColors.warning,
-    MissionStatus.completed        => AppColors.primary,
-    MissionStatus.waitingPayment   => AppColors.warning,
-    MissionStatus.closed           => AppColors.textTertiary,
-    MissionStatus.cancelled        => AppColors.error,
-    MissionStatus.dispute          => AppColors.error,
-    MissionStatus.expired          => AppColors.textTertiary,
+    MissionStatus.completed           => AppColors.primary,
+    MissionStatus.paymentHeld         => AppColors.success,
+    MissionStatus.awaitingRelease     => AppColors.warning,
+    MissionStatus.inDispute           => AppColors.error,
+    MissionStatus.closed              => AppColors.textTertiary,
+    MissionStatus.cancelled           => AppColors.error,
+    MissionStatus.expired             => AppColors.textTertiary,
   };
 
   IconData get icon => switch (this) {
-    MissionStatus.draft            => Icons.edit_note_rounded,
-    MissionStatus.waitingCandidates => Icons.hourglass_empty_rounded,
-    MissionStatus.candidateReceived => Icons.people_rounded,
-    MissionStatus.prestaChosen     => Icons.handshake_rounded,
-    MissionStatus.confirmed        => Icons.check_circle_rounded,
-    MissionStatus.onTheWay         => Icons.directions_car_rounded,
-    MissionStatus.inProgress       => Icons.play_circle_rounded,
+    MissionStatus.draft               => Icons.edit_note_rounded,
+    MissionStatus.waitingCandidates   => Icons.hourglass_empty_rounded,
+    MissionStatus.candidateReceived   => Icons.people_rounded,
+    MissionStatus.prestaChosen        => Icons.handshake_rounded,
+    MissionStatus.confirmed           => Icons.check_circle_rounded,
+    MissionStatus.onTheWay            => Icons.directions_car_rounded,
+    MissionStatus.inProgress          => Icons.play_circle_rounded,
     MissionStatus.completionRequested => Icons.hourglass_top_rounded,
-    MissionStatus.completed        => Icons.done_all_rounded,
-    MissionStatus.waitingPayment   => Icons.pending_rounded,
-    MissionStatus.closed           => Icons.inventory_2_rounded,
-    MissionStatus.cancelled        => Icons.cancel_rounded,
-    MissionStatus.dispute          => Icons.flag_rounded,
-    MissionStatus.expired          => Icons.timer_off_rounded,
+    MissionStatus.completed           => Icons.done_all_rounded,
+    MissionStatus.paymentHeld         => Icons.lock_rounded,
+    MissionStatus.awaitingRelease     => Icons.schedule_rounded,
+    MissionStatus.inDispute           => Icons.flag_rounded,
+    MissionStatus.closed              => Icons.inventory_2_rounded,
+    MissionStatus.cancelled           => Icons.cancel_rounded,
+    MissionStatus.expired             => Icons.timer_off_rounded,
   };
 
   bool get isActive =>
@@ -96,7 +100,8 @@ extension MissionStatusX on MissionStatus {
       this == MissionStatus.inProgress ||
       this == MissionStatus.completionRequested ||
       this == MissionStatus.completed ||
-      this == MissionStatus.waitingPayment;
+      this == MissionStatus.paymentHeld ||
+      this == MissionStatus.awaitingRelease;
 }
 
 // ─── Mission ──────────────────────────────────────────────────────────────────

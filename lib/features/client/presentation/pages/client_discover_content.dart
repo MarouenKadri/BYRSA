@@ -170,7 +170,8 @@ Color _statusAccentColor(MissionStatus status) {
     case MissionStatus.completionRequested:
       return const Color(0xFF8B5CF6);
     case MissionStatus.completed:
-    case MissionStatus.waitingPayment:
+    case MissionStatus.paymentHeld:
+    case MissionStatus.awaitingRelease:
       return const Color(0xFF10B981);
     default:
       return const Color(0xFF9CA3AF);

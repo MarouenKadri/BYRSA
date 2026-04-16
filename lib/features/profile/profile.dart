@@ -29,6 +29,7 @@ export 'presentation/pages/shared/notifications_settings_page.dart';
 export 'presentation/pages/shared/privacy_page.dart';
 export 'presentation/pages/shared/privacy_settings_page.dart';
 export 'presentation/pages/shared/help_center_page.dart';
+export 'presentation/pages/shared/my_information_page.dart';
 
 // ─── Pages - Client ───────────────────────────────────────────────────────────
 export 'presentation/pages/client/client_wallet_page.dart';

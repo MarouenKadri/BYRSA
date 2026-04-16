@@ -17,14 +17,16 @@ const _kTimelineSteps = [
   MissionStatus.inProgress,
   MissionStatus.completionRequested,
   MissionStatus.completed,
-  MissionStatus.waitingPayment,
+  MissionStatus.paymentHeld,
+  MissionStatus.awaitingRelease,
   MissionStatus.closed,
 ];
 
 const _kSpecialStatuses = {
   MissionStatus.cancelled,
-  MissionStatus.dispute,
+  MissionStatus.inDispute,
   MissionStatus.expired,
+  MissionStatus.draft,
 };
 
 class StatusTimeline extends StatelessWidget {
@@ -49,9 +51,9 @@ class _SpecialStatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (status) {
-      MissionStatus.cancelled => AppColors.error,
-      MissionStatus.dispute   => AppColors.warning,
-      _                       => context.colors.textTertiary,
+      MissionStatus.cancelled  => AppColors.error,
+      MissionStatus.inDispute  => AppColors.error,
+      _                        => context.colors.textTertiary,
     };
 
     return Container(
@@ -206,7 +208,8 @@ class _TimelineStepState extends State<_TimelineStep> with SingleTickerProviderS
     MissionStatus.inProgress        => 'En cours',
     MissionStatus.completionRequested => 'Validation',
     MissionStatus.completed         => 'Terminée',
-    MissionStatus.waitingPayment    => 'Validation',
+    MissionStatus.paymentHeld       => 'Sécurisé',
+    MissionStatus.awaitingRelease   => 'Sous 24h',
     MissionStatus.closed            => 'Payée',
     _                               => s.label,
   };

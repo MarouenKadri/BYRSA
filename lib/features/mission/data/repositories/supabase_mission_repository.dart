@@ -347,12 +347,13 @@ class SupabaseMissionRepository implements MissionRepository {
     MissionStatus.onTheWay => 'on_the_way',
     MissionStatus.inProgress => 'in_progress',
     MissionStatus.completionRequested => 'completion_requested',
-    MissionStatus.completed => 'completed',
-    MissionStatus.waitingPayment => 'waiting_payment',
-    MissionStatus.closed => 'closed',
-    MissionStatus.cancelled => 'cancelled',
-    MissionStatus.dispute => 'dispute',
-    MissionStatus.expired => 'expired',
+    MissionStatus.completed           => 'completed',
+    MissionStatus.paymentHeld         => 'payment_held',
+    MissionStatus.awaitingRelease     => 'awaiting_release',
+    MissionStatus.inDispute           => 'in_dispute',
+    MissionStatus.closed              => 'closed',
+    MissionStatus.cancelled           => 'cancelled',
+    MissionStatus.expired             => 'expired',
   };
 
   static MissionStatus _statusFromDb(String? s) => switch (s) {
@@ -364,12 +365,15 @@ class SupabaseMissionRepository implements MissionRepository {
     'on_the_way' => MissionStatus.onTheWay,
     'in_progress' => MissionStatus.inProgress,
     'completion_requested' => MissionStatus.completionRequested,
-    'completed' => MissionStatus.completed,
-    'waiting_payment' => MissionStatus.waitingPayment,
-    'closed' => MissionStatus.closed,
-    'cancelled' => MissionStatus.cancelled,
-    'dispute' => MissionStatus.dispute,
-    'expired' => MissionStatus.expired,
-    _ => MissionStatus.waitingCandidates,
+    'completed'            => MissionStatus.completed,
+    'payment_held'         => MissionStatus.paymentHeld,
+    'awaiting_release'     => MissionStatus.awaitingRelease,
+    'waiting_payment'      => MissionStatus.awaitingRelease, // rétro-compatibilité
+    'in_dispute'           => MissionStatus.inDispute,
+    'dispute'              => MissionStatus.inDispute, // rétro-compatibilité
+    'closed'               => MissionStatus.closed,
+    'cancelled'            => MissionStatus.cancelled,
+    'expired'              => MissionStatus.expired,
+    _                      => MissionStatus.waitingCandidates,
   };
 }

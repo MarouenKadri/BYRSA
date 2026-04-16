@@ -1,288 +1,189 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
-// AppPageAppBar, AppBackButtonLeading centralisés via app_primitives
 import '../../../data/models/transaction.dart';
+import '../../widgets/shared/payment_common_widgets.dart';
 
-/// Page Historique des paiements
+/// ─────────────────────────────────────────────────────────────
+/// Historique des paiements — Freelancer  (minimaliste)
+/// ─────────────────────────────────────────────────────────────
 class PaymentHistoryPage extends StatefulWidget {
-  const PaymentHistoryPage({super.key});
+  final bool embedded;
+  const PaymentHistoryPage({super.key, this.embedded = false});
 
   @override
   State<PaymentHistoryPage> createState() => _PaymentHistoryPageState();
 }
 
 class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
-  // Filtre sélectionné
-  String _selectedFilter = 'Tout';
-  final List<String> _filters = ['Tout', 'Revenus', 'Retraits', 'Frais'];
+  String _filter = 'Tout';
+  String _period = 'Ce mois';
 
-  // Période sélectionnée
-  String _selectedPeriod = 'Ce mois';
-  final List<String> _periods = ['Cette semaine', 'Ce mois', '3 derniers mois', 'Cette année', 'Tout'];
+  final _filters = ['Tout', 'Revenus', 'Retraits', 'Frais'];
+  final _periods = ['Cette semaine', 'Ce mois', '3 mois', 'Cette année', 'Tout'];
 
-  // Données simulées
-  final List<Transaction> _transactions = [
-    Transaction(
-      id: '1',
-      type: TransactionType.income,
-      status: TransactionStatus.completed,
-      amount: 85.00,
-      date: DateTime.now().subtract(const Duration(hours: 2)),
-      missionTitle: 'Ménage appartement',
-      clientName: 'Marie Dupont',
-    ),
-    Transaction(
-      id: '2',
-      type: TransactionType.fee,
-      status: TransactionStatus.completed,
-      amount: 8.50,
-      date: DateTime.now().subtract(const Duration(hours: 2)),
-      description: 'Commission Inkern (10%)',
-    ),
-    Transaction(
-      id: '3',
-      type: TransactionType.withdrawal,
-      status: TransactionStatus.pending,
-      amount: 150.00,
-      date: DateTime.now().subtract(const Duration(days: 1)),
-      paymentMethod: 'Virement bancaire',
-      description: 'Vers IBAN •••• 1234',
-    ),
-    Transaction(
-      id: '4',
-      type: TransactionType.income,
-      status: TransactionStatus.completed,
-      amount: 120.00,
-      date: DateTime.now().subtract(const Duration(days: 2)),
-      missionTitle: 'Jardinage',
-      clientName: 'Pierre Martin',
-    ),
-    Transaction(
-      id: '5',
-      type: TransactionType.fee,
-      status: TransactionStatus.completed,
-      amount: 12.00,
-      date: DateTime.now().subtract(const Duration(days: 2)),
-      description: 'Commission Inkern (10%)',
-    ),
-    Transaction(
-      id: '6',
-      type: TransactionType.bonus,
-      status: TransactionStatus.completed,
-      amount: 20.00,
-      date: DateTime.now().subtract(const Duration(days: 3)),
-      description: 'Bonus parrainage',
-    ),
-    Transaction(
-      id: '7',
-      type: TransactionType.income,
-      status: TransactionStatus.completed,
-      amount: 65.00,
-      date: DateTime.now().subtract(const Duration(days: 5)),
-      missionTitle: 'Bricolage - Montage meuble',
-      clientName: 'Sophie Bernard',
-    ),
-    Transaction(
-      id: '8',
-      type: TransactionType.fee,
-      status: TransactionStatus.completed,
-      amount: 6.50,
-      date: DateTime.now().subtract(const Duration(days: 5)),
-      description: 'Commission Inkern (10%)',
-    ),
-    Transaction(
-      id: '9',
-      type: TransactionType.withdrawal,
-      status: TransactionStatus.completed,
-      amount: 200.00,
-      date: DateTime.now().subtract(const Duration(days: 7)),
-      paymentMethod: 'Virement bancaire',
-      description: 'Vers IBAN •••• 1234',
-    ),
-    Transaction(
-      id: '10',
-      type: TransactionType.refund,
-      status: TransactionStatus.completed,
-      amount: 25.00,
-      date: DateTime.now().subtract(const Duration(days: 10)),
-      description: 'Remboursement mission annulée',
-    ),
-    Transaction(
-      id: '11',
-      type: TransactionType.income,
-      status: TransactionStatus.completed,
-      amount: 95.00,
-      date: DateTime.now().subtract(const Duration(days: 12)),
-      missionTitle: 'Repassage',
-      clientName: 'Lucie Moreau',
-    ),
-    Transaction(
-      id: '12',
-      type: TransactionType.withdrawal,
-      status: TransactionStatus.failed,
-      amount: 100.00,
-      date: DateTime.now().subtract(const Duration(days: 15)),
-      paymentMethod: 'Virement bancaire',
-      description: 'IBAN invalide',
-    ),
+  final List<Transaction> _txs = [
+    Transaction(id: '1', type: TransactionType.income,
+        status: TransactionStatus.completed, amount: 85.00,
+        date: DateTime.now().subtract(const Duration(hours: 2)),
+        missionTitle: 'Ménage appartement', clientName: 'Marie D.'),
+    Transaction(id: '2', type: TransactionType.held,
+        status: TransactionStatus.awaitingRelease, amount: 100.00,
+        date: DateTime.now().subtract(const Duration(hours: 5)),
+        missionTitle: 'Création logo', clientName: 'Julien M.'),
+    Transaction(id: '3', type: TransactionType.fee,
+        status: TransactionStatus.completed, amount: 8.50,
+        date: DateTime.now().subtract(const Duration(hours: 2)),
+        description: 'Commission Inkern 10%'),
+    Transaction(id: '4', type: TransactionType.withdrawal,
+        status: TransactionStatus.pending, amount: 150.00,
+        date: DateTime.now().subtract(const Duration(days: 1)),
+        description: 'Vers IBAN ···1234'),
+    Transaction(id: '5', type: TransactionType.income,
+        status: TransactionStatus.completed, amount: 120.00,
+        date: DateTime.now().subtract(const Duration(days: 2)),
+        missionTitle: 'Jardinage', clientName: 'Pierre M.'),
+    Transaction(id: '6', type: TransactionType.fee,
+        status: TransactionStatus.completed, amount: 12.00,
+        date: DateTime.now().subtract(const Duration(days: 2)),
+        description: 'Commission Inkern 10%'),
+    Transaction(id: '7', type: TransactionType.bonus,
+        status: TransactionStatus.completed, amount: 20.00,
+        date: DateTime.now().subtract(const Duration(days: 3)),
+        description: 'Bonus parrainage'),
+    Transaction(id: '8', type: TransactionType.income,
+        status: TransactionStatus.completed, amount: 65.00,
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        missionTitle: 'Montage meuble', clientName: 'Sophie B.'),
+    Transaction(id: '9', type: TransactionType.fee,
+        status: TransactionStatus.completed, amount: 6.50,
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        description: 'Commission Inkern 10%'),
+    Transaction(id: '10', type: TransactionType.withdrawal,
+        status: TransactionStatus.completed, amount: 200.00,
+        date: DateTime.now().subtract(const Duration(days: 7)),
+        description: 'Vers IBAN ···1234'),
+    Transaction(id: '11', type: TransactionType.refund,
+        status: TransactionStatus.completed, amount: 25.00,
+        date: DateTime.now().subtract(const Duration(days: 10)),
+        description: 'Remboursement mission annulée'),
   ];
 
-  List<Transaction> get _filteredTransactions {
-    return _transactions.where((t) {
-      if (_selectedFilter == 'Revenus') {
-        return t.type == TransactionType.income || 
-               t.type == TransactionType.bonus || 
-               t.type == TransactionType.refund;
-      } else if (_selectedFilter == 'Retraits') {
-        return t.type == TransactionType.withdrawal;
-      } else if (_selectedFilter == 'Frais') {
-        return t.type == TransactionType.fee;
-      }
-      return true;
-    }).toList();
-  }
+  // ─── Computed ────────────────────────────────────────────────
+  List<Transaction> get _filtered => _txs.where((t) {
+    return switch (_filter) {
+      'Revenus'  => t.type == TransactionType.income
+                 || t.type == TransactionType.bonus
+                 || t.type == TransactionType.refund
+                 || t.type == TransactionType.held,
+      'Retraits' => t.type == TransactionType.withdrawal,
+      'Frais'    => t.type == TransactionType.fee,
+      _          => true,
+    };
+  }).toList();
 
-  double get _totalIncome {
-    return _transactions
-        .where((t) => t.type == TransactionType.income && t.status == TransactionStatus.completed)
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
+  double get _totalRevenu => _txs
+      .where((t) => t.type == TransactionType.income
+                 && t.status == TransactionStatus.completed)
+      .fold(0.0, (s, t) => s + t.amount);
 
-  double get _totalWithdrawals {
-    return _transactions
-        .where((t) => t.type == TransactionType.withdrawal && t.status == TransactionStatus.completed)
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
+  double get _totalEnAttente => _txs
+      .where((t) => t.type == TransactionType.held)
+      .fold(0.0, (s, t) => s + t.amount);
 
-  double get _totalFees {
-    return _transactions
-        .where((t) => t.type == TransactionType.fee && t.status == TransactionStatus.completed)
-        .fold(0.0, (sum, t) => sum + t.amount);
-  }
+  double get _totalRetrait => _txs
+      .where((t) => t.type == TransactionType.withdrawal
+                 && t.status == TransactionStatus.completed)
+      .fold(0.0, (s, t) => s + t.amount);
 
+  // ─── Build ────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final body = Column(
+      children: [
+        _buildHeader(context),
+        Expanded(
+          child: _filtered.isEmpty
+              ? _buildEmpty(context)
+              : _buildList(context),
+        ),
+      ],
+    );
+
+    if (widget.embedded) return body;
+
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppPageAppBar(
-        title: 'Historique des paiements',
-        centerTitle: true,
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
+        titleWidget: Text('Historique', style: context.profilePageTitleStyle),
         actions: [
           IconButton(
-            icon: Icon(Icons.download_rounded, color: context.colors.textPrimary),
-            onPressed: () => _showExportSheet(),
-            tooltip: 'Exporter',
+            icon: Icon(Icons.download_rounded,
+                color: context.colors.textPrimary, size: 20),
+            onPressed: _showExport,
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Résumé + Filtres
-          AppSection(
-            color: context.colors.surface,
-            child: Column(
-              children: [
-                // Résumé financier
-                _buildSummarySection(),
-
-                AppGap.h16,
-
-                // Filtre période
-                _buildPeriodFilter(),
-
-                AppGap.h12,
-
-                // Filtres par type
-                _buildTypeFilters(),
-
-                AppGap.h16,
-              ],
-            ),
-          ),
-
-          // Liste des transactions
-          Expanded(
-            child: _filteredTransactions.isEmpty
-                ? _buildEmptyState()
-                : _buildTransactionsList(),
-          ),
-        ],
-      ),
+      body: body,
     );
   }
 
-  Widget _buildSummarySection() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSummaryCard(
-              label: 'Revenus',
-              amount: _totalIncome,
-              icon: Icons.arrow_downward_rounded,
-              color: AppColors.success,
-              isPositive: true,
-            ),
-          ),
-          AppGap.w12,
-          Expanded(
-            child: _buildSummaryCard(
-              label: 'Retraits',
-              amount: _totalWithdrawals,
-              icon: Icons.arrow_upward_rounded,
-              color: AppColors.info,
-              isPositive: false,
-            ),
-          ),
-          AppGap.w12,
-          Expanded(
-            child: _buildSummaryCard(
-              label: 'Frais',
-              amount: _totalFees,
-              icon: Icons.receipt_long_rounded,
-              color: Colors.red,
-              isPositive: false,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard({
-    required String label,
-    required double amount,
-    required IconData icon,
-    required Color color,
-    required bool isPositive,
-  }) {
-    return AppSurfaceCard(
-      padding: AppInsets.a12,
-      color: color.withValues(alpha: 0.05),
-      borderRadius: BorderRadius.circular(AppRadius.button),
-      border: Border.all(color: color.withValues(alpha: 0.2)),
+  // ─── Header ───────────────────────────────────────────────────
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      color: context.colors.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              AppGap.w4,
-              Text(
-                label,
-                style: context.text.labelMedium,
-              ),
-            ],
+          // ── Résumé 3 tuiles ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            child: Row(children: [
+              Expanded(child: _SummaryTile(
+                  label: 'Revenus', amount: _totalRevenu, positive: true)),
+              AppGap.w10,
+              Expanded(child: _SummaryTile(
+                  label: 'En attente', amount: _totalEnAttente,
+                  positive: true, highlight: true)),
+              AppGap.w10,
+              Expanded(child: _SummaryTile(
+                  label: 'Retraits', amount: _totalRetrait, positive: false)),
+            ]),
           ),
-          AppGap.h6,
-          Text(
-            '${isPositive ? '+' : '-'}${amount.toStringAsFixed(2)} €',
-            style: context.text.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
+          // ── Sélecteur période ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: GestureDetector(
+              onTap: _showPeriodPicker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceAlt,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: context.colors.border),
+                ),
+                child: Row(children: [
+                  Icon(Icons.calendar_today_rounded, size: 15,
+                      color: context.colors.textTertiary),
+                  AppGap.w8,
+                  Text(_period,
+                      style: context.text.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500)),
+                  const Spacer(),
+                  Icon(Icons.expand_more_rounded, size: 18,
+                      color: context.colors.textTertiary),
+                ]),
+              ),
+            ),
+          ),
+          // ── Filtres ──
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: PaymentFilterPills(
+              filters: _filters,
+              selected: _filter,
+              onChanged: (f) => setState(() => _filter = f),
             ),
           ),
         ],
@@ -290,117 +191,44 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  Widget _buildPeriodFilter() {
-    return Padding(
-      padding: AppInsets.h16,
-      child: GestureDetector(
-        onTap: () => _showPeriodPicker(),
-        child: AppSurfaceCard(
-          padding: AppInsets.h16v12,
-          color: context.colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          child: Row(
-            children: [
-              Icon(Icons.calendar_today_rounded, size: 20, color: context.colors.textSecondary),
-              AppGap.w10,
-              Text(
-                _selectedPeriod,
-                style: context.text.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Icon(Icons.keyboard_arrow_down_rounded, color: context.colors.textSecondary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeFilters() {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: AppInsets.h16,
-        itemCount: _filters.length,
-        separatorBuilder: (_, __) => AppGap.w8,
-        itemBuilder: (context, index) {
-          final filter = _filters[index];
-          final isSelected = _selectedFilter == filter;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = filter),
-            child: AppSurfaceCard(
-              padding: AppInsets.h16,
-              color: isSelected ? AppColors.primary : context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(AppRadius.cardLg),
-              child: Center(
-                child: Text(
-                  filter,
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: isSelected ? Colors.white : context.colors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return const AppEmptyStateBlock(
-      icon: Icons.receipt_long_rounded,
-      title: 'Aucune transaction',
-      message: 'Les transactions apparaîtront ici',
-    );
-  }
-
-  Widget _buildTransactionsList() {
-    // Grouper par date
+  // ─── Liste groupée par date ───────────────────────────────────
+  Widget _buildList(BuildContext context) {
     final grouped = <String, List<Transaction>>{};
-    for (final transaction in _filteredTransactions) {
-      final dateKey = _getDateKey(transaction.date);
-      grouped.putIfAbsent(dateKey, () => []).add(transaction);
+    for (final t in _filtered) {
+      grouped.putIfAbsent(_dateLabel(t.date), () => []).add(t);
     }
 
     return ListView.builder(
-      padding: AppInsets.a16,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       itemCount: grouped.length,
-      itemBuilder: (context, index) {
-        final dateKey = grouped.keys.elementAt(index);
-        final transactions = grouped[dateKey]!;
-        
+      itemBuilder: (ctx, i) {
+        final key = grouped.keys.elementAt(i);
+        final list = grouped[key]!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date header
             Padding(
-              padding: EdgeInsets.only(bottom: 12, top: index == 0 ? 0 : 8),
-              child: Text(
-                dateKey,
-                style: context.text.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              padding: EdgeInsets.only(bottom: 10, top: i == 0 ? 0 : 16),
+              child: Text(key,
+                  style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textTertiary,
+                      fontWeight: FontWeight.w600)),
             ),
-            // Transactions du jour
-            AppSurfaceCard(
-              padding: EdgeInsets.zero,
-              border: Border.all(color: context.colors.border),
+            Container(
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.colors.border),
+              ),
               child: Column(
-                children: List.generate(transactions.length, (i) {
-                  return Column(
-                    children: [
-                      _buildTransactionItem(transactions[i]),
-                      if (i < transactions.length - 1)
-                        Divider(height: 1, indent: 70, color: context.colors.divider),
-                    ],
-                  );
-                }),
+                children: List.generate(list.length, (j) => Column(
+                  children: [
+                    _buildTile(context, list[j]),
+                    if (j < list.length - 1)
+                      Divider(height: 1, indent: 70,
+                          color: context.colors.divider),
+                  ],
+                )),
               ),
             ),
           ],
@@ -409,560 +237,338 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  Widget _buildTransactionItem(Transaction transaction) {
-    return InkWell(
-      onTap: () => _showTransactionDetails(transaction),
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Padding(
-        padding: AppInsets.a16,
-        child: Row(
-          children: [
-            // Icône
-            AppSurfaceCard(
-              padding: AppInsets.a10,
-              color: transaction.type.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.button),
-              child: Icon(
-                transaction.type.icon,
-                color: transaction.type.color,
-                size: 22,
-              ),
-            ),
-            AppGap.w14,
+  Widget _buildTile(BuildContext context, Transaction tx) {
+    final isHeld = tx.type == TransactionType.held;
+    final isPos  = tx.type.isPositive;
 
-            // Détails
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          transaction.missionTitle ?? transaction.type.label,
-                          style: context.text.titleSmall?.copyWith(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (transaction.status != TransactionStatus.completed)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: AppTagPill(
-                            label: transaction.status.label,
-                            backgroundColor: transaction.status.color.withValues(alpha: 0.1),
-                            foregroundColor: transaction.status.color,
-                            padding: AppInsets.h8v2,
-                            fontSize: AppFontSize.xs,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
-                  ),
-                  AppGap.h4,
-                  Text(
-                    transaction.clientName ?? transaction.description ?? transaction.type.label,
-                    style: context.text.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
+    final icon   = tx.type.icon;
+    final title  = tx.missionTitle ?? tx.type.label;
+    final sub    = tx.clientName ?? tx.description ?? '';
+    final amount = '${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €';
 
-            AppGap.w12,
-
-            // Montant
-            Text(
-              '${transaction.type.isPositive ? '+' : '-'}${transaction.amount.toStringAsFixed(2)} €',
-              style: context.text.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: transaction.type.isPositive ? AppColors.success : context.colors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getDateKey(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-
-    if (transactionDate == today) {
-      return 'Aujourd\'hui';
-    } else if (transactionDate == yesterday) {
-      return 'Hier';
-    } else if (now.difference(date).inDays < 7) {
-      return _getDayName(date.weekday);
-    } else {
-      return '${date.day} ${_getMonthName(date.month)} ${date.year}';
+    String? badge;
+    Color?  badgeColor;
+    if (isHeld) {
+      badge = 'Versement sous 24h';
+      badgeColor = AppColors.warning;
+    } else if (tx.status != TransactionStatus.completed) {
+      badge = tx.status.label;
+      badgeColor = context.colors.textTertiary;
     }
-  }
 
-  String _getDayName(int weekday) {
-    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    return days[weekday - 1];
-  }
-
-  String _getMonthName(int month) {
-    const months = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 
-                    'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-    return months[month - 1];
-  }
-
-  void _showPeriodPicker() {
-    showAppBottomSheet(
-      context: context,
-      wrapWithSurface: false,
-      builder: (context) => SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Padding(
-          padding: AppInsets.a20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.colors.border,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-              AppGap.h20,
-              Text(
-                'Sélectionner une période',
-                style: context.text.headlineSmall?.copyWith(),
-              ),
-              AppGap.h20,
-              ...List.generate(_periods.length, (index) {
-                final period = _periods[index];
-                final isSelected = _selectedPeriod == period;
-                return ListTile(
-                  onTap: () {
-                    setState(() => _selectedPeriod = period);
-                    Navigator.pop(context);
-                  },
-                  leading: Icon(
-                    Icons.calendar_today_rounded,
-                    color: isSelected ? AppColors.primary : context.colors.textTertiary,
-                  ),
-                  title: Text(
-                    period,
-                    style: context.text.bodyMedium?.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected ? AppColors.primary : context.colors.textPrimary,
-                    ),
-                  ),
-                  trailing: isSelected
-                      ? Icon(Icons.check_rounded, color: AppColors.primary)
-                      : null,
-                );
-              }),
-              AppGap.h12,
-              // Période personnalisée
-              ListTile(
-                onTap: () {
-                  Navigator.pop(context);
-                  _showCustomDateRangePicker();
-                },
-                leading: Icon(Icons.date_range_rounded, color: context.colors.textTertiary),
-                title: const Text('Période personnalisée'),
-                trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textHint),
-              ),
-            ],
-          ),
-          ),
-        ),
-      ),
+    return PaymentTxTile(
+      icon: icon,
+      title: title,
+      subtitle: sub,
+      amount: amount,
+      isPositive: isPos && !isHeld,
+      badge: badge,
+      badgeColor: badgeColor,
+      onTap: () => _showDetail(context, tx),
     );
   }
 
-  void _showCustomDateRangePicker() async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      locale: const Locale('fr', 'FR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+  Widget _buildEmpty(BuildContext context) {
+    return Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.receipt_long_rounded, size: 36,
+            color: context.colors.textHint),
+        AppGap.h12,
+        Text('Aucune transaction',
+            style: context.text.bodyMedium?.copyWith(
+                color: context.colors.textTertiary)),
+      ]),
     );
-
-    if (picked != null) {
-      setState(() {
-        _selectedPeriod = '${picked.start.day}/${picked.start.month} - ${picked.end.day}/${picked.end.month}';
-      });
-    }
   }
 
-  void _showTransactionDetails(Transaction transaction) {
+  // ─── Sheet détail ─────────────────────────────────────────────
+  void _showDetail(BuildContext context, Transaction tx) {
+    final isPos = tx.type.isPositive;
     showAppBottomSheet(
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      builder: (context) => SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Padding(
-          padding: AppInsets.a20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: context.colors.sheetBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 36, height: 4,
                 decoration: BoxDecoration(
-                  color: context.colors.border,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
+                    color: context.colors.border,
+                    borderRadius: BorderRadius.circular(99))),
+            AppGap.h24,
+            Text(
+              '${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
+              style: context.text.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isPos ? AppColors.primary : context.colors.textPrimary),
+            ),
+            AppGap.h4,
+            Text(tx.missionTitle ?? tx.type.label,
+                style: context.text.bodyMedium?.copyWith(
+                    color: context.colors.textSecondary)),
+            AppGap.h6,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: tx.status.color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                    color: tx.status.color.withValues(alpha: 0.3)),
               ),
-              AppGap.h24,
-
-              // Icône et montant
-              Container(
-                padding: AppInsets.a16,
-                decoration: BoxDecoration(
-                  color: transaction.type.color.withValues(alpha:0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  transaction.type.icon,
-                  color: transaction.type.color,
-                  size: 32,
-                ),
+              child: Text(tx.status.label,
+                  style: context.text.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: tx.status.color)),
+            ),
+            AppGap.h24,
+            Container(
+              decoration: BoxDecoration(
+                color: context.colors.surfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.colors.border),
               ),
-              AppGap.h16,
-              Text(
-                '${transaction.type.isPositive ? '+' : '-'}${transaction.amount.toStringAsFixed(2)} €',
-                style: context.text.displaySmall?.copyWith(
-                  color: transaction.type.isPositive ? AppColors.success : context.colors.textPrimary,
-                ),
-              ),
-              AppGap.h8,
-              Container(
-                padding: AppInsets.h12v6,
-                decoration: BoxDecoration(
-                  color: transaction.status.color.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.cardLg),
-                ),
-                child: Text(
-                  transaction.status.label,
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: transaction.status.color,
-                  ),
-                ),
-              ),
-
-              AppGap.h24,
-
-              // Détails
-              Container(
-                padding: AppInsets.a16,
-                decoration: BoxDecoration(
-                  color: context.colors.background,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailRow('Type', transaction.type.label),
-                    if (transaction.missionTitle != null) ...[
-                      Divider(height: 20, color: context.colors.divider),
-                      _buildDetailRow('Mission', transaction.missionTitle!),
-                    ],
-                    if (transaction.clientName != null) ...[
-                      Divider(height: 20, color: context.colors.divider),
-                      _buildDetailRow('Client', transaction.clientName!),
-                    ],
-                    if (transaction.description != null) ...[
-                      Divider(height: 20, color: context.colors.divider),
-                      _buildDetailRow('Description', transaction.description!),
-                    ],
-                    if (transaction.paymentMethod != null) ...[
-                      Divider(height: 20, color: context.colors.divider),
-                      _buildDetailRow('Méthode', transaction.paymentMethod!),
-                    ],
-                    Divider(height: 20, color: context.colors.divider),
-                    _buildDetailRow(
-                      'Date',
-                      '${transaction.date.day}/${transaction.date.month}/${transaction.date.year} à ${transaction.date.hour}:${transaction.date.minute.toString().padLeft(2, '0')}',
-                    ),
-                    Divider(height: 20, color: context.colors.divider),
-                    _buildDetailRow('Référence', '#${transaction.id.padLeft(8, '0')}'),
-                  ],
-                ),
-              ),
-
-              AppGap.h20,
-
-              // Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Reçu',
-                      variant: ButtonVariant.outline,
-                      icon: Icons.receipt_rounded,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        // Télécharger reçu
-                      },
-                    ),
-                  ),
-                  AppGap.w12,
-                  Expanded(
-                    child: AppButton(
-                      label: 'Signaler',
-                      variant: ButtonVariant.outline,
-                      icon: Icons.flag_rounded,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        // Signaler un problème
-                      },
-                    ),
-                  ),
+              child: Column(children: [
+                _DetailRow('Type', tx.type.label),
+                if (tx.clientName != null) ...[
+                  Divider(height: 1, indent: 16, color: context.colors.divider),
+                  _DetailRow('Client', tx.clientName!),
                 ],
-              ),
-
-              AppGap.h12,
-
-              AppButton(
-                label: 'Fermer',
-                variant: ButtonVariant.ghost,
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          ),
+                if (tx.description != null) ...[
+                  Divider(height: 1, indent: 16, color: context.colors.divider),
+                  _DetailRow('Détail', tx.description!),
+                ],
+                Divider(height: 1, indent: 16, color: context.colors.divider),
+                _DetailRow('Date',
+                    '${tx.date.day.toString().padLeft(2,'0')}/${tx.date.month.toString().padLeft(2,'0')}/${tx.date.year}'),
+                Divider(height: 1, indent: 16, color: context.colors.divider),
+                _DetailRow('Référence', '#${tx.id.padLeft(8, '0')}'),
+              ]),
+            ),
+            AppGap.h20,
+            Row(children: [
+              Expanded(child: AppButton(
+                  label: 'Reçu', variant: ButtonVariant.outline,
+                  icon: Icons.receipt_rounded,
+                  onPressed: () => Navigator.pop(context))),
+              AppGap.w12,
+              Expanded(child: AppButton(
+                  label: 'Signaler', variant: ButtonVariant.outline,
+                  icon: Icons.flag_rounded,
+                  onPressed: () => Navigator.pop(context))),
+            ]),
+            AppGap.h12,
+            AppButton(label: 'Fermer', variant: ButtonVariant.ghost,
+                onPressed: () => Navigator.pop(context)),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: context.text.bodyMedium,
-        ),
-        Flexible(
-          child: Text(
-            value,
-            style: context.text.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showExportSheet() {
+  // ─── Période picker ───────────────────────────────────────────
+  void _showPeriodPicker() {
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
-      builder: (context) {
-        final bottomPad = MediaQuery.of(context).padding.bottom;
-        return Container(
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 4),
-                child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                  ),
-                ),
-              ),
-              AppGap.h16,
-
-
-              // PDF option
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Padding(
-                  padding: AppInsets.h20v12,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.picture_as_pdf_rounded, size: 20, color: AppColors.primary),
-                      ),
-                      AppGap.w14,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('PDF', style: context.text.titleSmall),
-                            AppGap.h2,
-                            Text('Document formaté pour impression', style: context.text.bodySmall),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Divider(height: 1, thickness: 1, color: context.colors.divider, indent: 16, endIndent: 16),
-
-              // CSV option
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Padding(
-                  padding: AppInsets.h20v12,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.table_chart_rounded, size: 20, color: AppColors.primary),
-                      ),
-                      AppGap.w14,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Excel (CSV)', style: context.text.titleSmall),
-                            AppGap.h2,
-                            Text('Tableur pour analyse', style: context.text.bodySmall),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Divider(height: 1, thickness: 1, color: context.colors.divider, indent: 16, endIndent: 16),
-
-              // Email option
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Padding(
-                  padding: AppInsets.h20v12,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: context.colors.surfaceAlt, shape: BoxShape.circle),
-                        child: const Icon(Icons.email_rounded, size: 20, color: AppColors.primary),
-                      ),
-                      AppGap.w14,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Envoyer par email', style: context.text.titleSmall),
-                            AppGap.h2,
-                            Text('Recevoir par email', style: context.text.bodySmall),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Fermer
-              Padding(
-                padding: EdgeInsets.only(top: 12, bottom: 16 + bottomPad),
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Text(
-                    'Fermer',
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textTertiary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildExportOption({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: context.colors.background,
-      borderRadius: BorderRadius.circular(AppRadius.card),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: Container(
-          padding: AppInsets.a16,
-          child: Row(
-            children: [
-              Container(
-                padding: AppInsets.a10,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.input),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              AppGap.w14,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: context.text.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textHint),
-            ],
-          ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: context.colors.sheetBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 36, height: 4,
+                decoration: BoxDecoration(color: context.colors.border,
+                    borderRadius: BorderRadius.circular(99))),
+            AppGap.h20,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Période',
+                  style: context.text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700)),
+            ),
+            AppGap.h16,
+            ..._periods.map((p) {
+              final sel = p == _period;
+              return ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                onTap: () { setState(() => _period = p); Navigator.pop(context); },
+                title: Text(p, style: context.text.bodyMedium?.copyWith(
+                    fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                    color: sel ? context.colors.textPrimary
+                               : context.colors.textSecondary)),
+                trailing: sel
+                    ? Icon(Icons.check_rounded, size: 18,
+                        color: context.colors.textPrimary)
+                    : null,
+              );
+            }),
+          ],
         ),
       ),
     );
   }
 
+  // ─── Export ───────────────────────────────────────────────────
+  void _showExport() {
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: context.colors.sheetBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 36, height: 4,
+                decoration: BoxDecoration(color: context.colors.border,
+                    borderRadius: BorderRadius.circular(99))),
+            AppGap.h20,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Exporter',
+                  style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            ),
+            AppGap.h16,
+            for (final opt in [
+              (Icons.picture_as_pdf_rounded, 'PDF', 'Document formaté'),
+              (Icons.table_chart_rounded, 'Excel (CSV)', 'Tableur pour analyse'),
+              (Icons.email_rounded, 'Email', 'Recevoir par email'),
+            ]) ...[
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(opt.$1, size: 18,
+                      color: context.colors.textSecondary),
+                ),
+                title: Text(opt.$2,
+                    style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600)),
+                subtitle: Text(opt.$3,
+                    style: context.text.bodySmall?.copyWith(
+                        color: context.colors.textTertiary)),
+                trailing: Icon(Icons.arrow_forward_ios_rounded,
+                    size: 14, color: context.colors.textHint),
+                onTap: () => Navigator.pop(context),
+              ),
+              if (opt.$2 != 'Email')
+                Divider(height: 1, color: context.colors.divider),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────
+  String _dateLabel(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day   = DateTime(d.year, d.month, d.day);
+    if (day == today) return "Aujourd'hui";
+    if (day == today.subtract(const Duration(days: 1))) return 'Hier';
+    if (now.difference(d).inDays < 7) {
+      const j = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+      return j[d.weekday - 1];
+    }
+    const m = ['janv.','févr.','mars','avr.','mai','juin',
+                'juil.','août','sept.','oct.','nov.','déc.'];
+    return '${d.day} ${m[d.month - 1]}';
+  }
+}
+
+// ─── Tuile résumé ─────────────────────────────────────────────────────────────
+
+class _SummaryTile extends StatelessWidget {
+  final String label;
+  final double amount;
+  final bool positive;
+  final bool highlight;
+
+  const _SummaryTile({
+    required this.label,
+    required this.amount,
+    required this.positive,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final amtColor = highlight
+        ? AppColors.warning
+        : positive
+            ? AppColors.primary
+            : context.colors.textPrimary;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceAlt,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: context.text.labelSmall?.copyWith(
+                  color: context.colors.textTertiary,
+                  fontWeight: FontWeight.w500)),
+          AppGap.h6,
+          Text(
+            '${positive ? '+' : '−'}${amount.toStringAsFixed(0)} €',
+            style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700, color: amtColor),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Ligne détail ─────────────────────────────────────────────────────────────
+
+class _DetailRow extends StatelessWidget {
+  final String label, value;
+  const _DetailRow(this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: context.text.bodySmall?.copyWith(
+                  color: context.colors.textTertiary)),
+          Flexible(
+            child: Text(value,
+                style: context.text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary),
+                textAlign: TextAlign.right),
+          ),
+        ],
+      ),
+    );
+  }
 }
