@@ -104,7 +104,7 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent>
           controller: _discoverTabController,
           tabs: const [
             AppSegmentedTab(icon: Icons.home_rounded, label: 'Home'),
-            AppSegmentedTab(icon: Icons.search_rounded, label: 'Chercher freelancer'),
+            AppSegmentedTab(icon: Icons.search_rounded, label: 'Freelancer'),
           ],
         ),
       ),

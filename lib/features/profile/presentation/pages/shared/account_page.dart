@@ -117,7 +117,7 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 _AccountMenuTile(
                   icon: Icons.credit_card_outlined,
-                  title: 'Moyens de paiement',
+                  title: 'Finance',
                   subtitle: isFreelancer ? 'IBAN •••• 1234' : 'Visa •••• 4242',
                   onTap: () => Navigator.push(
                     context,

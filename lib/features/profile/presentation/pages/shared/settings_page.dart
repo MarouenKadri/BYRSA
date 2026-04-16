@@ -70,7 +70,7 @@ class SettingsPage extends StatelessWidget {
               ),
               _SettingsItem(
                 icon: Icons.credit_card_rounded,
-                title: 'Moyens de paiement',
+                title: 'Finance',
                 subtitle: '•••• 4242',
                 onTap: () {},
               ),

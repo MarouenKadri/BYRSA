@@ -4,9 +4,6 @@ import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/transaction.dart';
 import '../../widgets/shared/payment_common_widgets.dart';
 
-/// ─────────────────────────────────────────────────────────────
-/// Historique des paiements — Freelancer  (minimaliste)
-/// ─────────────────────────────────────────────────────────────
 class PaymentHistoryPage extends StatefulWidget {
   final bool embedded;
   const PaymentHistoryPage({super.key, this.embedded = false});
@@ -69,7 +66,6 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
         description: 'Remboursement mission annulée'),
   ];
 
-  // ─── Computed ────────────────────────────────────────────────
   List<Transaction> get _filtered => _txs.where((t) {
     return switch (_filter) {
       'Revenus'  => t.type == TransactionType.income
@@ -83,8 +79,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
   }).toList();
 
   double get _totalRevenu => _txs
-      .where((t) => t.type == TransactionType.income
-                 && t.status == TransactionStatus.completed)
+      .where((t) => t.type == TransactionType.income && t.status == TransactionStatus.completed)
       .fold(0.0, (s, t) => s + t.amount);
 
   double get _totalEnAttente => _txs
@@ -92,20 +87,16 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
       .fold(0.0, (s, t) => s + t.amount);
 
   double get _totalRetrait => _txs
-      .where((t) => t.type == TransactionType.withdrawal
-                 && t.status == TransactionStatus.completed)
+      .where((t) => t.type == TransactionType.withdrawal && t.status == TransactionStatus.completed)
       .fold(0.0, (s, t) => s + t.amount);
 
-  // ─── Build ────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final body = Column(
       children: [
         _buildHeader(context),
         Expanded(
-          child: _filtered.isEmpty
-              ? _buildEmpty(context)
-              : _buildList(context),
+          child: _filtered.isEmpty ? _buildEmpty(context) : _buildList(context),
         ),
       ],
     );
@@ -119,8 +110,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
         titleWidget: Text('Historique', style: context.profilePageTitleStyle),
         actions: [
           IconButton(
-            icon: Icon(Icons.download_rounded,
-                color: context.colors.textPrimary, size: 20),
+            icon: Icon(Icons.download_rounded, color: context.colors.textPrimary, size: 20),
             onPressed: _showExport,
           ),
         ],
@@ -129,69 +119,89 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  // ─── Header ───────────────────────────────────────────────────
+  // ─── Header ───────────────────────────────────────────────────────────────
+
   Widget _buildHeader(BuildContext context) {
     return Container(
-      color: context.colors.surface,
+      color: context.colors.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Résumé 3 tuiles ──
+          // ── Résumé compact ──
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-            child: Row(children: [
-              Expanded(child: _SummaryTile(
-                  label: 'Revenus', amount: _totalRevenu, positive: true)),
-              AppGap.w10,
-              Expanded(child: _SummaryTile(
-                  label: 'En attente', amount: _totalEnAttente,
-                  positive: true, highlight: true)),
-              AppGap.w10,
-              Expanded(child: _SummaryTile(
-                  label: 'Retraits', amount: _totalRetrait, positive: false)),
-            ]),
+            child: _SummaryStrip(
+              totalRevenu: _totalRevenu,
+              totalEnAttente: _totalEnAttente,
+              totalRetrait: _totalRetrait,
+            ),
           ),
-          // ── Sélecteur période ──
+          // ── Période + export ──
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: GestureDetector(
-              onTap: _showPeriodPicker,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: context.colors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: context.colors.border),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _showPeriodPicker,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: context.colors.surface,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: context.colors.border),
+                      ),
+                      child: Row(children: [
+                        Icon(Icons.calendar_today_rounded, size: 14,
+                            color: context.colors.textTertiary),
+                        AppGap.w8,
+                        Text(_period,
+                            style: context.text.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: context.colors.textSecondary)),
+                        const Spacer(),
+                        Icon(Icons.expand_more_rounded, size: 16,
+                            color: context.colors.textTertiary),
+                      ]),
+                    ),
+                  ),
                 ),
-                child: Row(children: [
-                  Icon(Icons.calendar_today_rounded, size: 15,
-                      color: context.colors.textTertiary),
-                  AppGap.w8,
-                  Text(_period,
-                      style: context.text.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500)),
-                  const Spacer(),
-                  Icon(Icons.expand_more_rounded, size: 18,
-                      color: context.colors.textTertiary),
-                ]),
-              ),
+                if (!widget.embedded) ...[
+                  AppGap.w10,
+                  GestureDetector(
+                    onTap: _showExport,
+                    child: Container(
+                      width: 38, height: 38,
+                      decoration: BoxDecoration(
+                        color: context.colors.surface,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: context.colors.border),
+                      ),
+                      child: Icon(Icons.download_rounded, size: 16,
+                          color: context.colors.textSecondary),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           // ── Filtres ──
           Padding(
-            padding: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.only(bottom: 12),
             child: PaymentFilterPills(
               filters: _filters,
               selected: _filter,
               onChanged: (f) => setState(() => _filter = f),
             ),
           ),
+          Divider(height: 1, color: context.colors.divider),
         ],
       ),
     );
   }
 
-  // ─── Liste groupée par date ───────────────────────────────────
+  // ─── Liste groupée ────────────────────────────────────────────────────────
+
   Widget _buildList(BuildContext context) {
     final grouped = <String, List<Transaction>>{};
     for (final t in _filtered) {
@@ -199,7 +209,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
       itemCount: grouped.length,
       itemBuilder: (ctx, i) {
         final key = grouped.keys.elementAt(i);
@@ -208,25 +218,31 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(bottom: 10, top: i == 0 ? 0 : 16),
-              child: Text(key,
-                  style: context.text.bodySmall?.copyWith(
-                      color: context.colors.textTertiary,
-                      fontWeight: FontWeight.w600)),
+              padding: EdgeInsets.only(bottom: 8, top: i == 0 ? 0 : 20),
+              child: Text(
+                key,
+                style: context.text.labelSmall?.copyWith(
+                  color: context.colors.textTertiary,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ),
             Container(
               decoration: BoxDecoration(
                 color: context.colors.surface,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: context.colors.border),
               ),
               child: Column(
                 children: List.generate(list.length, (j) => Column(
                   children: [
-                    _buildTile(context, list[j]),
+                    _TxTile(
+                      tx: list[j],
+                      onTap: () => _showDetail(context, list[j]),
+                    ),
                     if (j < list.length - 1)
-                      Divider(height: 1, indent: 70,
-                          color: context.colors.divider),
+                      Divider(height: 1, indent: 64, endIndent: 0, color: context.colors.divider),
                   ],
                 )),
               ),
@@ -237,53 +253,34 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  Widget _buildTile(BuildContext context, Transaction tx) {
-    final isHeld = tx.type == TransactionType.held;
-    final isPos  = tx.type.isPositive;
-
-    final icon   = tx.type.icon;
-    final title  = tx.missionTitle ?? tx.type.label;
-    final sub    = tx.clientName ?? tx.description ?? '';
-    final amount = '${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €';
-
-    String? badge;
-    Color?  badgeColor;
-    if (isHeld) {
-      badge = 'Versement sous 24h';
-      badgeColor = AppColors.warning;
-    } else if (tx.status != TransactionStatus.completed) {
-      badge = tx.status.label;
-      badgeColor = context.colors.textTertiary;
-    }
-
-    return PaymentTxTile(
-      icon: icon,
-      title: title,
-      subtitle: sub,
-      amount: amount,
-      isPositive: isPos && !isHeld,
-      badge: badge,
-      badgeColor: badgeColor,
-      onTap: () => _showDetail(context, tx),
-    );
-  }
-
   Widget _buildEmpty(BuildContext context) {
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.receipt_long_rounded, size: 36,
-            color: context.colors.textHint),
-        AppGap.h12,
+        Container(
+          width: 60, height: 60,
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: context.colors.border),
+          ),
+          child: Icon(Icons.receipt_long_rounded, size: 26, color: context.colors.textHint),
+        ),
+        AppGap.h14,
         Text('Aucune transaction',
             style: context.text.bodyMedium?.copyWith(
-                color: context.colors.textTertiary)),
+                color: context.colors.textSecondary, fontWeight: FontWeight.w500)),
+        AppGap.h4,
+        Text('Rien à afficher pour cette période',
+            style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary)),
       ]),
     );
   }
 
-  // ─── Sheet détail ─────────────────────────────────────────────
+  // ─── Sheet détail ─────────────────────────────────────────────────────────
+
   void _showDetail(BuildContext context, Transaction tx) {
     final isPos = tx.type.isPositive;
+    final isHeld = tx.type == TransactionType.held;
     showAppBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -297,36 +294,60 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 36, height: 4,
-                decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(99))),
+            // ── Handle ──
+            Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: context.colors.border,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
             AppGap.h24,
+            // ── Icône ──
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: context.colors.surfaceAlt,
+                shape: BoxShape.circle,
+                border: Border.all(color: context.colors.border),
+              ),
+              child: Icon(tx.type.icon, size: 22, color: context.colors.textSecondary),
+            ),
+            AppGap.h14,
+            // ── Montant ──
             Text(
               '${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
               style: context.text.displaySmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: isPos ? AppColors.primary : context.colors.textPrimary),
+                fontWeight: FontWeight.w800,
+                color: isHeld
+                    ? context.colors.textSecondary
+                    : context.colors.textPrimary,
+              ),
             ),
             AppGap.h4,
-            Text(tx.missionTitle ?? tx.type.label,
-                style: context.text.bodyMedium?.copyWith(
-                    color: context.colors.textSecondary)),
-            AppGap.h6,
+            Text(
+              tx.missionTitle ?? tx.type.label,
+              style: context.text.bodyMedium?.copyWith(color: context.colors.textSecondary),
+            ),
+            AppGap.h8,
+            // ── Statut badge ──
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                color: tx.status.color.withValues(alpha: 0.1),
+                color: context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(99),
-                border: Border.all(
-                    color: tx.status.color.withValues(alpha: 0.3)),
+                border: Border.all(color: context.colors.border),
               ),
-              child: Text(tx.status.label,
-                  style: context.text.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: tx.status.color)),
+              child: Text(
+                tx.status.label,
+                style: context.text.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textSecondary,
+                ),
+              ),
             ),
             AppGap.h24,
+            // ── Détails ──
             Container(
               decoration: BoxDecoration(
                 color: context.colors.surfaceAlt,
@@ -363,7 +384,9 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                   onPressed: () => Navigator.pop(context))),
             ]),
             AppGap.h12,
-            AppButton(label: 'Fermer', variant: ButtonVariant.ghost,
+            AppButton(
+                label: 'Fermer',
+                variant: ButtonVariant.ghost,
                 onPressed: () => Navigator.pop(context)),
           ],
         ),
@@ -371,7 +394,8 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  // ─── Période picker ───────────────────────────────────────────
+  // ─── Période picker ───────────────────────────────────────────────────────
+
   void _showPeriodPicker() {
     showAppBottomSheet(
       context: context,
@@ -392,24 +416,27 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text('Période',
-                  style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700)),
+                  style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             ),
-            AppGap.h16,
+            AppGap.h12,
             ..._periods.map((p) {
               final sel = p == _period;
-              return ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                onTap: () { setState(() => _period = p); Navigator.pop(context); },
-                title: Text(p, style: context.text.bodyMedium?.copyWith(
-                    fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-                    color: sel ? context.colors.textPrimary
-                               : context.colors.textSecondary)),
-                trailing: sel
-                    ? Icon(Icons.check_rounded, size: 18,
-                        color: context.colors.textPrimary)
-                    : null,
+              return Column(
+                children: [
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () { setState(() => _period = p); Navigator.pop(context); },
+                    title: Text(p, style: context.text.bodyMedium?.copyWith(
+                        fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                        color: sel ? context.colors.textPrimary : context.colors.textSecondary)),
+                    trailing: sel
+                        ? Icon(Icons.check_rounded, size: 18, color: context.colors.textPrimary)
+                        : null,
+                  ),
+                  if (p != _periods.last)
+                    Divider(height: 1, color: context.colors.divider),
+                ],
               );
             }),
           ],
@@ -418,7 +445,8 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  // ─── Export ───────────────────────────────────────────────────
+  // ─── Export ───────────────────────────────────────────────────────────────
+
   void _showExport() {
     showAppBottomSheet(
       context: context,
@@ -438,8 +466,14 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
             AppGap.h20,
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Exporter',
+              child: Text('Exporter l\'historique',
                   style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            ),
+            AppGap.h4,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Période : $_period',
+                  style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary)),
             ),
             AppGap.h16,
             for (final opt in [
@@ -451,22 +485,17 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: Container(
-                  width: 36, height: 36,
+                  width: 38, height: 38,
                   decoration: BoxDecoration(
                     color: context.colors.surfaceAlt,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: context.colors.border),
                   ),
-                  child: Icon(opt.$1, size: 18,
-                      color: context.colors.textSecondary),
+                  child: Icon(opt.$1, size: 17, color: context.colors.textSecondary),
                 ),
-                title: Text(opt.$2,
-                    style: context.text.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600)),
-                subtitle: Text(opt.$3,
-                    style: context.text.bodySmall?.copyWith(
-                        color: context.colors.textTertiary)),
-                trailing: Icon(Icons.arrow_forward_ios_rounded,
-                    size: 14, color: context.colors.textHint),
+                title: Text(opt.$2, style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                subtitle: Text(opt.$3, style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary)),
+                trailing: Icon(Icons.arrow_forward_ios_rounded, size: 13, color: context.colors.textHint),
                 onTap: () => Navigator.pop(context),
               ),
               if (opt.$2 != 'Email')
@@ -478,73 +507,195 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
     );
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
   String _dateLabel(DateTime d) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final day   = DateTime(d.year, d.month, d.day);
+    final day = DateTime(d.year, d.month, d.day);
     if (day == today) return "Aujourd'hui";
     if (day == today.subtract(const Duration(days: 1))) return 'Hier';
     if (now.difference(d).inDays < 7) {
-      const j = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+      const j = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
       return j[d.weekday - 1];
     }
-    const m = ['janv.','févr.','mars','avr.','mai','juin',
-                'juil.','août','sept.','oct.','nov.','déc.'];
+    const m = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
     return '${d.day} ${m[d.month - 1]}';
   }
 }
 
-// ─── Tuile résumé ─────────────────────────────────────────────────────────────
+// ─── Strip résumé (bande horizontale) ────────────────────────────────────────
 
-class _SummaryTile extends StatelessWidget {
-  final String label;
-  final double amount;
-  final bool positive;
-  final bool highlight;
+class _SummaryStrip extends StatelessWidget {
+  final double totalRevenu;
+  final double totalEnAttente;
+  final double totalRetrait;
 
-  const _SummaryTile({
-    required this.label,
-    required this.amount,
-    required this.positive,
-    this.highlight = false,
+  const _SummaryStrip({
+    required this.totalRevenu,
+    required this.totalEnAttente,
+    required this.totalRetrait,
   });
 
   @override
   Widget build(BuildContext context) {
-    final amtColor = highlight
-        ? AppColors.warning
-        : positive
-            ? AppColors.primary
-            : context.colors.textPrimary;
-
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(12),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.colors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: context.text.labelSmall?.copyWith(
-                  color: context.colors.textTertiary,
-                  fontWeight: FontWeight.w500)),
-          AppGap.h6,
-          Text(
-            '${positive ? '+' : '−'}${amount.toStringAsFixed(0)} €',
-            style: context.text.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700, color: amtColor),
-          ),
-        ],
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            _StatCell(label: 'Revenus', value: '+${totalRevenu.toStringAsFixed(0)} €',
+                valueColor: context.colors.textPrimary),
+            VerticalDivider(width: 1, color: context.colors.divider),
+            _StatCell(label: 'En attente', value: '${totalEnAttente.toStringAsFixed(0)} €',
+                valueColor: context.colors.textSecondary),
+            VerticalDivider(width: 1, color: context.colors.divider),
+            _StatCell(label: 'Retraits', value: '−${totalRetrait.toStringAsFixed(0)} €',
+                valueColor: context.colors.textSecondary),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ─── Ligne détail ─────────────────────────────────────────────────────────────
+class _StatCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  const _StatCell({required this.label, required this.value, required this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: context.text.labelSmall?.copyWith(
+                    color: context.colors.textTertiary, fontWeight: FontWeight.w500)),
+            AppGap.h5,
+            Text(value,
+                style: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700, color: valueColor)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Tile transaction (redesign minimaliste) ──────────────────────────────────
+
+class _TxTile extends StatelessWidget {
+  final Transaction tx;
+  final VoidCallback onTap;
+
+  const _TxTile({required this.tx, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPos = tx.type.isPositive;
+    final isHeld = tx.type == TransactionType.held;
+    final amountStr = '${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €';
+    final title = tx.missionTitle ?? tx.type.label;
+    final subtitle = tx.clientName ?? tx.description ?? '';
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            // ─── Icône ───
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                color: context.colors.surfaceAlt,
+                borderRadius: BorderRadius.circular(11),
+                border: Border.all(color: context.colors.border),
+              ),
+              child: Icon(tx.type.icon, size: 17, color: context.colors.textSecondary),
+            ),
+            AppGap.w12,
+            // ─── Texte ───
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: context.text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  if (subtitle.isNotEmpty) ...[
+                    AppGap.h2,
+                    Text(subtitle,
+                        style: context.text.bodySmall?.copyWith(
+                            color: context.colors.textTertiary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ],
+                ],
+              ),
+            ),
+            AppGap.w12,
+            // ─── Montant + statut ───
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amountStr,
+                  style: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: isHeld
+                        ? context.colors.textSecondary
+                        : isPos
+                            ? context.colors.textPrimary
+                            : context.colors.textSecondary,
+                  ),
+                ),
+                if (isHeld) ...[
+                  AppGap.h3,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: context.colors.border),
+                    ),
+                    child: Text('Sous 24h',
+                        style: context.text.labelSmall?.copyWith(
+                            fontSize: 10,
+                            color: context.colors.textTertiary,
+                            fontWeight: FontWeight.w500)),
+                  ),
+                ] else if (tx.status != TransactionStatus.completed) ...[
+                  AppGap.h3,
+                  Text(tx.status.label,
+                      style: context.text.labelSmall?.copyWith(
+                          color: context.colors.textTertiary,
+                          fontWeight: FontWeight.w400)),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Ligne de détail ─────────────────────────────────────────────────────────
 
 class _DetailRow extends StatelessWidget {
   final String label, value;
@@ -558,13 +709,11 @@ class _DetailRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: context.text.bodySmall?.copyWith(
-                  color: context.colors.textTertiary)),
+              style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary)),
           Flexible(
             child: Text(value,
                 style: context.text.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textPrimary),
+                    fontWeight: FontWeight.w600, color: context.colors.textPrimary),
                 textAlign: TextAlign.right),
           ),
         ],
