@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
@@ -251,25 +252,19 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
   // ── Tab pills ─────────────────────────────────────────────────────────────
 
   Widget _buildTabPills(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      child: Row(
-        children: [
-          ProfileTabPill(
-            label: 'Information',
-            icon: Icons.info_outline_rounded,
-            active: _activeTab == _ProfileContentTab.information,
-            onTap: () => _selectTab(_ProfileContentTab.information),
-          ),
-          AppGap.w10,
-          ProfileTabPill(
-            label: '${profileRating.toStringAsFixed(1)} · $profileReviewsCount avis',
-            icon: Icons.star_rounded,
-            active: _activeTab == _ProfileContentTab.reviews,
-            onTap: () => _selectTab(_ProfileContentTab.reviews),
-          ),
-        ],
-      ),
+    return AppSegmentedTabBar(
+      tabs: [
+        const AppSegmentedTab(
+          icon: Icons.info_outline_rounded,
+          label: 'Information',
+        ),
+        AppSegmentedTab(
+          icon: Icons.star_rounded,
+          label: '${profileRating.toStringAsFixed(1)} · $profileReviewsCount avis',
+        ),
+      ],
+      selectedIndex: _activeTab.index,
+      onChanged: (i) => _selectTab(_ProfileContentTab.values[i]),
     );
   }
 

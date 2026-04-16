@@ -7,14 +7,16 @@ class FreelancerPreviewCard extends StatelessWidget {
   final Freelancer freelancer;
   final VoidCallback? onTap;
   final double? width;
-  final double? height;
+  final int missionsCount;
+  final int reviewsCount;
 
   const FreelancerPreviewCard({
     super.key,
     required this.freelancer,
     this.onTap,
-    this.width = 130,
-    this.height,
+    this.width,
+    this.missionsCount = 0,
+    this.reviewsCount = 0,
   });
 
   @override
@@ -23,118 +25,173 @@ class FreelancerPreviewCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        height: height,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.cardLg),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.14),
-              blurRadius: 18,
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 22,
               offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.cardLg),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              freelancer.imageUrl.isNotEmpty
-                  ? Image.network(
-                      freelancer.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          _AvatarFallback(name: freelancer.name),
-                    )
-                  : _AvatarFallback(name: freelancer.name),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.35, 1.0],
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.78),
-                      ],
-                    ),
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Photo ──────────────────────────────────────────────
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              child: AspectRatio(
+                aspectRatio: 1.05,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    freelancer.imageUrl.isNotEmpty
+                        ? Image.network(
+                            freelancer.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _AvatarFallback(name: freelancer.name),
+                          )
+                        : _AvatarFallback(name: freelancer.name),
+                    // Badge vérifié
+                    if (freelancer.isVerified)
+                      Positioned(
+                        top: 9,
+                        right: 9,
+                        child: Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.96),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              if (freelancer.isVerified)
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.92),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.verified_rounded,
-                      size: 13,
-                      color: AppColors.primary,
+            ),
+
+            // ── Infos ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(11, 10, 11, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nom
+                  Text(
+                    freelancer.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF101418),
+                      height: 1.2,
                     ),
                   ),
-                ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                  // Spécialité
+                  if (freelancer.subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      freelancer.subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF8E959D),
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 7),
+
+                  // Étoiles + avis
+                  Row(
                     children: [
-                      Text(
-                        freelancer.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 12,
-                            color: AppColors.amber,
+                      ...List.generate(5, (i) {
+                        final filled = freelancer.rating > 0
+                            ? freelancer.rating >= i + 1
+                            : false;
+                        return Icon(
+                          Icons.star_rounded,
+                          size: 12,
+                          color: filled
+                              ? AppColors.amber
+                              : const Color(0xFFE4E6E9),
+                        );
+                      }),
+                      if (reviewsCount > 0) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '($reviewsCount)',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF8E959D),
                           ),
-                          const SizedBox(width: 3),
-                          Text(
-                            freelancer.rating.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: AppFontSize.xs,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        freelancer.job,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: AppFontSize.tiny,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.85),
                         ),
-                      ),
+                      ],
                     ],
                   ),
-                ),
+
+                  const SizedBox(height: 8),
+
+                  // Divider
+                  const Divider(height: 1, color: Color(0xFFF0F1F3)),
+
+                  const SizedBox(height: 8),
+
+                  // Tarif + missions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          freelancer.job,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF101418),
+                          ),
+                        ),
+                      ),
+                      if (missionsCount > 0) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '$missionsCount missions',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF8E959D),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -160,16 +217,16 @@ class _AvatarFallback extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.25),
-            AppColors.primary.withValues(alpha: 0.08),
+            AppColors.primary.withValues(alpha: 0.18),
+            AppColors.primary.withValues(alpha: 0.06),
           ],
         ),
       ),
       child: Center(
         child: Text(
           initials.isEmpty ? '?' : initials,
-          style: TextStyle(
-            fontSize: AppFontSize.h3,
+          style: const TextStyle(
+            fontSize: 28,
             fontWeight: FontWeight.w700,
             color: AppColors.primary,
           ),

@@ -78,12 +78,7 @@ class _AppSectionBarState extends State<AppSectionBar>
           widget.pageTitle ?? 'Byrsa',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            color: context.colors.textPrimary,
-            letterSpacing: -0.3,
-          ),
+          style: context.appBarTitleStyle,
         ),
       ),
       actions: [

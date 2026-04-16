@@ -24,7 +24,7 @@ class ClientMyMissionsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: context.colors.background,
         appBar: AppSectionBar(
@@ -33,6 +33,10 @@ class ClientMyMissionsContent extends StatelessWidget {
           bottom: const AppSegmentedTabBar(
             tabs: [
               AppSegmentedTab(icon: Icons.campaign_rounded, label: 'Publiées'),
+              AppSegmentedTab(
+                icon: Icons.check_circle_outline_rounded,
+                label: 'Confirmées',
+              ),
               AppSegmentedTab(
                 icon: Icons.play_circle_outline_rounded,
                 label: 'En cours',
@@ -43,6 +47,7 @@ class ClientMyMissionsContent extends StatelessWidget {
         body: const TabBarView(
           children: [
             _ClientMissionTab(filter: _ClientTabFilter.published),
+            _ClientMissionTab(filter: _ClientTabFilter.confirmed),
             _ClientMissionTab(filter: _ClientTabFilter.inProgress),
           ],
         ),
@@ -51,11 +56,12 @@ class ClientMyMissionsContent extends StatelessWidget {
   }
 }
 
-enum _ClientTabFilter { published, inProgress }
+enum _ClientTabFilter { published, confirmed, inProgress }
 
 extension _ClientTabFilterX on _ClientTabFilter {
   MissionUiTab get uiTab => switch (this) {
-    _ClientTabFilter.published => MissionUiTab.published,
+    _ClientTabFilter.published  => MissionUiTab.published,
+    _ClientTabFilter.confirmed  => MissionUiTab.confirmed,
     _ClientTabFilter.inProgress => MissionUiTab.inProgress,
   };
 }
@@ -80,8 +86,8 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
   }
 
   List<Mission> _filter(List<Mission> all) {
-    return all.where((m) => MissionStatusUi.belongsToTab(
-      status: m.status,
+    return all.where((m) => MissionStatusUi.missionBelongsToTab(
+      mission: m,
       role: MissionUiRole.client,
       tab: widget.filter.uiTab,
     )).toList();
@@ -122,6 +128,7 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
                   extra: widget.filter == _ClientTabFilter.published
                       ? _CandidatesBadge(count: missions[index].candidatesCount)
                       : null,
+
                 ),
               ),
             ),
@@ -129,18 +136,21 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
   }
 
   IconData get _emptyIcon => switch (widget.filter) {
-    _ClientTabFilter.published   => Icons.assignment_outlined,
-    _ClientTabFilter.inProgress  => Icons.work_outline_rounded,
+    _ClientTabFilter.published  => Icons.assignment_outlined,
+    _ClientTabFilter.confirmed  => Icons.check_circle_outline_rounded,
+    _ClientTabFilter.inProgress => Icons.work_outline_rounded,
   };
 
   String get _emptyTitle => switch (widget.filter) {
-    _ClientTabFilter.published   => 'Aucune mission publiée',
-    _ClientTabFilter.inProgress  => 'Aucune mission en cours',
+    _ClientTabFilter.published  => 'Aucune mission publiée',
+    _ClientTabFilter.confirmed  => 'Aucune mission confirmée',
+    _ClientTabFilter.inProgress => 'Aucune mission en cours',
   };
 
   String get _emptySubtitle => switch (widget.filter) {
-    _ClientTabFilter.published   => 'Créez une mission pour trouver un prestataire',
-    _ClientTabFilter.inProgress  => 'Vos missions acceptées apparaîtront ici',
+    _ClientTabFilter.published  => 'Créez une mission pour trouver un prestataire',
+    _ClientTabFilter.confirmed  => 'Les missions avec un prestataire choisi apparaîtront ici',
+    _ClientTabFilter.inProgress => 'Vos missions acceptées apparaîtront ici',
   };
 }
 

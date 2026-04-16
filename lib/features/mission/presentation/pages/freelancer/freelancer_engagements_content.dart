@@ -19,23 +19,31 @@ class FreelancerEngagementsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
-        backgroundColor: AppColors.snow,
+        backgroundColor: context.colors.background,
         appBar: AppSectionBar(
           pageTitle: 'Mes missions',
           onGoToAccount: onGoToAccount,
-          bottom: const AppSegmentedTabBar(
-            tabs: [
-              AppSegmentedTab(label: 'Postulees'),
-              AppSegmentedTab(label: 'En cours'),
-            ],
-          ),
         ),
-        body: const TabBarView(
+        body: const Column(
           children: [
-            _MissionTab(filter: _TabFilter.applied),
-            _MissionTab(filter: _TabFilter.inProgress),
+            AppSegmentedTabBar(
+              tabs: [
+                AppSegmentedTab(icon: Icons.send_rounded, label: 'Postulées'),
+                AppSegmentedTab(icon: Icons.check_circle_outline_rounded, label: 'Confirmées'),
+                AppSegmentedTab(icon: Icons.play_circle_outline_rounded, label: 'En cours'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _MissionTab(filter: _TabFilter.applied),
+                  _MissionTab(filter: _TabFilter.confirmed),
+                  _MissionTab(filter: _TabFilter.inProgress),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -43,11 +51,12 @@ class FreelancerEngagementsContent extends StatelessWidget {
   }
 }
 
-enum _TabFilter { applied, inProgress }
+enum _TabFilter { applied, confirmed, inProgress }
 
 extension _TabFilterX on _TabFilter {
   MissionUiTab get uiTab => switch (this) {
-    _TabFilter.applied => MissionUiTab.applied,
+    _TabFilter.applied    => MissionUiTab.applied,
+    _TabFilter.confirmed  => MissionUiTab.confirmed,
     _TabFilter.inProgress => MissionUiTab.inProgress,
   };
 }
@@ -77,8 +86,8 @@ class _MissionTabState extends State<_MissionTab> {
   List<Mission> _filter(List<Mission> all) {
     return all
         .where(
-          (m) => MissionStatusUi.belongsToTab(
-            status: m.status,
+          (m) => MissionStatusUi.missionBelongsToTab(
+            mission: m,
             role: MissionUiRole.freelancer,
             tab: widget.filter.uiTab,
           ),
@@ -135,17 +144,20 @@ class _MissionTabState extends State<_MissionTab> {
   }
 
   IconData get _emptyIcon => switch (widget.filter) {
-    _TabFilter.applied => Icons.send_outlined,
+    _TabFilter.applied    => Icons.send_outlined,
+    _TabFilter.confirmed  => Icons.check_circle_outline_rounded,
     _TabFilter.inProgress => Icons.work_outline_rounded,
   };
 
   String get _emptyTitle => switch (widget.filter) {
-    _TabFilter.applied => 'Aucune candidature',
+    _TabFilter.applied    => 'Aucune candidature',
+    _TabFilter.confirmed  => 'Aucune mission confirmée',
     _TabFilter.inProgress => 'Aucune mission en cours',
   };
 
   String get _emptySubtitle => switch (widget.filter) {
-    _TabFilter.applied => 'Explorez les missions disponibles et postulez',
-    _TabFilter.inProgress => 'Vos missions confirmees apparaitront ici',
+    _TabFilter.applied    => 'Explorez les missions disponibles et postulez',
+    _TabFilter.confirmed  => 'Les missions où vous avez été sélectionné apparaîtront ici',
+    _TabFilter.inProgress => 'Vos missions démarrées apparaîtront ici',
   };
 }

@@ -57,7 +57,7 @@ class AppPageAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.bottom,
     this.centerTitle = false,
-    this.showBorder = true,
+    this.showBorder = false,
     this.backgroundColor,
     this.toolbarHeight = kToolbarHeight,
   });
@@ -86,7 +86,9 @@ class AppPageAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: backgroundColor ?? context.colors.background,
       elevation: 0,
+      shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       centerTitle: centerTitle,
       toolbarHeight: toolbarHeight,

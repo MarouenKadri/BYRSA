@@ -1,9 +1,32 @@
 import '../../../data/models/mission.dart';
 
 enum MissionUiRole { client, freelancer }
-enum MissionUiTab { published, applied, inProgress, archived }
+enum MissionUiTab { published, applied, confirmed, inProgress, archived }
 
 class MissionStatusUi {
+  /// Vérifie si une mission (avec sa date) appartient à un tab donné.
+  ///
+  /// Règle de promotion automatique :
+  ///   Une mission `prestaChosen` ou `confirmed` dont la date est aujourd'hui
+  ///   ou passée est promue dans "En cours" et retirée de "Confirmées".
+  static bool missionBelongsToTab({
+    required Mission mission,
+    required MissionUiRole role,
+    required MissionUiTab tab,
+  }) {
+    final isConfirmedStatus =
+        mission.status == MissionStatus.prestaChosen ||
+        mission.status == MissionStatus.confirmed;
+
+    if (isConfirmedStatus && _isScheduledNowOrPast(mission.date)) {
+      // Promue → "En cours", disparaît de "Confirmées"
+      return tab == MissionUiTab.inProgress;
+    }
+
+    return belongsToTab(status: mission.status, role: role, tab: tab);
+  }
+
+  /// Version statut seul (sans date) — utilisée pour les badges et labels.
   static bool belongsToTab({
     required MissionStatus status,
     required MissionUiRole role,
@@ -15,10 +38,11 @@ class MissionStatusUi {
           case MissionUiTab.published:
             return status == MissionStatus.waitingCandidates ||
                 status == MissionStatus.candidateReceived;
-          case MissionUiTab.inProgress:
+          case MissionUiTab.confirmed:
             return status == MissionStatus.prestaChosen ||
-                status == MissionStatus.confirmed ||
-                status == MissionStatus.onTheWay ||
+                status == MissionStatus.confirmed;
+          case MissionUiTab.inProgress:
+            return status == MissionStatus.onTheWay ||
                 status == MissionStatus.inProgress ||
                 status == MissionStatus.completionRequested ||
                 status == MissionStatus.completed ||
@@ -34,11 +58,12 @@ class MissionStatusUi {
       case MissionUiRole.freelancer:
         switch (tab) {
           case MissionUiTab.applied:
-            return status == MissionStatus.candidateReceived ||
-                status == MissionStatus.prestaChosen;
+            return status == MissionStatus.candidateReceived;
+          case MissionUiTab.confirmed:
+            return status == MissionStatus.prestaChosen ||
+                status == MissionStatus.confirmed;
           case MissionUiTab.inProgress:
-            return status == MissionStatus.confirmed ||
-                status == MissionStatus.onTheWay ||
+            return status == MissionStatus.onTheWay ||
                 status == MissionStatus.inProgress ||
                 status == MissionStatus.completionRequested ||
                 status == MissionStatus.completed ||
@@ -52,6 +77,14 @@ class MissionStatusUi {
             return false;
         }
     }
+  }
+
+  /// Vrai si la date planifiée est aujourd'hui ou dans le passé.
+  static bool _isScheduledNowOrPast(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final missionDay = DateTime(date.year, date.month, date.day);
+    return !missionDay.isAfter(today);
   }
 
   static String badgeLabel({

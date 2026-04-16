@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
@@ -552,10 +553,10 @@ extension AppAccountTextStyles on BuildContext {
 }
 
 extension AppBarTextStyles on BuildContext {
-  TextStyle get appBarTitleStyle => text.titleLarge!.copyWith(
-    fontSize: AppFontSize.xl,
+  TextStyle get appBarTitleStyle => GoogleFonts.plusJakartaSans(
+    fontSize: 18,
     fontWeight: FontWeight.w700,
-    color: colors.textPrimary,
+    color: const Color(0xFF121420),
   );
 
   TextStyle get appBarSubtitleStyle => text.labelMedium!.copyWith(

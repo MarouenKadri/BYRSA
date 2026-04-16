@@ -236,6 +236,7 @@ class SupabaseMissionRepository implements MissionRepository {
   ) async {
     if (_userId == null) return;
     try {
+      // 1. Enregistrer la candidature
       await _supabase.from('candidates').upsert({
         'mission_id': missionId,
         'freelancer_id': _userId!,
@@ -243,6 +244,14 @@ class SupabaseMissionRepository implements MissionRepository {
         'message': message,
         'status': 'en_attente',
       }, onConflict: 'mission_id,freelancer_id');
+
+      // 2. Passer la mission en candidate_received si elle était encore en attente
+      //    (seulement si aucun candidat n'avait encore postulé)
+      await _supabase
+          .from('missions')
+          .update({'status': 'candidate_received'})
+          .eq('id', missionId)
+          .eq('status', 'waiting_candidates');
     } catch (e) {
       debugPrint('submitProposal error: $e');
       rethrow;

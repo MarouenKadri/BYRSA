@@ -156,10 +156,12 @@ class MissionProvider extends ChangeNotifier {
       if (m.id != missionId) return m;
       final p = m.assignedPresta;
       final samePresta = p != null && p.id == presta.id;
-      final sameStatus = m.status == MissionStatus.confirmed;
+      // Utilise prestaChosen : client a choisi, mission confirmée côté client.
+      // Les deux statuts prestaChosen + confirmed apparaissent dans l'onglet "Confirmées".
+      final sameStatus = m.status == MissionStatus.prestaChosen;
       if (sameStatus && samePresta) return m;
       changed = true;
-      return m.copyWith(status: MissionStatus.confirmed, assignedPresta: presta);
+      return m.copyWith(status: MissionStatus.prestaChosen, assignedPresta: presta);
     }
 
     _clientMissions = _clientMissions.map(update).toList();
@@ -199,27 +201,44 @@ class MissionProvider extends ChangeNotifier {
     );
     final nextCount = source.candidatesCount + 1;
 
-    // Add to freelancer's applied missions list
+    // 1. Ajouter à la liste "Postulées" du freelancer
     final applied = publicMission.copyWith(
       status: MissionStatus.candidateReceived,
       candidatesCount: nextCount,
     );
     _freelancerMissions = _prependUniqueById(_freelancerMissions, applied);
 
-    // Only increment candidatesCount in public feed (don't change status)
+    // 2. Mettre à jour le statut + compteur dans le fil public
     _publicMissions = _publicMissions.map((m) => m.id == publicMission.id
-        ? m.copyWith(candidatesCount: nextCount)
+        ? m.copyWith(
+            status: MissionStatus.candidateReceived,
+            candidatesCount: nextCount,
+          )
         : m).toList();
+
+    // 3. Mettre à jour la liste client si la mission est présente
+    //    (évite que le client soit bloqué sur waitingCandidates jusqu'au prochain refresh)
+    _clientMissions = _clientMissions.map((m) {
+      if (m.id != publicMission.id) return m;
+      if (m.status != MissionStatus.waitingCandidates) return m;
+      return m.copyWith(
+        status: MissionStatus.candidateReceived,
+        candidatesCount: nextCount,
+      );
+    }).toList();
 
     notifyListeners();
     try {
       await _repository.submitProposal(publicMission.id, price, message);
     } catch (e) {
       debugPrint('submitProposal failed: $e');
-      // Rollback optimistic update on failure
+      // Rollback
       _freelancerMissions = _freelancerMissions.where((m) => m.id != publicMission.id).toList();
       _publicMissions = _publicMissions.map((m) => m.id == publicMission.id
-          ? m.copyWith(candidatesCount: source.candidatesCount)
+          ? m.copyWith(status: source.status, candidatesCount: source.candidatesCount)
+          : m).toList();
+      _clientMissions = _clientMissions.map((m) => m.id == publicMission.id
+          ? m.copyWith(status: source.status, candidatesCount: source.candidatesCount)
           : m).toList();
       notifyListeners();
       rethrow;
@@ -267,7 +286,8 @@ class MissionProvider extends ChangeNotifier {
   Future<bool> unlockMissionStart(String missionId, String code) async {
     final mission = _findMissionById(missionId);
     if (mission == null) return false;
-    if (mission.status != MissionStatus.confirmed &&
+    if (mission.status != MissionStatus.prestaChosen &&
+        mission.status != MissionStatus.confirmed &&
         mission.status != MissionStatus.onTheWay) {
       return false;
     }
