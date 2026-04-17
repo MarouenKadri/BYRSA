@@ -704,66 +704,129 @@ class _TxTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPos = tx.type.isPositive;
     final isHeld = tx.type == TransactionType.held;
+    final pipelineStage = _pipelineStage(tx);
+    final heldBadgeLabel = switch (pipelineStage) {
+      PaymentMissionPipelineStage.secured => 'Fonds securises',
+      PaymentMissionPipelineStage.waiting24h => 'Sous 24h',
+      PaymentMissionPipelineStage.dispute => 'Litige',
+      _ => 'Sous 24h',
+    };
+    final heldBadgeColor = switch (pipelineStage) {
+      PaymentMissionPipelineStage.secured => context.colors.primary,
+      PaymentMissionPipelineStage.dispute => context.colors.error,
+      _ => context.colors.textTertiary,
+    };
+    final pipelineCaption = switch (pipelineStage) {
+      PaymentMissionPipelineStage.secured => 'Fonds securises pour la mission',
+      PaymentMissionPipelineStage.waiting24h => 'Versement automatique sous 24h',
+      PaymentMissionPipelineStage.paid => 'Versement recu pour la mission',
+      PaymentMissionPipelineStage.dispute =>
+        'Litige en cours, versement suspendu',
+      _ => null,
+    };
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-        child: Row(children: [
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(
-              color: context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: context.colors.border),
-            ),
-            child: Icon(tx.type.icon, size: 17, color: context.colors.textSecondary),
-          ),
-          AppGap.w12,
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tx.missionTitle ?? tx.type.label,
-                style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600, color: context.colors.textPrimary),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            if ((tx.clientName ?? tx.description) != null) ...[
-              AppGap.h2,
-              Text(tx.clientName ?? tx.description!,
-                  style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-            ],
-          ])),
-          AppGap.w12,
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
-                style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isHeld ? context.colors.textSecondary
-                        : isPos ? context.colors.textPrimary
-                        : context.colors.textSecondary)),
-            if (isHeld) ...[
-              AppGap.h3,
+        child: Column(
+          children: [
+            Row(children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                width: 40, height: 40,
                 decoration: BoxDecoration(
                   color: context.colors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(11),
                   border: Border.all(color: context.colors.border),
                 ),
-                child: Text('Sous 24h',
-                    style: context.text.labelSmall?.copyWith(
-                        fontSize: 10, color: context.colors.textTertiary, fontWeight: FontWeight.w500)),
+                child: Icon(tx.type.icon, size: 17, color: context.colors.textSecondary),
               ),
-            ] else if (tx.status != TransactionStatus.completed) ...[
-              AppGap.h3,
-              Text(tx.status.label,
-                  style: context.text.labelSmall?.copyWith(
-                      color: context.colors.textTertiary, fontWeight: FontWeight.w400)),
+              AppGap.w12,
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tx.missionTitle ?? tx.type.label,
+                    style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600, color: context.colors.textPrimary),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                if ((tx.clientName ?? tx.description) != null) ...[
+                  AppGap.h2,
+                  Text(tx.clientName ?? tx.description!,
+                      style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                ],
+              ])),
+              AppGap.w12,
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('${isPos ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
+                    style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: isHeld ? context.colors.textSecondary
+                            : isPos ? context.colors.textPrimary
+                            : context.colors.textSecondary)),
+                if (isHeld) ...[
+                  AppGap.h3,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: context.colors.border),
+                    ),
+                    child: Text(heldBadgeLabel,
+                        style: context.text.labelSmall?.copyWith(
+                            fontSize: 10, color: heldBadgeColor, fontWeight: FontWeight.w500)),
+                  ),
+                ] else if (tx.status != TransactionStatus.completed) ...[
+                  AppGap.h3,
+                  Text(tx.status.label,
+                      style: context.text.labelSmall?.copyWith(
+                          color: context.colors.textTertiary, fontWeight: FontWeight.w400)),
+                ],
+              ]),
+            ]),
+            if (pipelineStage != null) ...[
+              AppGap.h10,
+              PaymentMissionPipelineInline(
+                stage: pipelineStage,
+                caption: pipelineCaption,
+              ),
             ],
-          ]),
-        ]),
+          ],
+        ),
       ),
     );
+  }
+
+  PaymentMissionPipelineStage? _pipelineStage(Transaction tx) {
+    if (tx.status == TransactionStatus.inDispute) {
+      return PaymentMissionPipelineStage.dispute;
+    }
+
+    final isMissionTx =
+        tx.missionTitle != null ||
+        tx.type == TransactionType.held ||
+        tx.type == TransactionType.released ||
+        tx.type == TransactionType.income;
+    if (!isMissionTx) return null;
+
+    if (tx.type == TransactionType.held || tx.status == TransactionStatus.held) {
+      if (tx.status == TransactionStatus.awaitingRelease ||
+          tx.status == TransactionStatus.pending) {
+        return PaymentMissionPipelineStage.waiting24h;
+      }
+      return PaymentMissionPipelineStage.secured;
+    }
+
+    if (tx.status == TransactionStatus.awaitingRelease ||
+        tx.status == TransactionStatus.pending) {
+      return PaymentMissionPipelineStage.waiting24h;
+    }
+
+    if (tx.type == TransactionType.income || tx.type == TransactionType.released) {
+      return PaymentMissionPipelineStage.paid;
+    }
+
+    return null;
   }
 }
 

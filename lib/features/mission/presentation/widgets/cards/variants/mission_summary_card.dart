@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/mission.dart';
+import '../../shared/mission_finance_ui.dart';
 import '../../shared/mission_shared_widgets.dart';
 import '../../shared/mission_status_ui.dart';
 import '../primitives/mission_card_frame.dart';
@@ -100,6 +101,16 @@ class MissionSummaryCard extends StatelessWidget {
                 MissionStatusChip.summary(label: statusLabel),
               ],
             ),
+            if (MissionFinanceStatusBadge.shouldDisplay(mission)) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: MissionFinanceStatusBadge(
+                  mission: mission,
+                  role: role,
+                ),
+              ),
+            ],
             if (extra != null) ...[
               const SizedBox(height: 12),
               extra!,

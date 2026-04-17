@@ -7,6 +7,7 @@ import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/detail/mission_detail_primitives.dart';
 import '../../widgets/detail/mission_detail_template.dart';
+import '../../widgets/shared/mission_finance_ui.dart';
 import '../../widgets/shared/mission_status_ui.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
 import '../../../../messaging/presentation/pages/chat_page.dart';
@@ -128,6 +129,17 @@ class _FreelancerMissionDetailPageState
         const Spacer(),
         BudgetBadge(budget: mission.budget, large: true),
       ],
+    );
+  }
+
+  @override
+  Widget? buildFinanceExposureCard(BuildContext ctx) {
+    if (!widget.isOwn || !MissionFinanceExposureCard.shouldDisplay(mission)) {
+      return null;
+    }
+    return MissionFinanceExposureCard(
+      mission: mission,
+      role: MissionUiRole.freelancer,
     );
   }
 

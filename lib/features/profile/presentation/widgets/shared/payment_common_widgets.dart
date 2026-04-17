@@ -382,3 +382,154 @@ class PaymentFilterPills extends StatelessWidget {
     );
   }
 }
+
+enum PaymentMissionPipelineStage { secured, waiting24h, paid, dispute }
+
+class PaymentMissionPipelineInline extends StatelessWidget {
+  final PaymentMissionPipelineStage stage;
+  final String? caption;
+
+  const PaymentMissionPipelineInline({
+    super.key,
+    required this.stage,
+    this.caption,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final currentStep = switch (stage) {
+      PaymentMissionPipelineStage.secured => 0,
+      PaymentMissionPipelineStage.waiting24h => 1,
+      PaymentMissionPipelineStage.paid => 2,
+      PaymentMissionPipelineStage.dispute => 1,
+    };
+    final accent = stage == PaymentMissionPipelineStage.dispute
+        ? context.colors.error
+        : context.colors.primary;
+    final text = caption ?? _defaultCaption(stage);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _PipelineDot(
+                active: currentStep >= 0,
+                done: currentStep > 0,
+                accent: accent,
+              ),
+              _PipelineConnector(done: currentStep > 0, accent: accent),
+              _PipelineDot(
+                active: currentStep >= 1,
+                done: currentStep > 1,
+                accent: accent,
+              ),
+              _PipelineConnector(done: currentStep > 1, accent: accent),
+              _PipelineDot(
+                active: currentStep >= 2,
+                done: false,
+                accent: accent,
+              ),
+            ],
+          ),
+          AppGap.h4,
+          Text(
+            text,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w600,
+              height: 1.25,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _defaultCaption(PaymentMissionPipelineStage stage) {
+    return switch (stage) {
+      PaymentMissionPipelineStage.secured => 'Paiement securise',
+      PaymentMissionPipelineStage.waiting24h =>
+        'Versement automatique sous 24h',
+      PaymentMissionPipelineStage.paid => 'Paiement verse',
+      PaymentMissionPipelineStage.dispute => 'Litige ouvert, versement bloque',
+    };
+  }
+}
+
+class _PipelineDot extends StatelessWidget {
+  final bool active;
+  final bool done;
+  final Color accent;
+
+  const _PipelineDot({
+    required this.active,
+    required this.done,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (done) {
+      return Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          color: accent,
+          shape: BoxShape.circle,
+        ),
+      );
+    }
+    if (active) {
+      return Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.22),
+          shape: BoxShape.circle,
+          border: Border.all(color: accent, width: 1.3),
+        ),
+      );
+    }
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFD5DEE8), width: 1.2),
+      ),
+    );
+  }
+}
+
+class _PipelineConnector extends StatelessWidget {
+  final bool done;
+  final Color accent;
+
+  const _PipelineConnector({required this.done, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: done ? accent.withValues(alpha: 0.7) : const Color(0xFFD5DEE8),
+          borderRadius: BorderRadius.circular(99),
+        ),
+      ),
+    );
+  }
+}

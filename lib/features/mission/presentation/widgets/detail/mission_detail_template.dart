@@ -36,6 +36,9 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
   /// Section rôle-spécifique (presta card ou client card)
   Widget buildRoleSection(BuildContext ctx);
 
+  /// Carte finance exposée (retourne null si non pertinente)
+  Widget? buildFinanceExposureCard(BuildContext ctx);
+
   /// CTA bas de page
   Widget buildBottom(BuildContext ctx);
 
@@ -62,6 +65,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
   Widget build(BuildContext context) {
     mission = syncMission(context);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+    final financeExposureCard = buildFinanceExposureCard(context);
 
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -100,6 +104,11 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                       child: StatusTimeline(status: mission.status),
+                    ),
+                  if (financeExposureCard != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: financeExposureCard,
                     ),
                   _buildMap(context),
                   AppGap.h20,

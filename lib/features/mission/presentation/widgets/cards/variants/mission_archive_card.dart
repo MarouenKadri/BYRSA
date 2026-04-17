@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/mission.dart';
+import '../../shared/mission_finance_ui.dart';
 import '../../shared/mission_status_ui.dart';
 import '../primitives/mission_card_frame.dart';
 import '../primitives/mission_status_chip.dart';
@@ -39,29 +40,44 @@ class MissionArchiveCard extends StatelessWidget {
       shadows: MissionCardFrame.noShadow,
       child: Padding(
         padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    mission.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: MissionCardFrame.titleCompactStyle,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mission.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: MissionCardFrame.titleCompactStyle,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        _formatDate(mission.date),
+                        style: MissionCardFrame.metaStyle,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 7),
-                  Text(
-                    _formatDate(mission.date),
-                    style: MissionCardFrame.metaStyle,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 14),
+                MissionStatusChip.archive(label: statusLabel),
+              ],
             ),
-            const SizedBox(width: 14),
-            MissionStatusChip.archive(label: statusLabel),
+            if (MissionFinanceStatusBadge.shouldDisplay(mission)) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: MissionFinanceStatusBadge(
+                  mission: mission,
+                  role: role,
+                ),
+              ),
+            ],
           ],
         ),
       ),

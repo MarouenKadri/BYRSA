@@ -463,61 +463,97 @@ class _TxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRefund = tx.type == _T.refund;
+    final pipelineStage = _pipelineStage(tx);
+    final pipelineCaption = switch (pipelineStage) {
+      PaymentMissionPipelineStage.waiting24h =>
+        'Paiement securise, versement sous 24h',
+      PaymentMissionPipelineStage.paid => 'Paiement verse au prestataire',
+      _ => null,
+    };
+    final trailingBadgeLabel = tx.pending
+        ? '24h'
+        : isRefund
+            ? 'Rembourse'
+            : tx.card;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-        child: Row(children: [
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(
-              color: context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: context.colors.border),
-            ),
-            child: Icon(
-              isRefund ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-              size: 17, color: context.colors.textSecondary),
-          ),
-          AppGap.w12,
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tx.title,
-                style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600, color: context.colors.textPrimary),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            AppGap.h2,
-            Text(tx.sub, style: context.text.bodySmall?.copyWith(
-                color: context.colors.textTertiary)),
-          ])),
-          AppGap.w12,
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('${isRefund ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
-                style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: tx.pending
-                        ? context.colors.textSecondary
-                        : context.colors.textPrimary)),
-            AppGap.h2,
-            if (tx.pending)
+        child: Column(
+          children: [
+            Row(children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                width: 40, height: 40,
                 decoration: BoxDecoration(
                   color: context.colors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(11),
                   border: Border.all(color: context.colors.border),
                 ),
-                child: Text('24h', style: context.text.labelSmall?.copyWith(
-                    fontSize: 10, color: context.colors.textTertiary, fontWeight: FontWeight.w500)),
-              )
-            else
-              Text(tx.card, style: context.text.labelSmall?.copyWith(
-                  color: context.colors.textTertiary)),
-          ]),
-        ]),
+                child: Icon(
+                  isRefund ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                  size: 17, color: context.colors.textSecondary),
+              ),
+              AppGap.w12,
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tx.title,
+                    style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600, color: context.colors.textPrimary),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                AppGap.h2,
+                Text(tx.sub, style: context.text.bodySmall?.copyWith(
+                    color: context.colors.textTertiary)),
+              ])),
+              AppGap.w12,
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('${isRefund ? '+' : '−'}${tx.amount.toStringAsFixed(2)} €',
+                    style: context.text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: tx.pending
+                            ? context.colors.textSecondary
+                            : context.colors.textPrimary)),
+                AppGap.h2,
+                if (tx.pending)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: context.colors.border),
+                    ),
+                    child: Text(trailingBadgeLabel, style: context.text.labelSmall?.copyWith(
+                        fontSize: 10, color: context.colors.textTertiary, fontWeight: FontWeight.w500)),
+                  )
+                else
+                  Text(
+                    trailingBadgeLabel,
+                    style: context.text.labelSmall?.copyWith(
+                      color: isRefund
+                          ? AppColors.primary
+                          : context.colors.textTertiary,
+                      fontWeight: isRefund ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                  ),
+              ]),
+            ]),
+            if (pipelineStage != null) ...[
+              AppGap.h10,
+              PaymentMissionPipelineInline(
+                stage: pipelineStage,
+                caption: pipelineCaption,
+              ),
+            ],
+          ],
+        ),
       ),
     );
+  }
+
+  PaymentMissionPipelineStage? _pipelineStage(_Tx tx) {
+    if (tx.type != _T.payment) return null;
+    if (tx.pending) return PaymentMissionPipelineStage.waiting24h;
+    return PaymentMissionPipelineStage.paid;
   }
 }
 

@@ -12,6 +12,7 @@ const _kTeal = AppColors.primary;
 const _kTimelineSteps = [
   MissionStatus.waitingCandidates,
   MissionStatus.candidateReceived,
+  MissionStatus.prestaChosen,
   MissionStatus.confirmed,
   MissionStatus.onTheWay,
   MissionStatus.inProgress,
@@ -141,6 +142,20 @@ class _TimelineStepState extends State<_TimelineStep> with SingleTickerProviderS
   }
 
   @override
+  void didUpdateWidget(covariant _TimelineStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCurrent && !oldWidget.isCurrent) {
+      _ctrl.repeat(reverse: true);
+      return;
+    }
+    if (!widget.isCurrent && oldWidget.isCurrent) {
+      _ctrl
+        ..stop()
+        ..value = 1.0;
+    }
+  }
+
+  @override
   void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
@@ -203,6 +218,7 @@ class _TimelineStepState extends State<_TimelineStep> with SingleTickerProviderS
   String _shortLabel(MissionStatus s) => switch (s) {
     MissionStatus.waitingCandidates => 'Publiée',
     MissionStatus.candidateReceived => 'Candidats',
+    MissionStatus.prestaChosen      => 'Sélection',
     MissionStatus.confirmed         => 'Confirmée',
     MissionStatus.onTheWay          => 'En route',
     MissionStatus.inProgress        => 'En cours',

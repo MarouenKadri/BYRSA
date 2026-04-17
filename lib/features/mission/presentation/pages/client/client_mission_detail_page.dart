@@ -8,11 +8,13 @@ import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/detail/mission_detail_primitives.dart';
 import '../../widgets/detail/mission_detail_template.dart';
+import '../../widgets/shared/mission_finance_ui.dart';
 import '../../../../client/presentation/pages/freelancer_profile_view.dart';
 import '../../../../messaging/presentation/pages/chat_page.dart';
 import 'candidates_page.dart';
 import '../../widgets/detail/client_detail_sections.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
+import '../../widgets/shared/mission_status_ui.dart';
 import 'create_mission_page.dart';
 import 'mission_validation_page.dart';
 import 'tracking_page.dart';
@@ -101,6 +103,15 @@ class _ClientMissionDetailPageState
         const Spacer(),
         BudgetBadge(budget: mission.budget, large: true),
       ],
+    );
+  }
+
+  @override
+  Widget? buildFinanceExposureCard(BuildContext ctx) {
+    if (!MissionFinanceExposureCard.shouldDisplay(mission)) return null;
+    return MissionFinanceExposureCard(
+      mission: mission,
+      role: MissionUiRole.client,
     );
   }
 
@@ -386,6 +397,8 @@ class _ClientMissionDetailPageState
       wrapWithSurface: false,
       child: ClientCancelSheet(
         missionTitle: mission.title,
+        missionStart: mission.scheduledStart,
+        missionAmount: mission.budget.averageAmount,
         onConfirm: () {
           context.read<MissionProvider>().updateMissionStatus(
                 mission.id,

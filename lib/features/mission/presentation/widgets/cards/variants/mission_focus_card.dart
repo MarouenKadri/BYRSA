@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../data/models/mission.dart';
+import '../../shared/mission_finance_ui.dart';
 import '../../shared/mission_status_ui.dart';
 import '../../shared/mission_shared_widgets.dart';
 import '../primitives/mission_card_frame.dart';
@@ -153,6 +154,16 @@ class MissionFocusCard extends StatelessWidget {
                 if (metaItems.isNotEmpty) ...[
                   const SizedBox(height: 14),
                   MissionMetaRow(items: metaItems),
+                ],
+                if (MissionFinanceStatusBadge.shouldDisplay(mission)) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: MissionFinanceStatusBadge(
+                      mission: mission,
+                      role: MissionUiRole.client,
+                    ),
+                  ),
                 ],
                 if (mission.description.trim().isNotEmpty) ...[
                   const SizedBox(height: 12),

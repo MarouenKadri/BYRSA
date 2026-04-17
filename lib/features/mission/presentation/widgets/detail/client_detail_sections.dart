@@ -825,11 +825,15 @@ class ClientActionSheet extends StatelessWidget {
 
 class ClientCancelSheet extends StatefulWidget {
   final String missionTitle;
+  final DateTime missionStart;
+  final double missionAmount;
   final VoidCallback onConfirm;
 
   const ClientCancelSheet({
     super.key,
     required this.missionTitle,
+    required this.missionStart,
+    required this.missionAmount,
     required this.onConfirm,
   });
 
@@ -839,6 +843,14 @@ class ClientCancelSheet extends StatefulWidget {
 
 class _ClientCancelSheetState extends State<ClientCancelSheet> {
   bool _loading = false;
+
+  bool get _isRefund100 {
+    final startsIn = widget.missionStart.difference(DateTime.now());
+    return startsIn.inMinutes >= 24 * 60;
+  }
+
+  double get _refundRate => _isRefund100 ? 1.0 : 0.5;
+  double get _refundAmount => widget.missionAmount * _refundRate;
 
   @override
   Widget build(BuildContext context) {
@@ -866,6 +878,46 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
                 color: AppColors.gray500,
+              ),
+            ),
+            AppGap.h14,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              decoration: BoxDecoration(
+                color: _isRefund100
+                    ? AppColors.info.withValues(alpha: 0.12)
+                    : AppColors.warning.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _isRefund100
+                      ? AppColors.info.withValues(alpha: 0.26)
+                      : AppColors.warning.withValues(alpha: 0.26),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _isRefund100
+                        ? 'Remboursement 100% (annulation > 24h)'
+                        : 'Remboursement 50% (annulation <= 24h / jour J)',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.snow,
+                    ),
+                  ),
+                  AppGap.h4,
+                  Text(
+                    'Montant estime: ${_refundAmount.toStringAsFixed(0)} €',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.gray500,
+                    ),
+                  ),
+                ],
               ),
             ),
             AppGap.h24,
