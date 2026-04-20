@@ -162,19 +162,19 @@ Color _statusAccentColor(MissionStatus status) {
   switch (status) {
     case MissionStatus.prestaChosen:
     case MissionStatus.confirmed:
-      return const Color(0xFFF59E0B);
+      return AppColors.amberDark; // 0xFFF59E0B
     case MissionStatus.onTheWay:
-      return const Color(0xFF3B82F6);
+      return AppColors.blueLight; // 0xFF3B82F6
     case MissionStatus.inProgress:
-      return const Color(0xFF10B981);
+      return AppColors.greenEmerald; // 0xFF10B981
     case MissionStatus.completionRequested:
-      return const Color(0xFF8B5CF6);
+      return AppColors.violet; // 0xFF8B5CF6
     case MissionStatus.completed:
     case MissionStatus.paymentHeld:
     case MissionStatus.awaitingRelease:
-      return const Color(0xFF10B981);
+      return AppColors.greenEmerald;
     default:
-      return const Color(0xFF9CA3AF);
+      return AppColors.gray400; // 0xFF9CA3AF
   }
 }
 
@@ -292,10 +292,14 @@ class _EmptyTodayCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
-          BoxShadow(color: Color(0x0A000000), blurRadius: 24, offset: Offset(0, 10)),
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.04),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
@@ -388,10 +392,14 @@ class _ActiveMissionCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A000000), blurRadius: 24, offset: Offset(0, 10)),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.04),
+              blurRadius: 24,
+              offset: Offset(0, 10),
+            ),
           ],
         ),
         clipBehavior: Clip.hardEdge,
@@ -431,7 +439,7 @@ class _ActiveMissionCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          MissionStatusChip.summary(label: statusLabel),
+                          MissionStatusChip.summary(context, label: statusLabel),
                         ],
                       ),
 
@@ -450,7 +458,7 @@ class _ActiveMissionCard extends StatelessWidget {
                       // ── 3. Prestataire — avatar 48px ────────────
                       if (presta != null) ...[
                         const SizedBox(height: 14),
-                        const Divider(height: 1, color: Color(0xFFF0F2F5)),
+                        Divider(height: 1, color: context.colors.divider),
                         const SizedBox(height: 14),
                         Row(
                           children: [
@@ -476,7 +484,7 @@ class _ActiveMissionCard extends StatelessWidget {
                               width: 8,
                               height: 8,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF10B981),
+                                color: AppColors.greenEmerald,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -491,7 +499,7 @@ class _ActiveMissionCard extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                              colors: [AppColors.deepNavy, AppColorsIndeed.textPrimary],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -559,7 +567,7 @@ class _ActiveMissionCard extends StatelessWidget {
                       ],
 
                       const SizedBox(height: 14),
-                      const Divider(height: 1, color: Color(0xFFF0F2F5)),
+                      Divider(height: 1, color: context.colors.divider),
                       const SizedBox(height: 12),
 
                       // ── 4. Boutons pill-shaped ──────────────────
@@ -646,8 +654,8 @@ class _CardAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = primary
         ? AppColors.primary.withValues(alpha: 0.08)
-        : const Color(0xFFF5F6F7);
-    final fg = primary ? AppColors.primary : const Color(0xFF4A4F55);
+        : context.colors.surfaceAlt;
+    final fg = primary ? AppColors.primary : context.colors.textSecondary;
 
     return GestureDetector(
       onTap: onTap,
@@ -753,7 +761,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
       children: [
         // Search & Filters Header — iOS pill style
         Container(
-          color: Colors.white,
+          color: context.colors.surface,
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
@@ -762,12 +770,12 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.colors.surface,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: const Color(0xFFEEEFF1)),
+                    border: Border.all(color: context.colors.border),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x0C000000),
+                        color: Color.fromRGBO(0, 0, 0, 0.05),
                         blurRadius: 16,
                         offset: Offset(0, 3),
                       ),
@@ -823,16 +831,16 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                   decoration: BoxDecoration(
                     color: _selectedCategoryId != null
                         ? AppColors.inkDark
-                        : Colors.white,
+                        : context.colors.surface,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: _selectedCategoryId != null
                           ? AppColors.inkDark
-                          : const Color(0xFFEEEFF1),
+                          : context.colors.border,
                     ),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x0C000000),
+                        color: Color.fromRGBO(0, 0, 0, 0.05),
                         blurRadius: 16,
                         offset: Offset(0, 3),
                       ),
@@ -946,7 +954,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.colors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -963,7 +971,7 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0E2E6),
+                    color: ctx.colors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

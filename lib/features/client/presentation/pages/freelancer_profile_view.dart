@@ -254,7 +254,7 @@ class _FreelancerProfilePageState
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.xl),
           boxShadow: const [
-            BoxShadow(color: Color(0x08000000), blurRadius: 24, offset: Offset(0, 10)),
+            BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
           ],
         ),
         child: Row(
@@ -297,7 +297,7 @@ class _FreelancerProfilePageState
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
-                BoxShadow(color: Color(0x08000000), blurRadius: 24, offset: Offset(0, 10)),
+                BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
               ],
             ),
             child: _bio.isNotEmpty
@@ -320,7 +320,7 @@ class _FreelancerProfilePageState
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
-                BoxShadow(color: Color(0x08000000), blurRadius: 24, offset: Offset(0, 10)),
+                BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
               ],
             ),
             child: Padding(
@@ -468,7 +468,7 @@ class _HeroRateBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 0.9),
         boxShadow: const [
-          BoxShadow(color: Color(0x26000000), blurRadius: 12, offset: Offset(0, 5)),
+          BoxShadow(color: AppPalette.blackAlpha15, blurRadius: 12, offset: Offset(0, 5)),
         ],
       ),
       child: Row(

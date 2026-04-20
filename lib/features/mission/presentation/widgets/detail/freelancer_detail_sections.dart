@@ -28,9 +28,9 @@ class FreelancerClientCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x08000000),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 24,
               offset: Offset(0, 10),
             ),
@@ -69,7 +69,7 @@ class FreelancerClientCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFFE8EBEF),
+                        color: context.colors.border,
                         width: 1.5,
                       ),
                     ),
@@ -103,7 +103,7 @@ class FreelancerClientCard extends StatelessWidget {
                             ),
                             if (client.isVerified) ...[
                               AppGap.w6,
-                              const Icon(
+                              Icon(
                                 Icons.verified_rounded,
                                 size: 16,
                                 color: AppColors.ink,
@@ -117,13 +117,13 @@ class FreelancerClientCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF8F98A3),
+                            color: context.colors.textHint,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFFB0B8C1)),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.colors.textHint),
                 ],
               ),
             ),
@@ -135,11 +135,11 @@ class FreelancerClientCard extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: onPhone,
-                        icon: const Icon(Icons.phone_rounded, size: 16),
+                        icon: Icon(Icons.phone_rounded, size: 16),
                         label: const Text('Appeler'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.ink,
-                          side: const BorderSide(color: Color(0xFFE1E6EB)),
+                          side: BorderSide(color: context.colors.border),
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
@@ -156,7 +156,7 @@ class FreelancerClientCard extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: onChat,
-                        icon: const Icon(Icons.chat_bubble_rounded, size: 16),
+                        icon: Icon(Icons.chat_bubble_rounded, size: 16),
                         label: const Text('Contacter'),
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -226,7 +226,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
           subtitle:
               'Le suivi live apparait uniquement pour une mission confirmee ou en cours.',
           cta: 'Voir le pilotage',
-          accent: const Color(0xFF98A1AC),
+          accent: context.colors.textTertiary,
         ),
     };
 
@@ -237,10 +237,10 @@ class FreelancerLocationShareCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
-          boxShadow: const [
+          border: Border.all(color: context.colors.border, width: 0.8),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x08000000),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 24,
               offset: Offset(0, 10),
             ),
@@ -280,7 +280,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 height: 1.45,
-                color: const Color(0xFF6E7781),
+                color: context.colors.textSecondary,
               ),
             ),
             AppGap.h16,
@@ -288,7 +288,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF6F8FA),
+                color: context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -303,9 +303,9 @@ class FreelancerLocationShareCard extends StatelessWidget {
                     child: Text(
                       'Le partage live doit etre active depuis le pilotage de mission.',
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: AppFontSize.smHalf,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF4C5661),
+                        color: context.colors.textSecondary,
                         height: 1.35,
                       ),
                     ),
@@ -448,7 +448,7 @@ class _FreelancerReportConfirmSheetState
               ),
             ),
             AppGap.h24,
-            const Divider(height: 1, color: Color(0x1FFFFFFF)),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
             AppGap.h24,
           ],
         ),
@@ -467,7 +467,7 @@ class _FreelancerReportConfirmSheetState
                     },
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: const Color(0xFFE57373),
+                backgroundColor: context.colors.error,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(56),
                 shape: RoundedRectangleBorder(
@@ -586,7 +586,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFD8DDE3),
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
@@ -607,10 +607,10 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close_rounded,
                       size: 18,
-                      color: Color(0xFF98A1AC),
+                      color: context.colors.textTertiary,
                     ),
                   ),
                 ],
@@ -630,7 +630,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF5F6975),
+                        color: context.colors.textSecondary,
                       ),
                     ),
                     AppGap.h24,
@@ -639,7 +639,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF7E8792),
+                        color: context.colors.textTertiary,
                       ),
                     ),
                     AppGap.h10,
@@ -657,11 +657,11 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       decoration: AppInputDecorations.formField(
                         context,
                         hintText: '0',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontSize: 38,
                           fontWeight: FontWeight.w300,
                           letterSpacing: -1.2,
-                          color: Color(0xFFD5D9DE),
+                          color: context.colors.border,
                         ),
                         contentPadding: EdgeInsets.zero,
                         noBorder: true,
@@ -696,7 +696,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                             decoration: BoxDecoration(
                               color: isActive
                                   ? Colors.black
-                                  : const Color(0xFFF2F4F7),
+                                  : context.colors.surfaceAlt,
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
@@ -721,7 +721,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF7E8792),
+                            color: context.colors.textTertiary,
                           ),
                         ),
                         const Spacer(),
@@ -730,7 +730,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFFA1A9B3),
+                            color: context.colors.textHint,
                           ),
                         ),
                       ],
@@ -753,11 +753,11 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                         context,
                         hintText:
                             'Présentez-vous, vos atouts, votre expérience...',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontSize: 14,
                           height: 1.5,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFFA4ACB5),
+                          color: context.colors.textHint,
                         ),
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.all(16),
@@ -771,13 +771,13 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
             // ── Submit button ─────────────────────────────────────────────
             Container(
               padding: EdgeInsets.fromLTRB(22, 12, 22, 16 + bottomPad),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x08000000),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 18,
-                    offset: Offset(0, -6),
+                    offset: const Offset(0, -6),
                   ),
                 ],
               ),

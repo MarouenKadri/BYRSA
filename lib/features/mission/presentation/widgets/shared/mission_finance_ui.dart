@@ -440,7 +440,7 @@ class MissionFinanceExposureCard extends StatelessWidget {
                     labels[i],
                     textAlign: TextAlign.center,
                     style: context.text.labelSmall?.copyWith(
-                      fontSize: 10.5,
+                      fontSize: AppFontSize.tinyHalf,
                       fontWeight: hasHighlightedLabel && i == highlightedLabelIndex
                           ? FontWeight.w700
                           : FontWeight.w600,
@@ -564,9 +564,9 @@ class _FinanceStepNode extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.transparent,
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFD7DEE7), width: 1.1),
+        border: Border.all(color: context.colors.border, width: 1.1),
       ),
-      child: Icon(icon, size: 11, color: const Color(0xFFB5C0CD)),
+      child: Icon(icon, size: 11, color: context.colors.textHint),
     );
   }
 }
@@ -584,7 +584,7 @@ class _FinanceLine extends StatelessWidget {
         height: 1.6,
         margin: const EdgeInsets.symmetric(horizontal: 5),
         decoration: BoxDecoration(
-          color: done ? accent.withValues(alpha: 0.72) : const Color(0xFFD7DEE7),
+          color: done ? accent.withValues(alpha: 0.72) : context.colors.border,
           borderRadius: BorderRadius.circular(99),
         ),
       ),

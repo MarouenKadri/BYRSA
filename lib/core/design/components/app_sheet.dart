@@ -24,7 +24,7 @@ class AppBottomSheetHandle extends StatelessWidget {
           width: 30,
           height: 2.5,
           decoration: BoxDecoration(
-            color: const Color(0xFF9AA4AF).withValues(alpha: 0.24),
+            color: context.colors.textHint.withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         ),
@@ -47,6 +47,12 @@ class AppSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = color ?? context.colors.sheetBg;
+    final resolvedBg = color == null ? bg.withValues(alpha: 0.86) : bg;
+    final resolvedBorderColor = color == null
+        ? context.colors.border.withValues(alpha: 0.85)
+        : context.colors.border;
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       child: BackdropFilter(
@@ -54,9 +60,9 @@ class AppSheetSurface extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: color ?? Colors.white.withValues(alpha: 0.80),
+            color: resolvedBg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.62)),
+            border: Border.all(color: resolvedBorderColor),
             boxShadow: const [
               BoxShadow(
                 color: Color.fromRGBO(15, 23, 42, 0.10),
@@ -283,15 +289,16 @@ class AppActionSheetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final destructiveColor = context.colors.error;
     final titleColor = destructive
-        ? const Color(0xFFE57373)
+        ? destructiveColor
         : dark
             ? AppColors.snow
             : context.colors.textPrimary;
     final iconColor = destructive
-        ? const Color(0xFFE57373)
+        ? destructiveColor
         : dark
-            ? const Color(0xFFD5DADE)
+            ? AppColors.snow.withValues(alpha: 0.85)
             : context.colors.textSecondary;
     final subtitleColor = dark ? AppColors.gray500 : context.colors.textSecondary;
 
@@ -457,7 +464,7 @@ class AppDarkSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.78),
+            color: Colors.black.withValues(alpha: 0.78),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           ),
@@ -481,9 +488,9 @@ class AppBarSheetSurface extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.72),
+            color: context.colors.sheetBg.withValues(alpha: 0.72),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+            border: Border.all(color: context.colors.border.withValues(alpha: 0.55)),
             boxShadow: const [
               BoxShadow(
                 color: Color.fromRGBO(15, 23, 42, 0.10),

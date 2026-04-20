@@ -26,16 +26,16 @@ class ProfileSheetSection extends StatelessWidget {
             children: [
               AppSurfaceCard(
                 padding: const EdgeInsets.all(7),
-                color: const Color(0xFFF7F8FA),
+                color: context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppDesign.radius8),
-                border: Border.all(color: const Color(0xFFE8ECF0), width: 1),
-                child: Icon(icon, size: 16, color: const Color(0xFF1F2933)),
+                border: Border.all(color: context.colors.border, width: 1),
+                child: Icon(icon, size: 16, color: context.colors.textPrimary),
               ),
               AppGap.w10,
               Text(
                 title.toUpperCase(),
                 style: context.profileSheetSectionStyle.copyWith(
-                  color: const Color(0xFF34424E),
+                  color: context.colors.textSecondary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -103,9 +103,9 @@ InputDecoration profileSheetInputDecoration(
   required IconData icon,
   bool readOnly = false,
 }) {
-  const borderColor = Color(0xFFE6EBF0);
-  const focusColor = AppColors.inkDark;
-  final labelColor = readOnly ? const Color(0xFF7A858F) : const Color(0xFF66707A);
+  final borderColor = context.colors.border;
+  final focusColor = context.colors.textPrimary;
+  final labelColor = readOnly ? context.colors.textHint : context.colors.textSecondary;
 
   OutlineInputBorder outline(Color color, [double width = 1]) => OutlineInputBorder(
         borderRadius: BorderRadius.circular(22),
@@ -116,9 +116,9 @@ InputDecoration profileSheetInputDecoration(
     labelText: label,
     labelStyle: context.profileSheetFieldLabelStyle.copyWith(color: labelColor),
     floatingLabelStyle: context.profileSheetFieldLabelStyle.copyWith(
-      color: readOnly ? const Color(0xFF7A858F) : focusColor,
+      color: readOnly ? context.colors.textHint : focusColor,
     ),
-    prefixIcon: Icon(icon, size: 18, color: const Color(0xFF1F2933)),
+    prefixIcon: Icon(icon, size: 18, color: context.colors.textPrimary),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
     filled: false,
     enabledBorder: outline(borderColor),
@@ -147,8 +147,8 @@ class ProfileSheetPrimaryAction extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: context.colors.textPrimary,
+          foregroundColor: context.colors.surface,
           elevation: 0,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -160,7 +160,7 @@ class ProfileSheetPrimaryAction extends StatelessWidget {
           style: context.text.titleSmall?.copyWith(
             fontSize: AppFontSize.lg,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: context.colors.surface,
           ),
         ),
       ),
@@ -183,11 +183,11 @@ class ProfileSheetSecondaryAction extends StatelessWidget {
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFF7A858F),
+        foregroundColor: context.colors.textTertiary,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         textStyle: context.text.bodyMedium?.copyWith(
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF7A858F),
+          color: context.colors.textTertiary,
         ),
       ),
       child: Text(label),

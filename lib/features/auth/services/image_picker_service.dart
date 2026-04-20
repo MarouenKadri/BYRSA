@@ -82,7 +82,7 @@ class _ImagePickerSheet extends StatelessWidget {
           subtitle: 'Utiliser la caméra',
           onTap: onCameraTap,
         ),
-        const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
         AppActionSheetItem(
           icon: Icons.photo_library_outlined,
           title: 'Choisir depuis la galerie',

@@ -21,7 +21,7 @@ class GoogleSignInButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: context.colors.surface,
           foregroundColor: context.colors.textPrimary,
-          side: BorderSide(color: const Color(0xFFE2E6EA), width: 1),
+          side: BorderSide(color: context.colors.border, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
         ),
@@ -63,11 +63,11 @@ class _GoogleLogo extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: SweepGradient(
           colors: [
-            Color(0xFF4285F4), // blue
-            Color(0xFF34A853), // green
-            Color(0xFFFBBC05), // yellow
-            Color(0xFFEA4335), // red
-            Color(0xFF4285F4), // back to blue
+            AppPalette.googleBlue, // blue
+            AppPalette.googleGreen, // green
+            AppPalette.googleYellow, // yellow
+            AppPalette.googleRed, // red
+            AppPalette.googleBlue, // back to blue
           ],
         ),
       ),
@@ -83,7 +83,7 @@ class _GoogleLogo extends StatelessWidget {
             style: TextStyle(
               fontSize: size * 0.55,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF4285F4),
+              color: AppPalette.googleBlue,
               height: 1,
             ),
           ),

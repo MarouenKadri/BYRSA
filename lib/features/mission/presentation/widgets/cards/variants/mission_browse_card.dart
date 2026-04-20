@@ -129,7 +129,7 @@ class _CategoryRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFD6DCE5)),
+              border: Border.all(color: context.colors.border),
             ),
             child: Text(
               'Déjà postulé',

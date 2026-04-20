@@ -25,7 +25,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         : notifications;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -35,21 +35,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
               padding: const EdgeInsets.fromLTRB(10, 10, 12, 0),
               child: Row(
                 children: [
-                  IconButton(
+                  AppBackButtonLeading(
+                    size: 18,
+                    color: context.colors.textSecondary,
                     onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                      color: Color(0xFF7B8188),
-                    ),
                   ),
                   Expanded(
                     child: Text(
                       'Notifications',
-                      style: TextStyle(
-                        fontSize: 26,
+                      style: context.text.displayMedium?.copyWith(
+                        fontSize: AppFontSize.h1Lg,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: context.colors.textPrimary,
                         letterSpacing: -0.6,
                       ),
                     ),
@@ -57,14 +54,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   if (unreadCount > 0)
                     TextButton(
                       onPressed: () => context.read<NotificationProvider>().markAllRead(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.ink,
-                        textStyle: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                      child: Text(
+                        'Tout lire',
+                        style: context.text.labelLarge?.copyWith(
+                          color: context.colors.textPrimary,
                         ),
                       ),
-                      child: const Text('Tout lire'),
                     ),
                 ],
               ),
@@ -130,24 +125,23 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppRadius.card);
+
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      color: Colors.transparent,
+      borderRadius: radius,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: radius,
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.gray50),
-          ),
+        child: AppSurfaceCard(
+          padding: AppInsets.a16,
+          borderRadius: radius,
+          border: Border.all(color: context.colors.border),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _NotificationAvatar(notification: notification),
-              const SizedBox(width: 14),
+              AppGap.w14,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,46 +152,45 @@ class _NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: TextStyle(
-                              fontSize: 15,
+                            style: context.text.titleSmall?.copyWith(
+                              fontSize: AppFontSize.body,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
+                              color: context.colors.textPrimary,
                             ),
                           ),
                         ),
                         if (!notification.isRead) ...[
-                          const SizedBox(width: 10),
+                          AppGap.w10,
                           Container(
                             width: 7,
                             height: 7,
                             margin: const EdgeInsets.only(top: 6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.ink,
+                            decoration: BoxDecoration(
+                              color: context.colors.textPrimary,
                               shape: BoxShape.circle,
                             ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    AppGap.h6,
                     Text(
                       notification.body,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13.5,
+                      style: context.text.bodySmall?.copyWith(
+                        fontSize: AppFontSize.mdHalf,
                         height: 1.45,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF5B6168),
+                        color: context.colors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    AppGap.h8,
                     Text(
                       notification.timeAgo,
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.text.labelMedium?.copyWith(
+                        fontSize: AppFontSize.sm,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF9AA1A8),
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   ],
@@ -225,7 +218,7 @@ class _NotificationAvatar extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFE7E9EC), width: 1),
+          border: Border.all(color: context.colors.border, width: 1),
         ),
         child: Image.network(
           notification.avatarUrl!,
@@ -239,15 +232,15 @@ class _NotificationAvatar extends StatelessWidget {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F7F8),
+        color: context.colors.surfaceAlt,
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFE7E9EC), width: 1),
+        border: Border.all(color: context.colors.border, width: 1),
       ),
       child: Center(
         child: Icon(
           _typeIcon(notification.type),
           size: 20,
-          color: const Color(0xFF4F555C),
+          color: context.colors.textSecondary,
         ),
       ),
     );
@@ -296,9 +289,9 @@ class _AvatarFallback extends StatelessWidget {
     }
 
     return Container(
-      color: const Color(0xFFF7F7F8),
+      color: context.colors.surfaceAlt,
       child: Center(
-        child: Icon(icon, size: 20, color: const Color(0xFF4F555C)),
+        child: Icon(icon, size: 20, color: context.colors.textSecondary),
       ),
     );
   }
@@ -321,17 +314,17 @@ class _FilterPill extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: AppInsets.h16v10,
         decoration: BoxDecoration(
-          color: selected ? AppColors.ink : const Color(0xFFF2F3F5),
+          color: selected ? context.colors.textPrimary : context.colors.surfaceAlt,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
+          style: context.text.labelLarge?.copyWith(
+            fontSize: AppFontSize.md,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppColors.ink,
+            color: selected ? Colors.white : context.colors.textPrimary,
           ),
         ),
       ),
@@ -346,14 +339,14 @@ class _DismissBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8EAEA),
-        borderRadius: BorderRadius.circular(16),
+        color: context.colors.errorLight,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.only(right: 20),
-      child: const Icon(
+      child: Icon(
         Icons.delete_outline_rounded,
-        color: Color(0xFFA55F5F),
+        color: context.colors.error,
         size: 20,
       ),
     );
@@ -377,34 +370,34 @@ class _EmptyNotifications extends StatelessWidget {
               width: 68,
               height: 68,
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F5F6),
+                color: context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(22),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.notifications_none_rounded,
                 size: 28,
-                color: Color(0xFF7B8188),
+                color: context.colors.textSecondary,
               ),
             ),
             const SizedBox(height: 18),
             Text(
               showUnreadOnly ? 'Aucune notification non lue' : 'Aucune notification',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 17,
+              style: context.text.titleLarge?.copyWith(
+                fontSize: AppFontSize.title,
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+                color: context.colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tout est a jour pour le moment.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
+              style: context.text.bodySmall?.copyWith(
+                fontSize: AppFontSize.md,
                 height: 1.45,
                 fontWeight: FontWeight.w400,
-                color: AppColors.gray600,
+                color: context.colors.textSecondary,
               ),
             ),
           ],

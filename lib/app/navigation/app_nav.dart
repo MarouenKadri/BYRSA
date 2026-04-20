@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/design/app_design_system.dart';
 import '../auth_provider.dart';
 import '../enum/user_role.dart';
 import '../../features/messaging/messaging_provider.dart';
@@ -97,7 +98,7 @@ class _CreateMissionNavButton extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF1A1A1A),
+                  color: AppColors.inkDark,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.add_rounded, size: 22, color: Colors.white),
@@ -106,9 +107,9 @@ class _CreateMissionNavButton extends StatelessWidget {
               const Text(
                 'Publier',
                 style: TextStyle(
-                  fontSize: 10.5,
+                  fontSize: AppFontSize.tinyHalf,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFFB8C0CC),
+                  color: AppColors.textTertiary,
                   height: 1,
                 ),
               ),

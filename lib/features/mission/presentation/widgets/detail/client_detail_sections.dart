@@ -25,10 +25,10 @@ class ClientCandidatesCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
-        boxShadow: const [
+        border: Border.all(color: context.colors.border, width: 0.8),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
@@ -61,8 +61,8 @@ class ClientCandidatesCard extends StatelessWidget {
                         height: 32,
                         decoration: BoxDecoration(
                           color: visible
-                              ? const Color(0xFFF4F5F7)
-                              : const Color(0xFFF8F9FB),
+                              ? context.colors.surfaceAlt
+                              : context.colors.background,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
@@ -71,7 +71,7 @@ class ClientCandidatesCard extends StatelessWidget {
                           size: 15,
                           color: visible
                               ? AppColors.ink
-                              : const Color(0xFFC4CAD2),
+                              : context.colors.textHint,
                         ),
                       ),
                     );
@@ -152,9 +152,9 @@ class ClientPrestaCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
@@ -165,14 +165,14 @@ class ClientPrestaCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.check_rounded, size: 18, color: Color(0xFF4A4F55)),
+              Icon(Icons.check_rounded, size: 18, color: context.colors.textSecondary),
               AppGap.w8,
               Text(
                 'Prestataire choisi',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF181B1F),
+                  color: context.colors.textPrimary,
                 ),
               ),
             ],
@@ -217,10 +217,10 @@ class ClientPrestaCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rounded,
                         size: 14,
-                        color: Color(0xFF9AA1A8),
+                        color: context.colors.textTertiary,
                       ),
                       AppGap.w4,
                       Text(
@@ -228,7 +228,7 @@ class ClientPrestaCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF9AA1A8),
+                          color: context.colors.textTertiary,
                         ),
                       ),
                     ],
@@ -242,7 +242,7 @@ class ClientPrestaCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6F7),
+              color: context.colors.surfaceAlt,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -253,7 +253,7 @@ class ClientPrestaCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF98A1AC),
+                      color: context.colors.textTertiary,
                     ),
                   ),
                 ),
@@ -266,10 +266,10 @@ class ClientPrestaCard extends StatelessWidget {
                   ),
                 ),
                 AppGap.w6,
-                const Icon(
+                Icon(
                   Icons.check_rounded,
                   size: 15,
-                  color: Color(0xFF1C8C55),
+                  color: context.colors.success,
                 ),
               ],
             ),
@@ -280,7 +280,7 @@ class ClientPrestaCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF9AA1A8),
+              color: context.colors.textTertiary,
             ),
           ),
           if (onPhone != null || onChat != null) ...[
@@ -291,11 +291,11 @@ class ClientPrestaCard extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onPhone,
-                      icon: const Icon(Icons.phone_rounded, size: 16),
+                      icon: Icon(Icons.phone_rounded, size: 16),
                       label: const Text('Appeler'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.ink,
-                        side: const BorderSide(color: Color(0xFFE1E6EB)),
+                        side: BorderSide(color: context.colors.border),
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
@@ -312,7 +312,7 @@ class ClientPrestaCard extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: onChat,
-                      icon: const Icon(Icons.chat_bubble_rounded, size: 16),
+                      icon: Icon(Icons.chat_bubble_rounded, size: 16),
                       label: const Text('Contacter'),
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
@@ -358,7 +358,7 @@ class ClientTrackingCard extends StatelessWidget {
           title: 'Code de demarrage pret',
           subtitle:
               'Communiquez ce code a $prestaName uniquement quand il arrive pour lancer la mission.',
-          accent: const Color(0xFF98A1AC),
+          accent: context.colors.textTertiary,
           cta: 'Voir le suivi',
         ),
       MissionStatus.onTheWay => (
@@ -389,7 +389,7 @@ class ClientTrackingCard extends StatelessWidget {
           icon: Icons.location_disabled_rounded,
           title: 'Suivi indisponible',
           subtitle: 'Aucune position live a afficher pour cette mission.',
-          accent: const Color(0xFF98A1AC),
+          accent: context.colors.textTertiary,
           cta: null,
         ),
     };
@@ -400,10 +400,10 @@ class ClientTrackingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
-        boxShadow: const [
+        border: Border.all(color: context.colors.border, width: 0.8),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
@@ -443,7 +443,7 @@ class ClientTrackingCard extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.w500,
               height: 1.45,
-              color: const Color(0xFF6E7781),
+              color: context.colors.textSecondary,
             ),
           ),
           if (startCode != null &&
@@ -517,7 +517,7 @@ class ClientTrackingCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.copy_rounded,
                               size: 16,
                               color: Colors.white,
@@ -545,7 +545,7 @@ class ClientTrackingCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF6F8FA),
+              color: context.colors.surfaceAlt,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -566,9 +566,9 @@ class ClientTrackingCard extends StatelessWidget {
                             ? 'La mission est en attente de votre retour avant de passer au paiement.'
                             : 'Le tracking live est prevu ici pour suivre le trajet du prestataire.',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: AppFontSize.smHalf,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF4C5661),
+                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -626,10 +626,10 @@ class ClientCompletionRequestedCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE9ECF0), width: 0.8),
-        boxShadow: const [
+        border: Border.all(color: context.colors.border, width: 0.8),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
@@ -647,7 +647,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.task_alt_rounded,
                   size: 20,
                   color: AppColors.warning,
@@ -673,7 +673,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.w500,
               height: 1.45,
-              color: const Color(0xFF6E7781),
+              color: context.colors.textSecondary,
             ),
           ),
           AppGap.h16,
@@ -681,12 +681,12 @@ class ClientCompletionRequestedCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF6F8FA),
+              color: context.colors.surfaceAlt,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.schedule_rounded,
                   size: 16,
                   color: AppColors.warning,
@@ -696,9 +696,9 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                   child: Text(
                     'Sans action de votre part, le paiement pourra ensuite etre libere automatiquement.',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: AppFontSize.smHalf,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF4C5661),
+                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -714,7 +714,7 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                   onPressed: onDispute,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.ink,
-                    side: const BorderSide(color: Color(0xFFE1E6EB)),
+                    side: BorderSide(color: context.colors.border),
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
@@ -757,14 +757,14 @@ class _PrestaAvatarFallback extends StatelessWidget {
     final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
     final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
     return Container(
-      color: const Color(0xFFF0F2F4),
+      color: context.colors.surfaceAlt,
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF8C95A0),
+          color: context.colors.textTertiary,
         ),
       ),
     );
@@ -800,7 +800,7 @@ class ClientActionSheet extends StatelessWidget {
             title: 'Modifier la mission',
             onTap: onEdit,
           ),
-          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          Divider(height: 1, indent: 20, endIndent: 20, color: Colors.white.withValues(alpha: 0.12)),
         ],
         AppActionSheetItem(
           icon: Icons.ios_share_outlined,
@@ -808,7 +808,7 @@ class ClientActionSheet extends StatelessWidget {
           onTap: onShare,
         ),
         if (canCancel) ...[
-          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          Divider(height: 1, indent: 20, endIndent: 20, color: Colors.white.withValues(alpha: 0.12)),
           AppActionSheetItem(
             icon: Icons.delete_outline,
             title: 'Annuler la mission',
@@ -903,7 +903,7 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
                         ? 'Remboursement 100% (annulation > 24h)'
                         : 'Remboursement 50% (annulation <= 24h / jour J)',
                     style: const TextStyle(
-                      fontSize: 12.5,
+                      fontSize: AppFontSize.smHalf,
                       fontWeight: FontWeight.w700,
                       color: AppColors.snow,
                     ),
@@ -921,7 +921,7 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
               ),
             ),
             AppGap.h24,
-            const Divider(height: 1, color: Color(0x1FFFFFFF)),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
             AppGap.h24,
           ],
         ),

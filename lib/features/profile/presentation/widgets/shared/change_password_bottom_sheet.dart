@@ -135,11 +135,11 @@ class _ShadowField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+            color: AppPalette.deepNavy.withValues(alpha: 0.06),
             blurRadius: 18,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -182,13 +182,13 @@ class _PasswordField extends StatelessWidget {
       decoration: AppInputDecorations.profileField(
         context,
         hintText: label,
-        prefixIcon: const Icon(Icons.lock_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+        prefixIcon: Icon(Icons.lock_outline_rounded, size: 16, color: context.colors.textHint),
       ).copyWith(
         suffixIcon: IconButton(
           icon: Icon(
             obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
             size: 19,
-            color: const Color(0xFF1F2933),
+            color: context.colors.textPrimary,
           ),
           onPressed: onToggle,
         ),

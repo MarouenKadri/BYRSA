@@ -53,7 +53,7 @@ class _CreditCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF111111), Color(0xFF242424)],
+          colors: [AppPalette.ink, AppColorsDark.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

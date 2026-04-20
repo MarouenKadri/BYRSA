@@ -20,13 +20,6 @@ abstract class AppDesign {
   static const double space40 = 40;
   static const double space48 = 48;
 
-  // ── Alias sémantiques ────────────────────────────────────────────────────
-  static const double spaceXS  = space4;
-  static const double spaceS   = space8;
-  static const double spaceM   = space16;
-  static const double spaceL   = space24;
-  static const double spaceXL  = space32;
-
   // ── Radius scale ─────────────────────────────────────────────────────────
   static const double radius4   = 4;
   static const double radius8   = 8;
@@ -61,8 +54,6 @@ abstract class AppDesign {
   static const EdgeInsets paddingChip    = EdgeInsets.symmetric(horizontal: space10, vertical: space6);
   static const EdgeInsets paddingSheet   = EdgeInsets.fromLTRB(space20, space16, space20, space24);
 
-  // ── Constante manquante ───────────────────────────────────────────────────
-  static const double space24_ = 24; // alias explicite pour boutons
 }
 
 class AppInsets {

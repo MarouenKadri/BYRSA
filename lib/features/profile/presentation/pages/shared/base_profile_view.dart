@@ -174,14 +174,14 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
               Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xC7000000),
-                          Color(0x52000000),
-                          Color(0x00000000),
+                          Colors.black.withValues(alpha: 0.78),
+                          Colors.black.withValues(alpha: 0.32),
+                          Colors.transparent,
                         ],
                         stops: [0.0, 0.28, 0.62],
                       ),
@@ -244,7 +244,7 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF23272D), Color(0xFF3A4048)],
+            colors: [AppColorsDark.surface, AppColorsDark.surfaceAlt],
           ),
         ),
       );
@@ -435,11 +435,11 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppRadius.input),
-          border: Border.all(color: AppColors.gray50),
+          border: Border.all(color: context.colors.border),
           boxShadow: const [
-            BoxShadow(color: Color(0x08000000), blurRadius: 14, offset: Offset(0, 6)),
+            BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 14, offset: Offset(0, 6)),
           ],
         ),
         child: Row(
@@ -474,17 +474,17 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.colors.surface,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
-                BoxShadow(color: Color(0x08000000), blurRadius: 24, offset: Offset(0, 10)),
+                BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
               ],
             ),
             child: Column(
               children: [
                 for (int i = 0; i < verifiedItems.length; i++) ...[
                   if (i > 0)
-                    const Divider(height: 1, color: AppColors.gray50, indent: 31),
+                    Divider(height: 1, color: context.colors.divider, indent: 31),
                   ProfileVerificationItem(
                     label: verifiedItems[i].label,
                     verified: verifiedItems[i].verified,
@@ -530,7 +530,7 @@ class ProfileTabPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: active ? AppColors.inkDark : AppColors.gray50),
           boxShadow: active
-              ? const [BoxShadow(color: Color(0x18000000), blurRadius: 8, offset: Offset(0, 3))]
+              ? const [BoxShadow(color: AppPalette.blackAlpha09, blurRadius: 8, offset: Offset(0, 3))]
               : null,
         ),
         child: Row(

@@ -286,13 +286,13 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                 border: Border.all(
                   color: _selectedCategoryId != null
                       ? AppColors.inkDark
-                      : const Color(0xFFEEEFF1),
+                      : context.colors.border,
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x0C000000),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 16,
-                    offset: Offset(0, 3),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -329,7 +329,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0E2E6),
+                    color: context.colors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -450,7 +450,7 @@ class _FilterPill extends StatelessWidget {
           boxShadow: selected
               ? const [
                   BoxShadow(
-                    color: Color(0x18000000),
+                    color: AppPalette.blackAlpha09,
                     blurRadius: 8,
                     offset: Offset(0, 3),
                   ),

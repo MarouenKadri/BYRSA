@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/design/app_design_system.dart';
+
 // ─── Primitive : Composite ────────────────────────────────────────────────────
 // Responsabilité unique : afficher une ligne de métadonnées (date, heure,
 // adresse) sous forme de pills. Les variants composent ce widget librement.
@@ -37,20 +39,20 @@ class _MetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F7F8),
+        color: context.colors.surfaceAlt,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(item.icon, size: 14, color: const Color(0xFF7E8792)),
+          Icon(item.icon, size: 14, color: context.colors.textTertiary),
           const SizedBox(width: 6),
           Text(
             item.text,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF7E8792),
+              color: context.colors.textTertiary,
             ),
           ),
         ],

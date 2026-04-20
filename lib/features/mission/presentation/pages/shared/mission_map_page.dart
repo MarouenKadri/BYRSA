@@ -138,11 +138,15 @@ class _MissionMapPageState extends State<MissionMapPage> {
           Positioned.fill(
             child: IgnorePointer(
               child: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0x40FFFFFF), Color(0x00FFFFFF), Color(0x0DFFFFFF)],
+                    colors: [
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.0),
+                      Colors.white.withValues(alpha: 0.05),
+                    ],
                     stops: [0.0, 0.22, 1.0],
                   ),
                 ),
@@ -160,12 +164,12 @@ class _MissionMapPageState extends State<MissionMapPage> {
                 color: Colors.white.withValues(alpha: 0.88),
                 shape: BoxShape.circle,
                 boxShadow: const [
-                  BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 8)),
+                  BoxShadow(color: Colors.black12, blurRadius: 18, offset: Offset(0, 8)),
                 ],
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Color(0xFF8E98A4)),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: context.colors.textTertiary),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -198,14 +202,14 @@ class _MapPin extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF173B78),
+            color: AppPalette.mapPin,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x24173B78),
+                color: AppPalette.mapPin.withValues(alpha: 0.14),
                 blurRadius: 14,
-                offset: Offset(0, 6),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -224,7 +228,7 @@ class _PinTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF173B78)
+      ..color = AppPalette.mapPin
       ..style = PaintingStyle.fill;
     final path = ui.Path()
       ..moveTo(0, 0)
@@ -259,7 +263,7 @@ class _AddressCard extends StatelessWidget {
             border: Border.all(color: Colors.white.withValues(alpha: 0.72), width: 0.8),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x14000000),
+                color: Colors.black12,
                 blurRadius: 28,
                 offset: Offset(0, -6),
               ),
@@ -270,7 +274,7 @@ class _AddressCard extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: 4),
-                child: Icon(Icons.location_on_outlined, color: Color(0xFF173B78), size: 18),
+                child: Icon(Icons.location_on_outlined, color: AppPalette.mapPin, size: 18),
               ),
               AppGap.w12,
               Expanded(
@@ -282,7 +286,7 @@ class _AddressCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF98A1AC),
+                        color: context.colors.textTertiary,
                       ),
                     ),
                     AppGap.h4,

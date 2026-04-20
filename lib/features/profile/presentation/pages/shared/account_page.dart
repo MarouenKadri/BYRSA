@@ -133,19 +133,19 @@ class _AccountPageState extends State<AccountPage> {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEDF3EF),
+                      color: context.colors.success.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: const Color(0xFFD4E2D8),
+                        color: context.colors.success.withValues(alpha: 0.18),
                         width: 1,
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Vérifié',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.text.labelMedium?.copyWith(
+                        fontSize: AppFontSize.sm,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF163127),
+                        color: context.colors.success,
                       ),
                     ),
                   ),
@@ -279,7 +279,7 @@ class _FlatTile extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -295,15 +295,15 @@ class _FlatTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: context.text.titleMedium?.copyWith(
+                    style: context.text.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: titleColor ?? context.colors.textPrimary,
                     ),
                   ),
-                  AppGap.h3,
+                  AppGap.h2,
                   Text(
                     subtitle,
-                    style: context.text.bodyMedium?.copyWith(
+                    style: context.text.bodySmall?.copyWith(
                       color: context.colors.textSecondary,
                       height: 1.4,
                     ),
@@ -345,10 +345,10 @@ class _ProfileHeader extends StatelessWidget {
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
       decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFB),
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE8ECEF), width: 1),
-        boxShadow: const [
+        border: Border.all(color: context.colors.border, width: 1),
+        boxShadow: [
           BoxShadow(
             color: Color.fromRGBO(15, 23, 42, 0.04),
             blurRadius: 18,
@@ -368,9 +368,9 @@ class _ProfileHeader extends StatelessWidget {
                   height: 82,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFF3F5F6),
+                    color: context.colors.surfaceAlt,
                     border: Border.all(
-                      color: const Color(0xFFE1E6EA),
+                      color: context.colors.border,
                       width: 1.2,
                     ),
                   ),
@@ -388,7 +388,7 @@ class _ProfileHeader extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF6B7280),
+                              color: context.colors.textSecondary,
                             ),
                           )
                         : null,
@@ -423,14 +423,14 @@ class _ProfileHeader extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.92),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFE4EAEE),
+                          color: context.colors.border,
                           width: 1,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.verified_rounded,
                         size: 16,
-                        color: Color(0xFF163127),
+                        color: context.colors.success,
                       ),
                     ),
                   ),
@@ -445,21 +445,21 @@ class _ProfileHeader extends StatelessWidget {
                 Text(
                   displayName,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: AppFontSize.h2,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.4,
-                    color: AppColors.inkDark,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 AppGap.h6,
                 Text(
                   isFreelancerMode ? 'Mode Freelancer' : 'Mode Client',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppFontSize.md,
                     fontWeight: FontWeight.w500,
                     color: isFreelancerMode
-                        ? const Color(0xFF163127)
-                        : AppColors.inkDark,
+                        ? context.colors.success
+                        : context.colors.textPrimary,
                   ),
                 ),
                 AppGap.h12,
@@ -468,21 +468,21 @@ class _ProfileHeader extends StatelessWidget {
                       ? null
                       : () => _pickAvatar(context, profileProv),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF5F6B76),
+                    foregroundColor: context.colors.textSecondary,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
-                    backgroundColor: const Color(0xFFF5F7F8),
+                    backgroundColor: context.colors.surfaceAlt,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
-                      side: const BorderSide(
-                        color: Color(0xFFE3E8EB),
+                      side: BorderSide(
+                        color: context.colors.border,
                         width: 1,
                       ),
                     ),
                   ),
-                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  icon: Icon(Icons.edit_outlined, size: 16),
                   label: Text(
                     'Modifier',
                     style: TextStyle(
@@ -506,146 +506,6 @@ class _ProfileHeader extends StatelessWidget {
     final file = await ImagePickerService.showPicker(context);
     if (file == null) return;
     await profileProv.uploadAvatar(file);
-  }
-}
-
-class _AccountSectionCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _AccountSectionCard({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFB),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE8ECEF), width: 1),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(15, 23, 42, 0.04),
-            blurRadius: 18,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 2, right: 2, bottom: 8),
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.inkDark,
-                letterSpacing: -0.2,
-              ),
-            ),
-          ),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _AccountMenuTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final Widget? trailing;
-  final bool showDivider;
-  final Color? titleColor;
-  final Color? iconColor;
-
-  const _AccountMenuTile({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.onTap,
-    this.trailing,
-    this.showDivider = true,
-    this.titleColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final resolvedTitleColor = titleColor ?? AppColors.inkDark;
-    final resolvedIconColor = iconColor ?? const Color(0xFF6E7781);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          border: showDivider
-              ? const Border(
-                  bottom: BorderSide(color: Color(0xFFEEF2F4), width: 1),
-                )
-              : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F7F8),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE7ECEF), width: 1),
-              ),
-              child: Icon(icon, size: 19, color: resolvedIconColor),
-            ),
-            AppGap.w14,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: resolvedTitleColor,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    AppGap.h5,
-                    Text(
-                      subtitle!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF66707A),
-                        height: 1.45,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            AppGap.w12,
-            trailing ??
-                const Padding(
-                  padding: EdgeInsets.only(top: 3),
-                  child: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 15,
-                    color: Color(0xFFB5BEC7),
-                  ),
-                ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -976,7 +836,7 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
           ),
         ),
         children: [
-          const Divider(height: 1, indent: 20, endIndent: 20),
+          Divider(height: 1, indent: 20, endIndent: 20),
           AppActionSheetItem(
             icon: Icons.play_circle_outline_rounded,
             title: 'Voir les stories',

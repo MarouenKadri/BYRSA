@@ -80,6 +80,7 @@ class AppSegmentedTabBar extends StatelessWidget implements PreferredSizeWidget 
   }) {
     return SizedBox(
       height: 48,
+      width: double.infinity,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -108,7 +109,7 @@ class AppSegmentedTabBar extends StatelessWidget implements PreferredSizeWidget 
                     boxShadow: selected
                         ? const [
                             BoxShadow(
-                              color: Color(0x18000000),
+                              color: AppPalette.blackAlpha09,
                               blurRadius: 8,
                               offset: Offset(0, 3),
                             ),

@@ -26,7 +26,7 @@ class FreelancerPreviewCard extends StatelessWidget {
       child: Container(
         width: width,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -98,10 +98,10 @@ class FreelancerPreviewCard extends StatelessWidget {
                     freelancer.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF101418),
+                      color: context.colors.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -113,10 +113,10 @@ class FreelancerPreviewCard extends StatelessWidget {
                       freelancer.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF8E959D),
+                        color: context.colors.textTertiary,
                         height: 1.3,
                       ),
                     ),
@@ -136,17 +136,17 @@ class FreelancerPreviewCard extends StatelessWidget {
                           size: 12,
                           color: filled
                               ? AppColors.amber
-                              : const Color(0xFFE4E6E9),
+                              : context.colors.border,
                         );
                       }),
                       if (reviewsCount > 0) ...[
                         const SizedBox(width: 4),
                         Text(
                           '($reviewsCount)',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF8E959D),
+                            color: context.colors.textTertiary,
                           ),
                         ),
                       ],
@@ -156,7 +156,7 @@ class FreelancerPreviewCard extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   // Divider
-                  const Divider(height: 1, color: Color(0xFFF0F1F3)),
+                  Divider(height: 1, color: context.colors.divider),
 
                   const SizedBox(height: 8),
 
@@ -168,10 +168,10 @@ class FreelancerPreviewCard extends StatelessWidget {
                           freelancer.job,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF101418),
+                            color: context.colors.textPrimary,
                           ),
                         ),
                       ),
@@ -179,10 +179,10 @@ class FreelancerPreviewCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '$missionsCount missions',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF8E959D),
+                            color: context.colors.textTertiary,
                           ),
                         ),
                       ],

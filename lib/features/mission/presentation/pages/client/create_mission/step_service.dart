@@ -51,7 +51,7 @@ class StepService extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.w400,
               height: 1.5,
-              color: const Color(0xFF98A0A8),
+              color: context.colors.textTertiary,
             ),
           ),
           if (selectedMeta != null) ...[
@@ -197,7 +197,7 @@ class _SubServicesSheetState extends State<_SubServicesSheet> {
               width: 34,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFD8DCE0),
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

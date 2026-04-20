@@ -81,14 +81,14 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
           Positioned.fill(
             child: IgnorePointer(
               child: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xC7000000),
-                      Color(0x52000000),
-                      Color(0x00000000),
+                      Colors.black.withValues(alpha: 0.78),
+                      Colors.black.withValues(alpha: 0.32),
+                      Colors.transparent,
                     ],
                     stops: [0.0, 0.28, 0.62],
                   ),

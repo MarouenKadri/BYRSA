@@ -35,9 +35,9 @@ class ArchivesPage extends StatelessWidget {
           ..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.colors.background,
       appBar: AppPageAppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.colors.background,
         leading: AppBackButtonLeading(
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -46,7 +46,7 @@ class ArchivesPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF222629),
+            color: context.colors.textPrimary,
             letterSpacing: -0.3,
           ),
         ),
@@ -61,7 +61,7 @@ class ArchivesPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF8A9199),
+                    color: context.colors.textSecondary,
                     height: 1.5,
                   ),
                 ),

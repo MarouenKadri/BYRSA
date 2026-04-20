@@ -100,11 +100,11 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
       title: 'A propos',
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x0A000000),
+              color: Color.fromRGBO(0, 0, 0, 0.04),
               blurRadius: 18,
               offset: Offset(0, 10),
             ),
@@ -114,29 +114,29 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
           controller: _bioCtrl,
           maxLines: 5,
           maxLength: 300,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             height: 1.6,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF20252B),
+            color: context.colors.textPrimary,
           ),
           decoration: AppInputDecorations.formField(
             context,
             hintText: 'Parlez de votre experience, de votre approche et de vos specialites.',
-            hintStyle: const TextStyle(
+            hintStyle: TextStyle(
               fontSize: 14,
               height: 1.6,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF9AA1A8),
+              color: context.colors.textTertiary,
             ),
             contentPadding: const EdgeInsets.all(18),
             noBorder: true,
             fillColor: Colors.transparent,
           ).copyWith(
-            counterStyle: const TextStyle(
+            counterStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF9AA1A8),
+              color: context.colors.textTertiary,
             ),
           ),
         ),
@@ -160,7 +160,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               decoration: BoxDecoration(
-                color: selected ? AppColors.ink : const Color(0xFFF2F2F2),
+                color: selected ? AppColors.ink : context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
@@ -169,7 +169,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                   Icon(
                     _mapSkillIcon(skill),
                     size: 14,
-                    color: selected ? Colors.white : const Color(0xFF565D65),
+                    color: selected ? Colors.white : context.colors.textSecondary,
                   ),
                   const SizedBox(width: 7),
                   Text(
@@ -177,7 +177,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                      color: selected ? Colors.white : const Color(0xFF50565D),
+                      color: selected ? Colors.white : context.colors.textSecondary,
                     ),
                   ),
                 ],
@@ -202,7 +202,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF20252B),
+                  color: context.colors.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -228,7 +228,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
             data: SliderTheme.of(context).copyWith(
               trackHeight: 2,
               activeTrackColor: AppColors.ink,
-              inactiveTrackColor: const Color(0xFFD9DEE3),
+              inactiveTrackColor: context.colors.border,
               thumbColor: AppColors.ink,
               overlayColor: AppColors.ink.withValues(alpha: 0.08),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
@@ -250,7 +250,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF7E858C),
+                  color: context.colors.textTertiary,
                 ),
               ),
               Text(
@@ -258,7 +258,7 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF7E858C),
+                  color: context.colors.textTertiary,
                 ),
               ),
             ],
@@ -273,11 +273,11 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
       title: 'Tarif',
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x0A000000),
+              color: Color.fromRGBO(0, 0, 0, 0.04),
               blurRadius: 18,
               offset: Offset(0, 10),
             ),
@@ -296,20 +296,20 @@ class _FreelancerProfileSheetState extends State<_FreelancerProfileSheet> {
           decoration: AppInputDecorations.formField(
             context,
             hintText: '0',
-            hintStyle: const TextStyle(
+            hintStyle: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w300,
-              color: Color(0xFFB4BAC1),
+              color: context.colors.textHint,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
             noBorder: true,
             fillColor: Colors.transparent,
           ).copyWith(
             suffixText: '€ / h',
-            suffixStyle: const TextStyle(
+            suffixStyle: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF7E858C),
+              color: context.colors.textTertiary,
             ),
           ),
         ),
@@ -393,7 +393,7 @@ class _ActivitySection extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF20252B),
+            color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: 14),

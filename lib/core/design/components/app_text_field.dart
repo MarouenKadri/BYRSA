@@ -116,7 +116,7 @@ class AppInputDecorations {
     return InputDecoration(
       counterText: '',
       filled: true,
-      fillColor: filled ? const Color(0xFFF5F6F7) : context.colors.background,
+      fillColor: filled ? context.colors.surfaceAlt : context.colors.background,
       border: OutlineInputBorder(
         borderRadius: br,
         borderSide: BorderSide(color: context.colors.border),
@@ -151,8 +151,7 @@ class AppInputDecorations {
         const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
     double radius = 14.0,
   }) {
-    final hintColor =
-        readOnly ? const Color(0xFF9AA4AF) : const Color(0xFF8A949E);
+    final hintColor = readOnly ? context.colors.textTertiary : context.colors.textHint;
     OutlineInputBorder _b({bool error = false, bool focus = false}) =>
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
@@ -174,7 +173,7 @@ class AppInputDecorations {
       suffixIcon: suffixIcon,
       contentPadding: contentPadding,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: context.colors.surface,
       counterText: '',
       border: _b(),
       enabledBorder: _b(),

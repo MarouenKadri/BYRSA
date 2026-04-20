@@ -172,15 +172,15 @@ class _StoryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isViewed
-                ? const Color(0xFFE5E7EB)
-                : const Color(0xFFDADFE6),
+                ? context.colors.border
+                : context.colors.primary.withValues(alpha: 0.30),
             width: 1,
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x10000000),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 18,
-              offset: Offset(0, 10),
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -233,7 +233,7 @@ class _StoryCard extends StatelessWidget {
                 child: Text(
                   catLabel,
                   style: const TextStyle(
-                    fontSize: 10.5,
+                    fontSize: AppFontSize.tinyHalf,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -278,7 +278,7 @@ class _StoryCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppFontSize.smHalf,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
@@ -312,15 +312,15 @@ class _StoryPhotoFallback extends StatelessWidget {
     final icon = StoryCategoryPresentation.icon(label);
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFDCE6DB), Color(0xFFC8D6D8)],
+          colors: [context.colors.successLight, context.colors.infoLight],
         ),
       ),
       child: Center(
-        child: Icon(icon, size: 30, color: const Color(0xFF6E7781)),
+        child: Icon(icon, size: 30, color: context.colors.textSecondary),
       ),
     );
   }
@@ -340,14 +340,14 @@ class _StoryAvatarFallback extends StatelessWidget {
         .map((p) => p[0].toUpperCase())
         .join();
     return Container(
-      color: const Color(0xFFE9EEF2),
+      color: context.colors.surfaceAlt,
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF4A4F55),
+          color: context.colors.textPrimary,
         ),
       ),
     );

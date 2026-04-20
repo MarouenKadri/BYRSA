@@ -141,7 +141,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
             fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 2.1,
-            color: const Color(0xFF7C8795),
+            color: context.colors.textTertiary,
           ),
         ),
         AppGap.h12,
@@ -177,13 +177,13 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
     return Container(
       margin: AppInsets.h16,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0A000000),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 26,
-            offset: Offset(0, 12),
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -203,7 +203,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                 height: 182,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE8EBEF)),
+                  border: Border.all(color: context.colors.border),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: Stack(
@@ -242,21 +242,21 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                             color: Colors.white.withValues(alpha: 0.96),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: const Color(0xFFE6E9ED),
+                              color: context.colors.border,
                               width: 0.8,
                             ),
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(
-                                color: Color(0x12000000),
+                                color: Colors.black.withValues(alpha: 0.07),
                                 blurRadius: 18,
-                                offset: Offset(0, 10),
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.search_rounded,
                             size: 18,
-                            color: AppColors.ink,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                       ),
@@ -269,12 +269,12 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 2),
                   child: Icon(
                     Icons.location_on_outlined,
                     size: 16,
-                    color: Color(0xFF9AA3AE),
+                    color: context.colors.textTertiary,
                   ),
                 ),
                 AppGap.w8,
@@ -287,7 +287,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                       fontSize: 16,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
@@ -306,11 +306,11 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x08000000),
+              color: AppPalette.blackAlpha03,
               blurRadius: 24,
               offset: Offset(0, 10),
             ),
@@ -324,7 +324,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
               style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
-                color: AppColors.ink,
+                color: context.colors.textPrimary,
               ),
             ),
             AppGap.h12,
@@ -334,7 +334,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                 fontSize: 14,
                 height: 1.65,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF5F6975),
+                color: context.colors.textSecondary,
               ),
             ),
           ],

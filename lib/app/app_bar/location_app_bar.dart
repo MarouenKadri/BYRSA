@@ -367,7 +367,7 @@ class RoleSwitchSheet extends StatelessWidget {
         ),
       ),
       children: [
-        const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
         AppGap.h8,
         _RoleItem(
           icon: Icons.person_outline_rounded,
@@ -379,7 +379,7 @@ class RoleSwitchSheet extends StatelessWidget {
             await context.read<AuthProvider>().switchRole(UserRole.client);
           },
         ),
-        const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
         _RoleItem(
           icon: Icons.handyman_outlined,
           label: 'Prestataire',
@@ -440,7 +440,9 @@ class _RoleItem extends StatelessWidget {
             Icon(
               icon,
               size: 21,
-              color: isSelected ? AppColors.snow : const Color(0xFFD5DADE),
+              color: isSelected
+                  ? AppColors.snow
+                  : AppColors.snow.withValues(alpha: 0.75),
             ),
             AppGap.w14,
             Expanded(
@@ -748,21 +750,21 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
       AppInputDecorations.formField(
         context,
         hintText: 'Rechercher...',
-        hintStyle: const TextStyle(
-          fontSize: 15,
+        hintStyle: context.text.bodyMedium?.copyWith(
+          fontSize: AppFontSize.body,
           fontWeight: FontWeight.w400,
-          color: Color(0xFF8C96A3),
+          color: context.colors.textTertiary,
         ),
-        prefixIcon: const Icon(
+        prefixIcon: Icon(
           Icons.search_outlined,
-          color: Color(0xFF7D8794),
+          color: context.colors.textSecondary,
           size: 19,
         ),
         suffixIcon: _isSearching
             ? IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.close_rounded,
-                  color: Color(0xFF7D8794),
+                  color: context.colors.textSecondary,
                   size: 18,
                 ),
                 onPressed: () {
@@ -771,7 +773,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                 },
               )
             : null,
-        fillColor: Colors.white.withValues(alpha: 0.42),
+        fillColor: context.colors.surface.withValues(alpha: 0.42),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         radius: 24,
@@ -784,7 +786,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFF4F4F2),
+      backgroundColor: context.colors.background,
       body: Column(
         children: [
           Expanded(
@@ -819,7 +821,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                                   icon: Icons.location_on_rounded,
                                   size: AppBarMetrics.mapPinIconSize,
                                   iconSize: AppBarMetrics.mapPinInnerIconSize,
-                                  backgroundColor: const Color(0xFF222222),
+                                  backgroundColor: AppPalette.charcoal,
                                   iconColor: Colors.white,
                                   boxShadow: const [
                                     BoxShadow(
@@ -831,7 +833,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                                 ),
                                 const CustomPaint(
                                   size: Size(12, 6),
-                                  painter: _PinTailPainter(Color(0xFF222222)),
+                                  painter: _PinTailPainter(AppPalette.charcoal),
                                 ),
                               ],
                             ),
@@ -843,11 +845,15 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                 Positioned.fill(
                   child: IgnorePointer(
                     child: DecoratedBox(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Color(0xDDF8F8F6), Color(0x00F8F8F6), Color(0x14F8F8F6)],
+                          colors: [
+                            context.colors.surface.withValues(alpha: 0.87),
+                            context.colors.surface.withValues(alpha: 0.0),
+                            context.colors.surface.withValues(alpha: 0.08),
+                          ],
                           stops: [0.0, 0.18, 1.0],
                         ),
                       ),
@@ -861,7 +867,10 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                   child: ClipRect(
                     child: BackdropFilter(
                       filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(height: top + 76, color: Colors.white.withValues(alpha: 0.08)),
+                      child: Container(
+                        height: top + 76,
+                        color: context.colors.surface.withValues(alpha: 0.08),
+                      ),
                     ),
                   ),
                 ),
@@ -873,9 +882,9 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                     onTap: () => Navigator.pop(context),
                     size: AppBarMetrics.mapBackButtonSize,
                     iconSize: AppBarMetrics.mapBackButtonIconSize,
-                    backgroundColor: Colors.white.withValues(alpha: 0.72),
-                    iconColor: const Color(0xFF1A1A1A),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.65)),
+                    backgroundColor: context.colors.surface.withValues(alpha: 0.72),
+                    iconColor: context.colors.textPrimary,
+                    border: Border.all(color: context.colors.border.withValues(alpha: 0.65)),
                     boxShadow: const [
                       BoxShadow(
                         color: Color.fromRGBO(0, 0, 0, 0.08),
@@ -899,7 +908,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF20242B),
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -907,7 +916,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F2F4).withValues(alpha: 0.86),
+                      color: context.colors.surfaceAlt.withValues(alpha: 0.86),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: const [
                         BoxShadow(
@@ -926,7 +935,11 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                       controller: _searchCtrl,
                       focusNode: _focusNode,
                       textInputAction: TextInputAction.search,
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: const Color(0xFF20242B)),
+                      style: context.text.bodyLarge?.copyWith(
+                        fontSize: AppFontSize.body,
+                        fontWeight: FontWeight.w400,
+                        color: context.colors.textPrimary,
+                      ),
                       decoration: _searchDecoration(context),
                     ),
                   ),
@@ -996,7 +1009,11 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
         return AppBarOptionTile(
           onTap: () => _selectResult(r),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          leading: Icon(Icons.place_outlined, size: 20, color: const Color(0xFF6B7280)),
+          leading: Icon(
+            Icons.place_outlined,
+            size: 20,
+            color: context.colors.textSecondary,
+          ),
           title: r.shortName,
           subtitle: r.displayName,
           trailing: Icon(
@@ -1020,7 +1037,8 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
             label: 'Position actuelle',
             isSelected: _selected == LocationType.current,
             isLoading: _loadingLocation,
-            teal: const Color(0xFF111827), tealLight: Colors.transparent,
+            teal: context.colors.textPrimary,
+            tealLight: Colors.transparent,
             pulse: _pulseScale,
             onTap: _loadingLocation ? null : _selectCurrentPosition,
           ),
@@ -1030,7 +1048,8 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
             label: 'Autre',
             subtitle: _otherAddress,
             isSelected: _selected == LocationType.other,
-            teal: const Color(0xFF111827), tealLight: Colors.transparent,
+            teal: context.colors.textPrimary,
+            tealLight: Colors.transparent,
             onTap: _otherAddress != null ? () => _selectOtherAddress(_otherAddress!) : null,
           ),
         ],
@@ -1056,7 +1075,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.2,
-              color: const Color(0xFF7C8593),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 10),
@@ -1079,7 +1098,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF29303A),
+                        color: context.colors.textPrimary,
                       ),
                     ),
                   ),
@@ -1142,13 +1161,15 @@ class _AddrItem extends StatelessWidget {
     final leadingIcon = Icon(
       icon,
       size: 20,
-      color: isSelected ? teal : const Color(0xFF7A8491),
+      color: isSelected ? teal : context.colors.textSecondary,
     );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFF1F3F5).withValues(alpha: 0.82) : Colors.transparent,
+        color: isSelected
+            ? context.colors.surfaceAlt.withValues(alpha: 0.82)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(20),
       ),
       child: AppBarOptionTile(
@@ -1167,7 +1188,7 @@ class _AddrItem extends StatelessWidget {
                 child: Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
-                  color: const Color(0xFF9AA3AF),
+                  color: context.colors.textHint,
                 ),
               ),
       ),

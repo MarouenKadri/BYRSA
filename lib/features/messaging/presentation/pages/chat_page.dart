@@ -9,14 +9,14 @@ import '../../messaging_provider.dart';
 import '../../../mission/presentation/pages/client/create_mission_page.dart';
 
 // ─── Couleurs locales luxury monochrome ──────────────────────────────────────
-const _kBg          = AppColors.snow;
-const _kWhite       = Colors.white;
-const _kInk         = Color(0xFF0D0D0D);
-const _kCharcoal    = Color(0xFF2C2C2C);
-const _kGrayMid     = Color(0xFF8A8A8A);
-const _kGrayLight   = Color(0xFFBBBBBB);
-const _kGrayXLight  = Color(0xFFCCCCCC);
-const _kBorder      = Color(0xFFEEEEEE);
+const _kBg          = AppPalette.snow;
+const _kWhite       = AppColorsLight.surface;
+const _kInk         = AppPalette.ink;
+const _kCharcoal    = AppColorsDark.surfaceAlt;
+const _kGrayMid     = AppColorsLight.textTertiary;
+const _kGrayLight   = AppColorsLight.textHint;
+const _kGrayXLight  = AppColorsIndeed.textHint;
+const _kBorder      = AppColorsLight.divider;
 
 class ChatPage extends StatefulWidget {
   final String? conversationId;
@@ -899,9 +899,13 @@ class _LocationBubble extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     height: 140,
-                    color: const Color(0xFFE8EDF2),
-                    child: const Center(
-                      child: Icon(Icons.map_outlined, size: 36, color: Color(0xFF9AA3AE)),
+                    color: context.colors.surfaceAlt,
+                    child: Center(
+                      child: Icon(
+                        Icons.map_outlined,
+                        size: 36,
+                        color: context.colors.textTertiary,
+                      ),
                     ),
                   ),
                 ),

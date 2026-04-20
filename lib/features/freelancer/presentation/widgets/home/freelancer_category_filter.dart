@@ -20,7 +20,7 @@ class FreelancerCategoryFilter extends StatelessWidget {
     return Container(
       color: context.colors.surface,
       child: AppCategoryFilterBar(
-        items: ServiceCategoryFilterItems.build(),
+        items: ServiceCategoryFilterItems.build(context),
         selectedId: selectedCategoryId,
         onSelect: onSelect,
         padding: const EdgeInsets.symmetric(horizontal: 20),

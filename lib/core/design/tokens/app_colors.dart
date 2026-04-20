@@ -116,87 +116,7 @@ abstract class AppColorsIndeed {
   static const purpleLight  = Color(0xFFF3E5F5);
 }
 
-abstract class AppColorsWarm {
-  // ── Brand (identique à la charte Inkern) ──────────────────────────────────
-  static const primary      = Color(0xFF34C759);
-  static const primaryDark  = Color(0xFF28A745);
-  static const secondary    = Color(0xFF007AFF);
-
-  // ── Surfaces ─────────────────────────────────────────────────────────────
-  static const background   = Color(0xFFFFFFFF);
-  static const surface      = Color(0xFFFFFFFF);
-  static const surfaceAlt   = Color(0xFFF5F5F5); // sert à détecter le thème
-  static const sheetBg      = Color(0xFFFFFFFF);
-  static const inputFill    = Color(0xFFF5F5F5); // fond input sans bordure
-
-  // ── Sans bordures ─────────────────────────────────────────────────────────
-  static const border       = Color(0x00000000); // transparent
-  static const divider      = Color(0xFFF2F2F2); // séparateur très discret
-
-  // ── Textes noir pur / gris ────────────────────────────────────────────────
-  static const textPrimary   = Color(0xFF000000); // noir pur
-  static const textSecondary = Color(0xFF666666); // gris moyen
-  static const textTertiary  = Color(0xFF999999);
-  static const textHint      = Color(0xFFBBBBBB);
-
-  // ── Statuts (identiques au thème light) ──────────────────────────────────
-  static const error    = Color(0xFFFF3B30);
-  static const warning  = Color(0xFFFF9500);
-  static const success  = Color(0xFF34C759);
-  static const info     = Color(0xFF007AFF);
-  static const rating   = Color(0xFFFFCC00);
-
-  // ── Sémantiques ──────────────────────────────────────────────────────────
-  static const errorLight   = Color(0xFFFFEDED);
-  static const warningLight = Color(0xFFFFF3E0);
-  static const successLight = Color(0xFFE8F5E9);
-  static const infoLight    = Color(0xFFE3F2FD);
-  static const purpleLight  = Color(0xFFF3E5F5);
-}
-
-// ─── 4. COLOR SCHEMES ────────────────────────────────────────────────────────
-
-const darkColorScheme = ColorScheme.dark(
-  primary:          AppColorsDark.primary,
-  secondary:        AppColorsDark.secondary,
-  surface:          AppColorsDark.surface,
-  error:            AppColorsDark.error,
-  onPrimary:        Colors.black,
-  onSecondary:      Colors.white,
-  onSurface:        AppColorsDark.textPrimary,
-  onError:          Colors.white,
-  outline:          AppColorsDark.border,
-  outlineVariant:   AppColorsDark.divider,
-  surfaceContainerHighest: AppColorsDark.surfaceAlt,
-);
-
-const lightColorScheme = ColorScheme.light(
-  primary:          AppColorsLight.primary,
-  secondary:        AppColorsLight.secondary,
-  surface:          AppColorsLight.surface,
-  error:            AppColorsLight.error,
-  onPrimary:        Colors.white,
-  onSecondary:      Colors.white,
-  onSurface:        AppColorsLight.textPrimary,
-  onError:          Colors.white,
-  outline:          AppColorsLight.border,
-  outlineVariant:   AppColorsLight.divider,
-  surfaceContainerHighest: AppColorsLight.surfaceAlt,
-);
-
-const warmColorScheme = ColorScheme.light(
-  primary:          AppColorsWarm.primary,
-  secondary:        AppColorsWarm.secondary,
-  surface:          AppColorsWarm.surface,
-  error:            AppColorsWarm.error,
-  onPrimary:        Colors.white,
-  onSecondary:      Colors.white,
-  onSurface:        AppColorsWarm.textPrimary,
-  onError:          Colors.white,
-  outline:          AppColorsWarm.border,
-  outlineVariant:   AppColorsWarm.divider,
-  surfaceContainerHighest: AppColorsWarm.surfaceAlt,
-);
+// ─── 4. COLOR SCHEME ─────────────────────────────────────────────────────────
 
 const indeedColorScheme = ColorScheme.light(
   primary:          AppColorsIndeed.primary,
@@ -220,6 +140,37 @@ abstract class AppPalette {
   static const info = AppColorsIndeed.info;
   static const success = AppColorsIndeed.success;
   static const warning = AppColorsIndeed.warning;
+
+  // ── Alpha primitives (évite les Color(0x..) dispersés) ────────────────────
+  static const whiteAlpha12 = Color(0x1FFFFFFF); // ~12% white overlay
+  static const blackAlpha03 = Color(0x08000000); // ~3% black overlay
+  static const blackAlpha04 = Color(0x0A000000); // ~4% black overlay
+  static const blackAlpha07 = Color(0x12000000); // ~7% black overlay
+  static const blackAlpha09 = Color(0x18000000); // ~9% black overlay
+  static const blackAlpha15 = Color(0x26000000); // ~15% black overlay
+  static const charcoal = Color(0xFF222222);
+
+  // ── Service categories (source unique) ───────────────────────────────────
+  static const categoryMenage = Color(0xFF4CAF50);
+  static const categoryJardinage = Color(0xFF8BC34A);
+  static const categoryBricolage = Color(0xFFFF9800);
+  static const categoryPlomberie = Color(0xFF2196F3);
+  static const categoryElectricite = Color(0xFFFFC107);
+  static const categoryDemenagement = Color(0xFF9C27B0);
+  static const categoryPetsitting = Color(0xFFE91E63);
+  static const categoryCours = Color(0xFF3F51B5);
+
+  // ── Brand externes ───────────────────────────────────────────────────────
+  static const googleBlue = Color(0xFF4285F4);
+  static const googleGreen = Color(0xFF34A853);
+  static const googleYellow = Color(0xFFFBBC05);
+  static const googleRed = Color(0xFFEA4335);
+
+  // ── Card (missions) ──────────────────────────────────────────────────────
+  static const cardTitle = Color(0xFF1A1A1A);
+  static const cardSubtitle = Color(0xFF6F7782);
+  static const cardMeta = Color(0xFF9AA3AE);
+  static const cardCaption = Color(0xFF24313D);
   // ── Neutres fréquents ────────────────────────────────────────────────────
   static const ink      = Color(0xFF111111);  // noir texte principal (68×)
   static const inkDark  = Color(0xFF101418);  // noir profond mission (54×)
@@ -261,6 +212,11 @@ abstract class AppPalette {
   static const indigoTW = Color(0xFF6366F1);
   static const mapGradientEnd = Color(0xFF253659);
   static const mapGradientStart = Color(0xFF1A2744);
+  static const mapPin = Color(0xFF173B78);
+  // Mini map decorative primitives (used by mission detail placeholder painter)
+  static const miniMapRoad = Color(0xFFE4E7EB);
+  static const miniMapMinorRoad = Color(0xFFEEF0F3);
+  static const miniMapWater = Color(0xFFD9E9F7);
   static const mastercardOrange = Color(0xFFEA580C);
   static const pinkRed = Color(0xFFFF3B5C);
   static const purple = Color(0xFFAF52DE);
@@ -277,43 +233,36 @@ abstract class AppPalette {
 }
 
 class AppColorTokens {
-  final BuildContext _ctx;
-  const AppColorTokens(this._ctx);
+  const AppColorTokens(BuildContext _);
 
-  bool get _dark  => _ctx.isDark;
-  /// Thème Warm actif : détecté via surfaceContainerHighest unique
-  bool get _warm  => !_dark && _ctx.scheme.surfaceContainerHighest == AppColorsWarm.surfaceAlt;
-  /// Thème Indeed (bleu) actif : détecté via surfaceContainerHighest unique
-  bool get _blue  => !_dark && _ctx.scheme.surfaceContainerHighest == AppColorsIndeed.surfaceAlt;
+  Color get primary      => AppColorsIndeed.primary;
+  Color get primaryDark  => AppColorsIndeed.primaryDark;
+  Color get secondary    => AppColorsIndeed.secondary;
 
-  Color get primary      => _blue ? AppColorsIndeed.primary     : (_warm ? AppColorsWarm.primary     : AppColorsDark.primary);
-  Color get primaryDark  => _blue ? AppColorsIndeed.primaryDark : (_warm ? AppColorsWarm.primaryDark : AppColorsDark.primaryDark);
-  Color get secondary    => _blue ? AppColorsIndeed.secondary   : (_warm ? AppColorsWarm.secondary   : AppColorsDark.secondary);
+  Color get background   => AppColorsIndeed.background;
+  Color get surface      => AppColorsIndeed.surface;
+  Color get surfaceAlt   => AppColorsIndeed.surfaceAlt;
+  Color get sheetBg      => AppColorsIndeed.sheetBg;
+  Color get inputFill    => AppColorsIndeed.inputFill;
 
-  Color get background   => _dark ? AppColorsDark.background : (_blue ? AppColorsIndeed.background : (_warm ? AppColorsWarm.background : AppColorsLight.background));
-  Color get surface      => _dark ? AppColorsDark.surface    : (_blue ? AppColorsIndeed.surface    : (_warm ? AppColorsWarm.surface    : AppColorsLight.surface));
-  Color get surfaceAlt   => _dark ? AppColorsDark.surfaceAlt : (_blue ? AppColorsIndeed.surfaceAlt : (_warm ? AppColorsWarm.surfaceAlt : AppColorsLight.surfaceAlt));
-  Color get sheetBg      => _dark ? AppColorsDark.sheetBg    : (_blue ? AppColorsIndeed.sheetBg    : (_warm ? AppColorsWarm.sheetBg    : AppColorsLight.sheetBg));
-  Color get inputFill    => _dark ? AppColorsDark.inputFill  : (_blue ? AppColorsIndeed.inputFill  : (_warm ? AppColorsWarm.inputFill  : AppColorsLight.inputFill));
+  Color get border       => AppColorsIndeed.border;
+  Color get divider      => AppColorsIndeed.divider;
 
-  Color get border       => _dark ? AppColorsDark.border  : (_blue ? AppColorsIndeed.border  : (_warm ? AppColorsWarm.border  : AppColorsLight.border));
-  Color get divider      => _dark ? AppColorsDark.divider : (_blue ? AppColorsIndeed.divider : (_warm ? AppColorsWarm.divider : AppColorsLight.divider));
+  Color get textPrimary   => AppColorsIndeed.textPrimary;
+  Color get textSecondary => AppColorsIndeed.textSecondary;
+  Color get textTertiary  => AppColorsIndeed.textTertiary;
+  Color get textHint      => AppColorsIndeed.textHint;
 
-  Color get textPrimary   => _dark ? AppColorsDark.textPrimary   : (_blue ? AppColorsIndeed.textPrimary   : (_warm ? AppColorsWarm.textPrimary   : AppColorsLight.textPrimary));
-  Color get textSecondary => _dark ? AppColorsDark.textSecondary : (_blue ? AppColorsIndeed.textSecondary : (_warm ? AppColorsWarm.textSecondary : AppColorsLight.textSecondary));
-  Color get textTertiary  => _dark ? AppColorsDark.textTertiary  : (_blue ? AppColorsIndeed.textTertiary  : (_warm ? AppColorsWarm.textTertiary  : AppColorsLight.textTertiary));
-  Color get textHint      => _dark ? AppColorsDark.textHint      : (_blue ? AppColorsIndeed.textHint      : (_warm ? AppColorsWarm.textHint      : AppColorsLight.textHint));
+  Color get error    => AppColorsIndeed.error;
+  Color get warning  => AppColorsIndeed.warning;
+  Color get success  => AppColorsIndeed.success;
+  Color get info     => AppColorsIndeed.info;
+  Color get rating   => AppColorsIndeed.rating;
 
-  Color get error    => _blue ? AppColorsIndeed.error   : (_warm ? AppColorsWarm.error   : AppColorsDark.error);
-  Color get warning  => _blue ? AppColorsIndeed.warning : (_warm ? AppColorsWarm.warning : AppColorsDark.warning);
-  Color get success  => _blue ? AppColorsIndeed.success : (_warm ? AppColorsWarm.success : AppColorsDark.success);
-  Color get info     => _blue ? AppColorsIndeed.info    : (_warm ? AppColorsWarm.info    : AppColorsDark.info);
-  Color get rating   => AppColorsDark.rating;
-
-  Color get errorLight   => _dark ? AppColorsDark.errorLight   : (_blue ? AppColorsIndeed.errorLight   : (_warm ? AppColorsWarm.errorLight   : AppColorsLight.errorLight));
-  Color get warningLight => _dark ? AppColorsDark.warningLight : (_blue ? AppColorsIndeed.warningLight : (_warm ? AppColorsWarm.warningLight : AppColorsLight.warningLight));
-  Color get successLight => _dark ? AppColorsDark.successLight : (_blue ? AppColorsIndeed.successLight : (_warm ? AppColorsWarm.successLight : AppColorsLight.successLight));
-  Color get infoLight    => _dark ? AppColorsDark.infoLight    : (_blue ? AppColorsIndeed.infoLight    : (_warm ? AppColorsWarm.infoLight    : AppColorsLight.infoLight));
+  Color get errorLight   => AppColorsIndeed.errorLight;
+  Color get warningLight => AppColorsIndeed.warningLight;
+  Color get successLight => AppColorsIndeed.successLight;
+  Color get infoLight    => AppColorsIndeed.infoLight;
 }
 
 // ─── 7. LEGACY COMPATIBILITY ALIASES ────────────────────────────────────────
@@ -375,6 +324,9 @@ class AppColors {
   static const Color lightBlue = AppPalette.lightBlue;
   static const Color mapGradientEnd = AppPalette.mapGradientEnd;
   static const Color mapGradientStart = AppPalette.mapGradientStart;
+  static const Color miniMapRoad = AppPalette.miniMapRoad;
+  static const Color miniMapMinorRoad = AppPalette.miniMapMinorRoad;
+  static const Color miniMapWater = AppPalette.miniMapWater;
   static const Color mastercardOrange = AppPalette.mastercardOrange;
   static const Color pinkRed = AppPalette.pinkRed;
   static const Color purple = AppPalette.purple;
@@ -388,8 +340,3 @@ class AppColors {
   static const Color violet = AppPalette.violet;
 }
 
-// BuildContext extensions needed by AppColorTokens
-extension _AppColorTokensBuildContextExt on BuildContext {
-  bool get isDark => Theme.of(this).brightness == Brightness.dark;
-  ColorScheme get scheme => Theme.of(this).colorScheme;
-}

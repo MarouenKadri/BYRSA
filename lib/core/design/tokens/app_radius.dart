@@ -6,9 +6,7 @@ class AppRadius {
   static const double micro = 2;
   static const double xs = AppDesign.radiusXS;
   static const double tag = 6;
-  static const double fab = 28;
   static const double small = AppDesign.radiusS;
-  static const double bubble = 18;
   static const double badge = AppDesign.radiusBadge;
   static const double input = AppDesign.radiusInput;
   static const double button = AppDesign.radiusButton;

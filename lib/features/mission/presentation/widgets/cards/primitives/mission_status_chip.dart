@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../../core/design/app_design_system.dart';
 
 // ─── Primitive : Badge statut ─────────────────────────────────────────────────
 // Responsabilité unique : afficher un badge coloré pour le statut d'une mission.
@@ -26,18 +27,18 @@ class MissionStatusChip extends StatelessWidget {
   });
 
   // Style summary : fond blanc + bordure subtile
-  factory MissionStatusChip.summary({required String label}) {
+  factory MissionStatusChip.summary(BuildContext context, {required String label}) {
     return MissionStatusChip(
       label: label,
-      foreground: const Color(0xFF1A1A1A),
-      background: Colors.white,
-      border: Border.all(color: const Color(0xFFE5E7EB)),
+      foreground: context.colors.textPrimary,
+      background: context.colors.surface,
+      border: Border.all(color: context.colors.border),
     );
   }
 
   // Style archive : fond coloré résolu depuis le label
-  factory MissionStatusChip.archive({required String label}) {
-    final style = _resolveArchiveStyle(label);
+  factory MissionStatusChip.archive(BuildContext context, {required String label}) {
+    final style = _resolveArchiveStyle(context, label);
     return MissionStatusChip(
       label: label,
       foreground: style.foreground,
@@ -47,19 +48,19 @@ class MissionStatusChip extends StatelessWidget {
     );
   }
 
-  static _ChipStyle _resolveArchiveStyle(String label) {
+  static _ChipStyle _resolveArchiveStyle(BuildContext context, String label) {
     return switch (label) {
-      'Annulee' => const _ChipStyle(
-          foreground: Color(0xFFA56969),
-          background: Color(0xFFF8F1F1),
+      'Annulee' => _ChipStyle(
+          foreground: context.colors.error,
+          background: context.colors.errorLight,
         ),
-      'Paiement en attente' => const _ChipStyle(
-          foreground: Color(0xFF6A7280),
-          background: Color(0xFFF0F2F5),
+      'Paiement en attente' => _ChipStyle(
+          foreground: context.colors.textSecondary,
+          background: context.colors.surfaceAlt,
         ),
-      _ => const _ChipStyle(
-          foreground: Color(0xFF5A6169),
-          background: Color(0xFFF0F1F2),
+      _ => _ChipStyle(
+          foreground: context.colors.textSecondary,
+          background: context.colors.surfaceAlt,
         ),
     };
   }

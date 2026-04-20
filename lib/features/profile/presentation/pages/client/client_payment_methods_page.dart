@@ -45,7 +45,7 @@ class _ClientPaymentMethodsPageState extends State<ClientPaymentMethodsPage> {
               onTap: () { Navigator.pop(context); _setDefault(index); },
             ),
           if (!card.isDefault)
-            const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+            const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
           AppActionSheetItem(
             icon: Icons.delete_outline_rounded,
             title: 'Supprimer la carte',
@@ -638,8 +638,8 @@ class _AddCardSheet extends StatelessWidget {
             style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
             decoration: AppInputDecorations.profileField(context,
               hintText: 'Numéro de carte',
-              prefixIcon: const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFFB0BAC4))),
-          )),
+              prefixIcon: Icon(Icons.credit_card_rounded, size: 16, color: context.colors.textHint))),
+          ),
           AppGap.h16,
           Row(children: [
             Expanded(child: PaymentShadowField(child: TextFormField(
@@ -660,8 +660,8 @@ class _AddCardSheet extends StatelessWidget {
             style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
             decoration: AppInputDecorations.profileField(context,
               hintText: 'Titulaire de la carte',
-              prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4))),
-          )),
+              prefixIcon: Icon(Icons.person_outline_rounded, size: 16, color: context.colors.textHint))),
+          ),
         ]),
       ),
     );

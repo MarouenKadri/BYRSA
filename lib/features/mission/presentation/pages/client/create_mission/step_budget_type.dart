@@ -35,10 +35,10 @@ class StepBudgetType extends StatelessWidget {
           Text(
             'Choisissez la formule qui correspond le mieux à votre mission.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.5,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 30),
@@ -93,10 +93,10 @@ class _BudgetTypeCard extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFF0F1720) : Colors.transparent,
+            color: isSelected ? AppPalette.deepNavy : Colors.transparent,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: const [
@@ -122,7 +122,7 @@ class _BudgetTypeCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 15.5,
+                      fontSize: AppFontSize.lgHalf,
                       fontWeight: FontWeight.w500,
                       color: AppColors.inkDark,
                     ),
@@ -131,9 +131,9 @@ class _BudgetTypeCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: AppFontSize.smHalf,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF98A0A8),
+                      color: context.colors.textTertiary,
                     ),
                   ),
                 ],
@@ -143,8 +143,8 @@ class _BudgetTypeCard extends StatelessWidget {
               Icons.chevron_right_rounded,
               size: 18,
               color: isSelected
-                  ? const Color(0xFF0F1720)
-                  : const Color(0xFFB5BCC4),
+                  ? AppPalette.deepNavy
+                  : context.colors.textHint,
             ),
           ],
         ),

@@ -25,7 +25,7 @@ class MissionStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const badgeColor = Color(0xFF2C3742);
+    final badgeColor = context.colors.textPrimary;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -197,22 +197,22 @@ class BudgetBadge extends StatelessWidget {
           vertical: large ? 9 : 7,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F4F5),
+          color: context.colors.surfaceAlt,
           borderRadius: BorderRadius.circular(large ? 14 : 10),
-          border: Border.all(color: const Color(0xFFE4E4E7)),
+          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.request_quote_outlined,
-                size: large ? 16 : 14, color: const Color(0xFF6F7782)),
+                size: large ? 16 : 14, color: context.colors.textSecondary),
             SizedBox(width: large ? 6 : 5),
             Text(
               'Sur devis',
               style: TextStyle(
                 fontSize: large ? 15 : 13,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF6F7782),
+                color: context.colors.textSecondary,
               ),
             ),
           ],
@@ -229,10 +229,14 @@ class BudgetBadge extends StatelessWidget {
         vertical: large ? 10 : 8,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF101214),
+        color: AppPalette.inkDark,
         borderRadius: BorderRadius.circular(large ? 14 : 12),
-        boxShadow: const [
-          BoxShadow(color: Color(0x22000000), blurRadius: 8, offset: Offset(0, 3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.13),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Row(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
@@ -10,186 +9,49 @@ import '../components/app_text_field.dart';
 
 // ─── 5. THEMES ───────────────────────────────────────────────────────────────
 
-// ─── Tokens par mode ─────────────────────────────────────────────────────────
+// ─── Tokens Indeed ───────────────────────────────────────────────────────────
 
-abstract class _Tokens {
-  Color get primary;
-  Color get error;
-  Color get background;
-  Color get surface;
-  Color get surfaceAlt;
-  Color get sheetBg;
-  Color get inputFill;
-  Color get border;
-  Color get divider;
-  Color get textPrimary;
-  Color get textSecondary;
-  Color get textTertiary;
-  Color get textHint;
-  Color get appBarBg;
-}
-
-class _DarkTokens extends _Tokens {
-  @override
-  Color get primary => AppColorsDark.primary;
-  @override
-  Color get error => AppColorsDark.error;
-  @override
-  Color get background => AppColorsDark.background;
-  @override
-  Color get surface => AppColorsDark.surface;
-  @override
-  Color get surfaceAlt => AppColorsDark.surfaceAlt;
-  @override
-  Color get sheetBg => AppColorsDark.sheetBg;
-  @override
-  Color get inputFill => AppColorsDark.inputFill;
-  @override
-  Color get border => AppColorsDark.border;
-  @override
-  Color get divider => AppColorsDark.divider;
-  @override
-  Color get textPrimary => AppColorsDark.textPrimary;
-  @override
-  Color get textSecondary => AppColorsDark.textSecondary;
-  @override
-  Color get textTertiary => AppColorsDark.textTertiary;
-  @override
-  Color get textHint => AppColorsDark.textHint;
-  @override
-  Color get appBarBg => AppColorsDark.background;
-}
-
-class _LightTokens extends _Tokens {
-  @override
-  Color get primary => AppColorsLight.primary;
-  @override
-  Color get error => AppColorsLight.error;
-  @override
-  Color get background => AppColorsLight.background;
-  @override
-  Color get surface => AppColorsLight.surface;
-  @override
-  Color get surfaceAlt => AppColorsLight.surfaceAlt;
-  @override
-  Color get sheetBg => AppColorsLight.sheetBg;
-  @override
-  Color get inputFill => AppColorsLight.inputFill;
-  @override
-  Color get border => AppColorsLight.border;
-  @override
-  Color get divider => AppColorsLight.divider;
-  @override
-  Color get textPrimary => AppColorsLight.textPrimary;
-  @override
-  Color get textSecondary => AppColorsLight.textSecondary;
-  @override
-  Color get textTertiary => AppColorsLight.textTertiary;
-  @override
-  Color get textHint => AppColorsLight.textHint;
-  @override
-  Color get appBarBg => AppColorsLight.surface;
-}
-
-class _WarmTokens extends _Tokens {
-  @override
-  Color get primary => AppColorsWarm.primary;
-  @override
-  Color get error => AppColorsWarm.error;
-  @override
-  Color get background => AppColorsWarm.background;
-  @override
-  Color get surface => AppColorsWarm.surface;
-  @override
-  Color get surfaceAlt => AppColorsWarm.surfaceAlt;
-  @override
-  Color get sheetBg => AppColorsWarm.sheetBg;
-  @override
-  Color get inputFill => AppColorsWarm.inputFill;
-  @override
-  Color get border => AppColorsWarm.border;
-  @override
-  Color get divider => AppColorsWarm.divider;
-  @override
-  Color get textPrimary => AppColorsWarm.textPrimary;
-  @override
-  Color get textSecondary => AppColorsWarm.textSecondary;
-  @override
-  Color get textTertiary => AppColorsWarm.textTertiary;
-  @override
-  Color get textHint => AppColorsWarm.textHint;
-  @override
-  Color get appBarBg => AppColorsWarm.background;
-}
-
-class _IndeedTokens extends _Tokens {
-  @override
-  Color get primary => AppColorsIndeed.primary;
-  @override
-  Color get error => AppColorsIndeed.error;
-  @override
-  Color get background => AppColorsIndeed.background;
-  @override
-  Color get surface => AppColorsIndeed.surface;
-  @override
-  Color get surfaceAlt => AppColorsIndeed.surfaceAlt;
-  @override
-  Color get sheetBg => AppColorsIndeed.sheetBg;
-  @override
-  Color get inputFill => AppColorsIndeed.inputFill;
-  @override
-  Color get border => AppColorsIndeed.border;
-  @override
-  Color get divider => AppColorsIndeed.divider;
-  @override
-  Color get textPrimary => AppColorsIndeed.textPrimary;
-  @override
+class _IndeedTokens {
+  const _IndeedTokens();
+  Color get primary      => AppColorsIndeed.primary;
+  Color get error        => AppColorsIndeed.error;
+  Color get background   => AppColorsIndeed.background;
+  Color get surface      => AppColorsIndeed.surface;
+  Color get surfaceAlt   => AppColorsIndeed.surfaceAlt;
+  Color get sheetBg      => AppColorsIndeed.sheetBg;
+  Color get inputFill    => AppColorsIndeed.inputFill;
+  Color get border       => AppColorsIndeed.border;
+  Color get divider      => AppColorsIndeed.divider;
+  Color get textPrimary  => AppColorsIndeed.textPrimary;
   Color get textSecondary => AppColorsIndeed.textSecondary;
-  @override
   Color get textTertiary => AppColorsIndeed.textTertiary;
-  @override
-  Color get textHint => AppColorsIndeed.textHint;
-  @override
-  Color get appBarBg => AppColorsIndeed.surface; // AppBar blanc
+  Color get textHint     => AppColorsIndeed.textHint;
+  Color get appBarBg     => AppColorsIndeed.surface;
 }
-
-enum _ThemeFlavor { dark, light, warm, indeed }
 
 class AppThemeData {
   AppThemeData._();
 
-  static ThemeData get dark => _build(_ThemeFlavor.dark);
-  static ThemeData get light => _build(_ThemeFlavor.light);
-  static ThemeData get warm => _build(_ThemeFlavor.warm);
-  static ThemeData get indeed => _build(_ThemeFlavor.indeed);
+  static ThemeData get indeed => _build();
 
-  static ThemeData _build(_ThemeFlavor flavor) {
-    final isDark = flavor == _ThemeFlavor.dark;
-    final _Tokens c = switch (flavor) {
-      _ThemeFlavor.dark => _DarkTokens(),
-      _ThemeFlavor.light => _LightTokens(),
-      _ThemeFlavor.warm => _WarmTokens(),
-      _ThemeFlavor.indeed => _IndeedTokens(),
-    };
+  static ThemeData _build() {
+    const c = _IndeedTokens();
+
+    final textTheme = AppType.buildTextTheme(
+      primary: c.textPrimary,
+      secondary: c.textSecondary,
+      tertiary: c.textTertiary,
+    );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: isDark ? Brightness.dark : Brightness.light,
-      colorScheme: switch (flavor) {
-        _ThemeFlavor.dark => darkColorScheme,
-        _ThemeFlavor.light => lightColorScheme,
-        _ThemeFlavor.warm => warmColorScheme,
-        _ThemeFlavor.indeed => indeedColorScheme,
-      },
+      brightness: Brightness.light,
+      colorScheme: indeedColorScheme,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
 
       // ── Typo ────────────────────────────────────────────────────────────
-      textTheme: AppType.buildTextTheme(
-        primary: c.textPrimary,
-        secondary: c.textSecondary,
-        tertiary: c.textTertiary,
-      ),
+      textTheme: textTheme,
 
       // ── AppBar ───────────────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
@@ -199,10 +61,8 @@ class AppThemeData {
         scrolledUnderElevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: c.textPrimary),
-        systemOverlayStyle: isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-        titleTextStyle: TextStyle(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        titleTextStyle: (textTheme.titleLarge ?? const TextStyle()).copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w700,
           color: c.textPrimary,
@@ -394,10 +254,10 @@ class AppThemeData {
 
       // ── SnackBar ─────────────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? c.surfaceAlt : AppColors.ink,
-        contentTextStyle: TextStyle(
+        backgroundColor: AppColors.ink,
+        contentTextStyle: const TextStyle(
           fontSize: 14,
-          color: isDark ? c.textPrimary : Colors.white,
+          color: Colors.white,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusCard),
@@ -432,6 +292,15 @@ class AppThemeData {
 }
 
 class AppShadows {
+  static List<BoxShadow> get storyCircle => [
+    BoxShadow(
+      // Story circles need a very subtle lift on light surfaces.
+      color: AppPalette.inkDark.withValues(alpha: 0.04),
+      blurRadius: 12,
+      offset: const Offset(0, 6),
+    ),
+  ];
+
   static List<BoxShadow> get card => [
     BoxShadow(
       color: Colors.black.withValues(alpha: 0.3),
@@ -503,9 +372,6 @@ extension AppDesignContext on BuildContext {
   /// ColorScheme du thème courant
   ColorScheme get scheme => Theme.of(this).colorScheme;
 
-  bool get isWarmTheme =>
-      !isDark && scheme.surfaceContainerHighest == AppColorsWarm.surfaceAlt;
-
   bool get isIndeedTheme =>
       !isDark && scheme.surfaceContainerHighest == AppColorsIndeed.surfaceAlt;
 }
@@ -553,22 +419,20 @@ extension AppAccountTextStyles on BuildContext {
 }
 
 extension AppBarTextStyles on BuildContext {
-  TextStyle get appBarTitleStyle => GoogleFonts.plusJakartaSans(
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    color: const Color(0xFF121420),
-  );
+  TextStyle get appBarTitleStyle =>
+      (Theme.of(this).appBarTheme.titleTextStyle ?? text.titleLarge ?? const TextStyle())
+          .copyWith(color: colors.textPrimary);
 
   TextStyle get appBarSubtitleStyle => text.labelMedium!.copyWith(
     fontSize: AppFontSize.sm,
     fontWeight: FontWeight.w500,
-    color: AppColors.primary,
+    color: colors.primary,
   );
 
   TextStyle get appBarPillStyle => text.titleMedium!.copyWith(
     fontSize: AppFontSize.lg,
     fontWeight: FontWeight.w800,
-    color: AppColors.primary,
+    color: colors.primary,
     letterSpacing: -0.3,
   );
 

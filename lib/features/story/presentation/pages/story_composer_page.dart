@@ -147,17 +147,21 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColorsDark.background,
         resizeToAvoidBottomInset: false,
         body: Stack(
           fit: StackFit.expand,
           children: [
             Image.file(currentMedia, fit: BoxFit.cover),
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter, end: Alignment.center,
-                  colors: [Color(0xA61A1A1A), Colors.transparent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.center,
+                  colors: [
+                    AppColorsDark.background.withValues(alpha: 0.65),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
@@ -165,10 +169,14 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
               alignment: Alignment.bottomCenter,
               child: Container(
                 height: AppStoryMetrics.composerBottomGradientHeight,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                    colors: [Color(0xA61A1A1A), Colors.transparent],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      AppColorsDark.background.withValues(alpha: 0.65),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
               ),
@@ -218,7 +226,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                       child: Icon(
                                         Icons.send_outlined,
                                         color: _selectedCategoryId != null
-                                            ? const Color(0xFF4B8DFF)
+                                            ? context.colors.secondary
                                             : AppColors.gray500,
                                         size: 20,
                                       ),
@@ -252,13 +260,13 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                         decoration: BoxDecoration(
                                           color: Colors.black.withValues(alpha: 0.18),
                                           borderRadius: BorderRadius.circular(16),
-                                          border: Border.all(
+                                        border: Border.all(
                                             color: AppColors.snow.withValues(alpha: 0.14),
                                           ),
                                         ),
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.add_photo_alternate_outlined,
-                                          color: Color(0xFFBFC5CB),
+                                          color: AppColors.snow.withValues(alpha: 0.72),
                                           size: 20,
                                         ),
                                       ),
@@ -274,14 +282,14 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
                                           color: active
-                                              ? const Color(0xFF4B8DFF)
-                                              : Colors.white.withValues(alpha: 0.10),
+                                              ? context.colors.secondary
+                                              : AppColors.snow.withValues(alpha: 0.10),
                                           width: active ? 1.2 : 1,
                                         ),
                                         boxShadow: active
-                                            ? const [
+                                            ? [
                                                 BoxShadow(
-                                                  color: Color.fromRGBO(75, 141, 255, 0.22),
+                                                  color: context.colors.secondary.withValues(alpha: 0.22),
                                                   blurRadius: 12,
                                                   offset: Offset(0, 4),
                                                 ),
@@ -305,10 +313,10 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                               TextButton.icon(
                                 onPressed: _replaceMedia,
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFFBFC5CB),
+                                  foregroundColor: context.colors.textSecondary,
                                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
                                   textStyle: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: AppFontSize.smHalf,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -319,10 +327,10 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                               TextButton.icon(
                                 onPressed: _addMoreMedia,
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFFBFC5CB),
+                                  foregroundColor: context.colors.textSecondary,
                                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
                                   textStyle: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: AppFontSize.smHalf,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -500,14 +508,14 @@ class _CategoryPickerSheet extends StatelessWidget {
                           : Colors.transparent,
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xFF4B8DFF).withValues(alpha: 0.60)
+                            ? context.colors.secondary.withValues(alpha: 0.60)
                             : Colors.transparent,
                         width: isSelected ? 1.1 : 1,
                       ),
                       boxShadow: isSelected
-                          ? const [
+                          ? [
                               BoxShadow(
-                                color: Color.fromRGBO(75, 141, 255, 0.24),
+                                color: context.colors.secondary.withValues(alpha: 0.24),
                                 blurRadius: 14,
                                 offset: Offset(0, 4),
                               ),
@@ -522,17 +530,17 @@ class _CategoryPickerSheet extends StatelessWidget {
                           size: 24,
                           color: isSelected
                               ? AppColors.snow
-                              : const Color(0xFFBFC5CB),
+                              : context.colors.textSecondary,
                         ),
                         AppGap.h8,
                         Text(
                           cat.name,
                           style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: AppFontSize.xsHalf,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                             color: isSelected
                                 ? AppColors.snow
-                                : const Color(0xFFB0B0B0),
+                                : context.colors.textSecondary,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2,

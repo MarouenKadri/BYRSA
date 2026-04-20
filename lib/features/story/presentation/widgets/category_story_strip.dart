@@ -99,7 +99,7 @@ class _CategoryStoryCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cat = categoryId != null ? ServiceCategory.resolve(categoryId!) : null;
-    final accent = cat?.color ?? const Color(0xFFB8C0CC);
+    final accent = cat?.color ?? context.colors.textTertiary;
 
     return GestureDetector(
       onTap: onTap,
@@ -118,31 +118,25 @@ class _CategoryStoryCircle extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isAdd
-                        ? const Color(0xFFFAFBFC)
+                        ? context.colors.surface
                         : viewed
-                            ? const Color(0xFFF6F8F9)
-                            : Colors.white,
+                            ? context.colors.surfaceAlt
+                            : context.colors.surface,
                     border: Border.all(
                       color: isAdd
-                          ? const Color(0xFFE3E8EC)
+                          ? context.colors.border
                           : viewed
-                              ? const Color(0xFFE7ECEF)
+                              ? context.colors.border
                               : accent.withValues(alpha: 0.42),
                       width: 1.15,
                     ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(15, 23, 42, 0.04),
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
+                    boxShadow: AppShadows.storyCircle,
                   ),
                   child: isAdd
-                      ? const Center(
+                      ? Center(
                           child: Icon(
                             Icons.add_rounded,
-                            color: Color(0xFF98A2AD),
+                            color: context.colors.textTertiary,
                             size: 21,
                           ),
                         )
@@ -151,8 +145,8 @@ class _CategoryStoryCircle extends StatelessWidget {
                             cat?.icon ?? Icons.photo_library_outlined,
                             size: 21,
                             color: viewed
-                                ? const Color(0xFFADB5BE)
-                                : const Color(0xFF5F6B76),
+                                ? context.colors.textTertiary
+                                : context.colors.textSecondary,
                           ),
                         ),
                 ),
@@ -166,7 +160,7 @@ class _CategoryStoryCircle extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.96),
+                        color: context.colors.surface.withValues(alpha: 0.96),
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: accent.withValues(alpha: 0.22),
@@ -175,10 +169,10 @@ class _CategoryStoryCircle extends StatelessWidget {
                       ),
                       child: Text(
                         '$count',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF66707A),
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ),
@@ -191,11 +185,11 @@ class _CategoryStoryCircle extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: AppFontSize.xsHalf,
                   fontWeight: FontWeight.w500,
                   color: viewed
-                      ? const Color(0xFF9BA6B1)
-                      : const Color(0xFF4D5965),
+                      ? context.colors.textTertiary
+                      : context.colors.textPrimary.withValues(alpha: 0.78),
                   letterSpacing: -0.1,
                 ),
                 maxLines: 1,

@@ -34,11 +34,19 @@ abstract class AppType {
 class AppFontSize {
   static const double micro = 9;
   static const double tiny = 10;
+  // Half steps are used in a few legacy screens; keep them centralized so UI
+  // stays consistent and we can phase them out progressively.
+  static const double tinyHalf = 10.5;
   static const double xs = 11;
+  static const double xsHalf = 11.5;
   static const double sm = 12;
+  static const double smHalf = 12.5;
   static const double md = 13;
+  static const double mdHalf = 13.5;
   static const double base = 14;
+  static const double baseHalf = 14.5;
   static const double body = 15;
+  static const double lgHalf = 15.5;
   static const double lg = 16;
   static const double title = 17;
   static const double xl = 18;

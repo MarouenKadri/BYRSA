@@ -188,7 +188,7 @@ class AppButton extends StatelessWidget {
                   ? Colors.black
                   : Colors.black.withValues(alpha: 0.12),
               foregroundColor: Colors.white,
-              disabledForegroundColor: const Color(0xFF8F98A3),
+              disabledForegroundColor: context.colors.textHint,
               elevation: 0,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(

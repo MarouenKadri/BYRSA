@@ -141,11 +141,11 @@ class _StepDetailsState extends State<StepDetails> {
               _takePhoto();
             },
           ),
-          const Divider(
+          Divider(
             height: 1,
             indent: 20,
             endIndent: 20,
-            color: Color(0x1FFFFFFF),
+            color: Colors.white.withValues(alpha: 0.12),
           ),
           AppActionSheetItem(
             icon: Icons.photo_library_outlined,
@@ -186,10 +186,10 @@ class _StepDetailsState extends State<StepDetails> {
                 Text(
                   'Quelques détails bien choisis aideront les freelancers à vous répondre plus précisément.',
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppFontSize.mdHalf,
                     fontWeight: FontWeight.w400,
                     height: 1.5,
-                    color: const Color(0xFFACB3BA),
+                    color: context.colors.textTertiary,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -211,7 +211,7 @@ class _StepDetailsState extends State<StepDetails> {
         Text(
           'DESCRIPTION',
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: AppFontSize.xsHalf,
             fontWeight: FontWeight.w600,
             color: AppColors.gray600,
             letterSpacing: 1.8,
@@ -220,7 +220,7 @@ class _StepDetailsState extends State<StepDetails> {
         AppGap.h12,
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF4F5F6),
+            color: context.colors.surfaceAlt,
             borderRadius: BorderRadius.circular(16),
           ),
           child: TextField(
@@ -238,20 +238,20 @@ class _StepDetailsState extends State<StepDetails> {
               context,
               hintText:
                   "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 height: 1.5,
-                color: Color(0xFFB0B6BD),
+                color: context.colors.textHint,
               ),
               contentPadding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
               noBorder: true,
               fillColor: Colors.transparent,
             ).copyWith(
-              counterStyle: const TextStyle(
+              counterStyle: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF9BA3AB),
+                color: context.colors.textTertiary,
               ),
             ),
           ),
@@ -322,7 +322,7 @@ class _StepDetailsState extends State<StepDetails> {
             Text(
               'PHOTOS ${widget.photos.length}/10',
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: AppFontSize.xsHalf,
                 fontWeight: FontWeight.w600,
                 color: AppColors.gray600,
                 letterSpacing: 1.8,
@@ -334,7 +334,7 @@ class _StepDetailsState extends State<StepDetails> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: const Color(0xFFE7EAEE)),
+                border: Border.all(color: context.colors.border),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -361,7 +361,7 @@ class _StepDetailsState extends State<StepDetails> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFFB75C5C),
+                    color: context.colors.error,
                   ),
                 ),
               ),
@@ -384,7 +384,7 @@ class _StepDetailsState extends State<StepDetails> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE9EDF0)),
+        border: Border.all(color: context.colors.border),
       ),
       child: const Center(
         child: CircularProgressIndicator(strokeWidth: 2),
@@ -400,7 +400,7 @@ class _StepDetailsState extends State<StepDetails> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE9EDF0)),
+          border: Border.all(color: context.colors.border),
         ),
         child: Center(
           child: Column(
@@ -421,14 +421,14 @@ class _StepDetailsState extends State<StepDetails> {
                 ),
               ),
               AppGap.h4,
-              Text(
-                "Camera ou galerie, jusqu'a 10 images",
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9BA3AB),
+                Text(
+                  "Camera ou galerie, jusqu'a 10 images",
+                  style: TextStyle(
+                    fontSize: AppFontSize.smHalf,
+                    fontWeight: FontWeight.w400,
+                    color: context.colors.textTertiary,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -485,23 +485,27 @@ class _StepDetailsState extends State<StepDetails> {
       child: SizedBox(
         width: 110,
         height: 118,
-        child: AppSurfaceCard(
-          margin: const EdgeInsets.only(right: 10),
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE9EDF0)),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.photo_camera_outlined, size: 28, color: AppColors.gray600),
-              AppGap.h6,
-              Text(
-                'Ajouter',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: const Color(0xFF6E757D)),
-              ),
-            ],
+          child: AppSurfaceCard(
+            margin: const EdgeInsets.only(right: 10),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: context.colors.border),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.photo_camera_outlined, size: 28, color: AppColors.gray600),
+                AppGap.h6,
+                Text(
+                  'Ajouter',
+                  style: TextStyle(
+                    fontSize: AppFontSize.smHalf,
+                    fontWeight: FontWeight.w500,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
       ),
     );
   }
@@ -656,7 +660,7 @@ class _PhotoOptionTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Row(
           children: [
-            Icon(icon, size: 21, color: const Color(0xFFD5DADE)),
+            Icon(icon, size: 21, color: AppColors.snow.withValues(alpha: 0.85)),
             AppGap.w14,
             Expanded(
               child: Column(

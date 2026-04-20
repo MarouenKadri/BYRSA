@@ -80,7 +80,8 @@
       "mcp__claude_ai_Supabase__apply_migration",
       "Bash(/mnt/c/Users/marouen/flutter/bin/flutter analyze *)",
       "Bash(/mnt/c/Users/marouen/Documents/flutter/bin/flutter analyze *)",
-      "Bash(/home/marouen/.local/share/flutter/bin/flutter analyze *)"
+      "Bash(/home/marouen/.local/share/flutter/bin/flutter analyze *)",
+      "Bash(flutter.bat analyze *)"
     ]
   }
 }

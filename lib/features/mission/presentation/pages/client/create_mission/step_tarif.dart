@@ -79,10 +79,10 @@ class _StepTarifState extends State<StepTarif> {
           Text(
             'Choisissez ou saisissez un montant adapte a votre mission.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.5,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 30),
@@ -114,7 +114,7 @@ class _StepTarifState extends State<StepTarif> {
           Text(
             'DUREE ESTIMEE',
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppFontSize.xsHalf,
               fontWeight: FontWeight.w600,
               color: AppColors.gray600,
               letterSpacing: 1.8,
@@ -158,10 +158,10 @@ class _StepTarifState extends State<StepTarif> {
               child: Text(
                 'Total estime : ${total.round()} EUR',
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppFontSize.smHalf,
                   fontWeight: FontWeight.w400,
                   fontStyle: FontStyle.italic,
-                  color: const Color(0xFF9BA3AB),
+                  color: context.colors.textTertiary,
                 ),
               ),
             ),
@@ -192,10 +192,10 @@ class _StepTarifState extends State<StepTarif> {
           Text(
             'Renseignez un montant clair pour recevoir des propositions precises.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.5,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 30),
@@ -227,9 +227,9 @@ class _StepTarifState extends State<StepTarif> {
           Text(
             'Vous pourrez ajuster ce montant plus tard avec votre prestataire.',
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: AppFontSize.smHalf,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFFB0B6BD),
+              color: context.colors.textTertiary,
               height: 1.45,
             ),
           ),
@@ -256,7 +256,7 @@ class _AmountInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
@@ -273,19 +273,19 @@ class _AmountInput extends StatelessWidget {
         style: TextStyle(
           fontSize: 36,
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF16345F),
+          color: context.colors.textPrimary,
           letterSpacing: -1,
         ),
         decoration: AppInputDecorations.formField(
           context,
           hintText: '0',
           hintStyle: TextStyle(
-            color: const Color(0xFFD4D9DE),
+            color: context.colors.textHint,
             fontSize: 36,
             fontWeight: useLightHint ? FontWeight.w300 : FontWeight.w600,
             letterSpacing: -1,
           ),
-          fillColor: Colors.white,
+          fillColor: context.colors.surface,
           contentPadding: const EdgeInsets.fromLTRB(22, 20, 0, 20),
           radius: 18,
         ).copyWith(
@@ -293,10 +293,10 @@ class _AmountInput extends StatelessWidget {
             padding: const EdgeInsets.only(right: 20),
             child: Text(
               suffix,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.inkDark,
+                color: context.colors.textPrimary,
               ),
             ),
           ),
@@ -327,18 +327,18 @@ class _RateChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? AppColors.inkDark : Colors.transparent,
+          color: selected ? context.colors.textPrimary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppColors.inkDark : const Color(0xFFE4E8EC),
+            color: selected ? context.colors.textPrimary : context.colors.border,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.5,
+            fontSize: AppFontSize.mdHalf,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppColors.gray700,
+            color: selected ? context.colors.surface : context.colors.textSecondary,
           ),
         ),
       ),
@@ -360,9 +360,9 @@ class _CounterBtn extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFE4E8EC)),
+          border: Border.all(color: context.colors.border),
           boxShadow: const [
             BoxShadow(
               color: Color.fromRGBO(16, 20, 24, 0.03),

@@ -64,10 +64,10 @@ class StepSummary extends StatelessWidget {
                 ? 'Verifiez les details avant d\'enregistrer.'
                 : 'Verifiez les details avant de publier.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.5,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           AppGap.h24,
@@ -95,7 +95,7 @@ class StepSummary extends StatelessWidget {
                       height: 48,
                       margin: const EdgeInsets.only(left: 1),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F6F7),
+                        color: context.colors.surfaceAlt,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
@@ -170,7 +170,7 @@ class StepSummary extends StatelessWidget {
                   Text(
                     'PHOTOS',
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AppFontSize.xsHalf,
                       fontWeight: FontWeight.w600,
                       color: AppColors.gray600,
                       letterSpacing: 1.8,
@@ -190,7 +190,7 @@ class StepSummary extends StatelessWidget {
                           margin: EdgeInsets.only(right: index < photos.length - 1 ? 10 : 0),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            color: const Color(0xFFF5F6F7),
+                            color: context.colors.surfaceAlt,
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -248,9 +248,9 @@ class StepSummary extends StatelessWidget {
                             Text(
                               '${estimatedHours.toStringAsFixed(estimatedHours.truncateToDouble() == estimatedHours ? 0 : 1)} heures estimees',
                               style: TextStyle(
-                                fontSize: 13.5,
+                                fontSize: AppFontSize.mdHalf,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6E757D),
+                                color: context.colors.textSecondary,
                               ),
                             ),
                           ],
@@ -275,7 +275,7 @@ class StepSummary extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6E757D),
+                                color: context.colors.textSecondary,
                                 letterSpacing: 0.4,
                               ),
                             ),
@@ -288,7 +288,7 @@ class StepSummary extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF16345F),
+                          color: AppColors.deepNavy,
                         ),
                       ),
                   ],
@@ -304,10 +304,10 @@ class StepSummary extends StatelessWidget {
                   ? 'Vos modifications seront visibles immediatement par les freelancers.'
                   : 'Votre demande sera transmise aux meilleurs experts disponibles.',
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppFontSize.smHalf,
                 fontWeight: FontWeight.w400,
                 fontStyle: FontStyle.italic,
-                color: const Color(0xFF9BA3AB),
+                color: context.colors.textTertiary,
                 height: 1.45,
               ),
             ),
@@ -358,7 +358,7 @@ class SummaryRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF9CA3AB)),
+        Icon(icon, size: 18, color: context.colors.textTertiary),
         AppGap.w12,
         Expanded(
           child: Column(
@@ -367,16 +367,16 @@ class SummaryRow extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: AppFontSize.xsHalf,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF9CA3AB),
+                  color: context.colors.textTertiary,
                 ),
               ),
               AppGap.h4,
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: AppFontSize.baseHalf,
                   fontWeight: FontWeight.w600,
                   color: AppColors.inkDark,
                   height: 1.45,
@@ -395,10 +395,14 @@ class _BrokenPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Color(0xFFF1F3F5),
+    return ColoredBox(
+      color: context.colors.surfaceAlt,
       child: Center(
-        child: Icon(Icons.broken_image_outlined, color: Color(0xFFB5BCC4), size: 22),
+        child: Icon(
+          Icons.broken_image_outlined,
+          color: context.colors.textHint,
+          size: 22,
+        ),
       ),
     );
   }

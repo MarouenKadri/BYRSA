@@ -33,7 +33,7 @@ class _FreelancerPaymentMethodsPageState
               _showEditIbanSheet(context);
             },
           ),
-          const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0x1FFFFFFF)),
+          const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
           AppActionSheetItem(
             icon: Icons.delete_outline_rounded,
             title: 'Supprimer le compte',
@@ -477,7 +477,7 @@ class _BalanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF111111), Color(0xFF242424)],
+          colors: [AppPalette.ink, AppColorsDark.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -969,8 +969,8 @@ class _IbanSheet extends StatelessWidget {
             style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
             decoration: AppInputDecorations.profileField(context,
               hintText: 'IBAN (FR76...)',
-              prefixIcon: const Icon(Icons.account_balance_rounded, size: 16, color: Color(0xFFB0BAC4))),
-          )),
+              prefixIcon: Icon(Icons.account_balance_rounded, size: 16, color: context.colors.textHint))),
+          ),
           AppGap.h16,
           PaymentShadowField(child: TextFormField(
             style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
@@ -981,8 +981,8 @@ class _IbanSheet extends StatelessWidget {
             style: TextStyle(fontSize: AppFontSize.body, color: context.colors.textPrimary),
             decoration: AppInputDecorations.profileField(context,
               hintText: 'Titulaire du compte',
-              prefixIcon: const Icon(Icons.person_outline_rounded, size: 16, color: Color(0xFFB0BAC4))),
-          )),
+              prefixIcon: Icon(Icons.person_outline_rounded, size: 16, color: context.colors.textHint))),
+          ),
         ]),
       ),
     );

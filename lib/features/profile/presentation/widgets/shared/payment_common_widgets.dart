@@ -507,7 +507,7 @@ class _PipelineDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.transparent,
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFD5DEE8), width: 1.2),
+        border: Border.all(color: context.colors.border, width: 1.2),
       ),
     );
   }
@@ -526,7 +526,7 @@ class _PipelineConnector extends StatelessWidget {
         height: 2,
         margin: const EdgeInsets.symmetric(horizontal: 5),
         decoration: BoxDecoration(
-          color: done ? accent.withValues(alpha: 0.7) : const Color(0xFFD5DEE8),
+          color: done ? accent.withValues(alpha: 0.7) : context.colors.border,
           borderRadius: BorderRadius.circular(99),
         ),
       ),

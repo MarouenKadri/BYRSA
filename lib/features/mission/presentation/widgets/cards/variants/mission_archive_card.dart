@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/design/app_design_system.dart';
 import '../../../../data/models/mission.dart';
 import '../../shared/mission_finance_ui.dart';
 import '../../shared/mission_status_ui.dart';
@@ -36,7 +37,7 @@ class MissionArchiveCard extends StatelessWidget {
     return MissionCardFrame(
       onTap: onTap,
       radius: MissionCardFrame.radiusSmall,
-      color: const Color(0xFFF9F9F9),
+      color: context.colors.surfaceAlt,
       shadows: MissionCardFrame.noShadow,
       child: Padding(
         padding: const EdgeInsets.all(MissionCardFrame.paddingDefault),
@@ -65,7 +66,7 @@ class MissionArchiveCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 14),
-                MissionStatusChip.archive(label: statusLabel),
+                MissionStatusChip.archive(context, label: statusLabel),
               ],
             ),
             if (MissionFinanceStatusBadge.shouldDisplay(mission)) ...[

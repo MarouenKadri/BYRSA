@@ -163,16 +163,16 @@ class _StepAddressState extends State<StepAddress> {
               ),
           ],
         ),
-        const IgnorePointer(
+        IgnorePointer(
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.center,
-                colors: [Color(0x24FFFFFF), Colors.transparent],
+                colors: [Colors.white.withValues(alpha: 0.14), Colors.transparent],
               ),
             ),
-            child: SizedBox.expand(),
+            child: const SizedBox.expand(),
           ),
         ),
 
@@ -237,7 +237,7 @@ class _StepAddressState extends State<StepAddress> {
                                         children: [
                                           Text(
                                             place.name,
-                                            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.inkDark),
+                                            style: TextStyle(fontSize: AppFontSize.baseHalf, fontWeight: FontWeight.w600, color: AppColors.inkDark),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -277,7 +277,7 @@ class _StepAddressState extends State<StepAddress> {
               onPressed: _useCurrentLocation,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.gray700,
-                side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
+                side: BorderSide(color: context.colors.border, width: 1),
                 backgroundColor: Colors.white.withValues(alpha: 0.94),
                 minimumSize: const Size(0, 48),
                 shape: RoundedRectangleBorder(
@@ -353,10 +353,10 @@ class _SearchBar extends StatelessWidget {
         decoration: AppInputDecorations.formField(
           context,
           hintText: 'Rechercher une adresse...',
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF9BA3AB),
+            color: context.colors.textTertiary,
           ),
           prefixIcon: isSearching
               ? Padding(
@@ -368,8 +368,11 @@ class _SearchBar extends StatelessWidget {
                         strokeWidth: 2, color: AppColors.primary),
                   ),
                 )
-              : const Icon(Icons.search_outlined,
-                  color: Color(0xFF6E757D), size: 20),
+              : Icon(
+                  Icons.search_outlined,
+                  color: context.colors.textSecondary,
+                  size: 20,
+                ),
           suffixIcon: hasValue
               ? IconButton(
                   icon: Icon(Icons.close_rounded,
@@ -481,12 +484,12 @@ class _SelectedAddressCard extends StatelessWidget {
               children: [
                 Text(
                   'Adresse sélectionnée',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500, color: AppColors.gray600),
+                  style: TextStyle(fontSize: AppFontSize.xsHalf, fontWeight: FontWeight.w500, color: AppColors.gray600),
                 ),
                 AppGap.h2,
                 Text(
                   address,
-                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.inkDark),
+                  style: TextStyle(fontSize: AppFontSize.baseHalf, fontWeight: FontWeight.w600, color: AppColors.inkDark),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

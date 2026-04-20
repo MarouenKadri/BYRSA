@@ -335,7 +335,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                color: const Color(0xFFFFF3F3),
+                color: context.colors.errorLight,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: AppShadows.card,
                 child: Row(
@@ -802,7 +802,7 @@ class _FreelancerTrackingPanel extends StatelessWidget {
         AppGap.h18,
         AppSurfaceCard(
           padding: AppInsets.a14,
-          color: const Color(0xFFF6F8FA),
+          color: context.colors.surfaceAlt,
           borderRadius: BorderRadius.circular(AppDesign.radius14),
           child: Row(
             children: [
@@ -829,7 +829,7 @@ class _FreelancerTrackingPanel extends StatelessWidget {
                   },
                   style: context.text.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF344150),
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),

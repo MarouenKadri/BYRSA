@@ -202,10 +202,10 @@ class _EmailInfoTabState extends State<_EmailInfoTab> {
                     context,
                     hintText: 'Nouvel email',
                     radius: 18,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.mail_outline_rounded,
                       size: 16,
-                      color: Color(0xFFB0BAC4),
+                      color: context.colors.textHint,
                     ),
                   ).copyWith(
                     contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -240,10 +240,10 @@ class _EmailInfoTabState extends State<_EmailInfoTab> {
                     context,
                     hintText: 'Confirmer le nouvel email',
                     radius: 18,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.mail_outline_rounded,
                       size: 16,
-                      color: Color(0xFFB0BAC4),
+                      color: context.colors.textHint,
                     ),
                   ).copyWith(
                     contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -344,10 +344,10 @@ class _PhoneInfoTabState extends State<_PhoneInfoTab> {
                     context,
                     hintText: 'Nouveau numéro',
                     radius: 18,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.phone_outlined,
                       size: 16,
-                      color: Color(0xFFB0BAC4),
+                      color: context.colors.textHint,
                     ),
                   ).copyWith(
                     contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),

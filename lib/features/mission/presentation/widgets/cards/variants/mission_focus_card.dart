@@ -115,7 +115,7 @@ class MissionFocusCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    MissionStatusChip.summary(label: statusLabel),
+                    MissionStatusChip.summary(context, label: statusLabel),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -126,9 +126,9 @@ class MissionFocusCard extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF7FAFC),
+                    color: context.colors.surfaceAlt,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFE8EDF2)),
+                    border: Border.all(color: context.colors.border),
                   ),
                   child: Row(
                     children: [

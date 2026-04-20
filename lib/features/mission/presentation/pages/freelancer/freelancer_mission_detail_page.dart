@@ -332,16 +332,16 @@ class _FreelancerMissionDetailPageState
           width: double.infinity,
           height: 52,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ctx.colors.surface,
             borderRadius: BorderRadius.circular(AppRadius.button),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: ctx.colors.border),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.check_rounded,
-                color: Color(0xFF4A4F55),
+                color: ctx.colors.textSecondary,
                 size: 18,
               ),
               AppGap.w8,

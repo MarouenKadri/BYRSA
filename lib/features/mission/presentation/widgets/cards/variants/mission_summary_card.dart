@@ -98,7 +98,7 @@ class MissionSummaryCard extends StatelessWidget {
               children: [
                 Expanded(child: MissionMetaRow(items: metaItems)),
                 const SizedBox(width: 12),
-                MissionStatusChip.summary(label: statusLabel),
+                MissionStatusChip.summary(context, label: statusLabel),
               ],
             ),
             if (MissionFinanceStatusBadge.shouldDisplay(mission)) ...[

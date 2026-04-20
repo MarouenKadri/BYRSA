@@ -120,8 +120,8 @@ class _NavTileState extends State<_NavTile>
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = AppColors.inkDark;
-    final inactiveColor = const Color(0xFFB8C0CC);
+    final activeColor = context.colors.textPrimary;
+    final inactiveColor = context.colors.textTertiary;
 
     return GestureDetector(
       onTap: _handleTap,
@@ -148,7 +148,7 @@ class _NavTileState extends State<_NavTile>
                   Text(
                     widget.item.label,
                     style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: AppFontSize.tinyHalf,
                       fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
                       color: widget.selected ? activeColor : inactiveColor,
                       height: 1,
@@ -203,21 +203,22 @@ class AnimatedFab extends StatelessWidget {
       curve: Curves.easeOutCubic,
       width: targetWidth,
       height: AppNavMetrics.fabHeight,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0E7490).withValues(alpha: expanded ? 0.26 : 0.18),
-            blurRadius: expanded ? 26 : 18,
-            offset: const Offset(0, 12),
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            boxShadow: [
+              BoxShadow(
+            color: AppColors.primaryDark
+                .withValues(alpha: expanded ? 0.26 : 0.18),
+                blurRadius: expanded ? 26 : 18,
+                offset: const Offset(0, 12),
+              ),
+              BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.10),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          BoxShadow(
-            color: const Color(0xFF155EEF).withValues(alpha: 0.10),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Material(
         color: Colors.transparent,
         borderRadius: borderRadius,
@@ -228,8 +229,8 @@ class AnimatedFab extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF10B4E8),
-                Color(0xFF0A84D6),
+                AppColors.primary,
+                AppColors.primaryDark,
               ],
             ),
             border: Border.all(

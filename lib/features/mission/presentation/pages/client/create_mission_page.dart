@@ -237,7 +237,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
               trailing: TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF6E757D),
+                  foregroundColor: context.colors.textSecondary,
                   textStyle: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -399,9 +399,9 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
               onPressed: canGo ? _nextStep : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.inkDark,
-                disabledBackgroundColor: const Color(0xFFD8DCE0),
+                disabledBackgroundColor: context.colors.border,
                 foregroundColor: Colors.white,
-                disabledForegroundColor: const Color(0xFFFBFBFB),
+                disabledForegroundColor: context.colors.surface,
                 elevation: 0,
                 minimumSize: const Size.fromHeight(56),
                 shape: RoundedRectangleBorder(
@@ -425,7 +425,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF9BA3AB),
+              color: context.colors.textTertiary,
             ),
           ),
         ],

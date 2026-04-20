@@ -133,11 +133,11 @@ class _ShadowField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+            color: AppPalette.deepNavy.withValues(alpha: 0.06),
             blurRadius: 18,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -165,13 +165,13 @@ class _ReadOnlyField extends StatelessWidget {
       style: TextStyle(
         fontSize: AppFontSize.body,
         fontWeight: FontWeight.w400,
-        color: const Color(0xFF9AA4AF),
+        color: context.colors.textTertiary,
       ),
       decoration: AppInputDecorations.profileField(
         context,
         hintText: label,
         readOnly: true,
-        prefixIcon: const Icon(Icons.mail_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+        prefixIcon: Icon(Icons.mail_outline_rounded, size: 16, color: context.colors.textHint),
       ),
     );
   }
@@ -205,7 +205,7 @@ class _EmailField extends StatelessWidget {
       decoration: AppInputDecorations.profileField(
         context,
         hintText: label,
-        prefixIcon: const Icon(Icons.mail_outline_rounded, size: 16, color: Color(0xFFB0BAC4)),
+        prefixIcon: Icon(Icons.mail_outline_rounded, size: 16, color: context.colors.textHint),
       ).copyWith(errorStyle: context.profileErrorStyle),
     );
   }

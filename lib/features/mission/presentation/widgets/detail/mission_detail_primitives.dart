@@ -76,7 +76,7 @@ class DetailMetaChip extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 14, color: const Color(0xFF98A1AC)),
+      Icon(icon, size: 14, color: context.colors.textTertiary),
       AppGap.w6,
       Expanded(
         child: Text(
@@ -85,7 +85,7 @@ class DetailMetaChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF66707C),
+            color: context.colors.textSecondary,
           ),
         ),
       ),
@@ -104,9 +104,9 @@ class DetailLuxuryPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: const Color(0xFF161616), width: 0.5),
+      border: Border.all(color: AppColors.inkDark, width: 0.5),
     ),
     child: Text(
       label,
@@ -156,7 +156,7 @@ class DetailInfoRow extends StatelessWidget {
       crossAxisAlignment:
           twoLines ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 17, color: const Color(0xFF98A1AC)),
+        Icon(icon, size: 17, color: context.colors.textTertiary),
         AppGap.w14,
         Expanded(
           child: Column(
@@ -167,7 +167,7 @@ class DetailInfoRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF9AA3AE),
+                  color: context.colors.textTertiary,
                 ),
               ),
               AppGap.h4,
@@ -280,7 +280,7 @@ class DetailTealButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: onTap != null ? fg : const Color(0xFF8F98A3),
+                color: onTap != null ? fg : context.colors.textHint,
               ),
             ),
           ],
@@ -386,21 +386,21 @@ class DetailStatusBanner extends StatelessWidget {
   // Style freelancer — card blanche, icône muted
   Widget _buildCard(BuildContext context) {
     final iconColor = config.color == AppColors.error
-        ? const Color(0xFF8F5656)
+        ? context.colors.error.withValues(alpha: 0.65)
         : config.color == AppColors.warning
-            ? const Color(0xFF8B6B2F)
-            : const Color(0xFF4A4F55);
+            ? context.colors.warning.withValues(alpha: 0.65)
+            : context.colors.textSecondary;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: context.colors.border),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Color.fromRGBO(0, 0, 0, 0.03),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
@@ -432,7 +432,7 @@ class DetailStatusBanner extends StatelessWidget {
                     fontSize: 13,
                     height: 1.45,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF7C8795),
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -539,7 +539,7 @@ class DetailMapPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
     children: [
-      Container(color: const Color(0xFFF5F6F8)),
+      Container(color: context.colors.surfaceAlt),
       const Positioned.fill(child: CustomPaint(painter: _MiniMapPainter())),
       const Center(child: DetailMiniMapPin()),
     ],
@@ -560,7 +560,7 @@ class DetailMiniMapPin extends StatelessWidget {
       shape: BoxShape.circle,
       boxShadow: [
         BoxShadow(
-          color: Color(0x18000000),
+          color: Color.fromRGBO(0, 0, 0, 0.10),
           blurRadius: 12,
           offset: Offset(0, 6),
         ),
@@ -587,15 +587,15 @@ class _MiniMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final roadPaint = Paint()
-      ..color = const Color(0xFFE4E7EB)
+      ..color = AppColors.miniMapRoad
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.2;
     final minorRoadPaint = Paint()
-      ..color = const Color(0xFFEEF0F3)
+      ..color = AppColors.miniMapMinorRoad
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     final waterPaint = Paint()
-      ..color = const Color(0xFFD9E9F7)
+      ..color = AppColors.miniMapWater
       ..style = PaintingStyle.stroke
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round;

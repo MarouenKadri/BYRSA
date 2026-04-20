@@ -471,20 +471,20 @@ class AppPageHeaderBlock extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: context.text.displayMedium?.copyWith(
             fontSize: AppFontSize.h1,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
-            color: AppColors.ink,
+            color: context.colors.textPrimary,
           ),
         ),
         AppGap.h8,
         Text(
           subtitle,
-          style: TextStyle(
+          style: context.text.bodyLarge?.copyWith(
             fontSize: AppFontSize.body,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF7C8795),
+            color: context.colors.textSecondary,
           ),
         ),
       ],
@@ -524,22 +524,22 @@ class AppProgressBar extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: SizedBox(
-              height: 2,
-              child: Stack(
-                children: [
-                  Container(color: const Color(0xFFE7EAEE)),
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: progress),
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOutCubic,
-                    builder: (_, value, __) => FractionallySizedBox(
-                      widthFactor: value,
-                      child: Container(color: AppColors.ink),
-                    ),
+                  height: 2,
+                  child: Stack(
+                    children: [
+                      Container(color: context.colors.divider),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: progress),
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, value, __) => FractionallySizedBox(
+                          widthFactor: value,
+                          child: Container(color: context.colors.primary),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
           ),
           // ── Label étape ──────────────────────────────────────────────────
           if (stepLabel != null) ...[
@@ -547,9 +547,9 @@ class AppProgressBar extends StatelessWidget {
             Text(
               stepLabel!,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppFontSize.smHalf,
                 fontWeight: FontWeight.w600,
-                color: AppColors.stepBlue,
+                color: context.colors.primary,
                 letterSpacing: 0.2,
               ),
             ),
@@ -587,7 +587,7 @@ class AppProgressHeader extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(4, 8, 20, 0),
           child: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: AppColors.ink,
+            color: context.colors.textPrimary,
             onPressed: onBack,
           ),
         ),

@@ -93,7 +93,7 @@ class _PersonalInfoSheet extends StatelessWidget {
             Text(
               'Ces informations ne peuvent pas être modifiées après inscription.',
               style: context.text.bodySmall?.copyWith(
-                color: const Color(0xFF7A858F),
+                color: context.colors.textTertiary,
                 height: 1.45,
               ),
             ),
@@ -132,11 +132,11 @@ class _ShadowField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+            color: AppPalette.deepNavy.withValues(alpha: 0.06),
             blurRadius: 18,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -166,16 +166,16 @@ class _ReadOnlyField extends StatelessWidget {
     return TextFormField(
       initialValue: value,
       readOnly: true,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: AppFontSize.body,
         fontWeight: FontWeight.w400,
-        color: Color(0xFF9AA4AF),
+        color: context.colors.textTertiary,
       ),
       decoration: AppInputDecorations.profileField(
         context,
         hintText: label,
         readOnly: true,
-        prefixIcon: Icon(icon, size: 16, color: const Color(0xFFB0BAC4)),
+        prefixIcon: Icon(icon, size: 16, color: context.colors.textHint),
       ),
     );
   }

@@ -338,11 +338,11 @@ class _CandidatesPageState extends State<CandidatesPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x05000000),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 20,
-                    offset: Offset(0, 10),
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
@@ -526,11 +526,11 @@ class _CandidateCard extends StatelessWidget {
           border: isAccepted
               ? Border.all(color: AppColors.ink, width: 1.0)
               : Border.all(color: AppColors.gray50),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x04000000),
+              color: Colors.black.withValues(alpha: 0.016),
               blurRadius: 18,
-              offset: Offset(0, 10),
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -553,7 +553,7 @@ class _CandidateCard extends StatelessWidget {
                           border: Border.all(color: Colors.white, width: 1.5),
                           boxShadow: const [
                             BoxShadow(
-                              color: Color(0x12000000),
+                              color: AppPalette.blackAlpha07,
                               blurRadius: 12,
                               offset: Offset(0, 6),
                             ),

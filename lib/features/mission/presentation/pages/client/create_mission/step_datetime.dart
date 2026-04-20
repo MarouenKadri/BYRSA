@@ -46,10 +46,10 @@ class StepDate extends StatelessWidget {
           Text(
             'Choisissez une date pour planifier votre mission.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.45,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 30),
@@ -77,8 +77,8 @@ class StepDate extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xFF0F1720)
-                            : const Color(0xFFE9EDF0),
+                            ? AppColors.deepNavy
+                            : context.colors.border,
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: const [
@@ -94,10 +94,10 @@ class StepDate extends StatelessWidget {
                         Text(
                           isToday ? 'AUJ.' : _dayName(date.weekday).toUpperCase(),
                           style: TextStyle(
-                            fontSize: 10.5,
+                            fontSize: AppFontSize.tinyHalf,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
-                            color: const Color(0xFF98A0A8),
+                            color: context.colors.textTertiary,
                           ),
                         ),
                         AppGap.h10,
@@ -114,10 +114,10 @@ class StepDate extends StatelessWidget {
                         Text(
                           _monthName(date.month).toUpperCase(),
                           style: TextStyle(
-                            fontSize: 10.5,
+                            fontSize: AppFontSize.tinyHalf,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
-                            color: const Color(0xFF98A0A8),
+                            color: context.colors.textTertiary,
                           ),
                         ),
                         AppGap.h10,
@@ -165,7 +165,7 @@ class StepDate extends StatelessWidget {
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.gray700,
-              side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
+              side: BorderSide(color: context.colors.border, width: 1),
               backgroundColor: Colors.transparent,
               minimumSize: const Size.fromHeight(54),
               shape: RoundedRectangleBorder(
@@ -176,7 +176,7 @@ class StepDate extends StatelessWidget {
             label: Text(
               'Autre date',
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppFontSize.baseHalf,
                 fontWeight: FontWeight.w500,
                 color: AppColors.gray700,
               ),
@@ -246,10 +246,10 @@ class StepTime extends StatelessWidget {
           Text(
             'Choisissez le créneau qui vous convient le mieux.',
             style: TextStyle(
-              fontSize: 13.5,
+              fontSize: AppFontSize.mdHalf,
               fontWeight: FontWeight.w400,
               height: 1.45,
-              color: const Color(0xFFACB3BA),
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: 30),
@@ -282,8 +282,8 @@ class StepTime extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xFF0F1720)
-                            : const Color(0xFFE9EDF0),
+                            ? AppColors.deepNavy
+                            : context.colors.border,
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: const [
@@ -337,7 +337,7 @@ class StepTime extends StatelessWidget {
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.gray700,
-              side: const BorderSide(color: Color(0xFFE4E8EC), width: 1),
+              side: BorderSide(color: context.colors.border, width: 1),
               backgroundColor: Colors.transparent,
               minimumSize: const Size.fromHeight(54),
               shape: RoundedRectangleBorder(
@@ -348,7 +348,7 @@ class StepTime extends StatelessWidget {
             label: Text(
               'Autre heure',
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppFontSize.baseHalf,
                 fontWeight: FontWeight.w500,
                 color: AppColors.gray700,
               ),
