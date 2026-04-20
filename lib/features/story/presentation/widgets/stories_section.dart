@@ -43,12 +43,12 @@ class _StoriesSectionState extends State<StoriesSection> {
     if (total == 0) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 194,
+      height: 160,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
         itemCount: total,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           if (widget.isFreelancer && index == 0) {
             return _AddStoryCard(
@@ -102,9 +102,9 @@ class _AddStoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 128,
+        width: 110,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           color: context.colors.surfaceAlt,
           border: Border.all(color: context.colors.border, width: 1),
         ),
@@ -167,9 +167,9 @@ class _StoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 128,
+        width: 110,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isViewed
                 ? context.colors.border

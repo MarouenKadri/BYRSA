@@ -165,173 +165,116 @@ class ClientPrestaCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.check_rounded, size: 18, color: context.colors.textSecondary),
-              AppGap.w8,
               Text(
-                'Prestataire choisi',
+                'PRESTATAIRE CHOISI',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: context.colors.textPrimary,
+                  color: context.colors.textTertiary,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              AppGap.w10,
+              Expanded(
+                child: Divider(color: context.colors.border, thickness: 1),
+              ),
+              AppGap.w10,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppPalette.inkDark,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.13),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  agreedPrice,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.4,
+                    height: 1,
+                  ),
                 ),
               ),
             ],
           ),
-          AppGap.h20,
-          Center(
-            child: GestureDetector(
-              onTap: onViewProfile,
-              child: Column(
-                children: [
-                  Container(
-                    width: 82,
-                    height: 82,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 1.5,
-                      ),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: presta.avatarUrl.isNotEmpty
-                        ? Image.network(
-                            presta.avatarUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                _PrestaAvatarFallback(name: presta.name),
-                          )
-                        : _PrestaAvatarFallback(name: presta.name),
+          AppGap.h16,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ── Avatar ──
+              GestureDetector(
+                onTap: onViewProfile,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.colors.border, width: 1.5),
                   ),
-                  AppGap.h12,
-                  Text(
-                    presta.name,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  AppGap.h6,
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star_rounded,
-                        size: 14,
-                        color: context.colors.textTertiary,
-                      ),
-                      AppGap.w4,
-                      Text(
-                        '${presta.rating.toStringAsFixed(1)} rating',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: context.colors.textTertiary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AppGap.h18,
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Tarif convenu:',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: context.colors.textTertiary,
-                    ),
-                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: presta.avatarUrl.isNotEmpty
+                      ? Image.network(
+                          presta.avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _PrestaAvatarFallback(name: presta.name),
+                        )
+                      : _PrestaAvatarFallback(name: presta.name),
                 ),
-                Text(
-                  agreedPrice,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+              ),
+              AppGap.w10,
+              // ── Nom ──
+              Expanded(
+                child: Text(
+                  presta.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.ink,
                   ),
                 ),
-                AppGap.w6,
-                Icon(
-                  Icons.check_rounded,
-                  size: 15,
-                  color: context.colors.success,
+              ),
+              // ── Boutons ──
+              if (onPhone != null)
+                OutlinedButton(
+                  onPressed: onPhone,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.ink,
+                    side: BorderSide(color: context.colors.border),
+                    minimumSize: const Size(42, 38),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: const Icon(Icons.phone_rounded, size: 17),
                 ),
-              ],
-            ),
-          ),
-          AppGap.h14,
-          Text(
-            'Paiement securise • Service garanti',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: context.colors.textTertiary,
-            ),
-          ),
-          if (onPhone != null || onChat != null) ...[
-            AppGap.h16,
-            Row(
-              children: [
-                if (onPhone != null)
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onPhone,
-                      icon: Icon(Icons.phone_rounded, size: 16),
-                      label: const Text('Appeler'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.ink,
-                        side: BorderSide(color: context.colors.border),
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+              if (onPhone != null && onChat != null) AppGap.w8,
+              if (onChat != null)
+                ElevatedButton(
+                  onPressed: onChat,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: AppColors.ink,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(42, 38),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                if (onPhone != null && onChat != null) AppGap.w10,
-                if (onChat != null)
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onChat,
-                      icon: Icon(Icons.chat_bubble_rounded, size: 16),
-                      label: const Text('Contacter'),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.ink,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
+                  child: const Icon(Icons.chat_bubble_rounded, size: 17),
+                ),
+            ],
+          ),
         ],
       ),
     );

@@ -37,7 +37,9 @@ Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
     'id': row['id'] ?? '',
     'name': fullName.isEmpty ? 'Prestataire' : fullName,
     'avatar': (row['avatar_url'] ?? '') as String,
-    'category': categoryNames.isNotEmpty ? categoryNames.first : 'Multi-services',
+    'category': categoryNames.isNotEmpty
+        ? categoryNames.first
+        : 'Multi-services',
     'categoryIds': categoryIds,
     'services': categoryNames,
     'rating': 0.0,
@@ -52,7 +54,6 @@ Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
   };
 }
 
-
 /// ─────────────────────────────────────────────────────────────
 /// 🏠 Inkern - Page d'accueil Client
 /// Haut : CTA mission + catégories + accès prestataires + stories
@@ -61,7 +62,11 @@ Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
 class ClientDiscoverContent extends StatefulWidget {
   final VoidCallback? onGoToAccount;
   final VoidCallback? onGoToMissions;
-  const ClientDiscoverContent({super.key, this.onGoToAccount, this.onGoToMissions});
+  const ClientDiscoverContent({
+    super.key,
+    this.onGoToAccount,
+    this.onGoToMissions,
+  });
 
   @override
   State<ClientDiscoverContent> createState() => _ClientDiscoverContentState();
@@ -188,9 +193,29 @@ class _ActiveMissionsSection extends StatelessWidget {
 
   String _todayLabel() {
     final now = DateTime.now();
-    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const days = [
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+      'Dimanche',
+    ];
+    const months = [
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre',
+    ];
     return '${days[now.weekday - 1]} ${now.day} ${months[now.month - 1]}';
   }
 
@@ -198,20 +223,16 @@ class _ActiveMissionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final missions = context
-        .watch<MissionProvider>()
-        .clientMissions
-        .where((m) {
-          final mDay = DateTime(m.date.year, m.date.month, m.date.day);
-          if (mDay != todayDate) return false;
-          // Utilise la règle de promotion : confirmed+aujourd'hui → En cours
-          return MissionStatusUi.missionBelongsToTab(
-            mission: m,
-            role: MissionUiRole.client,
-            tab: MissionUiTab.inProgress,
-          );
-        })
-        .toList();
+    final missions = context.watch<MissionProvider>().clientMissions.where((m) {
+      final mDay = DateTime(m.date.year, m.date.month, m.date.day);
+      if (mDay != todayDate) return false;
+      // Utilise la règle de promotion : confirmed+aujourd'hui → En cours
+      return MissionStatusUi.missionBelongsToTab(
+        mission: m,
+        role: MissionUiRole.client,
+        tab: MissionUiTab.inProgress,
+      );
+    }).toList();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
@@ -246,7 +267,10 @@ class _ActiveMissionsSection extends StatelessWidget {
               const Spacer(),
               if (missions.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(20),
@@ -320,7 +344,9 @@ class _EmptyTodayCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             "Pas de mission aujourd'hui",
-            style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -378,9 +404,11 @@ class _ActiveMissionCard extends StatelessWidget {
     );
     final presta = mission.assignedPresta;
     final startCode = mission.startCode;
-    final showCode = startCode != null &&
+    final showCode =
+        startCode != null &&
         (status == MissionStatus.confirmed || status == MissionStatus.onTheWay);
-    final showTracking = status == MissionStatus.confirmed ||
+    final showTracking =
+        status == MissionStatus.confirmed ||
         status == MissionStatus.onTheWay ||
         status == MissionStatus.inProgress;
     final accent = _statusAccentColor(status);
@@ -417,7 +445,6 @@ class _ActiveMissionCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       // Catégorie + titre + statut
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,8 +453,10 @@ class _ActiveMissionCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(mission.categoryName,
-                                    style: MissionCardFrame.titleStyle),
+                                Text(
+                                  mission.categoryName,
+                                  style: MissionCardFrame.titleStyle,
+                                ),
                                 const SizedBox(height: 6),
                                 Text(
                                   mission.title,
@@ -439,21 +468,28 @@ class _ActiveMissionCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          MissionStatusChip.summary(context, label: statusLabel),
+                          MissionStatusChip.summary(
+                            context,
+                            label: statusLabel,
+                          ),
                         ],
                       ),
 
                       const SizedBox(height: 16),
 
                       // Heure + adresse
-                      MissionMetaRow(items: [
-                        MissionMetaItem(
+                      MissionMetaRow(
+                        items: [
+                          MissionMetaItem(
                             icon: Icons.schedule_outlined,
-                            text: mission.timeSlot),
-                        MissionMetaItem(
+                            text: mission.timeSlot,
+                          ),
+                          MissionMetaItem(
                             icon: Icons.location_on_outlined,
-                            text: mission.address.shortAddress),
-                      ]),
+                            text: mission.address.shortAddress,
+                          ),
+                        ],
+                      ),
 
                       // ── 3. Prestataire — avatar 48px ────────────
                       if (presta != null) ...[
@@ -472,11 +508,15 @@ class _ActiveMissionCard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(presta.name,
-                                      style: MissionCardFrame.captionStyle),
+                                  Text(
+                                    presta.name,
+                                    style: MissionCardFrame.captionStyle,
+                                  ),
                                   const SizedBox(height: 2),
-                                  Text('Prestataire assigné',
-                                      style: MissionCardFrame.metaStyle),
+                                  Text(
+                                    'Prestataire assigné',
+                                    style: MissionCardFrame.metaStyle,
+                                  ),
                                 ],
                               ),
                             ),
@@ -499,7 +539,10 @@ class _ActiveMissionCard extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [AppColors.deepNavy, AppColorsIndeed.textPrimary],
+                              colors: [
+                                AppColors.deepNavy,
+                                AppColorsIndeed.textPrimary,
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -513,8 +556,11 @@ class _ActiveMissionCard extends StatelessWidget {
                                   color: Colors.white.withValues(alpha: 0.10),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.lock_open_rounded,
-                                    size: 13, color: Colors.white70),
+                                child: const Icon(
+                                  Icons.lock_open_rounded,
+                                  size: 13,
+                                  color: Colors.white70,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -524,9 +570,10 @@ class _ActiveMissionCard extends StatelessWidget {
                                     const Text(
                                       'Code de démarrage',
                                       style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white54),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white54,
+                                      ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
@@ -545,10 +592,14 @@ class _ActiveMissionCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                                 onTap: () async {
                                   await Clipboard.setData(
-                                      ClipboardData(text: startCode));
+                                    ClipboardData(text: startCode),
+                                  );
                                   if (context.mounted) {
-                                    showAppSnackBar(context, 'Code copié',
-                                        icon: Icons.copy_rounded);
+                                    showAppSnackBar(
+                                      context,
+                                      'Code copié',
+                                      icon: Icons.copy_rounded,
+                                    );
                                   }
                                 },
                                 child: Container(
@@ -557,8 +608,11 @@ class _ActiveMissionCard extends StatelessWidget {
                                     color: Colors.white.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Icon(Icons.copy_rounded,
-                                      size: 14, color: Colors.white),
+                                  child: const Icon(
+                                    Icons.copy_rounded,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ],
@@ -583,8 +637,9 @@ class _ActiveMissionCard extends StatelessWidget {
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) =>
-                                          TrackingPage(mission: mission)),
+                                    builder: (_) =>
+                                        TrackingPage(mission: mission),
+                                  ),
                                 ),
                               ),
                             ),
@@ -710,7 +765,7 @@ class FreelancerDiscoveryPage extends StatelessWidget {
 class _FreelancerDiscoveryView extends StatefulWidget {
   final String? initialCategoryId;
 
-  const _FreelancerDiscoveryView({super.key, this.initialCategoryId});
+  const _FreelancerDiscoveryView({this.initialCategoryId});
 
   @override
   State<_FreelancerDiscoveryView> createState() =>
@@ -810,7 +865,9 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                               onPressed: () {
                                 _searchController.clear();
                                 setState(() {});
-                                context.read<ProfileProvider>().loadFreelancers();
+                                context
+                                    .read<ProfileProvider>()
+                                    .loadFreelancers();
                               },
                             )
                           : null,
@@ -982,8 +1039,9 @@ class _FreelancerDiscoveryViewState extends State<_FreelancerDiscoveryView> {
                 children: [
                   Text(
                     'Catégorie',
-                    style: context.text.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: context.text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   if (_selectedCategoryId != null)
                     GestureDetector(
@@ -1119,4 +1177,3 @@ class _CategoryChip extends StatelessWidget {
     );
   }
 }
-

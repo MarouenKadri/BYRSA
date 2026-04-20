@@ -39,39 +39,48 @@ class FreelancerClientCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Publie par',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
-              ),
-            ),
-            AppGap.h14,
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ClientProfileView(
-                    clientId: client.id,
-                    clientName: client.name,
-                    clientAvatar: client.avatarUrl,
-                    rating: client.rating,
-                    missionsCount: client.missionsCount,
+            // ── Titre style C ──
+            Row(
+              children: [
+                Text(
+                  'PUBLIÉ PAR',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textTertiary,
+                    letterSpacing: 1.2,
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
+                AppGap.w10,
+                Expanded(
+                  child: Divider(color: context.colors.border, thickness: 1),
+                ),
+              ],
+            ),
+            AppGap.h16,
+            // ── Avatar + nom + boutons ──
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ClientProfileView(
+                        clientId: client.id,
+                        clientName: client.name,
+                        clientAvatar: client.avatarUrl,
+                        rating: client.rating,
+                        missionsCount: client.missionsCount,
+                      ),
+                    ),
+                  ),
+                  child: Container(
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: context.colors.border,
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: context.colors.border, width: 1.5),
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: client.avatarUrl.isNotEmpty
@@ -83,99 +92,61 @@ class FreelancerClientCard extends StatelessWidget {
                           )
                         : _ClientAvatarFallback(name: client.name),
                   ),
-                  AppGap.w14,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                client.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.ink,
-                                ),
-                              ),
-                            ),
-                            if (client.isVerified) ...[
-                              AppGap.w6,
-                              Icon(
-                                Icons.verified_rounded,
-                                size: 16,
-                                color: AppColors.ink,
-                              ),
-                            ],
-                          ],
-                        ),
-                        AppGap.h6,
-                        Text(
-                          '${client.rating.toStringAsFixed(1)} · ${client.missionsCount} mission${client.missionsCount > 1 ? 's' : ''}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            color: context.colors.textHint,
+                ),
+                AppGap.w10,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          client.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ink,
                           ),
                         ),
+                      ),
+                      if (client.isVerified) ...[
+                        AppGap.w4,
+                        Icon(Icons.verified_rounded, size: 14, color: AppColors.ink),
                       ],
-                    ),
+                    ],
                   ),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.colors.textHint),
-                ],
-              ),
+                ),
+                if (onPhone != null)
+                  OutlinedButton(
+                    onPressed: onPhone,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.ink,
+                      side: BorderSide(color: context.colors.border),
+                      minimumSize: const Size(42, 38),
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    child: const Icon(Icons.phone_rounded, size: 17),
+                  ),
+                if (onPhone != null && onChat != null) AppGap.w8,
+                if (onChat != null)
+                  ElevatedButton(
+                    onPressed: onChat,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: AppColors.ink,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(42, 38),
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    child: const Icon(Icons.chat_bubble_rounded, size: 17),
+                  ),
+              ],
             ),
-            if (onPhone != null || onChat != null) ...[
-              AppGap.h16,
-              Row(
-                children: [
-                  if (onPhone != null)
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: onPhone,
-                        icon: Icon(Icons.phone_rounded, size: 16),
-                        label: const Text('Appeler'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.ink,
-                          side: BorderSide(color: context.colors.border),
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (onPhone != null && onChat != null) AppGap.w10,
-                  if (onChat != null)
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: onChat,
-                        icon: Icon(Icons.chat_bubble_rounded, size: 16),
-                        label: const Text('Contacter'),
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: AppColors.ink,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
           ],
         ),
       ),

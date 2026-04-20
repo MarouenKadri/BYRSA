@@ -247,32 +247,24 @@ class _FreelancerProfilePageState
     if (widget.proposedPrice == null) return null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          boxShadow: const [
-            BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Tarif proposé',
-              style: context.text.bodyMedium?.copyWith(color: context.colors.textHint),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.successBg,
+              borderRadius: BorderRadius.circular(999),
             ),
-            Text(
+            child: Text(
               widget.proposedPrice!,
-              style: context.text.displaySmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.successDark,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

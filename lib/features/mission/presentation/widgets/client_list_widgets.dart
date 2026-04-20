@@ -293,28 +293,21 @@ class SelectedPrestaSection extends StatelessWidget {
             ),
           ),
 
-          // ─── Tarif accepté ───
           if (presta.acceptedPrice != null) ...[
-            AppGap.h16,
+            AppGap.h10,
             Container(
-              width: double.infinity,
-              padding: AppInsets.a14,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: context.colors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppRadius.button),
+                color: AppColors.successBg,
+                borderRadius: BorderRadius.circular(999),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Tarif accepté',
-                    style: context.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: context.colors.textPrimary),
-                  ),
-                  Text(
-                    presta.acceptedPrice!,
-                    style: context.text.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: context.colors.primary),
-                  ),
-                ],
+              child: Text(
+                presta.acceptedPrice!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.successDark,
+                ),
               ),
             ),
           ],

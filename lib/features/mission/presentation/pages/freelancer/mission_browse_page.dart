@@ -175,7 +175,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                   sliver: SliverList.builder(
                     itemCount: items.length,
                     itemBuilder: (context, index) {
@@ -185,7 +185,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                       if (item is String) {
                         final isToday = item == 'Aujourd\'hui';
                         return Padding(
-                          padding: const EdgeInsets.only(top: 16, bottom: 10),
+                          padding: const EdgeInsets.only(top: 12, bottom: 8),
                           child: Row(
                             children: [
                               if (isToday) ...[
@@ -231,7 +231,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                       // Carte mission
                       final mission = item as Mission;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 10),
                         child: MissionBrowseCard(
                           mission: mission,
                           isApplied: appliedIds.contains(mission.id),
@@ -259,7 +259,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
   Widget _buildHeader() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(20, 8, 16, 14),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Row(
         children: [
           Text(
@@ -400,7 +400,7 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
     final count = missions.length;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
       child: Row(
         children: [
           Text(

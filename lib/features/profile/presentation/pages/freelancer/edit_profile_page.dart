@@ -1250,34 +1250,35 @@ class _TarifCardState extends State<_TarifCard> {
               fontWeight: FontWeight.w800,
               color: context.colors.textPrimary,
             ),
-            decoration: AppInputDecorations.formField(
-              context,
-              hintText: '25',
-              hintStyle: TextStyle(
-                fontSize: AppFontSize.h1Lg,
-                fontWeight: FontWeight.w800,
-                color: context.colors.border,
-              ),
-              prefixIcon: const Padding(
-                padding: EdgeInsets.only(left: 14, right: 8),
-                child: Icon(
-                  Icons.euro_rounded,
-                  color: AppColors.primary,
-                  size: 24,
+            decoration:
+                AppInputDecorations.formField(
+                  context,
+                  hintText: '25',
+                  hintStyle: TextStyle(
+                    fontSize: AppFontSize.h1Lg,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.border,
+                  ),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 14, right: 8),
+                    child: Icon(
+                      Icons.euro_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(),
+                  fillColor: context.colors.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                ).copyWith(
+                  suffixText: '€ / heure',
+                  suffixStyle: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              prefixIconConstraints: const BoxConstraints(),
-              fillColor: context.colors.surface,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-            ).copyWith(
-              suffixText: '€ / heure',
-              suffixStyle: context.text.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
           AppGap.h14,
           Text(
@@ -1610,7 +1611,6 @@ class _EditField extends StatelessWidget {
     required this.controller,
     required this.icon,
     this.keyboardType,
-    this.maxLines = 1,
   });
   @override
   Widget build(BuildContext context) => Column(
