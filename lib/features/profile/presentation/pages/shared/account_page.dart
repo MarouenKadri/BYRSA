@@ -54,14 +54,13 @@ class _AccountPageState extends State<AccountPage> {
             _ProfileHeader(),
             if (isFreelancer) const _MyStoriesSection(),
             AppGap.h12,
-            _AccountSectionCard(
-              title: 'Compte',
+            _FlatSection(
+              label: 'COMPTE',
               children: [
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.badge_outlined,
                   title: 'Mes informations',
-                  subtitle:
-                      'Informations personnelles, email, numéro de téléphone',
+                  subtitle: 'Infos personnelles, email, téléphone',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -70,27 +69,25 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ),
                 if (isFreelancer)
-                  _AccountMenuTile(
-                    icon: Icons.work_outline_rounded,
+                  _FlatTile(
+                    icon: Icons.work_outline,
                     title: 'Mon activité',
                     subtitle: 'Skills, tarif, localisation, disponibilité',
                     onTap: () => showFreelancerProfileBottomSheet(context),
                   ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.inventory_2_outlined,
                   title: 'Archives',
-                  subtitle: 'Missions terminees et annulees',
+                  subtitle: 'Missions terminées et annulées',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ArchivesPage()),
                   ),
                 ),
-                _AccountMenuTile(
-                  icon: Icons.star_border_rounded,
+                _FlatTile(
+                  icon: Icons.star_outline,
                   title: 'Mes avis',
-                  subtitle: isFreelancer
-                      ? '112 avis · 4.9 / 5'
-                      : '24 avis · 4.7 / 5',
+                  subtitle: isFreelancer ? '112 avis · 4.9 / 5' : '24 avis · 4.7 / 5',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -99,11 +96,10 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ),
                 if (isFreelancer)
-                  _AccountMenuTile(
+                  _FlatTile(
                     icon: Icons.photo_library_outlined,
                     title: 'Mes publications',
                     subtitle: 'Voir toutes mes publications',
-                    showDivider: false,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const MyPostsPage()),
@@ -111,11 +107,10 @@ class _AccountPageState extends State<AccountPage> {
                   ),
               ],
             ),
-            AppGap.h16,
-            _AccountSectionCard(
-              title: 'Paiements et sécurité',
+            _FlatSection(
+              label: 'PAIEMENTS ET SÉCURITÉ',
               children: [
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.credit_card_outlined,
                   title: 'Finance',
                   subtitle: isFreelancer ? 'IBAN •••• 1234' : 'Visa •••• 4242',
@@ -128,14 +123,14 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                   ),
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.verified_user_outlined,
                   title: "Vérification d'identité",
                   subtitle: 'Compte vérifié et protégé',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 6,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEDF3EF),
@@ -145,36 +140,35 @@ class _AccountPageState extends State<AccountPage> {
                         width: 1,
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Vérifié',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF163127),
+                        color: Color(0xFF163127),
                       ),
                     ),
                   ),
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.key_outlined,
                   title: 'Mot de passe',
                   subtitle: 'Modifié il y a 3 mois',
                   onTap: () => showChangePasswordBottomSheet(context),
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.shield_outlined,
                   title: 'Confidentialité',
                   subtitle: 'Autorisations, visibilité et données',
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.delete_outline_rounded,
                   title: 'Supprimer mon compte',
                   subtitle: 'Action irréversible',
-                  showDivider: false,
-                  titleColor: context.colors.error,
                   iconColor: context.colors.error,
+                  titleColor: context.colors.error,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const DeleteAccountPage(),
@@ -183,44 +177,147 @@ class _AccountPageState extends State<AccountPage> {
                 ),
               ],
             ),
-            AppGap.h16,
-            _AccountSectionCard(
-              title: 'Aide et session',
+            _FlatSection(
+              label: 'AIDE ET SESSION',
               children: [
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.help_outline_rounded,
                   title: "Centre d'aide",
                   subtitle: 'Guides et réponses rapides',
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.mail_outline_rounded,
                   title: 'Nous contacter',
                   subtitle: 'Réponse sous 24h',
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.favorite_border_rounded,
                   title: "Noter l'application",
                   subtitle: 'Partager votre expérience',
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.info_outline_rounded,
                   title: 'À propos de Inkern',
                   subtitle: 'Version 1.0.0',
                   onTap: () {},
                 ),
-                _AccountMenuTile(
+                _FlatTile(
                   icon: Icons.logout_rounded,
                   title: 'Se déconnecter',
                   subtitle: 'Quitter la session en cours',
-                  showDivider: false,
                   onTap: () async =>
                       await context.read<AuthProvider>().logout(),
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ─── Widgets flat génériques ─────────────────────────────────────────────────
+
+class _FlatSection extends StatelessWidget {
+  final String label;
+  final List<Widget> children;
+
+  const _FlatSection({required this.label, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 14, top: 16, bottom: 8),
+            child: Text(
+              label,
+              style: context.text.labelSmall?.copyWith(
+                color: context.colors.textTertiary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _FlatTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Widget? trailing;
+  final Color? iconColor;
+  final Color? titleColor;
+
+  const _FlatTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.trailing,
+    this.iconColor,
+    this.titleColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 22,
+              color: iconColor ?? context.colors.textSecondary,
+            ),
+            AppGap.w14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: context.text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: titleColor ?? context.colors.textPrimary,
+                    ),
+                  ),
+                  AppGap.h3,
+                  Text(
+                    subtitle,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: context.colors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AppGap.w12,
+            trailing ??
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: context.colors.textTertiary,
+                ),
           ],
         ),
       ),

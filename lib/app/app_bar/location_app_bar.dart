@@ -36,6 +36,7 @@ class AppLocationRoleBar extends StatelessWidget
   final String locationLabel;
   final int unreadCount;
   final String avatarLabel;
+
   final VoidCallback onLocationTap;
   final VoidCallback onNotificationsTap;
   final VoidCallback onAvatarTap;
@@ -47,6 +48,7 @@ class AppLocationRoleBar extends StatelessWidget
     required this.locationLabel,
     required this.unreadCount,
     required this.avatarLabel,
+
     required this.onLocationTap,
     required this.onNotificationsTap,
     required this.onAvatarTap,
@@ -274,6 +276,7 @@ class _LocationAppBarState extends State<LocationAppBar>
       locationLabel: locLabel,
       unreadCount: unread,
       avatarLabel: avatarLabel,
+
       bellScale: _bellScale,
       onLocationTap: () => _openLocationSearch(context, address),
       onNotificationsTap: () => LocationAppBarCoordinator.openNotifications(
@@ -281,8 +284,8 @@ class _LocationAppBarState extends State<LocationAppBar>
       ),
       onAvatarTap: () => LocationAppBarCoordinator.openRoleSheet(
         context,
-          firstName: firstName,
-          onGoToAccount: widget.onGoToAccount,
+        firstName: firstName,
+        onGoToAccount: widget.onGoToAccount,
       ),
     );
   }

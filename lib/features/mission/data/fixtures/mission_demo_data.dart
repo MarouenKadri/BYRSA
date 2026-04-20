@@ -27,7 +27,7 @@ class MissionDemoData {
       id: 'M-2855', title: 'Réparation fuite robinet cuisine',
       description: 'Fuite sous l\'évier, joint à changer probablement. Accès facile sous l\'évier.',
       categoryId: 'plomberie',
-      date: _now.add(const Duration(days: 1)), timeSlot: '10h00 - 11h00',
+      date: _now, timeSlot: '10h00 - 11h00',
       address: const MissionAddress(fullAddress: '8 avenue Victor Hugo, 75016 Paris', shortAddress: 'Paris 16e', distance: '4.1 km'),
       budget: const BudgetInfo(type: BudgetType.fixed, amount: 50),
       status: MissionStatus.confirmed,
@@ -198,7 +198,7 @@ class MissionDemoData {
     Mission(
       id: 'M-F-EC02', title: 'Réparation fuite robinet cuisine',
       description: 'Fuite sous l\'évier, joint à remplacer.',
-      categoryId: 'plomberie', date: _now.add(const Duration(days: 1)),
+      categoryId: 'plomberie', date: _now,
       timeSlot: '10h00 - 11h00',
       address: const MissionAddress(fullAddress: '8 avenue Victor Hugo, 75016 Paris', shortAddress: 'Paris 16e', distance: '4.1 km'),
       budget: const BudgetInfo(type: BudgetType.fixed, amount: 65),

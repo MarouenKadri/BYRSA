@@ -63,6 +63,13 @@ class _ClientMissionDetailPageState
   @override
   Mission get widgetMission => widget.mission;
 
+  bool get _isMissionToday {
+    final today = DateTime.now();
+    return mission.date.year == today.year &&
+        mission.date.month == today.month &&
+        mission.date.day == today.day;
+  }
+
   @override
   Mission syncMission(BuildContext ctx) {
     return ctx.watch<MissionProvider>().clientMissions.firstWhere(
@@ -233,9 +240,10 @@ class _ClientMissionDetailPageState
               onConfirm: _openValidationScreen,
               onDispute: _openCompletionDispute,
             ),
-          if (mission.status == MissionStatus.confirmed ||
-              mission.status == MissionStatus.onTheWay ||
-              mission.status == MissionStatus.inProgress)
+          if (_isMissionToday &&
+              (mission.status == MissionStatus.confirmed ||
+                  mission.status == MissionStatus.onTheWay ||
+                  mission.status == MissionStatus.inProgress))
             ClientTrackingCard(
               mission: mission,
               onOpenTracking: _openTracking,
@@ -269,8 +277,9 @@ class _ClientMissionDetailPageState
       );
     }
 
-    if (mission.status == MissionStatus.onTheWay ||
-        mission.status == MissionStatus.inProgress) {
+    if (_isMissionToday &&
+        (mission.status == MissionStatus.onTheWay ||
+            mission.status == MissionStatus.inProgress)) {
       return DetailBottomArea(
         child: DetailTealButton(
           label: mission.status == MissionStatus.onTheWay

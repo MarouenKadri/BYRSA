@@ -158,6 +158,6 @@ class _MissionTabState extends State<_MissionTab> {
   String get _emptySubtitle => switch (widget.filter) {
     _TabFilter.applied    => 'Explorez les missions disponibles et postulez',
     _TabFilter.confirmed  => 'Les missions où vous avez été sélectionné apparaîtront ici',
-    _TabFilter.inProgress => 'Vos missions démarrées apparaîtront ici',
+    _TabFilter.inProgress => 'Vos missions du jour apparaîtront ici',
   };
 }

@@ -249,7 +249,13 @@ class _FreelancerMissionDetailPageState
       ),
     ];
 
+    final today = DateTime.now();
+    final isToday = mission.date.year == today.year &&
+        mission.date.month == today.month &&
+        mission.date.day == today.day;
+
     if (widget.isOwn &&
+        isToday &&
         (mission.status == MissionStatus.confirmed ||
             mission.status == MissionStatus.onTheWay ||
             mission.status == MissionStatus.inProgress)) {

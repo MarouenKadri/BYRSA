@@ -150,7 +150,7 @@ class _ClientMissionTabState extends State<_ClientMissionTab> {
   String get _emptySubtitle => switch (widget.filter) {
     _ClientTabFilter.published  => 'Créez une mission pour trouver un prestataire',
     _ClientTabFilter.confirmed  => 'Les missions avec un prestataire choisi apparaîtront ici',
-    _ClientTabFilter.inProgress => 'Vos missions acceptées apparaîtront ici',
+    _ClientTabFilter.inProgress => 'Vos missions du jour apparaîtront ici',
   };
 }
 

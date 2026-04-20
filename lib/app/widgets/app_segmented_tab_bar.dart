@@ -40,12 +40,10 @@ class AppSegmentedTabBar extends StatelessWidget implements PreferredSizeWidget 
 
   @override
   Widget build(BuildContext context) {
-    // Résolution du mode
     final tabController = controller ?? DefaultTabController.maybeOf(context);
     final isStandalone = tabController == null;
 
     if (tabs.isEmpty) return const SizedBox.shrink();
-    if (!isStandalone && tabController == null) return const SizedBox.shrink();
 
     if (isStandalone) {
       return _buildPills(
@@ -82,68 +80,66 @@ class AppSegmentedTabBar extends StatelessWidget implements PreferredSizeWidget 
   }) {
     return SizedBox(
       height: 48,
-      child: Padding(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(tabs.length, (index) {
-              final selected = getSelected(index) == index;
-              final isLast = index == tabs.length - 1;
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List<Widget>.generate(tabs.length, (index) {
+            final selected = getSelected(index) == index;
+            final isLast = index == tabs.length - 1;
 
-              return Padding(
-                padding: EdgeInsets.only(right: isLast ? 0 : 8),
-                child: GestureDetector(
-                  onTap: () => onTap(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 9,
+            return Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : 8),
+              child: GestureDetector(
+                onTap: () => onTap(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.inkDark : Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: selected ? AppColors.inkDark : AppColors.gray50,
                     ),
-                    decoration: BoxDecoration(
-                      color: selected ? AppColors.inkDark : Colors.white,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: selected ? AppColors.inkDark : AppColors.gray50,
-                      ),
-                      boxShadow: selected
-                          ? const [
-                              BoxShadow(
-                                color: Color(0x18000000),
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (tabs[index].icon != null) ...[
-                          Icon(
-                            tabs[index].icon,
-                            size: 13,
-                            color: selected ? Colors.white : AppColors.gray600,
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        Text(
-                          tabs[index].label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: selected ? Colors.white : AppColors.inkDark,
-                          ),
+                    boxShadow: selected
+                        ? const [
+                            BoxShadow(
+                              color: Color(0x18000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (tabs[index].icon != null) ...[
+                        Icon(
+                          tabs[index].icon,
+                          size: 13,
+                          color: selected ? Colors.white : AppColors.gray600,
                         ),
+                        const SizedBox(width: 6),
                       ],
-                    ),
+                      Text(
+                        tabs[index].label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: selected ? Colors.white : AppColors.inkDark,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );
