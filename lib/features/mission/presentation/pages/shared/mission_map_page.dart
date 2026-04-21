@@ -202,12 +202,12 @@ class _MapPin extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppPalette.mapPin,
+            color: AppColors.mapPin,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                color: AppPalette.mapPin.withValues(alpha: 0.14),
+                color: AppColors.mapPin.withValues(alpha: 0.14),
                 blurRadius: 14,
                 offset: const Offset(0, 6),
               ),
@@ -228,7 +228,7 @@ class _PinTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppPalette.mapPin
+      ..color = AppColors.mapPin
       ..style = PaintingStyle.fill;
     final path = ui.Path()
       ..moveTo(0, 0)
@@ -274,7 +274,7 @@ class _AddressCard extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: 4),
-                child: Icon(Icons.location_on_outlined, color: AppPalette.mapPin, size: 18),
+                child: Icon(Icons.location_on_outlined, color: AppColors.mapPin, size: 18),
               ),
               AppGap.w12,
               Expanded(

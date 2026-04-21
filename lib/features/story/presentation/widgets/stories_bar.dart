@@ -26,7 +26,7 @@ class StoryMediaPickerSheet extends StatelessWidget {
           height: 1,
           indent: 20,
           endIndent: 20,
-          color: AppPalette.whiteAlpha12,
+          color: AppColors.whiteAlpha12,
         ),
         AppActionSheetItem(
           icon: Icons.photo_library_outlined,

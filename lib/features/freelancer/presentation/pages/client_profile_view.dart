@@ -191,7 +191,7 @@ class _ClientProfileViewState extends BaseProfileState<ClientProfileView> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
-                BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
+                BoxShadow(color: AppColors.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
               ],
             ),
             child: Text(

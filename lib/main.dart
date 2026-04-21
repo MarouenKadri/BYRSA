@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: themeProv.customTheme ?? AppThemeData.indeed,
+          theme: themeProv.customTheme ?? AppThemeData.theme,
           themeMode: themeProv.flutterThemeMode,
           home: const RootNav(),
         ),

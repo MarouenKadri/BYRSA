@@ -9,33 +9,33 @@ import '../components/app_text_field.dart';
 
 // ─── 5. THEMES ───────────────────────────────────────────────────────────────
 
-// ─── Tokens Indeed ───────────────────────────────────────────────────────────
+// ─── Tokens App ──────────────────────────────────────────────────────────────
 
-class _IndeedTokens {
-  const _IndeedTokens();
-  Color get primary      => AppColorsIndeed.primary;
-  Color get error        => AppColorsIndeed.error;
-  Color get background   => AppColorsIndeed.background;
-  Color get surface      => AppColorsIndeed.surface;
-  Color get surfaceAlt   => AppColorsIndeed.surfaceAlt;
-  Color get sheetBg      => AppColorsIndeed.sheetBg;
-  Color get inputFill    => AppColorsIndeed.inputFill;
-  Color get border       => AppColorsIndeed.border;
-  Color get divider      => AppColorsIndeed.divider;
-  Color get textPrimary  => AppColorsIndeed.textPrimary;
-  Color get textSecondary => AppColorsIndeed.textSecondary;
-  Color get textTertiary => AppColorsIndeed.textTertiary;
-  Color get textHint     => AppColorsIndeed.textHint;
-  Color get appBarBg     => AppColorsIndeed.surface;
+class _AppTokens {
+  const _AppTokens();
+  Color get primary => AppColors.primary;
+  Color get error => AppColors.error;
+  Color get background => AppColors.background;
+  Color get surface => AppColors.surface;
+  Color get surfaceAlt => AppColors.surfaceAlt;
+  Color get sheetBg => AppColors.sheetBg;
+  Color get inputFill => AppColors.inputFill;
+  Color get border => AppColors.border;
+  Color get divider => AppColors.divider;
+  Color get textPrimary => AppColors.textPrimary;
+  Color get textSecondary => AppColors.textSecondary;
+  Color get textTertiary => AppColors.textTertiary;
+  Color get textHint => AppColors.textHint;
+  Color get appBarBg => AppColors.surface;
 }
 
 class AppThemeData {
   AppThemeData._();
 
-  static ThemeData get indeed => _build();
+  static ThemeData get theme => _build();
 
   static ThemeData _build() {
-    const c = _IndeedTokens();
+    const c = _AppTokens();
 
     final textTheme = AppType.buildTextTheme(
       primary: c.textPrimary,
@@ -46,7 +46,7 @@ class AppThemeData {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: indeedColorScheme,
+      colorScheme: appColorScheme,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
 
@@ -295,7 +295,7 @@ class AppShadows {
   static List<BoxShadow> get storyCircle => [
     BoxShadow(
       // Story circles need a very subtle lift on light surfaces.
-      color: AppPalette.inkDark.withValues(alpha: 0.04),
+      color: AppColors.inkDark.withValues(alpha: 0.04),
       blurRadius: 12,
       offset: const Offset(0, 6),
     ),
@@ -372,8 +372,8 @@ extension AppDesignContext on BuildContext {
   /// ColorScheme du thème courant
   ColorScheme get scheme => Theme.of(this).colorScheme;
 
-  bool get isIndeedTheme =>
-      !isDark && scheme.surfaceContainerHighest == AppColorsIndeed.surfaceAlt;
+  bool get isAppTheme =>
+      !isDark && scheme.surfaceContainerHighest == AppColors.surfaceAlt;
 }
 
 extension AppAccountTextStyles on BuildContext {

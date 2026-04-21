@@ -541,7 +541,7 @@ class _ActiveMissionCard extends StatelessWidget {
                             gradient: const LinearGradient(
                               colors: [
                                 AppColors.deepNavy,
-                                AppColorsIndeed.textPrimary,
+                                AppColors.textPrimary,
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,

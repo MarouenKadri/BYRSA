@@ -310,7 +310,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
             BoxShadow(
-              color: AppPalette.blackAlpha03,
+              color: AppColors.blackAlpha03,
               blurRadius: 24,
               offset: Offset(0, 10),
             ),

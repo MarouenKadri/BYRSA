@@ -96,7 +96,7 @@ class _BudgetTypeCard extends StatelessWidget {
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppPalette.deepNavy : Colors.transparent,
+            color: isSelected ? AppColors.deepNavy : Colors.transparent,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: const [
@@ -143,7 +143,7 @@ class _BudgetTypeCard extends StatelessWidget {
               Icons.chevron_right_rounded,
               size: 18,
               color: isSelected
-                  ? AppPalette.deepNavy
+                  ? AppColors.deepNavy
                   : context.colors.textHint,
             ),
           ],

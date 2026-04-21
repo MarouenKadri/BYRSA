@@ -45,7 +45,7 @@ class _BalanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppPalette.ink, AppColorsDark.surface],
+          colors: [AppColors.ink, AppColors.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

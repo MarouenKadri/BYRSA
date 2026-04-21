@@ -109,7 +109,7 @@ class AppSegmentedTabBar extends StatelessWidget implements PreferredSizeWidget 
                     boxShadow: selected
                         ? const [
                             BoxShadow(
-                              color: AppPalette.blackAlpha09,
+                              color: AppColors.blackAlpha09,
                               blurRadius: 8,
                               offset: Offset(0, 3),
                             ),

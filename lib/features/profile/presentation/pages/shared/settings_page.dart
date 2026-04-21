@@ -123,7 +123,7 @@ class SettingsPage extends StatelessWidget {
               _SettingsItem(
                 icon: Icons.dark_mode_rounded,
                 title: 'Apparence',
-                subtitle: 'Indeed',
+                subtitle: 'App',
                 onTap: () => _showThemeDialog(context),
               ),
               _SettingsItem(
@@ -275,9 +275,9 @@ class SettingsPage extends StatelessWidget {
         children: [
           _ThemeOption(
             icon: Icons.business_center_outlined,
-            label: 'Indeed (bleu)',
-            isSelected: current == AppThemeMode.indeed,
-            onTap: () { context.read<ThemeProvider>().setMode(AppThemeMode.indeed); Navigator.pop(context); },
+            label: 'App',
+            isSelected: current == AppThemeMode.app,
+            onTap: () { context.read<ThemeProvider>().setMode(AppThemeMode.app); Navigator.pop(context); },
           ),
         ],
       ),

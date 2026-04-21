@@ -93,7 +93,7 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = context.isIndeedTheme
+    final effectiveColor = context.isAppTheme
         ? context.colors.primary
         : (color ?? context.colors.primary);
     return Container(
@@ -229,7 +229,7 @@ class BudgetBadge extends StatelessWidget {
         vertical: large ? 10 : 8,
       ),
       decoration: BoxDecoration(
-        color: AppPalette.inkDark,
+        color: AppColors.inkDark,
         borderRadius: BorderRadius.circular(large ? 14 : 12),
         boxShadow: [
           BoxShadow(

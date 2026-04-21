@@ -9,14 +9,14 @@ import '../../messaging_provider.dart';
 import '../../../mission/presentation/pages/client/create_mission_page.dart';
 
 // ─── Couleurs locales luxury monochrome ──────────────────────────────────────
-const _kBg          = AppPalette.snow;
-const _kWhite       = AppColorsLight.surface;
-const _kInk         = AppPalette.ink;
-const _kCharcoal    = AppColorsDark.surfaceAlt;
-const _kGrayMid     = AppColorsLight.textTertiary;
-const _kGrayLight   = AppColorsLight.textHint;
-const _kGrayXLight  = AppColorsIndeed.textHint;
-const _kBorder      = AppColorsLight.divider;
+const _kBg          = AppColors.snow;
+const _kWhite       = AppColors.surface;
+const _kInk         = AppColors.ink;
+const _kCharcoal    = AppColors.surfaceAlt;
+const _kGrayMid     = AppColors.textTertiary;
+const _kGrayLight   = AppColors.textHint;
+const _kGrayXLight  = AppColors.textHint;
+const _kBorder      = AppColors.divider;
 
 class ChatPage extends StatefulWidget {
   final String? conversationId;

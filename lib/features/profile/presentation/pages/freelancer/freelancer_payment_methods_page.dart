@@ -33,7 +33,7 @@ class _FreelancerPaymentMethodsPageState
               _showEditIbanSheet(context);
             },
           ),
-          const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
+          const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.whiteAlpha12),
           AppActionSheetItem(
             icon: Icons.delete_outline_rounded,
             title: 'Supprimer le compte',
@@ -477,7 +477,7 @@ class _BalanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppPalette.ink, AppColorsDark.surface],
+          colors: [AppColors.ink, AppColors.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

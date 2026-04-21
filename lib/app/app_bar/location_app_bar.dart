@@ -367,7 +367,7 @@ class RoleSwitchSheet extends StatelessWidget {
         ),
       ),
       children: [
-        const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.whiteAlpha12),
         AppGap.h8,
         _RoleItem(
           icon: Icons.person_outline_rounded,
@@ -379,7 +379,7 @@ class RoleSwitchSheet extends StatelessWidget {
             await context.read<AuthProvider>().switchRole(UserRole.client);
           },
         ),
-        const Divider(height: 1, indent: 20, endIndent: 20, color: AppPalette.whiteAlpha12),
+        const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.whiteAlpha12),
         _RoleItem(
           icon: Icons.handyman_outlined,
           label: 'Prestataire',
@@ -821,7 +821,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                                   icon: Icons.location_on_rounded,
                                   size: AppBarMetrics.mapPinIconSize,
                                   iconSize: AppBarMetrics.mapPinInnerIconSize,
-                                  backgroundColor: AppPalette.charcoal,
+                                  backgroundColor: AppColors.charcoal,
                                   iconColor: Colors.white,
                                   boxShadow: const [
                                     BoxShadow(
@@ -833,7 +833,7 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
                                 ),
                                 const CustomPaint(
                                   size: Size(12, 6),
-                                  painter: _PinTailPainter(AppPalette.charcoal),
+                                  painter: _PinTailPainter(AppColors.charcoal),
                                 ),
                               ],
                             ),

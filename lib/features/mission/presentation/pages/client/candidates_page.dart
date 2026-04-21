@@ -553,7 +553,7 @@ class _CandidateCard extends StatelessWidget {
                           border: Border.all(color: Colors.white, width: 1.5),
                           boxShadow: const [
                             BoxShadow(
-                              color: AppPalette.blackAlpha07,
+                              color: AppColors.blackAlpha07,
                               blurRadius: 12,
                               offset: Offset(0, 6),
                             ),

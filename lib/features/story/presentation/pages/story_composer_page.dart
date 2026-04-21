@@ -147,7 +147,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColorsDark.background,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: Stack(
           fit: StackFit.expand,
@@ -159,7 +159,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                   begin: Alignment.topCenter,
                   end: Alignment.center,
                   colors: [
-                    AppColorsDark.background.withValues(alpha: 0.65),
+                    AppColors.background.withValues(alpha: 0.65),
                     Colors.transparent,
                   ],
                 ),
@@ -174,7 +174,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      AppColorsDark.background.withValues(alpha: 0.65),
+                      AppColors.background.withValues(alpha: 0.65),
                       Colors.transparent,
                     ],
                   ),

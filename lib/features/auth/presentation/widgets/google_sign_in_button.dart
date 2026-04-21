@@ -63,11 +63,11 @@ class _GoogleLogo extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: SweepGradient(
           colors: [
-            AppPalette.googleBlue, // blue
-            AppPalette.googleGreen, // green
-            AppPalette.googleYellow, // yellow
-            AppPalette.googleRed, // red
-            AppPalette.googleBlue, // back to blue
+            AppColors.googleBlue, // blue
+            AppColors.googleGreen, // green
+            AppColors.googleYellow, // yellow
+            AppColors.googleRed, // red
+            AppColors.googleBlue, // back to blue
           ],
         ),
       ),
@@ -83,7 +83,7 @@ class _GoogleLogo extends StatelessWidget {
             style: TextStyle(
               fontSize: size * 0.55,
               fontWeight: FontWeight.w700,
-              color: AppPalette.googleBlue,
+              color: AppColors.googleBlue,
               height: 1,
             ),
           ),

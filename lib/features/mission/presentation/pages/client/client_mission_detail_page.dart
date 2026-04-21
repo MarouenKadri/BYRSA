@@ -98,15 +98,18 @@ class _ClientMissionDetailPageState
   Widget buildTagsPrice(BuildContext ctx) {
     final daysLeft = mission.date.difference(DateTime.now()).inDays;
     final daysLabel = daysLeft > 0 ? '+$daysLeft jours' : "Aujourd'hui";
+    final hasAssignedPresta = mission.assignedPresta != null;
 
     return Row(
       children: [
         DetailLuxuryPill(label: daysLabel),
-        AppGap.w10,
-        DetailLuxuryPill(
-          label:
-              '${mission.candidatesCount} candidat${mission.candidatesCount > 1 ? 's' : ''}',
-        ),
+        if (!hasAssignedPresta) ...[
+          AppGap.w10,
+          DetailLuxuryPill(
+            label:
+                '${mission.candidatesCount} candidat${mission.candidatesCount > 1 ? 's' : ''}',
+          ),
+        ],
         const Spacer(),
         BudgetBadge(budget: mission.budget, large: true),
       ],

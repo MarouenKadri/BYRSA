@@ -244,7 +244,7 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColorsDark.surface, AppColorsDark.surfaceAlt],
+            colors: [AppColors.surface, AppColors.surfaceAlt],
           ),
         ),
       );
@@ -439,7 +439,7 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
           borderRadius: BorderRadius.circular(AppRadius.input),
           border: Border.all(color: context.colors.border),
           boxShadow: const [
-            BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 14, offset: Offset(0, 6)),
+            BoxShadow(color: AppColors.blackAlpha03, blurRadius: 14, offset: Offset(0, 6)),
           ],
         ),
         child: Row(
@@ -477,7 +477,7 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
               color: context.colors.surface,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               boxShadow: const [
-                BoxShadow(color: AppPalette.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
+                BoxShadow(color: AppColors.blackAlpha03, blurRadius: 24, offset: Offset(0, 10)),
               ],
             ),
             child: Column(
@@ -530,7 +530,7 @@ class ProfileTabPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: active ? AppColors.inkDark : AppColors.gray50),
           boxShadow: active
-              ? const [BoxShadow(color: AppPalette.blackAlpha09, blurRadius: 8, offset: Offset(0, 3))]
+              ? const [BoxShadow(color: AppColors.blackAlpha09, blurRadius: 8, offset: Offset(0, 3))]
               : null,
         ),
         child: Row(

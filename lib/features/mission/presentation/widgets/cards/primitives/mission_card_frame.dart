@@ -21,7 +21,7 @@ class MissionCardFrame extends StatelessWidget {
   static const TextStyle titleStyle = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: AppPalette.cardTitle,
+    color: AppColors.cardTitle,
     letterSpacing: -0.2,
     height: 1.25,
   );
@@ -30,7 +30,7 @@ class MissionCardFrame extends StatelessWidget {
   static const TextStyle subtitleStyle = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: AppPalette.cardSubtitle,
+    color: AppColors.cardSubtitle,
     height: 1.45,
   );
 
@@ -38,7 +38,7 @@ class MissionCardFrame extends StatelessWidget {
   static const TextStyle metaStyle = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    color: AppPalette.cardMeta,
+    color: AppColors.cardMeta,
     letterSpacing: 0.1,
   );
 
@@ -46,7 +46,7 @@ class MissionCardFrame extends StatelessWidget {
   static const TextStyle titleCompactStyle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppPalette.cardTitle,
+    color: AppColors.cardTitle,
     letterSpacing: -0.2,
   );
 
@@ -54,7 +54,7 @@ class MissionCardFrame extends StatelessWidget {
   static const TextStyle captionStyle = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w600,
-    color: AppPalette.cardCaption,
+    color: AppColors.cardCaption,
   );
 
   // ── Spacing ──────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ class MissionCardFrame extends StatelessWidget {
 
   static const List<BoxShadow> defaultShadow = [
     BoxShadow(
-      color: AppPalette.blackAlpha04,
+      color: AppColors.blackAlpha04,
       blurRadius: 24,
       offset: Offset(0, 10),
     ),

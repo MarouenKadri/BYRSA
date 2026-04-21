@@ -182,7 +182,7 @@ class ClientPrestaCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppPalette.inkDark,
+                  color: AppColors.inkDark,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
