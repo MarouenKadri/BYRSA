@@ -17,8 +17,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _currentCtrl = TextEditingController();
   final _newCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
-
-  bool _isLoading = false;
+  bool _hideCurrent = true;
+  bool _hideNew = true;
+  bool _hideConfirm = true;
 
   @override
   void dispose() {
@@ -30,105 +31,79 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = context.watch<AuthProvider>().isLoading;
+
     return Scaffold(
       backgroundColor: context.colors.background,
-      resizeToAvoidBottomInset: false,
       appBar: AppPageAppBar(
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
+        titleWidget: Text(
+          'Mot de passe',
+          style: context.profilePageTitleStyle,
+        ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: AppSpacing.screenPadding,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Header ───────────────────────────────────────────────────
-                Text(
-                  'Mot de passe',
-                  style: context.profilePageTitleStyle.copyWith(
-                    fontSize: AppFontSize.h1,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
-                  ),
-                ),
-                AppGap.h8,
-                Text(
-                  'Choisissez un nouveau mot de passe sécurisé',
-                  style: context.profileSecondaryLabelStyle.copyWith(
-                    fontSize: AppFontSize.body,
-                    height: 1.4,
-                  ),
-                ),
-                AppSpacing.sectionGap,
-
-                // ── Champs ───────────────────────────────────────────────────
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        AppTextField(
-                          label: 'Mot de passe actuel',
-                          hint: '••••••••',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: true,
-                          controller: _currentCtrl,
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Champ obligatoire' : null,
-                        ),
-                        AppGap.h24,
-                        AppTextField(
-                          label: 'Nouveau mot de passe',
-                          hint: 'Minimum 8 caractères',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: true,
-                          controller: _newCtrl,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Champ obligatoire';
-                            if (v.length < 8) return 'Minimum 8 caractères';
-                            if (!v.contains(RegExp(r'[A-Za-z]'))) {
-                              return 'Doit contenir au moins 1 lettre';
-                            }
-                            if (!v.contains(RegExp(r'[0-9]'))) {
-                              return 'Doit contenir au moins 1 chiffre';
-                            }
-                            return null;
-                          },
-                        ),
-                        AppGap.h24,
-                        AppTextField(
-                          label: 'Confirmer le mot de passe',
-                          hint: '••••••••',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: true,
-                          controller: _confirmCtrl,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Champ obligatoire';
-                            if (v != _newCtrl.text) {
-                              return 'Les mots de passe ne correspondent pas';
-                            }
-                            return null;
-                          },
-                        ),
-                        AppGap.h24,
-                        _PasswordStrengthTips(),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // ── Bouton ───────────────────────────────────────────────────
-                AppButton(
-                  label: 'Mettre à jour',
-                  onPressed: _submit,
-                  isLoading: _isLoading,
-                  icon: Icons.arrow_forward_rounded,
-                  variant: ButtonVariant.primary,
-                ),
-              ],
+      bottomNavigationBar: AppActionFooter(
+        child: AppButton(
+          label: 'Enregistrer',
+          onPressed: isLoading ? null : _submit,
+          isLoading: isLoading,
+          variant: ButtonVariant.black,
+        ),
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 116),
+          children: [
+            _PasswordField(
+              controller: _currentCtrl,
+              label: 'Mot de passe actuel',
+              obscure: _hideCurrent,
+              onToggle: () => setState(() => _hideCurrent = !_hideCurrent),
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'Champ requis' : null,
             ),
-          ),
+            AppGap.h16,
+            _PasswordField(
+              controller: _newCtrl,
+              label: 'Nouveau mot de passe',
+              hintText: 'Minimum 8 caractères',
+              obscure: _hideNew,
+              onToggle: () => setState(() => _hideNew = !_hideNew),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Champ requis';
+                if (v.length < 8) return 'Minimum 8 caractères';
+                if (!v.contains(RegExp(r'[A-Za-z]'))) {
+                  return 'Doit contenir au moins 1 lettre';
+                }
+                if (!v.contains(RegExp(r'[0-9]'))) {
+                  return 'Doit contenir au moins 1 chiffre';
+                }
+                return null;
+              },
+            ),
+            AppGap.h16,
+            _PasswordField(
+              controller: _confirmCtrl,
+              label: 'Confirmer le nouveau mot de passe',
+              obscure: _hideConfirm,
+              onToggle: () => setState(() => _hideConfirm = !_hideConfirm),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Champ requis';
+                if (v != _newCtrl.text) {
+                  return 'Les mots de passe ne correspondent pas';
+                }
+                return null;
+              },
+            ),
+            AppGap.h16,
+            const _InlineHelper(
+              text:
+                  'Utilisez au moins 8 caractères avec des lettres et des chiffres.',
+            ),
+            AppGap.h24,
+            const _PasswordStrengthTips(),
+          ],
         ),
       ),
     );
@@ -136,53 +111,99 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
     final error =
-        await context.read<AuthProvider>().updatePassword(_newCtrl.text);
+        await context.read<AuthProvider>().updatePassword(_newCtrl.text.trim());
     if (!mounted) return;
-    setState(() => _isLoading = false);
     if (error != null) {
       showAppSnackBar(context, error, type: SnackBarType.error);
       return;
     }
-    _showSuccessDialog();
-  }
 
-  void _showSuccessDialog() {
-    showAppDialog(
-      context: context,
-      barrierDismissible: false,
-      title: Text('Mot de passe modifié !', style: context.text.titleLarge),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: AppInsets.a18,
-            decoration: const BoxDecoration(
-                color: AppColors.primaryLight, shape: BoxShape.circle),
-            child: const Icon(Icons.check_circle_rounded,
-                color: AppColors.primary, size: 48),
-          ),
-          AppGap.h16,
-          Text(
-            'Votre mot de passe a été mis à jour avec succès.',
-            style: context.text.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-      confirmLabel: 'Parfait',
-      onConfirm: () {
-        Navigator.pop(context);
-        Navigator.pop(context);
-      },
+    _currentCtrl.clear();
+    _newCtrl.clear();
+    _confirmCtrl.clear();
+    showAppSnackBar(
+      context,
+      'Mot de passe mis à jour',
+      type: SnackBarType.success,
     );
   }
 }
 
-// ─── Conseils de sécurité ─────────────────────────────────────────────────────
+class _PasswordField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? hintText;
+  final bool obscure;
+  final VoidCallback onToggle;
+  final String? Function(String?)? validator;
+
+  const _PasswordField({
+    required this.controller,
+    required this.label,
+    this.hintText,
+    required this.obscure,
+    required this.onToggle,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscure,
+      validator: validator,
+      style: TextStyle(
+        fontSize: AppFontSize.body,
+        fontWeight: FontWeight.w400,
+        color: context.colors.textPrimary,
+      ),
+      decoration: AppInputDecorations.profileField(
+        context,
+        hintText: hintText ?? label,
+        radius: 18,
+        prefixIcon: Icon(
+          Icons.lock_outline_rounded,
+          size: 16,
+          color: context.colors.textHint,
+        ),
+      ).copyWith(
+        labelText: label,
+        contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        errorStyle: context.profileErrorStyle,
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            size: 19,
+            color: context.colors.textPrimary,
+          ),
+          onPressed: onToggle,
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineHelper extends StatelessWidget {
+  final String text;
+
+  const _InlineHelper({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: context.text.bodyMedium?.copyWith(
+        color: context.colors.textSecondary,
+        height: 1.45,
+      ),
+    );
+  }
+}
 
 class _PasswordStrengthTips extends StatelessWidget {
+  const _PasswordStrengthTips();
+
   @override
   Widget build(BuildContext context) {
     return Container(

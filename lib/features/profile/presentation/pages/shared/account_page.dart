@@ -6,16 +6,15 @@ import '../../../../../app/auth_provider.dart';
 import '../../../../../app/enum/user_role.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
 import '../../../../auth/services/image_picker_service.dart';
-import '../freelancer/my_posts_page.dart';
 import '../../../../reviews/presentation/pages/my_reviews_page.dart';
 import '../../../../story/story.dart';
 import '../../../../mission/data/models/service_category.dart';
 import '../client/client_payment_methods_page.dart';
 import '../shared/archives_page.dart';
+import '../freelancer/freelancer_activity_page.dart';
 import '../freelancer/freelancer_payment_methods_page.dart';
+import 'change_password_page.dart';
 import 'my_information_page.dart';
-import '../../widgets/shared/change_password_bottom_sheet.dart';
-import '../../widgets/shared/freelancer_profile_bottom_sheet.dart';
 import '../../../profile_provider.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
@@ -60,7 +59,7 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.badge_outlined,
                   title: 'Mes informations',
-                  subtitle: 'Infos personnelles, email, téléphone',
+                  subtitle: '',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -73,17 +72,23 @@ class _AccountPageState extends State<AccountPage> {
                     icon: Icons.work_outline,
                     title: 'Mon activité',
                     subtitle: 'Skills, tarif, localisation, disponibilité',
-                    onTap: () => showFreelancerProfileBottomSheet(context),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FreelancerActivityPage(),
+                      ),
+                    ),
                   ),
-                _FlatTile(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'Archives',
-                  subtitle: 'Missions terminées et annulées',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ArchivesPage()),
+                if (!isFreelancer)
+                  _FlatTile(
+                    icon: Icons.inventory_2_outlined,
+                    title: 'Archives',
+                    subtitle: 'Missions terminées et annulées',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ArchivesPage()),
+                    ),
                   ),
-                ),
                 _FlatTile(
                   icon: Icons.star_outline,
                   title: 'Mes avis',
@@ -95,16 +100,6 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                   ),
                 ),
-                if (isFreelancer)
-                  _FlatTile(
-                    icon: Icons.photo_library_outlined,
-                    title: 'Mes publications',
-                    subtitle: 'Voir toutes mes publications',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MyPostsPage()),
-                    ),
-                  ),
               ],
             ),
             _FlatSection(
@@ -155,7 +150,11 @@ class _AccountPageState extends State<AccountPage> {
                   icon: Icons.key_outlined,
                   title: 'Mot de passe',
                   subtitle: 'Modifié il y a 3 mois',
-                  onTap: () => showChangePasswordBottomSheet(context),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ChangePasswordPage(),
+                    ),
+                  ),
                 ),
                 _FlatTile(
                   icon: Icons.shield_outlined,

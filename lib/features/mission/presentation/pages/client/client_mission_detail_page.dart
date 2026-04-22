@@ -111,7 +111,7 @@ class _ClientMissionDetailPageState
           ),
         ],
         const Spacer(),
-        BudgetBadge(budget: mission.budget, large: true),
+        BudgetText(budget: mission.budget, large: true),
       ],
     );
   }

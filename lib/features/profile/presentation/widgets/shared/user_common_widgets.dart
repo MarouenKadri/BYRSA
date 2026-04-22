@@ -3,7 +3,7 @@ import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 
 /// ─── Widget partagé : section avec icon badge ────────────────────────────
-/// Utilisé dans personal_info_bottom_sheet.dart et freelancer_profile_bottom_sheet.dart
+/// Utilise par les anciennes feuilles profil et par les écrans profil partagés.
 class ProfileSheetSection extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -50,7 +50,7 @@ class ProfileSheetSection extends StatelessWidget {
 }
 
 /// ─── Widget partagé : étape de vérification ───────────────────────────────
-/// Utilisé dans account_page.dart et edit_profile_page.dart
+/// Utilisé dans account_page.dart et freelancer_activity_page.dart
 class VerificationStep extends StatelessWidget {
   final IconData icon;
   final String title;

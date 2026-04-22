@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission_address.dart';
 import '../../../../../core/design/app_design_system.dart';
 
@@ -45,27 +44,14 @@ class _MissionMapPageState extends State<MissionMapPage> {
     if (query.trim().isEmpty) return;
     setState(() => _loading = true);
     try {
-      final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/search'
-        '?q=${Uri.encodeComponent(query)}&format=json&limit=1',
-      );
-      final resp = await http.get(uri, headers: {
-        'Accept-Language': 'fr',
-        'User-Agent': 'HomserviceApp/1.0',
-      });
+      final place = await NominatimService.geocodeSingle(query);
       if (!mounted) return;
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as List;
-        if (data.isNotEmpty) {
-          final lat = double.parse(data[0]['lat'] as String);
-          final lon = double.parse(data[0]['lon'] as String);
-          setState(() {
-            _pinLatLng = LatLng(lat, lon);
-            _center = _pinLatLng!;
-          });
-          _mapController.move(_center, 15.4);
-        }
-      }
+      if (place == null) return;
+      setState(() {
+        _pinLatLng = place.latLng;
+        _center = place.latLng;
+      });
+      _mapController.move(_center, 15.4);
     } catch (_) {
       // silencieux
     } finally {

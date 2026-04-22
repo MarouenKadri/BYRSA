@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/design/app_design_system.dart';
+import '../../../../../core/location/nominatim_service.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
@@ -115,26 +114,13 @@ class _TrackingPageState extends State<TrackingPage> {
 
   Future<void> _geocodeDestination() async {
     try {
-      final query = Uri.encodeComponent(widget.mission.address.fullAddress);
-      final resp = await http.get(
-        Uri.parse(
-          'https://nominatim.openstreetmap.org/search'
-          '?q=$query&format=json&limit=1&countrycodes=fr',
-        ),
-        headers: {'Accept-Language': 'fr', 'User-Agent': 'InkernApp/1.0'},
+      final place = await NominatimService.geocodeSingle(
+        widget.mission.address.fullAddress,
       );
       if (!mounted) return;
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as List;
-        if (data.isNotEmpty) {
-          final dest = LatLng(
-            double.parse(data.first['lat'] as String),
-            double.parse(data.first['lon'] as String),
-          );
-          setState(() => _destinationLatLng = dest);
-          if (_freelancerPosition != null) _updateEta(_freelancerPosition!);
-        }
-      }
+      if (place == null) return;
+      setState(() => _destinationLatLng = place.latLng);
+      if (_freelancerPosition != null) _updateEta(_freelancerPosition!);
     } catch (_) {}
   }
 

@@ -21,9 +21,6 @@ export 'presentation/mission_provider.dart';
 export 'presentation/widgets/shared/mission_shared_widgets.dart';
 export 'presentation/widgets/shared/status_timeline.dart';
 
-// ─── Widgets - Client ─────────────────────────────────────────────────────────
-export 'presentation/widgets/client_list_widgets.dart';
-
 // ─── Widgets - Freelancer ─────────────────────────────────────────────────────
 export 'presentation/widgets/freelancer_list_widgets.dart';
 

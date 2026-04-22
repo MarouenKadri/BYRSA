@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../../core/design/app_design_system.dart';
 import '../../core/design/app_primitives.dart';
+import '../../core/location/nominatim_service.dart';
 import '../auth_provider.dart';
 import '../enum/user_role.dart';
 import '../../features/notifications/notification_provider.dart';
@@ -536,6 +535,16 @@ class _NominatimResult {
       lon: double.parse(j['lon'] as String),
     );
   }
+
+  factory _NominatimResult.fromPlace(NominatimPlace place) {
+    final parts = place.displayName.split(',');
+    return _NominatimResult(
+      displayName: place.displayName,
+      shortName: parts.first.trim(),
+      lat: place.lat,
+      lon: place.lon,
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -612,26 +621,15 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
   Future<void> _search(String query) async {
     setState(() => _loadingResults = true);
     try {
-      final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/search'
-        '?q=${Uri.encodeComponent(query)}'
-        '&format=json&limit=6&countrycodes=fr&addressdetails=0',
-      );
-      final resp = await http.get(uri, headers: {
-        'Accept-Language': 'fr',
-        'User-Agent': 'InkernApp/1.0',
-      });
+      final places = await NominatimService.search(query, limit: 6);
       if (!mounted) return;
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as List;
-        setState(() => _results =
-            data.map((d) => _NominatimResult.fromJson(d as Map<String, dynamic>)).toList());
-        if (_results.isNotEmpty) {
-          final first = _results.first;
-          final latlng = LatLng(first.lat, first.lon);
-          setState(() { _pin = latlng; _center = latlng; });
-          _mapCtrl.move(latlng, 12);
-        }
+      setState(() => _results =
+          places.map(_NominatimResult.fromPlace).toList(growable: false));
+      if (_results.isNotEmpty) {
+        final first = _results.first;
+        final latlng = LatLng(first.lat, first.lon);
+        setState(() { _pin = latlng; _center = latlng; });
+        _mapCtrl.move(latlng, 12);
       }
     } catch (_) {
     } finally {
@@ -693,27 +691,17 @@ class _LocationSearchPageState extends State<LocationSearchPage> with SingleTick
       String city = 'Position actuelle';
       String subtitle = '';
       try {
-        final uri = Uri.parse(
-          'https://nominatim.openstreetmap.org/reverse'
-          '?lat=${pos.latitude}&lon=${pos.longitude}'
-          '&format=json&accept-language=fr',
-        );
-        final resp = await http.get(uri, headers: {
-          'Accept-Language': 'fr',
-          'User-Agent': 'InkernApp/1.0',
-        });
-        if (resp.statusCode == 200) {
-          final data = jsonDecode(resp.body) as Map<String, dynamic>;
-          final addr = data['address'] as Map<String, dynamic>?;
-          if (addr != null) {
-            city = (addr['city'] ?? addr['town'] ?? addr['village'] ??
-                addr['municipality'] ?? 'Position actuelle') as String;
-            final postcode = addr['postcode'] ?? '';
-            final country = addr['country'] ?? '';
-            subtitle = [postcode, country]
-                .where((s) => (s as String).isNotEmpty)
-                .join(', ');
-          }
+        final place = await NominatimService.reverse(latlng);
+        if (place != null && place.displayName.isNotEmpty) {
+          final parts = place.displayName
+              .split(',')
+              .map((entry) => entry.trim())
+              .where((entry) => entry.isNotEmpty)
+              .toList(growable: false);
+          city = parts.isNotEmpty ? parts.first : city;
+          subtitle = parts.length > 2
+              ? parts.skip(1).take(2).join(', ')
+              : parts.skip(1).join(', ');
         }
       } catch (_) {}
 

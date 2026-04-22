@@ -127,7 +127,7 @@ class _FreelancerMissionDetailPageState
         AppGap.w10,
         DetailLuxuryPill(label: secondaryLabel),
         const Spacer(),
-        BudgetBadge(budget: mission.budget, large: true),
+        BudgetText(budget: mission.budget, large: true),
       ],
     );
   }

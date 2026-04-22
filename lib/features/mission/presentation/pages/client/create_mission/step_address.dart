@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import '../../../../../../core/design/app_design_system.dart';
+import '../../../../../../core/location/nominatim_service.dart';
 
 /// ─────────────────────────────────────────────────────────────
 /// 📍 Step 4 — Adresse avec carte dynamique
@@ -30,7 +29,7 @@ class _StepAddressState extends State<StepAddress> {
 
   LatLng _mapCenter = const LatLng(48.8566, 2.3522); // Paris par défaut
   LatLng? _selectedLatLng;
-  List<_Place> _suggestions = [];
+  List<NominatimPlace> _suggestions = [];
   bool _isSearching = false;
   bool _showSuggestions = false;
 
@@ -64,24 +63,12 @@ class _StepAddressState extends State<StepAddress> {
     setState(() => _isSearching = true);
 
     try {
-      final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/search'
-        '?q=${Uri.encodeComponent(query)}&format=json&limit=5&addressdetails=1',
-      );
-      final resp = await http.get(uri, headers: {
-        'Accept-Language': 'fr',
-        'User-Agent': 'HomserviceApp/1.0',
-      });
-
+      final results = await NominatimService.search(query, limit: 5);
       if (!mounted) return;
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as List;
-        setState(() {
-          _suggestions = data.map((e) => _Place.fromJson(e)).toList();
-          _showSuggestions = _suggestions.isNotEmpty;
-        });
-      }
+      setState(() {
+        _suggestions = results;
+        _showSuggestions = _suggestions.isNotEmpty;
+      });
     } catch (_) {
       // Erreur réseau silencieuse
     } finally {
@@ -89,13 +76,13 @@ class _StepAddressState extends State<StepAddress> {
     }
   }
 
-  void _selectPlace(_Place place) {
+  void _selectPlace(NominatimPlace place) {
     _ctrl.text = place.displayName;
     widget.onAddressChanged(place.displayName);
     _focus.unfocus();
 
     setState(() {
-      _selectedLatLng = LatLng(place.lat, place.lon);
+      _selectedLatLng = place.latLng;
       _mapCenter = _selectedLatLng!;
       _showSuggestions = false;
       _suggestions = [];
@@ -236,13 +223,21 @@ class _StepAddressState extends State<StepAddress> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            place.name,
+                                            place.displayName
+                                                .split(',')
+                                                .first
+                                                .trim(),
                                             style: TextStyle(fontSize: AppFontSize.baseHalf, fontWeight: FontWeight.w600, color: AppColors.inkDark),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           Text(
-                                            place.subtitle,
+                                            place.displayName
+                                                .split(',')
+                                                .skip(1)
+                                                .take(2)
+                                                .join(',')
+                                                .trim(),
                                             style: context.text.labelMedium?.copyWith(color: context.colors.textTertiary),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -507,41 +502,3 @@ class _SelectedAddressCard extends StatelessWidget {
   }
 }
 
-// ── Modèle de lieu ────────────────────────────────────────────
-
-class _Place {
-  final String displayName;
-  final String name;
-  final String subtitle;
-  final double lat;
-  final double lon;
-
-  _Place({
-    required this.displayName,
-    required this.name,
-    required this.subtitle,
-    required this.lat,
-    required this.lon,
-  });
-
-  factory _Place.fromJson(Map<String, dynamic> json) {
-    final address = json['address'] as Map<String, dynamic>? ?? {};
-    final name = (json['name'] as String?)?.isNotEmpty == true
-        ? json['name'] as String
-        : (address['road'] as String?) ??
-            (json['display_name'] as String).split(',').first;
-
-    final parts = <String>[];
-    if (address['city'] != null) parts.add(address['city'] as String);
-    if (address['postcode'] != null) parts.add(address['postcode'] as String);
-    if (address['country'] != null) parts.add(address['country'] as String);
-
-    return _Place(
-      displayName: json['display_name'] as String,
-      name: name,
-      subtitle: parts.join(', '),
-      lat: double.parse(json['lat'] as String),
-      lon: double.parse(json['lon'] as String),
-    );
-  }
-}

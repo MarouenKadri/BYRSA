@@ -152,7 +152,7 @@ class _Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        BudgetBadge(budget: mission.budget, large: true),
+        BudgetText(budget: mission.budget, large: true),
         AppGap.w16,
         if (mission.client != null) ...[
           UserAvatar(

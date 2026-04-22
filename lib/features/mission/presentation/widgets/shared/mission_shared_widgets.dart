@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
+import '../cards/primitives/mission_card_frame.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// 🧩 Inkern - Widgets Communs Mission (Partagés Client & Freelancer)
@@ -221,7 +222,7 @@ class BudgetBadge extends StatelessWidget {
     }
 
     final amount = budget.amount?.toInt() ?? 0;
-    final suffix = isHourly ? '/h' : '';
+    final valueText = '$amount €${isHourly ? '/h' : ''}';
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -239,31 +240,15 @@ class BudgetBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Text(
-            '$amount €',
-            style: TextStyle(
-              fontSize: large ? 22 : 17,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: -0.4,
-              height: 1,
-            ),
-          ),
-          if (suffix.isNotEmpty)
-            Text(
-              suffix,
-              style: TextStyle(
-                fontSize: large ? 13 : 11,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.65),
-              ),
-            ),
-        ],
+      child: Text(
+        valueText,
+        style: TextStyle(
+          fontSize: large ? 22 : 17,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          letterSpacing: -0.4,
+          height: 1,
+        ),
       ),
     );
   }
@@ -276,7 +261,34 @@ class BudgetText extends StatelessWidget {
   const BudgetText({super.key, required this.budget, this.large = false});
 
   @override
-  Widget build(BuildContext context) => BudgetBadge(budget: budget, large: large);
+  Widget build(BuildContext context) {
+    final isQuote = budget.type == BudgetType.quote;
+    final isHourly = budget.type == BudgetType.hourly;
+    final amount = budget.amount?.toInt() ?? 0;
+    final valueText = '$amount €${isHourly ? '/h' : ''}';
+
+    if (isQuote) {
+      return Text(
+        budget.displayText,
+        style: (large ? MissionCardFrame.captionStyle : MissionCardFrame.metaStyle)
+            .copyWith(
+              color: AppColors.cardCaption,
+              fontWeight: FontWeight.w600,
+            ),
+      );
+    }
+
+    return Text(
+      valueText,
+      style: TextStyle(
+        fontSize: large ? 18 : 16,
+        fontWeight: FontWeight.w700,
+        color: AppColors.cardTitle,
+        letterSpacing: -0.2,
+        height: 1,
+      ),
+    );
+  }
 }
 
 // ─── Avatar Utilisateur ───────────────────────────────────────────────────────

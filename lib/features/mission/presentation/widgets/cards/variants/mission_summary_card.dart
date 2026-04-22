@@ -81,7 +81,7 @@ class MissionSummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                BudgetBadge(budget: mission.budget),
+                BudgetText(budget: mission.budget),
               ],
             ),
             if (showDescription && mission.description.trim().isNotEmpty) ...[

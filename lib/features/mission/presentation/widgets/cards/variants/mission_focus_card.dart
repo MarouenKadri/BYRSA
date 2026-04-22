@@ -147,7 +147,7 @@ class MissionFocusCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      BudgetBadge(budget: mission.budget),
+                      BudgetText(budget: mission.budget),
                     ],
                   ),
                 ),
