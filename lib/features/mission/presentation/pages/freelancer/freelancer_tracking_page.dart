@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -29,16 +29,17 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   late Mission _mission;
 
   // Map
-  final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _mapController;
   bool _following = true;
+  bool _isProgrammaticCameraMove = false;
 
   // GPS
   StreamSubscription<Position>? _positionSub;
-  LatLng? _currentPosition;
+  ll.LatLng? _currentPosition;
   bool _locationError = false;
 
   // Destination
-  LatLng? _destinationLatLng;
+  ll.LatLng? _destinationLatLng;
 
   // ETA / distance
   double? _distanceKm;
@@ -90,7 +91,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
         ),
       );
       if (!mounted) return;
-      _onNewPosition(LatLng(pos.latitude, pos.longitude), moveMap: true);
+      _onNewPosition(ll.LatLng(pos.latitude, pos.longitude), moveMap: true);
     } catch (_) {}
 
     _positionSub = Geolocator.getPositionStream(
@@ -100,20 +101,20 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
       ),
     ).listen((pos) {
       if (!mounted) return;
-      _onNewPosition(LatLng(pos.latitude, pos.longitude));
+      _onNewPosition(ll.LatLng(pos.latitude, pos.longitude));
     });
   }
 
-  void _onNewPosition(LatLng latlng, {bool moveMap = false}) {
+  void _onNewPosition(ll.LatLng latlng, {bool moveMap = false}) {
     setState(() => _currentPosition = latlng);
     if (_following || moveMap) {
-      _mapController.move(latlng, _following ? 15 : _mapController.camera.zoom);
+      _moveCamera(latlng, 15);
     }
     _updateDistanceEta(latlng);
     _broadcastPosition(latlng);
   }
 
-  void _broadcastPosition(LatLng latlng) {
+  void _broadcastPosition(ll.LatLng latlng) {
     // Broadcast temps réel
     _broadcastChannel?.sendBroadcastMessage(
       event: 'position',
@@ -143,9 +144,9 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
 
   // ── ETA & distance ───────────────────────────────────────────
 
-  void _updateDistanceEta(LatLng current) {
+  void _updateDistanceEta(ll.LatLng current) {
     if (_destinationLatLng == null) return;
-    final meters = const Distance()(current, _destinationLatLng!);
+    final meters = const ll.Distance()(current, _destinationLatLng!);
     final km = meters / 1000;
     setState(() {
       _distanceKm = km;
@@ -170,7 +171,23 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   void _recenter() {
     if (_currentPosition == null) return;
     setState(() => _following = true);
-    _mapController.move(_currentPosition!, 15);
+    _moveCamera(_currentPosition!, 15);
+  }
+
+  Future<void> _moveCamera(ll.LatLng target, double zoom) async {
+    final controller = _mapController;
+    if (controller == null) return;
+    _isProgrammaticCameraMove = true;
+    try {
+      await controller.animateCamera(
+        gmaps.CameraUpdate.newLatLngZoom(
+          gmaps.LatLng(target.latitude, target.longitude),
+          zoom,
+        ),
+      );
+    } finally {
+      _isProgrammaticCameraMove = false;
+    }
   }
 
   // ── Statut mission ───────────────────────────────────────────
@@ -258,9 +275,10 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
         children: [
           // ── Carte réelle ───────────────────────────────────
           _RealMap(
-            mapController: _mapController,
             currentPosition: _currentPosition,
             destinationLatLng: _destinationLatLng,
+            isProgrammaticCameraMove: _isProgrammaticCameraMove,
+            onMapCreated: (controller) => _mapController = controller,
             onGesture: () {
               if (_following) setState(() => _following = false);
             },
@@ -458,18 +476,20 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   }
 }
 
-// ─── Carte réelle flutter_map ─────────────────────────────────────────────────
+// ─── Carte réelle Google Maps ────────────────────────────────────────────────
 
 class _RealMap extends StatelessWidget {
-  final MapController mapController;
-  final LatLng? currentPosition;
-  final LatLng? destinationLatLng;
+  final ll.LatLng? currentPosition;
+  final ll.LatLng? destinationLatLng;
+  final bool isProgrammaticCameraMove;
+  final ValueChanged<gmaps.GoogleMapController> onMapCreated;
   final VoidCallback onGesture;
 
   const _RealMap({
-    required this.mapController,
     required this.currentPosition,
     required this.destinationLatLng,
+    required this.isProgrammaticCameraMove,
+    required this.onMapCreated,
     required this.onGesture,
   });
 
@@ -477,94 +497,68 @@ class _RealMap extends StatelessWidget {
   Widget build(BuildContext context) {
     final center = currentPosition ??
         destinationLatLng ??
-        const LatLng(46.6034, 1.8883);
+        const ll.LatLng(46.6034, 1.8883);
 
-    final routePoints = [
-      if (currentPosition != null) currentPosition!,
-      if (destinationLatLng != null) destinationLatLng!,
-    ];
-
-    return FlutterMap(
-      mapController: mapController,
-      options: MapOptions(
-        initialCenter: center,
-        initialZoom: currentPosition != null ? 15 : 12,
-        onMapEvent: (event) {
-          if (event is MapEventMoveStart &&
-              event.source == MapEventSource.dragStart) {
-            onGesture();
-          }
-        },
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: gmaps.LatLng(center.latitude, center.longitude),
+        zoom: currentPosition != null ? 15 : 12,
       ),
-      children: [
-        TileLayer(
-          urlTemplate:
-              'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-          subdomains: const ['a', 'b', 'c', 'd'],
-          userAgentPackageName: 'com.example.inkern',
-        ),
-        if (routePoints.length == 2)
-          PolylineLayer(
-            polylines: [
-              Polyline(
-                points: routePoints,
-                color: AppColors.iosBlue.withValues(alpha: 0.55),
-                strokeWidth: 4,
-              ),
-            ],
-          ),
-        MarkerLayer(
-          markers: [
-            if (destinationLatLng != null)
-              Marker(
-                point: destinationLatLng!,
-                width: 40,
-                height: 52,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.home_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                    Container(width: 2, height: 12, color: AppColors.primary),
-                  ],
-                ),
-              ),
-            if (currentPosition != null)
-              Marker(
-                point: currentPosition!,
-                width: 28,
-                height: 28,
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: AppColors.iosBlue,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.iosBlue.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
+      mapType: gmaps.MapType.normal,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      mapToolbarEnabled: false,
+      compassEnabled: false,
+      onMapCreated: onMapCreated,
+      onCameraMoveStarted: () {
+        if (!isProgrammaticCameraMove) {
+          onGesture();
+        }
+      },
+      polylines: (currentPosition != null && destinationLatLng != null)
+          ? {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('route'),
+                points: [
+                  gmaps.LatLng(
+                    currentPosition!.latitude,
+                    currentPosition!.longitude,
                   ),
-                ),
+                  gmaps.LatLng(
+                    destinationLatLng!.latitude,
+                    destinationLatLng!.longitude,
+                  ),
+                ],
+                color: AppColors.iosBlue.withValues(alpha: 0.70),
+                width: 4,
               ),
-          ],
-        ),
-      ],
+            }
+          : const <gmaps.Polyline>{},
+      markers: {
+        if (destinationLatLng != null)
+          gmaps.Marker(
+            markerId: const gmaps.MarkerId('destination'),
+            position: gmaps.LatLng(
+              destinationLatLng!.latitude,
+              destinationLatLng!.longitude,
+            ),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              gmaps.BitmapDescriptor.hueGreen,
+            ),
+          ),
+        if (currentPosition != null)
+          gmaps.Marker(
+            markerId: const gmaps.MarkerId('current'),
+            position: gmaps.LatLng(
+              currentPosition!.latitude,
+              currentPosition!.longitude,
+            ),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              gmaps.BitmapDescriptor.hueAzure,
+            ),
+          ),
+      },
     );
   }
 }

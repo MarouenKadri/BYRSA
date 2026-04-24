@@ -155,8 +155,6 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                 ),
               ),
               SliverToBoxAdapter(child: _buildHeader()),
-              if (!_isLoading)
-                SliverToBoxAdapter(child: _buildResultsHeader(filtered)),
               if (_isLoading)
                 SliverToBoxAdapter(
                   child: SizedBox(height: 380, child: SkeletonList()),
@@ -396,23 +394,6 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
     );
   }
 
-  Widget _buildResultsHeader(List<Mission> missions) {
-    final count = missions.length;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-      child: Row(
-        children: [
-          Text(
-            '$count mission${count > 1 ? 's' : ''}',
-            style:
-                context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const Spacer(),
-        ],
-      ),
-    );
-  }
 }
 
 // ─── Pill de filtre (bottom sheet) ────────────────────────────────────────────

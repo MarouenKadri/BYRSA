@@ -103,45 +103,73 @@ class _FreelancerMyPublicationsTabState
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _selectionMode
-                      ? '${_selectedIds.length} sélectionné${_selectedIds.length > 1 ? 's' : ''}'
-                      : '${stories.length} publication${stories.length > 1 ? 's' : ''}',
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textPrimary,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compactActions = _selectionMode && constraints.maxWidth < 380;
+
+              final title = Text(
+                _selectionMode
+                    ? '${_selectedIds.length} sélectionné${_selectedIds.length > 1 ? 's' : ''}'
+                    : '${stories.length} publication${stories.length > 1 ? 's' : ''}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
+              );
+
+              final selectionActions = Wrap(
+                spacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed:
+                        allSelected ? _exitSelection : () => _selectAll(stories),
+                    child: Text(allSelected ? 'Désélectionner' : 'Tout'),
                   ),
-                ),
-              ),
-              if (_selectionMode) ...[
-                TextButton(
-                  onPressed:
-                      allSelected ? _exitSelection : () => _selectAll(stories),
-                  child: Text(allSelected ? 'Désélectionner' : 'Tout'),
-                ),
-                AppGap.w8,
-                IconButton(
-                  onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.error,
+                  IconButton(
+                    onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.error,
+                    ),
                   ),
-                ),
-              ] else ...[
-                AppButton(
-                  label: 'Ajouter',
-                  variant: ButtonVariant.secondary,
-                  icon: Icons.add_rounded,
-                  iconTrailing: false,
-                  height: 42,
-                  width: 122,
-                  onPressed: () => pickAndOpenComposer(context),
-                ),
-              ],
-            ],
+                ],
+              );
+
+              if (compactActions) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title,
+                    AppGap.h8,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: selectionActions,
+                    ),
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: title),
+                  if (_selectionMode)
+                    selectionActions
+                  else
+                    AppButton(
+                      label: 'Ajouter',
+                      variant: ButtonVariant.secondary,
+                      icon: Icons.add_rounded,
+                      iconTrailing: false,
+                      height: 42,
+                      width: 122,
+                      onPressed: () => pickAndOpenComposer(context),
+                    ),
+                ],
+              );
+            },
           ),
         ),
         AnimatedSize(
@@ -155,7 +183,8 @@ class _FreelancerMyPublicationsTabState
                     horizontal: 20,
                     vertical: 10,
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
                         onTap:
@@ -197,35 +226,39 @@ class _FreelancerMyPublicationsTabState
                           ],
                         ),
                       ),
-                      const Spacer(),
+                      if (_selectedIds.isNotEmpty) AppGap.h10,
                       if (_selectedIds.isNotEmpty)
-                        GestureDetector(
-                          onTap: _deleteSelected,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 16,
-                                  color: AppColors.error,
-                                ),
-                                AppGap.w6,
-                                Text(
-                                  'Supprimer (${_selectedIds.length})',
-                                  style: context.text.bodySmall?.copyWith(
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: _deleteSelected,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 16,
                                     color: AppColors.error,
-                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                              ],
+                                  AppGap.w6,
+                                  Text(
+                                    'Supprimer (${_selectedIds.length})',
+                                    style: context.text.bodySmall?.copyWith(
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

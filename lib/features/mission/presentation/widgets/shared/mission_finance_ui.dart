@@ -107,7 +107,7 @@ class MissionFinanceUi {
         _ => 0,
       };
       return _FinancePipelineConfig(
-        labels: const ['Paye'],
+        labels: const ['Montant reserve'],
         icons: const [Icons.payments_rounded],
         activeStep: activeStep,
       );
@@ -123,8 +123,8 @@ class MissionFinanceUi {
 
     return _FinancePipelineConfig(
       labels: [
-        'Fonds bloques',
-        'Versement 24h',
+        'Fonds reserves',
+        'Versement',
       ],
       icons: const [
         Icons.lock_rounded,
@@ -167,22 +167,22 @@ class MissionFinanceUi {
 
     return switch (role) {
       MissionUiRole.client => switch (state) {
-        MissionFinanceState.pending => 'Attente paiement',
-        MissionFinanceState.secured => 'Paye',
-        MissionFinanceState.awaitingRelease24h => 'Paye',
-        MissionFinanceState.paidOut => 'Paye',
-        MissionFinanceState.disputeHold => 'Litige',
-        MissionFinanceState.refund100 => 'Remboursement 100%',
-        MissionFinanceState.refund50 => 'Remboursement 50%',
+        MissionFinanceState.pending => 'En attente',
+        MissionFinanceState.secured => 'Montant reserve',
+        MissionFinanceState.awaitingRelease24h => 'Liberation 24h',
+        MissionFinanceState.paidOut => 'Verse',
+        MissionFinanceState.disputeHold => 'Suspendu',
+        MissionFinanceState.refund100 => 'Remboursement',
+        MissionFinanceState.refund50 => 'Remboursement',
       },
       MissionUiRole.freelancer => switch (state) {
-        MissionFinanceState.pending => 'Attente paiement',
-        MissionFinanceState.secured => 'Fonds bloques',
+        MissionFinanceState.pending => 'En attente',
+        MissionFinanceState.secured => 'Fonds reserves',
         MissionFinanceState.awaitingRelease24h => 'Versement 24h',
-        MissionFinanceState.paidOut => 'Recu',
-        MissionFinanceState.disputeHold => 'Litige',
+        MissionFinanceState.paidOut => 'Verse',
+        MissionFinanceState.disputeHold => 'Suspendu',
         MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
-          'Mission annulee',
+          'Annulee',
       },
     };
   }
@@ -193,20 +193,20 @@ class MissionFinanceUi {
   }) {
     return switch (role) {
       MissionUiRole.client => switch (state) {
-        MissionFinanceState.pending => 'Attente paiement',
-        MissionFinanceState.secured => 'Paye',
-        MissionFinanceState.awaitingRelease24h => 'Paye',
-        MissionFinanceState.paidOut => 'Paye',
-        MissionFinanceState.disputeHold => 'Litige',
+        MissionFinanceState.pending => 'Paiement a venir',
+        MissionFinanceState.secured => 'Montant reserve',
+        MissionFinanceState.awaitingRelease24h => 'Liberation programmee',
+        MissionFinanceState.paidOut => 'Paiement libere',
+        MissionFinanceState.disputeHold => 'Paiement suspendu',
         MissionFinanceState.refund100 => 'Remboursement integral',
         MissionFinanceState.refund50 => 'Remboursement partiel',
       },
       MissionUiRole.freelancer => switch (state) {
-        MissionFinanceState.pending => 'Attente paiement',
-        MissionFinanceState.secured => 'Fonds bloques',
-        MissionFinanceState.awaitingRelease24h => 'Versement 24h',
-        MissionFinanceState.paidOut => 'Recu',
-        MissionFinanceState.disputeHold => 'Litige',
+        MissionFinanceState.pending => 'Paiement en attente',
+        MissionFinanceState.secured => 'Fonds reserves',
+        MissionFinanceState.awaitingRelease24h => 'Versement programme',
+        MissionFinanceState.paidOut => 'Versement effectue',
+        MissionFinanceState.disputeHold => 'Versement suspendu',
         MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
           'Mission annulee',
       },
@@ -284,6 +284,57 @@ class MissionFinanceUi {
     return 'Montant a recevoir: ${_euro(freelancerPayout)}';
   }
 
+  static IconData amountIcon({
+    required MissionFinanceState state,
+    required MissionUiRole role,
+  }) {
+    if (role == MissionUiRole.client) {
+      return switch (state) {
+        MissionFinanceState.pending => Icons.payments_outlined,
+        MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
+          Icons.replay_rounded,
+        MissionFinanceState.disputeHold => Icons.pause_circle_outline_rounded,
+        _ => Icons.payments_rounded,
+      };
+    }
+
+    return switch (state) {
+      MissionFinanceState.pending => Icons.wallet_outlined,
+      MissionFinanceState.paidOut => Icons.account_balance_wallet_rounded,
+      MissionFinanceState.disputeHold => Icons.pause_circle_outline_rounded,
+      MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
+        Icons.money_off_csred_rounded,
+      _ => Icons.savings_rounded,
+    };
+  }
+
+  static ({String reserved, String paid}) amountPills({
+    required Mission mission,
+    required MissionFinanceState state,
+    required MissionUiRole role,
+  }) {
+    final total = mission.budget.averageAmount;
+    final freelancerPayout = total * 0.9;
+    final base = role == MissionUiRole.client ? total : freelancerPayout;
+
+    final reserved = switch (state) {
+      MissionFinanceState.secured ||
+      MissionFinanceState.awaitingRelease24h ||
+      MissionFinanceState.disputeHold => base,
+      _ => 0.0,
+    };
+
+    final paid = switch (state) {
+      MissionFinanceState.paidOut => base,
+      _ => 0.0,
+    };
+
+    return (
+      reserved: _euro(reserved),
+      paid: _euro(paid),
+    );
+  }
+
   static String _euro(double value) {
     final rounded = value.roundToDouble();
     if (rounded == value) return '${rounded.toInt()} €';
@@ -353,240 +404,106 @@ class MissionFinanceExposureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = MissionFinanceUi.resolveState(mission);
     final accent = MissionFinanceUi.accentColor(context, state);
-    final statusLabel = MissionFinanceUi.outsideLabel(mission: mission, role: role);
-    final pipeline = MissionFinanceUi.pipeline(state: state, role: role);
-    final stepIndex = pipeline.activeStep;
-    final labels = pipeline.labels;
-    final icons = pipeline.icons;
-    final allStepsDone = stepIndex >= labels.length;
-    final highlightedLabelIndex = allStepsDone
-        ? labels.length - 1
-        : stepIndex;
-    final hasHighlightedLabel = highlightedLabelIndex >= 0;
-    final title = MissionFinanceUi.detailTitle(state: state, role: role);
-    final subtitle = MissionFinanceUi.detailSubtitle(state: state, role: role);
-    final amountLine = MissionFinanceUi.amountLine(
+    final amountPills = MissionFinanceUi.amountPills(
       mission: mission,
       state: state,
       role: role,
     );
+    final reservedActive = state == MissionFinanceState.secured ||
+        state == MissionFinanceState.awaitingRelease24h ||
+        state == MissionFinanceState.disputeHold;
+    final paidActive = state == MissionFinanceState.paidOut;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  MissionFinanceUi.stateIcon(state),
-                  size: 13,
-                  color: accent,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Suivi paiement',
-                  style: context.text.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textPrimary,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: accent.withValues(alpha: 0.24)),
-                ),
-                child: Text(
-                  statusLabel,
-                  style: context.text.labelSmall?.copyWith(
-                    color: accent,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildPipelineTrack(
-            labels: labels,
-            icons: icons,
-            activeStep: stepIndex,
-            accent: accent,
-          ),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              for (int i = 0; i < labels.length; i++)
-                Expanded(
-                  child: Text(
-                    labels[i],
-                    textAlign: TextAlign.center,
-                    style: context.text.labelSmall?.copyWith(
-                      fontSize: AppFontSize.tinyHalf,
-                      fontWeight: hasHighlightedLabel && i == highlightedLabelIndex
-                          ? FontWeight.w700
-                          : FontWeight.w600,
-                      color: hasHighlightedLabel && i <= highlightedLabelIndex
-                          ? context.colors.textPrimary
-                          : context.colors.textTertiary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: context.text.labelMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: accent,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: context.text.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            amountLine,
-            style: context.text.labelMedium?.copyWith(
-              color: context.colors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPipelineTrack({
-    required List<String> labels,
-    required List<IconData> icons,
-    required int activeStep,
-    required Color accent,
-  }) {
-    if (labels.length <= 1) {
-      return Center(
-        child: _FinanceStepNode(
-          index: 0,
-          icon: icons.isNotEmpty ? icons.first : Icons.payments_rounded,
-          activeStep: activeStep,
-          accent: accent,
-        ),
-      );
-    }
-
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (int i = 0; i < labels.length; i++) ...[
-          _FinanceStepNode(
-            index: i,
-            icon: i < icons.length ? icons[i] : Icons.circle_rounded,
-            activeStep: activeStep,
-            accent: accent,
+        Text(
+          'Suivi paiement',
+          style: context.text.labelMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: context.colors.textPrimary,
+            letterSpacing: 0.1,
           ),
-          if (i < labels.length - 1)
-            _FinanceLine(done: i < activeStep, accent: accent),
-        ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _FinanceAmountPill(
+                label: 'Réservé',
+                value: amountPills.reserved,
+                active: reservedActive,
+                accent: accent,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _FinanceAmountPill(
+                label: 'Versé',
+                value: amountPills.paid,
+                active: paidActive,
+                accent: accent,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 }
 
-class _FinanceStepNode extends StatelessWidget {
-  final int index;
-  final IconData icon;
-  final int activeStep;
+class _FinanceAmountPill extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool active;
   final Color accent;
 
-  const _FinanceStepNode({
-    required this.index,
-    required this.icon,
-    required this.activeStep,
+  const _FinanceAmountPill({
+    required this.label,
+    required this.value,
+    required this.active,
     required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final done = index < activeStep;
-    final active = index == activeStep;
-
-    if (done) {
-      return Container(
-        width: 18,
-        height: 18,
-        decoration: BoxDecoration(
-          color: accent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 11, color: Colors.white),
-      );
-    }
-
-    if (active) {
-      return Container(
-        width: 18,
-        height: 18,
-        decoration: BoxDecoration(
-          color: accent.withValues(alpha: 0.18),
-          shape: BoxShape.circle,
-          border: Border.all(color: accent, width: 1.1),
-        ),
-        child: Icon(icon, size: 11, color: accent),
-      );
-    }
+    final background = active
+        ? accent.withValues(alpha: 0.16)
+        : context.colors.surface;
+    final borderColor = active
+        ? accent.withValues(alpha: 0.34)
+        : context.colors.border.withValues(alpha: 0.65);
+    final labelColor = active ? accent : context.colors.textTertiary;
+    final valueColor = active
+        ? context.colors.textPrimary
+        : context.colors.textSecondary;
 
     return Container(
-      width: 18,
-      height: 18,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        color: Colors.transparent,
-        shape: BoxShape.circle,
-        border: Border.all(color: context.colors.border, width: 1.1),
+        color: background,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor),
       ),
-      child: Icon(icon, size: 11, color: context.colors.textHint),
-    );
-  }
-}
-
-class _FinanceLine extends StatelessWidget {
-  final bool done;
-  final Color accent;
-
-  const _FinanceLine({required this.done, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 1.6,
-        margin: const EdgeInsets.symmetric(horizontal: 5),
-        decoration: BoxDecoration(
-          color: done ? accent.withValues(alpha: 0.72) : context.colors.border,
-          borderRadius: BorderRadius.circular(99),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: context.text.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: labelColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: context.text.labelLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+            ),
+          ),
+        ],
       ),
     );
   }

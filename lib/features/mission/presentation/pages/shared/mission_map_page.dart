@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart' as ll;
 
 import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission_address.dart';
@@ -21,10 +21,10 @@ class MissionMapPage extends StatefulWidget {
 }
 
 class _MissionMapPageState extends State<MissionMapPage> {
-  final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _mapController;
 
-  LatLng _center = const LatLng(48.8566, 2.3522);
-  LatLng? _pinLatLng;
+  ll.LatLng _center = const ll.LatLng(48.8566, 2.3522);
+  ll.LatLng? _pinLatLng;
   bool _loading = false;
   bool _sheetVisible = false;
 
@@ -32,7 +32,7 @@ class _MissionMapPageState extends State<MissionMapPage> {
   void initState() {
     super.initState();
     if (widget.address.latitude != null && widget.address.longitude != null) {
-      _pinLatLng = LatLng(widget.address.latitude!, widget.address.longitude!);
+      _pinLatLng = ll.LatLng(widget.address.latitude!, widget.address.longitude!);
       _center = _pinLatLng!;
     } else {
       _geocode();
@@ -51,7 +51,12 @@ class _MissionMapPageState extends State<MissionMapPage> {
         _pinLatLng = place.latLng;
         _center = place.latLng;
       });
-      _mapController.move(_center, 15.4);
+      await _mapController?.animateCamera(
+        gmaps.CameraUpdate.newLatLngZoom(
+          gmaps.LatLng(_center.latitude, _center.longitude),
+          14.2,
+        ),
+      );
     } catch (_) {
       // silencieux
     } finally {
@@ -62,7 +67,12 @@ class _MissionMapPageState extends State<MissionMapPage> {
 
   Future<void> _focusMap() async {
     final target = _pinLatLng ?? _center;
-    _mapController.move(target, 16.8);
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(
+        gmaps.LatLng(target.latitude, target.longitude),
+        15.6,
+      ),
+    );
     await Future.delayed(const Duration(milliseconds: 170));
     if (!mounted) return;
     setState(() => _sheetVisible = true);
@@ -70,7 +80,6 @@ class _MissionMapPageState extends State<MissionMapPage> {
 
   @override
   void dispose() {
-    _mapController.dispose();
     super.dispose();
   }
 
@@ -83,31 +92,30 @@ class _MissionMapPageState extends State<MissionMapPage> {
       body: Stack(
         children: [
           // ── Carte plein écran ──────────────────────────────────────────
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _center,
-              initialZoom: 15.2,
-              onTap: (_, __) => _focusMap(),
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: gmaps.LatLng(_center.latitude, _center.longitude),
+              zoom: 14.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-                subdomains: const ['a', 'b', 'c', 'd'],
-                userAgentPackageName: 'com.example.homservice',
-              ),
-              if (_pinLatLng != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _pinLatLng!,
-                      width: 48,
-                      height: 56,
-                      child: const _MapPin(),
+            mapType: gmaps.MapType.normal,
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: false,
+            compassEnabled: false,
+            onMapCreated: (controller) => _mapController = controller,
+            onTap: (_) => _focusMap(),
+            markers: _pinLatLng == null
+                ? const <gmaps.Marker>{}
+                : {
+                    gmaps.Marker(
+                      markerId: const gmaps.MarkerId('mission'),
+                      position: gmaps.LatLng(
+                        _pinLatLng!.latitude,
+                        _pinLatLng!.longitude,
+                      ),
                     ),
-                  ],
-                ),
-            ],
+                  },
           ),
 
           // ── Loader géocodage ──────────────────────────────────────────
@@ -173,59 +181,6 @@ class _MissionMapPageState extends State<MissionMapPage> {
       ),
     );
   }
-}
-
-// ── Pin ────────────────────────────────────────────────────────────────────
-
-class _MapPin extends StatelessWidget {
-  const _MapPin();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: AppColors.mapPin,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.mapPin.withValues(alpha: 0.14),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
-        ),
-        CustomPaint(
-          size: const Size(12, 10),
-          painter: _PinTailPainter(),
-        ),
-      ],
-    );
-  }
-}
-
-class _PinTailPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.mapPin
-      ..style = PaintingStyle.fill;
-    final path = ui.Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..lineTo(size.width, 0)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
 }
 
 // ── Carte adresse ──────────────────────────────────────────────────────────

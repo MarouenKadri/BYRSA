@@ -15,10 +15,10 @@
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
 
-        <!-- ✅ CLÉ GOOGLE MAPS (mets ta clé API ici) -->
+        <!-- ✅ CLÉ GOOGLE MAPS -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="TA_CLE_API_GOOGLE_MAPS_ICI" />
+            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
 
         <activity
             android:name=".MainActivity"

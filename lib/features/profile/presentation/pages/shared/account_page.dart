@@ -342,20 +342,21 @@ class _ProfileHeader extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: 14),
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: context.colors.border, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(15, 23, 42, 0.04),
-            blurRadius: 18,
-            offset: Offset(0, 10),
+            color: const Color.fromRGBO(15, 23, 42, 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: isUploading ? null : () => _pickAvatar(context, profileProv),
@@ -363,8 +364,8 @@ class _ProfileHeader extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 82,
-                  height: 82,
+                  width: 76,
+                  height: 76,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.surfaceAlt,
@@ -374,7 +375,7 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                   ),
                   child: CircleAvatar(
-                    radius: 39,
+                    radius: 36,
                     backgroundColor: Colors.transparent,
                     backgroundImage: avatarUrl != null
                         ? NetworkImage(avatarUrl)
@@ -385,7 +386,7 @@ class _ProfileHeader extends StatelessWidget {
                                 ? displayName[0].toUpperCase()
                                 : '?',
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 26,
                               fontWeight: FontWeight.w700,
                               color: context.colors.textSecondary,
                             ),
@@ -414,22 +415,20 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 if (isVerified && !isUploading)
                   Positioned(
-                    top: -2,
                     right: -2,
+                    bottom: -2,
                     child: Container(
-                      padding: const EdgeInsets.all(4),
+                      width: 22,
+                      height: 22,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: context.colors.border,
-                          width: 1,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.verified_rounded,
-                        size: 16,
                         color: context.colors.success,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: context.colors.surface, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 13,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -440,39 +439,44 @@ class _ProfileHeader extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFontSize.h2,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.4,
+                    letterSpacing: -0.5,
                     color: context.colors.textPrimary,
                   ),
                 ),
-                AppGap.h6,
+                AppGap.h4,
                 Text(
-                  isFreelancerMode ? 'Mode Freelancer' : 'Mode Client',
+                  isFreelancerMode ? 'Freelancer' : 'Client',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFontSize.md,
                     fontWeight: FontWeight.w500,
-                    color: isFreelancerMode
-                        ? context.colors.success
-                        : context.colors.textPrimary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 AppGap.h12,
-                TextButton.icon(
+                TextButton(
                   onPressed: isUploading
                       ? null
                       : () => _pickAvatar(context, profileProv),
                   style: TextButton.styleFrom(
-                    foregroundColor: context.colors.textSecondary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    foregroundColor: context.colors.textPrimary,
                     backgroundColor: context.colors.surfaceAlt,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                       side: BorderSide(
@@ -481,13 +485,24 @@ class _ProfileHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  icon: Icon(Icons.edit_outlined, size: 16),
-                  label: Text(
-                    'Modifier',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Modifier le profil',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textPrimary,
+                        ),
+                      ),
+                      AppGap.w8,
+                      Icon(
+                        Icons.arrow_outward_rounded,
+                        size: 15,
+                        color: context.colors.textSecondary,
+                      ),
+                    ],
                   ),
                 ),
               ],

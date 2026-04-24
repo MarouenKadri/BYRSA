@@ -45,6 +45,8 @@
 	<string>Inkern utilise votre position pour vous montrer les prestataires à proximité.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Inkern utilise votre position pour vous montrer les prestataires à proximité.</string>
+	<key>GoogleMapsAPIKey</key>
+	<string>YOUR_GOOGLE_MAPS_API_KEY</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

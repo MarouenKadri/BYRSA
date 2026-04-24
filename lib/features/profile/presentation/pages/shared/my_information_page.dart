@@ -32,6 +32,8 @@ class _MyInformationPageState extends State<MyInformationPage> {
         titleWidget: Text(
           'Mes informations',
           style: context.profilePageTitleStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       bottomNavigationBar: _buildBottomAction(context),

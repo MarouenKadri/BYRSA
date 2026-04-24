@@ -4,6 +4,7 @@ import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../../../../freelancer/presentation/pages/client_profile_view.dart';
+import 'mission_detail_primitives.dart';
 
 // ─── FreelancerClientCard ─────────────────────────────────────────────────────
 
@@ -21,134 +22,144 @@ class FreelancerClientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: AppInsets.h16,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 24,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Titre style C ──
-            Row(
-              children: [
-                Text(
-                  'PUBLIÉ PAR',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textTertiary,
-                    letterSpacing: 1.2,
+    return DetailSectionCard(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const DetailSectionTitle(title: 'Publié par'),
+          AppGap.h16,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ClientProfileView(
+                      clientId: client.id,
+                      clientName: client.name,
+                      clientAvatar: client.avatarUrl,
+                      rating: client.rating,
+                      missionsCount: client.missionsCount,
+                    ),
                   ),
                 ),
-                AppGap.w10,
-                Expanded(
-                  child: Divider(color: context.colors.border, thickness: 1),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.colors.border, width: 1.5),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: client.avatarUrl.isNotEmpty
+                      ? Image.network(
+                          client.avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _ClientAvatarFallback(name: client.name),
+                        )
+                      : _ClientAvatarFallback(name: client.name),
                 ),
-              ],
-            ),
-            AppGap.h16,
-            // ── Avatar + nom + boutons ──
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ClientProfileView(
-                        clientId: client.id,
-                        clientName: client.name,
-                        clientAvatar: client.avatarUrl,
-                        rating: client.rating,
-                        missionsCount: client.missionsCount,
+              ),
+              AppGap.w10,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            client.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        if (client.isVerified) ...[
+                          AppGap.w8,
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: context.colors.surfaceAlt,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: context.colors.border),
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              size: 13,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    AppGap.h4,
+                    Text(
+                      'Client',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.textSecondary,
                       ),
                     ),
-                  ),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: context.colors.border, width: 1.5),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: client.avatarUrl.isNotEmpty
-                        ? Image.network(
-                            client.avatarUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                _ClientAvatarFallback(name: client.name),
-                          )
-                        : _ClientAvatarFallback(name: client.name),
-                  ),
-                ),
-                AppGap.w10,
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          client.name,
-                          overflow: TextOverflow.ellipsis,
+                    AppGap.h6,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: AppColors.rating,
+                        ),
+                        AppGap.w4,
+                        Text(
+                          client.rating.toStringAsFixed(1),
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.ink,
                           ),
                         ),
-                      ),
-                      if (client.isVerified) ...[
-                        AppGap.w4,
-                        Icon(Icons.verified_rounded, size: 14, color: AppColors.ink),
                       ],
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AppGap.h18,
+          Row(
+            children: [
+              if (onPhone != null)
+                Expanded(
+                  child: DetailSecondaryButton(
+                    label: 'Appeler',
+                    onTap: onPhone,
+                    icon: Icons.phone_rounded,
                   ),
                 ),
-                if (onPhone != null)
-                  OutlinedButton(
-                    onPressed: onPhone,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.ink,
-                      side: BorderSide(color: context.colors.border),
-                      minimumSize: const Size(42, 38),
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    child: const Icon(Icons.phone_rounded, size: 17),
+              if (onPhone != null && onChat != null) AppGap.w10,
+              if (onChat != null)
+                Expanded(
+                  child: DetailTealButton(
+                    label: 'Message',
+                    onTap: onChat,
+                    icon: Icons.chat_bubble_rounded,
                   ),
-                if (onPhone != null && onChat != null) AppGap.w8,
-                if (onChat != null)
-                  ElevatedButton(
-                    onPressed: onChat,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: AppColors.ink,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(42, 38),
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    child: const Icon(Icons.chat_bubble_rounded, size: 17),
-                  ),
-              ],
-            ),
-          ],
-        ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -201,112 +212,77 @@ class FreelancerLocationShareCard extends StatelessWidget {
         ),
     };
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: context.colors.border, width: 0.8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 24,
-              offset: Offset(0, 10),
+    return DetailSectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DetailSectionTitle(
+            title: 'Suivi mission',
+            trailing: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: config.accent.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(config.icon, size: 20, color: config.accent),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          ),
+          AppGap.h8,
+          Text(
+            config.title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+          AppGap.h14,
+          Text(
+            config.subtitle,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: context.colors.textSecondary,
+            ),
+          ),
+          AppGap.h16,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: context.colors.surfaceAlt,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: config.accent.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(config.icon, size: 20, color: config.accent),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: config.accent,
                 ),
-                AppGap.w12,
+                AppGap.w8,
                 Expanded(
                   child: Text(
-                    config.title,
+                    'Le partage live doit etre active depuis le pilotage de mission.',
                     style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
+                      fontSize: AppFontSize.smHalf,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.textSecondary,
+                      height: 1.35,
                     ),
                   ),
                 ),
               ],
             ),
-            AppGap.h14,
-            Text(
-              config.subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                height: 1.45,
-                color: context.colors.textSecondary,
-              ),
-            ),
-            AppGap.h16,
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: context.colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 16,
-                    color: config.accent,
-                  ),
-                  AppGap.w8,
-                  Expanded(
-                    child: Text(
-                      'Le partage live doit etre active depuis le pilotage de mission.',
-                      style: TextStyle(
-                        fontSize: AppFontSize.smHalf,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            AppGap.h16,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onOpenMissionPilot,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  textStyle: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text(config.cta),
-              ),
-            ),
-          ],
-        ),
+          ),
+          AppGap.h16,
+          DetailTealButton(
+            label: config.cta,
+            onTap: onOpenMissionPilot,
+          ),
+        ],
       ),
     );
   }

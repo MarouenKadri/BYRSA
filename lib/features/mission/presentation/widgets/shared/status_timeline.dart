@@ -9,18 +9,12 @@ import '../../../data/models/mission.dart';
 
 const _kTeal = AppColors.primary;
 
-const _kTimelineSteps = [
-  MissionStatus.waitingCandidates,
-  MissionStatus.candidateReceived,
-  MissionStatus.prestaChosen,
-  MissionStatus.confirmed,
-  MissionStatus.onTheWay,
-  MissionStatus.inProgress,
-  MissionStatus.completionRequested,
-  MissionStatus.completed,
-  MissionStatus.paymentHeld,
-  MissionStatus.awaitingRelease,
-  MissionStatus.closed,
+const _kTimelineLabels = [
+  'Mission',
+  'Confirmée',
+  'En route',
+  'En cours',
+  'Fin',
 ];
 
 const _kSpecialStatuses = {
@@ -80,39 +74,69 @@ class _TimelineTrack extends StatelessWidget {
   const _TimelineTrack({required this.currentStatus});
 
   int get _currentIndex {
-    final idx = _kTimelineSteps.indexOf(currentStatus);
-    return idx == -1 ? 0 : idx;
+    return switch (currentStatus) {
+      MissionStatus.waitingCandidates ||
+      MissionStatus.candidateReceived ||
+      MissionStatus.prestaChosen => 0,
+      MissionStatus.confirmed => 1,
+      MissionStatus.onTheWay => 2,
+      MissionStatus.inProgress => 3,
+      MissionStatus.completionRequested ||
+      MissionStatus.completed ||
+      MissionStatus.paymentHeld ||
+      MissionStatus.awaitingRelease ||
+      MissionStatus.closed => 4,
+      _ => 0,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final currentIdx = _currentIndex;
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppDesign.radius14),
-        border: Border.all(color: context.colors.divider),
-      ),
-      padding: AppInsets.v14,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: AppInsets.h16,
-        child: Row(
-          children: List.generate(_kTimelineSteps.length * 2 - 1, (i) {
-            if (i.isOdd) {
-              final stepIndex = i ~/ 2;
-              final isDone = stepIndex < currentIdx;
-              return _Connector(done: isDone);
-            }
-            final stepIndex = i ~/ 2;
-            return _TimelineStep(
-              status: _kTimelineSteps[stepIndex],
-              isDone: stepIndex < currentIdx,
-              isCurrent: stepIndex == currentIdx,
-            );
-          }),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Progression',
+              style: context.text.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.colors.textPrimary,
+                letterSpacing: 0.1,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              _kTimelineLabels[currentIdx],
+              style: context.text.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
         ),
-      ),
+        AppGap.h12,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.zero,
+          child: Row(
+            children: List.generate(_kTimelineLabels.length * 2 - 1, (i) {
+              if (i.isOdd) {
+                final stepIndex = i ~/ 2;
+                final isDone = stepIndex < currentIdx;
+                return _Connector(done: isDone);
+              }
+              final stepIndex = i ~/ 2;
+              return _TimelineStep(
+                label: _kTimelineLabels[stepIndex],
+                isDone: stepIndex < currentIdx,
+                isCurrent: stepIndex == currentIdx,
+              );
+            }),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -120,10 +144,14 @@ class _TimelineTrack extends StatelessWidget {
 // ─── Étape individuelle ───────────────────────────────────────────────────────
 
 class _TimelineStep extends StatefulWidget {
-  final MissionStatus status;
+  final String label;
   final bool isDone;
   final bool isCurrent;
-  const _TimelineStep({required this.status, required this.isDone, required this.isCurrent});
+  const _TimelineStep({
+    required this.label,
+    required this.isDone,
+    required this.isCurrent,
+  });
 
   @override
   State<_TimelineStep> createState() => _TimelineStepState();
@@ -171,16 +199,22 @@ class _TimelineStepState extends State<_TimelineStep> with SingleTickerProviderS
             : _buildCircle(),
         AppGap.h6,
         SizedBox(
-          width: 52,
+          width: 64,
           child: Text(
-            _shortLabel(widget.status),
+            widget.label,
             style: context.text.labelSmall?.copyWith(
-              fontSize: AppFontSize.micro,
-              fontWeight: widget.isCurrent ? FontWeight.w700 : null,
-              color: widget.isCurrent ? _kTeal : widget.isDone ? Colors.white60 : null,
+              fontSize: 10.5,
+              fontWeight: widget.isCurrent || widget.isDone
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: widget.isCurrent
+                  ? context.colors.textPrimary
+                  : widget.isDone
+                      ? context.colors.textSecondary
+                      : context.colors.textTertiary,
             ),
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -191,44 +225,43 @@ class _TimelineStepState extends State<_TimelineStep> with SingleTickerProviderS
   Widget _buildCircle() {
     if (widget.isDone) {
       return Container(
-        width: 30, height: 30,
-        decoration: BoxDecoration(color: _kTeal.withValues(alpha: 0.15), shape: BoxShape.circle,
-            border: Border.all(color: _kTeal, width: 1.5)),
-        child: const Icon(Icons.check_rounded, color: _kTeal, size: 16),
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(
+          color: _kTeal,
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.check_rounded, color: Colors.white, size: 9),
       );
     }
     if (widget.isCurrent) {
       return Container(
-        width: 30, height: 30,
-        decoration: const BoxDecoration(color: _kTeal, shape: BoxShape.circle),
-        child: Icon(widget.status.icon, color: Colors.black, size: 15),
+        width: 16,
+        height: 16,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          shape: BoxShape.circle,
+          border: Border.all(color: _kTeal.withValues(alpha: 0.32)),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _kTeal,
+            shape: BoxShape.circle,
+          ),
+        ),
       );
     }
     return Container(
-      width: 30, height: 30,
+      width: 14,
+      height: 14,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: context.colors.background,
-        border: Border.all(color: context.colors.divider, width: 1.5),
+        color: context.colors.surface,
+        border: Border.all(color: context.colors.divider, width: 1.4),
       ),
-      child: Icon(widget.status.icon, color: context.colors.textTertiary, size: 14),
     );
   }
-
-  String _shortLabel(MissionStatus s) => switch (s) {
-    MissionStatus.waitingCandidates => 'Publiée',
-    MissionStatus.candidateReceived => 'Candidats',
-    MissionStatus.prestaChosen      => 'Sélection',
-    MissionStatus.confirmed         => 'Confirmée',
-    MissionStatus.onTheWay          => 'En route',
-    MissionStatus.inProgress        => 'En cours',
-    MissionStatus.completionRequested => 'Validation',
-    MissionStatus.completed         => 'Terminée',
-    MissionStatus.paymentHeld       => 'Sécurisé',
-    MissionStatus.awaitingRelease   => 'Sous 24h',
-    MissionStatus.closed            => 'Payée',
-    _                               => s.label,
-  };
 }
 
 // ─── Connecteur horizontal ────────────────────────────────────────────────────
@@ -240,7 +273,8 @@ class _Connector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 24, height: 1.5,
+      width: 28,
+      height: 1.5,
       margin: const EdgeInsets.only(bottom: 22),
       decoration: BoxDecoration(
         color: done ? _kTeal : context.colors.divider,

@@ -51,33 +51,38 @@ class AppButton extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null && !iconTrailing) ...[
-                Icon(icon, size: 20),
-                AppGap.w8,
-              ],
-              Text(
-                label,
-                style: context.text.titleSmall?.copyWith(
-                  fontSize: AppFontSize.lg,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.1,
-                  color: switch (variant) {
-                    ButtonVariant.primary || ButtonVariant.destructive || ButtonVariant.black => Colors.white,
-                    ButtonVariant.secondary => context.colors.textPrimary,
-                    ButtonVariant.outline => AppColors.primary,
-                    ButtonVariant.ghost => context.colors.textSecondary,
-                  },
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null && !iconTrailing) ...[
+                  Icon(icon, size: 20),
+                  AppGap.w8,
+                ],
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.titleSmall?.copyWith(
+                    fontSize: AppFontSize.lg,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.1,
+                    color: switch (variant) {
+                      ButtonVariant.primary || ButtonVariant.destructive || ButtonVariant.black => Colors.white,
+                      ButtonVariant.secondary => context.colors.textPrimary,
+                      ButtonVariant.outline => AppColors.primary,
+                      ButtonVariant.ghost => context.colors.textSecondary,
+                    },
+                  ),
                 ),
-              ),
-              if (icon != null && iconTrailing) ...[
-                AppGap.w8,
-                Icon(icon, size: 20),
+                if (icon != null && iconTrailing) ...[
+                  AppGap.w8,
+                  Icon(icon, size: 20),
+                ],
               ],
-            ],
+            ),
           );
 
     switch (variant) {

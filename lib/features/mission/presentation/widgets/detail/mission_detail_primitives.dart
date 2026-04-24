@@ -23,7 +23,7 @@ class StatusBannerConfig {
     required this.title,
     required this.subtitle,
     this.pulse = false,
-    this.style = DetailBannerStyle.colored,
+    this.style = DetailBannerStyle.card,
   });
 }
 
@@ -117,6 +117,101 @@ class DetailLuxuryPill extends StatelessWidget {
       ),
     ),
   );
+}
+
+// ─── DetailSectionCard / Title / Label ───────────────────────────────────────
+
+class DetailSectionCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+  final bool showBorder;
+
+  const DetailSectionCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(20),
+    this.margin = const EdgeInsets.fromLTRB(16, 0, 16, 16),
+    this.showBorder = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: showBorder
+            ? Border.all(color: context.colors.border, width: 0.8)
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class DetailSectionTitle extends StatelessWidget {
+  final String title;
+  final Widget? trailing;
+
+  const DetailSectionTitle({
+    super.key,
+    required this.title,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final titleText = Text(
+      title,
+      style: TextStyle(
+        fontSize: 19,
+        fontWeight: FontWeight.w700,
+        color: context.colors.textPrimary,
+      ),
+    );
+
+    if (trailing == null) return titleText;
+
+    return Row(
+      children: [
+        Expanded(child: titleText),
+        AppGap.w12,
+        trailing!,
+      ],
+    );
+  }
+}
+
+class DetailSectionLabel extends StatelessWidget {
+  final String label;
+
+  const DetailSectionLabel({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: context.colors.textTertiary,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
 }
 
 // ─── DetailInlineDivider ──────────────────────────────────────────────────────
@@ -281,6 +376,60 @@ class DetailTealButton extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: onTap != null ? fg : context.colors.textHint,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailSecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final IconData? icon;
+
+  const DetailSecondaryButton({
+    super.key,
+    required this.label,
+    this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: context.colors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 18,
+                color: onTap != null
+                    ? context.colors.textPrimary
+                    : context.colors.textHint,
+              ),
+              AppGap.w8,
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: onTap != null
+                    ? context.colors.textPrimary
+                    : context.colors.textHint,
               ),
             ),
           ],

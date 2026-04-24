@@ -90,7 +90,12 @@ class _FreelancerActivityPageState extends State<FreelancerActivityPage> {
       backgroundColor: context.colors.background,
       appBar: AppPageAppBar(
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
-        titleWidget: Text(_tabTitle, style: context.profilePageTitleStyle),
+        titleWidget: Text(
+          _tabTitle,
+          style: context.profilePageTitleStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       bottomNavigationBar: _selectedTabIndex == 0
           ? AppActionFooter(

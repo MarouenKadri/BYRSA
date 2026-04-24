@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
+import 'mission_detail_primitives.dart';
 
 // ─── ClientCandidatesCard ─────────────────────────────────────────────────────
 
@@ -19,32 +20,11 @@ class ClientCandidatesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.colors.border, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
+    return DetailSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Candidatures',
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
-            ),
-          ),
+          const DetailSectionTitle(title: 'Candidatures'),
           AppGap.h16,
           Row(
             children: [
@@ -94,27 +74,9 @@ class ClientCandidatesCard extends StatelessWidget {
             ],
           ),
           AppGap.h18,
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: count > 0 ? onViewCandidates : null,
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: Colors.black,
-                disabledBackgroundColor:
-                    Colors.black.withValues(alpha: 0.12),
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(54),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                textStyle: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              child: const Text('Voir les candidatures'),
-            ),
+          DetailTealButton(
+            label: 'Voir les candidatures',
+            onTap: count > 0 ? onViewCandidates : null,
           ),
         ],
       ),
@@ -145,79 +107,68 @@ class ClientPrestaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final agreedPrice = presta.acceptedPrice ?? '100 €';
+    final ratingValue = rating ?? presta.rating;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+    return DetailSectionCard(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'PRESTATAIRE CHOISI',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textTertiary,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              AppGap.w10,
-              Expanded(
-                child: Divider(color: context.colors.border, thickness: 1),
-              ),
-              AppGap.w10,
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.inkDark,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.13),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  agreedPrice,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.4,
-                    height: 1,
+          DetailSectionTitle(
+            title: 'Prestataire choisi',
+            trailing: Container(
+              padding: const EdgeInsets.fromLTRB(12, 9, 12, 10),
+              decoration: BoxDecoration(
+                color: AppColors.inkDark,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.13),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                ),
+                ],
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Convenu',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.72),
+                      height: 1,
+                    ),
+                  ),
+                  AppGap.h4,
+                  Text(
+                    agreedPrice,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -0.4,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           AppGap.h16,
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Avatar ──
               GestureDetector(
                 onTap: onViewProfile,
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: context.colors.border, width: 1.5),
+                    border: Border.all(color: context.colors.border, width: 1.6),
                   ),
                   clipBehavior: Clip.hardEdge,
                   child: presta.avatarUrl.isNotEmpty
@@ -230,48 +181,99 @@ class ClientPrestaCard extends StatelessWidget {
                       : _PrestaAvatarFallback(name: presta.name),
                 ),
               ),
-              AppGap.w10,
-              // ── Nom ──
+              AppGap.w12,
               Expanded(
-                child: Text(
-                  presta.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            presta.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        if (presta.isVerified) ...[
+                          AppGap.w8,
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: context.colors.surfaceAlt,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: context.colors.border),
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              size: 13,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    AppGap.h4,
+                    Text(
+                      'Prestataire confirmé',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                    AppGap.h6,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: AppColors.rating,
+                        ),
+                        AppGap.w4,
+                        Text(
+                          ratingValue.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              // ── Boutons ──
+            ],
+          ),
+          AppGap.h18,
+          Row(
+            children: [
               if (onPhone != null)
-                OutlinedButton(
-                  onPressed: onPhone,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
-                    side: BorderSide(color: context.colors.border),
-                    minimumSize: const Size(42, 38),
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                Expanded(
+                  child: DetailSecondaryButton(
+                    label: 'Appeler',
+                    onTap: onPhone,
+                    icon: Icons.phone_rounded,
                   ),
-                  child: const Icon(Icons.phone_rounded, size: 17),
                 ),
-              if (onPhone != null && onChat != null) AppGap.w8,
+              if (onPhone != null && onChat != null) AppGap.w10,
               if (onChat != null)
-                ElevatedButton(
-                  onPressed: onChat,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: AppColors.ink,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(42, 38),
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                Expanded(
+                  child: DetailTealButton(
+                    label: 'Message',
+                    onTap: onChat,
+                    icon: Icons.chat_bubble_rounded,
                   ),
-                  child: const Icon(Icons.chat_bubble_rounded, size: 17),
                 ),
             ],
           ),
@@ -337,47 +339,30 @@ class ClientTrackingCard extends StatelessWidget {
         ),
     };
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.colors.border, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
+    return DetailSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: config.accent.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(config.icon, size: 20, color: config.accent),
+          DetailSectionTitle(
+            title: 'Suivi mission',
+            trailing: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: config.accent.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
               ),
-              AppGap.w12,
-              Expanded(
-                child: Text(
-                  config.title,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
-              ),
-            ],
+              child: Icon(config.icon, size: 20, color: config.accent),
+            ),
+          ),
+          AppGap.h8,
+          Text(
+            config.title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
           ),
           AppGap.h14,
           Text(
@@ -521,25 +506,9 @@ class ClientTrackingCard extends StatelessWidget {
           ),
           if (config.cta != null) ...[
             AppGap.h16,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onOpenTracking,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  textStyle: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text(config.cta!),
-              ),
+            DetailTealButton(
+              label: config.cta!,
+              onTap: onOpenTracking,
             ),
           ],
         ],
@@ -563,51 +532,34 @@ class ClientCompletionRequestedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prestaName = mission.assignedPresta?.name ?? 'Le prestataire';
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.colors.border, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
+    return DetailSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.task_alt_rounded,
-                  size: 20,
-                  color: AppColors.warning,
-                ),
+          DetailSectionTitle(
+            title: 'Fin de mission',
+            trailing: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
               ),
-              AppGap.w12,
-              Expanded(
-                child: Text(
-                  'Fin de mission signalee',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
+              child: Icon(
+                Icons.task_alt_rounded,
+                size: 20,
+                color: AppColors.warning,
               ),
-            ],
+            ),
+          ),
+          AppGap.h8,
+          Text(
+            'Fin de mission signalee',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
           ),
           AppGap.h14,
           Text(
@@ -653,33 +605,16 @@ class ClientCompletionRequestedCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  onPressed: onDispute,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
-                    side: BorderSide(color: context.colors.border),
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  child: const Text('Signaler'),
+                child: DetailSecondaryButton(
+                  label: 'Signaler',
+                  onTap: onDispute,
                 ),
               ),
               AppGap.w10,
               Expanded(
-                child: ElevatedButton(
-                  onPressed: onConfirm,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  child: const Text('Confirmer'),
+                child: DetailTealButton(
+                  label: 'Confirmer',
+                  onTap: onConfirm,
                 ),
               ),
             ],

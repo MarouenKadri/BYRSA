@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart' as ll;
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
+import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission.dart';
+import '../../../data/models/mission_address.dart';
 import '../../pages/shared/mission_map_page.dart';
 import '../shared/status_timeline.dart';
 import 'mission_detail_hero.dart';
@@ -209,18 +213,8 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: Image.network(
-                        'https://maps.googleapis.com/maps/api/staticmap'
-                        '?center=${Uri.encodeComponent(mission.address.fullAddress)}'
-                        '&zoom=14&size=600x360'
-                        '&style=feature:all|saturation:-100|lightness:25'
-                        '&style=feature:water|element:geometry|color:0xD8E8F7'
-                        '&style=feature:road|element:geometry|color:0xF4F5F7'
-                        '&key=MAPS_KEY',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => DetailMapPlaceholder(
-                          address: mission.address.shortAddress,
-                        ),
+                      child: IgnorePointer(
+                        child: _DetailMapPreview(address: mission.address),
                       ),
                     ),
                     const Center(child: DetailMiniMapPin()),
@@ -348,5 +342,72 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
     final cfg = resolveBanner();
     if (cfg == null) return const SizedBox.shrink();
     return DetailStatusBanner(config: cfg);
+  }
+}
+
+class _DetailMapPreview extends StatefulWidget {
+  final MissionAddress address;
+
+  const _DetailMapPreview({required this.address});
+
+  @override
+  State<_DetailMapPreview> createState() => _DetailMapPreviewState();
+}
+
+class _DetailMapPreviewState extends State<_DetailMapPreview> {
+  Future<ll.LatLng?>? _centerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _centerFuture = _resolveCenter();
+  }
+
+  Future<ll.LatLng?> _resolveCenter() async {
+    final lat = widget.address.latitude;
+    final lon = widget.address.longitude;
+    if (lat != null && lon != null) {
+      return ll.LatLng(lat, lon);
+    }
+
+    final query = widget.address.fullAddress.trim();
+    if (query.isEmpty) return null;
+
+    final place = await NominatimService.geocodeSingle(query);
+    return place?.latLng;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ll.LatLng?>(
+      future: _centerFuture,
+      builder: (context, snapshot) {
+        final center = snapshot.data;
+        if (center == null) {
+          return DetailMapPlaceholder(
+            address: widget.address.shortAddress,
+          );
+        }
+
+        return gmaps.GoogleMap(
+          initialCameraPosition: gmaps.CameraPosition(
+            target: gmaps.LatLng(center.latitude, center.longitude),
+            zoom: 13,
+          ),
+          mapType: gmaps.MapType.normal,
+          myLocationEnabled: false,
+          zoomControlsEnabled: false,
+          compassEnabled: false,
+          myLocationButtonEnabled: false,
+          mapToolbarEnabled: false,
+          rotateGesturesEnabled: false,
+          tiltGesturesEnabled: false,
+          scrollGesturesEnabled: false,
+          zoomGesturesEnabled: false,
+          liteModeEnabled: true,
+          markers: const <gmaps.Marker>{},
+        );
+      },
+    );
   }
 }

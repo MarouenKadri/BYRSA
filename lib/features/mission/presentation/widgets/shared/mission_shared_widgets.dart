@@ -468,18 +468,7 @@ class RatingWidget extends StatelessWidget {
                   color: context.colors.textPrimary,
                 ),
         ),
-        if (missionsCount != null)
-          Text(
-            ' • $missionsCount mission${missionsCount! > 1 ? 's' : ''}',
-            style: compact
-                ? context.text.labelSmall?.copyWith(
-                    color: context.colors.textTertiary,
-                  )
-                : context.text.labelMedium?.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-          )
-        else if (reviewsCount != null)
+        if (reviewsCount != null)
           Text(
             ' ($reviewsCount)',
             style: compact
