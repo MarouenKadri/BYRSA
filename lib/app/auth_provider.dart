@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -25,18 +26,16 @@ class AuthProvider extends ChangeNotifier {
     return identities.any((i) => i.provider == 'google');
   }
 
-  bool _isRegistering = false; // skip _loadProfile() during registration
-  bool _isLoadingProfile = false; // guard against concurrent _loadProfile calls
+  bool _isRegistering = false;
+  bool _isLoadingProfile = false;
+  StreamSubscription<AuthState>? _authSub;
 
   AuthProvider() {
     _init();
   }
 
   void _init() {
-    // Do NOT call _loadProfile synchronously here.
-    // The initialSession event fires immediately for existing sessions and covers app restart.
-    // Calling it here too would cause a double-load race condition.
-    _supabase.auth.onAuthStateChange.listen((data) {
+    _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedOut) {
         currentRole = UserRole.guest;
         isLogged = false;
@@ -630,5 +629,11 @@ class AuthProvider extends ChangeNotifier {
     if (message.contains('Password should be'))
       return 'Mot de passe trop court (minimum 8 caractères)';
     return 'Une erreur est survenue';
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 }

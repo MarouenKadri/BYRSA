@@ -350,72 +350,36 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
   }
 
   Widget _buildBottomNav(bool isLastStep) {
-    final padding = MediaQuery.of(context).padding;
     final canGo = _canContinue();
 
     if (isLastStep) {
-      return AppSection(
-        color: context.colors.surface,
-        padding: EdgeInsets.fromLTRB(24, 16, 24, 16 + padding.bottom),
+      return AppActionFooter(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
         child: SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
+          child: AppButton(
+            label: widget.mission != null &&
+                    widget.mission!.status != MissionStatus.draft
+                ? 'Enregistrer les modifications'
+                : 'Publier la mission',
+            variant: ButtonVariant.black,
             onPressed: _submitMission,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              minimumSize: const Size.fromHeight(56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-            child: Text(
-              widget.mission != null &&
-                      widget.mission!.status != MissionStatus.draft
-                  ? 'Enregistrer les modifications'
-                  : 'Publier la mission',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-                color: Colors.white,
-              ),
-            ),
           ),
         ),
       );
     }
 
-    return AppSection(
-      color: context.colors.surface,
-      padding: EdgeInsets.fromLTRB(24, 10, 24, 14 + padding.bottom),
+    return AppActionFooter(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: AppButton(
+              label: 'Continuer',
+              variant: ButtonVariant.black,
               onPressed: canGo ? _nextStep : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.inkDark,
-                disabledBackgroundColor: context.colors.border,
-                foregroundColor: Colors.white,
-                disabledForegroundColor: context.colors.surface,
-                elevation: 0,
-                minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              child: Text(
-                'Continuer',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.1,
-                ),
-              ),
             ),
           ),
           AppGap.h10,

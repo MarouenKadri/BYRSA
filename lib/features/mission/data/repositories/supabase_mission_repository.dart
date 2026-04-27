@@ -12,8 +12,11 @@ class SupabaseMissionRepository implements MissionRepository {
 
   String? get _userId => _supabase.auth.currentUser?.id;
 
+  // Only fetch profile columns actually used by _clientFromJson / _prestaFromJson
   static const _select =
-      '*, client:profiles!client_id(*), presta:profiles!assigned_presta_id(*)';
+      '*, '
+      'client:profiles!client_id(id, first_name, last_name, avatar_url, rating, completed_missions, is_verified), '
+      'presta:profiles!assigned_presta_id(id, first_name, last_name, avatar_url, rating, reviews_count, completed_missions, is_verified)';
 
   // ─── Fetch ───────────────────────────────────────────────────────────────
 
@@ -25,7 +28,8 @@ class SupabaseMissionRepository implements MissionRepository {
           .from('missions')
           .select(_select)
           .eq('client_id', _userId!)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(100);
       return (data as List)
           .map<Mission>((e) => _fromJson(e as Map<String, dynamic>))
           .toList();
@@ -47,7 +51,9 @@ class SupabaseMissionRepository implements MissionRepository {
         query = query.neq('client_id', _userId!);
       }
 
-      final data = await query.order('created_at', ascending: false);
+      final data = await query
+          .order('created_at', ascending: false)
+          .limit(100);
       debugPrint('fetchPublicMissions: ${(data as List).length} missions');
       return data.map<Mission>((e) => _fromJson(e)).toList();
     } catch (e, st) {
@@ -79,7 +85,8 @@ class SupabaseMissionRepository implements MissionRepository {
             .from('missions')
             .select(_select)
             .eq('assigned_presta_id', _userId!)
-            .order('created_at', ascending: false);
+            .order('created_at', ascending: false)
+            .limit(100);
       } else {
         data = await _supabase
             .from('missions')
@@ -87,7 +94,8 @@ class SupabaseMissionRepository implements MissionRepository {
             .or(
               'assigned_presta_id.eq.$_userId,id.in.(${candidateMissionIds.join(',')})',
             )
-            .order('created_at', ascending: false);
+            .order('created_at', ascending: false)
+            .limit(100);
       }
 
       debugPrint('fetchFreelancerMissions: ${data.length} missions');

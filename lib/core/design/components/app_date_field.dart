@@ -64,22 +64,25 @@ class _AppDateFieldState extends AppBaseFieldState<AppDateField> {
       inputFormatters: [DateInputFormatter()],
       autofocus: widget.autofocus,
       onChanged: widget.onChanged,
-      style: context.text.displaySmall?.copyWith(
-        fontSize: AppFontSize.h1Lg,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 3,
+      style: context.text.bodyLarge?.copyWith(
+        fontSize: AppFontSize.body,
+        fontWeight: FontWeight.w500,
+        color: context.colors.textPrimary,
       ),
-      decoration: AppInputDecorations.formField(
+      decoration: AppInputDecorations.profileField(
         context,
-        hintText: 'JJ / MM / AAAA',
-        hintStyle: context.text.displaySmall?.copyWith(
-          fontSize: AppFontSize.h1Lg,
-          fontWeight: FontWeight.w400,
-          color: context.colors.textTertiary,
-          letterSpacing: 3,
+        hintText: 'jj/mm/aaaa',
+        radius: 18,
+        prefixIcon: Icon(
+          Icons.calendar_today_outlined,
+          size: 16,
+          color: context.colors.textHint,
         ),
+      ).copyWith(
+        labelText: widget.label,
         errorText: widget.errorText,
-        fillColor: context.colors.background,
+        contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        errorStyle: context.profileErrorStyle,
       ),
     );
   }

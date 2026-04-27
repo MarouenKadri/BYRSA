@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/location/nominatim_service.dart';
+import 'mission_step_ui.dart';
 
 /// ─────────────────────────────────────────────────────────────
 /// 📍 Step 4 — Adresse avec carte dynamique
@@ -189,17 +190,11 @@ class _StepAddressState extends State<StepAddress> {
                   margin: const EdgeInsets.only(top: 6),
                   decoration: BoxDecoration(
                     color: context.colors.surface,
-                    borderRadius: BorderRadius.circular(AppDesign.radius14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: context.colors.border),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppDesign.radius14),
+                    borderRadius: BorderRadius.circular(18),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: _suggestions.asMap().entries.map((e) {
@@ -271,9 +266,9 @@ class _StepAddressState extends State<StepAddress> {
             child: OutlinedButton.icon(
               onPressed: _useCurrentLocation,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.gray700,
+                foregroundColor: context.colors.textPrimary,
                 side: BorderSide(color: context.colors.border, width: 1),
-                backgroundColor: Colors.white.withValues(alpha: 0.94),
+                backgroundColor: context.colors.surface.withValues(alpha: 0.96),
                 minimumSize: const Size(0, 48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -285,7 +280,7 @@ class _StepAddressState extends State<StepAddress> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.gray700,
+                  color: context.colors.textPrimary,
                 ),
               ),
             ),
@@ -328,57 +323,46 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(16, 20, 24, 0.06),
-            blurRadius: 18,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        onChanged: onChanged,
-        textInputAction: TextInputAction.search,
-        decoration: AppInputDecorations.formField(
-          context,
-          hintText: 'Rechercher une adresse...',
-          hintStyle: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            color: context.colors.textTertiary,
-          ),
-          prefixIcon: isSearching
-              ? Padding(
-                  padding: AppInsets.a14,
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.primary),
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      decoration: AppInputDecorations.profileField(
+        context,
+        hintText: 'Rechercher une adresse...',
+        radius: 18,
+        prefixIcon: isSearching
+            ? Padding(
+                padding: AppInsets.a14,
+                child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
                   ),
-                )
-              : Icon(
-                  Icons.search_outlined,
-                  color: context.colors.textSecondary,
-                  size: 20,
                 ),
-          suffixIcon: hasValue
-              ? IconButton(
-                  icon: Icon(Icons.close_rounded,
-                      color: context.colors.textHint, size: 20),
-                  onPressed: onClear,
-                )
-              : null,
-          contentPadding: AppInsets.h16v16,
-          noBorder: true,
-          fillColor: Colors.transparent,
-        ),
+              )
+            : Icon(
+                Icons.search_outlined,
+                color: context.colors.textHint,
+                size: 18,
+              ),
+        suffixIcon: hasValue
+            ? IconButton(
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: context.colors.textHint,
+                  size: 18,
+                ),
+                onPressed: onClear,
+              )
+            : null,
+      ).copyWith(
+        labelText: 'Adresse de la mission',
+        contentPadding: AppInsets.h16v16,
+        errorStyle: context.profileErrorStyle,
       ),
     );
   }
@@ -451,15 +435,9 @@ class _SelectedAddressCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: AppInsets.a16,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(16, 20, 24, 0.08),
-            blurRadius: 18,
-            offset: Offset(0, -4),
-          ),
-        ],
+        color: context.colors.surface.withValues(alpha: 0.98),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -477,14 +455,15 @@ class _SelectedAddressCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Adresse sélectionnée',
-                  style: TextStyle(fontSize: AppFontSize.xsHalf, fontWeight: FontWeight.w500, color: AppColors.gray600),
-                ),
+                const MissionSectionLabel(label: 'Adresse sélectionnée'),
                 AppGap.h2,
                 Text(
                   address,
-                  style: TextStyle(fontSize: AppFontSize.baseHalf, fontWeight: FontWeight.w600, color: AppColors.inkDark),
+                  style: TextStyle(
+                    fontSize: AppFontSize.baseHalf,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

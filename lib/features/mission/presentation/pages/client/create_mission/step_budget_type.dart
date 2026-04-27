@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import 'create_mission_models.dart';
+import 'mission_step_ui.dart';
 
 class StepBudgetType extends StatelessWidget {
   final String budgetType;
@@ -21,25 +22,10 @@ class StepBudgetType extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Comment souhaitez-vous payer ?',
-            style: TextStyle(
-              fontSize: 31,
-              fontWeight: FontWeight.w600,
-              height: 1.16,
-              color: AppColors.inkDark,
-              letterSpacing: -0.6,
-            ),
-          ),
-          AppGap.h10,
-          Text(
-            'Choisissez la formule qui correspond le mieux à votre mission.',
-            style: TextStyle(
-              fontSize: AppFontSize.mdHalf,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-              color: context.colors.textTertiary,
-            ),
+          const MissionStepHeader(
+            title: 'Comment souhaitez-vous payer ?',
+            subtitle:
+                'Choisissez la formule qui correspond le mieux à votre mission.',
           ),
           const SizedBox(height: 30),
           _BudgetTypeCard(
@@ -94,25 +80,20 @@ class _BudgetTypeCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         decoration: BoxDecoration(
           color: context.colors.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? AppColors.deepNavy : Colors.transparent,
+            color: isSelected
+                ? context.colors.textPrimary
+                : context.colors.border,
             width: isSelected ? 1.5 : 1,
           ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(16, 20, 24, 0.04),
-              blurRadius: 14,
-              offset: Offset(0, 6),
-            ),
-          ],
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 24,
-              color: AppColors.gray700,
+              size: 22,
+              color: context.colors.textSecondary,
             ),
             AppGap.w16,
             Expanded(
@@ -124,7 +105,7 @@ class _BudgetTypeCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppFontSize.lgHalf,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.inkDark,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   AppGap.h4,
@@ -143,7 +124,7 @@ class _BudgetTypeCard extends StatelessWidget {
               Icons.chevron_right_rounded,
               size: 18,
               color: isSelected
-                  ? AppColors.deepNavy
+                  ? context.colors.textPrimary
                   : context.colors.textHint,
             ),
           ],

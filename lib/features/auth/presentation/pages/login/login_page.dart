@@ -9,6 +9,7 @@ import '../forgot_password/forgot_password_page.dart';
 import '../register/register_flow.dart';
 
 enum _InputType { unknown, email, phone }
+
 enum _InputStatus { idle, checking, found, notFound, validPhone }
 
 class LoginPage extends StatefulWidget {
@@ -22,7 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   final _inputCtrl = TextEditingController();
   final _passCtrl  = TextEditingController();
 
-  // OTP (téléphone)
   final List<TextEditingController> _otpControllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _otpFocusNodes =
@@ -34,7 +34,8 @@ class _LoginPageState extends State<LoginPage> {
   Timer? _debounce;
 
   bool _isSubmitting = false;
-  bool _otpSent      = false; // true après envoi SMS → affiche champ OTP
+  bool _otpSent      = false;
+  bool _obscurePass  = true;
 
   @override
   void initState() {
@@ -48,8 +49,8 @@ class _LoginPageState extends State<LoginPage> {
     _debounce?.cancel();
     _inputCtrl.dispose();
     _passCtrl.dispose();
-    for (final c in _otpControllers) { c.dispose(); }
-    for (final f in _otpFocusNodes) { f.dispose(); }
+    for (final c in _otpControllers) c.dispose();
+    for (final f in _otpFocusNodes) f.dispose();
     super.dispose();
   }
 
@@ -75,7 +76,10 @@ class _LoginPageState extends State<LoginPage> {
     final type = _detectType(raw);
 
     if (type != _inputType) {
-      setState(() { _inputType = type; _inputStatus = _InputStatus.idle; });
+      setState(() {
+        _inputType   = type;
+        _inputStatus = _InputStatus.idle;
+      });
     }
 
     if (type == _InputType.email) {
@@ -84,10 +88,14 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       setState(() => _inputStatus = _InputStatus.checking);
-      _debounce = Timer(const Duration(milliseconds: 800), () => _checkEmail(raw));
+      _debounce = Timer(
+        const Duration(milliseconds: 800),
+        () => _checkEmail(raw),
+      );
     } else if (type == _InputType.phone) {
-      setState(() => _inputStatus =
-          _isValidPhone(raw) ? _InputStatus.validPhone : _InputStatus.idle);
+      setState(() => _inputStatus = _isValidPhone(raw)
+          ? _InputStatus.validPhone
+          : _InputStatus.idle);
     } else {
       setState(() => _inputStatus = _InputStatus.idle);
     }
@@ -109,7 +117,11 @@ class _LoginPageState extends State<LoginPage> {
 
   bool get _canSubmit {
     if (_inputType == _InputType.email) {
-      return _inputStatus == _InputStatus.found && _passCtrl.text.isNotEmpty;
+      // Email trouvé → besoin du mot de passe
+      if (_inputStatus == _InputStatus.found) return _passCtrl.text.isNotEmpty;
+      // Email non trouvé → on peut proposer l'inscription
+      if (_inputStatus == _InputStatus.notFound) return true;
+      return false;
     }
     if (_inputType == _InputType.phone) {
       if (!_otpSent) return _inputStatus == _InputStatus.validPhone;
@@ -124,10 +136,18 @@ class _LoginPageState extends State<LoginPage> {
     if (_isSubmitting) return;
     FocusScope.of(context).unfocus();
 
+    // Si l'email n'existe pas → rediriger vers l'inscription
+    if (_inputType == _InputType.email &&
+        _inputStatus == _InputStatus.notFound) {
+      _goToRegister();
+      return;
+    }
+
     if (_inputType == _InputType.email) {
       setState(() => _isSubmitting = true);
       final error = await context.read<AuthProvider>().login(
-        _inputCtrl.text.trim(), _passCtrl.text,
+        _inputCtrl.text.trim(),
+        _passCtrl.text,
       );
       if (!mounted) return;
       setState(() => _isSubmitting = false);
@@ -141,7 +161,6 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_inputType == _InputType.phone) {
       if (!_otpSent) {
-        // TODO: envoyer SMS
         setState(() => _otpSent = true);
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => _otpFocusNodes[0].requestFocus(),
@@ -155,8 +174,8 @@ class _LoginPageState extends State<LoginPage> {
       }
       setState(() => _isSubmitting = true);
       final phone = _normalizePhone(_inputCtrl.text.trim());
-      final error = await context.read<AuthProvider>()
-          .verifyPhoneLoginOtp(phone, token);
+      final error =
+          await context.read<AuthProvider>().verifyPhoneLoginOtp(phone, token);
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       if (error != null) {
@@ -167,8 +186,19 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _goToRegister() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RegisterFlow(
+            initialEmail: _inputType == _InputType.email
+                ? _inputCtrl.text.trim()
+                : null,
+          ),
+        ),
+      );
+
   String _normalizePhone(String raw) {
-    final digits  = raw.replaceAll(' ', '');
+    final digits   = raw.replaceAll(' ', '');
     final stripped = digits.startsWith('0') ? digits.substring(1) : digits;
     return '${_selectedCountry.dialCode}$stripped';
   }
@@ -196,11 +226,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final kbH     = MediaQuery.of(context).viewInsets.bottom;
-    final kbOpen  = kbH > 50;
+    final kbH    = MediaQuery.of(context).viewInsets.bottom;
+    final kbOpen = kbH > 50;
     final isPhone = _inputType == _InputType.phone;
-    final showPasswordField = _inputType == _InputType.email;
-    final showOtpField      = isPhone && _otpSent;
+
+    final showPasswordField =
+        _inputType == _InputType.email && _inputStatus == _InputStatus.found;
+    final showNotFound =
+        _inputType == _InputType.email && _inputStatus == _InputStatus.notFound;
+    final showOtpField = isPhone && _otpSent;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -217,7 +251,8 @@ class _LoginPageState extends State<LoginPage> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            size: 20),
                         onPressed: () => Navigator.pop(context),
                         color: context.colors.textPrimary,
                       ),
@@ -228,35 +263,18 @@ class _LoginPageState extends State<LoginPage> {
                 // ─── Corps ───────────────────────────────────────────────────
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Connexion',
-                          style: context.text.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: context.colors.textPrimary,
-                          ),
-                        ),
-                        AppGap.h6,
-                        Text(
-                          'Entrez vos identifiants pour accéder à votre compte.',
-                          style: context.text.bodyMedium?.copyWith(
-                            color: context.colors.textSecondary,
-                          ),
+                        const AppPageHeaderBlock(
+                          title: 'Connexion',
+                          subtitle:
+                              'Entrez vos identifiants pour accéder à votre compte.',
                         ),
 
-                        AppGap.h32,
+                        AppGap.h28,
 
-                        // ── Champ email / téléphone ───────────────────────
-                        Text(
-                          isPhone ? 'Téléphone' : 'Email ou téléphone',
-                          style: context.text.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        AppGap.h8,
                         TextFormField(
                           controller: _inputCtrl,
                           keyboardType: isPhone
@@ -266,91 +284,112 @@ class _LoginPageState extends State<LoginPage> {
                           inputFormatters: isPhone
                               ? [PhoneFormatter(_selectedCountry.maxDigits)]
                               : null,
-                          style: context.text.bodyLarge?.copyWith(
+                          style: context.text.bodyMedium?.copyWith(
                             color: context.colors.textPrimary,
                           ),
-                          decoration: AppInputDecorations.formField(
+                          decoration: AppInputDecorations.profileField(
                             context,
                             hintText: isPhone
                                 ? _selectedCountry.hint
                                 : 'Ex: email@exemple.com',
+                            radius: 18,
                             prefixIcon: isPhone
                                 ? GestureDetector(
                                     onTap: _showCountryPicker,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 14),
-                                      margin: const EdgeInsets.only(right: 8),
+                                          horizontal: 12, vertical: 12),
+                                      margin:
+                                          const EdgeInsets.only(right: 8),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(_selectedCountry.flag,
-                                              style: context.text.headlineMedium),
+                                              style: const TextStyle(
+                                                  fontSize: 18)),
                                           AppGap.w4,
                                           Text(
                                             _selectedCountry.dialCode,
-                                            style: context.text.titleSmall
-                                                ?.copyWith(color: context.colors.textSecondary),
+                                            style: context.text.bodySmall
+                                                ?.copyWith(
+                                              color: context
+                                                  .colors.textSecondary,
+                                            ),
                                           ),
                                           AppGap.w2,
-                                          Icon(Icons.arrow_drop_down_rounded,
-                                              size: 16, color: context.colors.textTertiary),
+                                          Icon(
+                                            Icons.arrow_drop_down_rounded,
+                                            size: 16,
+                                            color:
+                                                context.colors.textTertiary,
+                                          ),
                                         ],
                                       ),
                                     ),
                                   )
-                                : Icon(Icons.alternate_email_rounded,
-                                    size: 20, color: context.colors.textSecondary),
-                            fillColor: context.colors.inputFill,
-                            radius: AppInputTokens.formRadius,
+                                : Icon(
+                                    Icons.alternate_email_rounded,
+                                    size: 16,
+                                    color: context.colors.textHint,
+                                  ),
+                          ).copyWith(
+                            labelText: isPhone ? 'Téléphone' : 'Email ou téléphone',
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                            errorStyle: context.profileErrorStyle,
                           ),
                         ),
 
-                        // ── Statut email ──────────────────────────────────
-                        AppGap.h10,
-                        _StatusRow(
-                          inputType: _inputType,
+                        // ── Indicateur de statut ──────────────────────────
+                        AppGap.h8,
+                        _StatusIndicator(
                           status: _inputStatus,
-                          onRegister: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RegisterFlow(
-                                initialEmail: _inputType == _InputType.email
-                                    ? _inputCtrl.text.trim()
-                                    : null,
-                              ),
-                            ),
-                          ),
+                          inputType: _inputType,
                         ),
 
-                        // ── Champ mot de passe (email) ────────────────────
+                        // ── Email non trouvé → invitation inscription ──────
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: showNotFound
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    "Cet email n'est pas associé\na aucun compte.",
+                                    style: context.text.bodySmall?.copyWith(
+                                      color: context.colors.textSecondary,
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+
+                        // ── Mot de passe (email trouvé) ───────────────────
                         AnimatedSize(
                           duration: const Duration(milliseconds: 280),
                           curve: Curves.easeInOut,
                           child: showPasswordField
                               ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
-                                    AppGap.h20,
+                                    AppGap.h16,
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        Text(
-                                          'Mot de passe',
-                                          style: context.text.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
                                         GestureDetector(
                                           onTap: () => Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const ForgotPasswordPage(),
+                                              builder: (_) =>
+                                                  const ForgotPasswordPage(),
                                             ),
                                           ),
                                           child: Text(
-                                            'Oublié ?',
-                                            style: context.text.bodySmall?.copyWith(
+                                            'Mot de passe oublié ?',
+                                            style: context.text.bodySmall
+                                                ?.copyWith(
                                               color: context.colors.primary,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -359,30 +398,71 @@ class _LoginPageState extends State<LoginPage> {
                                       ],
                                     ),
                                     AppGap.h8,
-                                    AppTextField(
-                                      label: 'Mot de passe',
+                                    TextFormField(
                                       controller: _passCtrl,
-                                      obscureText: true,
-                                      autofocus: _inputStatus == _InputStatus.found,
+                                      obscureText: _obscurePass,
+                                      autofocus:
+                                          _inputStatus == _InputStatus.found,
+                                      style: context.text.bodyMedium
+                                          ?.copyWith(
+                                        color: context.colors.textPrimary,
+                                      ),
+                                      decoration:
+                                          AppInputDecorations.profileField(
+                                        context,
+                                        hintText: '••••••••',
+                                        radius: 18,
+                                        prefixIcon: Icon(
+                                          Icons.lock_outline_rounded,
+                                          size: 16,
+                                          color: context.colors.textHint,
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePass
+                                                ? Icons
+                                                    .visibility_off_rounded
+                                                : Icons.visibility_rounded,
+                                            size: 18,
+                                            color:
+                                                context.colors.textSecondary,
+                                          ),
+                                          onPressed: () => setState(
+                                            () => _obscurePass = !_obscurePass,
+                                          ),
+                                        ),
+                                      ).copyWith(
+                                        labelText: 'Mot de passe',
+                                        contentPadding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          16,
+                                          16,
+                                          16,
+                                        ),
+                                        errorStyle: context.profileErrorStyle,
+                                      ),
                                     ),
                                   ],
                                 )
                               : const SizedBox.shrink(),
                         ),
 
-                        // ── Champ OTP (téléphone) ─────────────────────────
+                        // ── OTP (téléphone) ───────────────────────────────
                         AnimatedSize(
                           duration: const Duration(milliseconds: 280),
                           curve: Curves.easeInOut,
                           child: showOtpField
                               ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
-                                    AppGap.h24,
+                                    AppGap.h20,
                                     Text(
                                       'Code SMS',
-                                      style: context.text.bodyMedium?.copyWith(
+                                      style: context.text.bodySmall
+                                          ?.copyWith(
                                         fontWeight: FontWeight.w600,
+                                        color: context.colors.textSecondary,
                                       ),
                                     ),
                                     AppGap.h4,
@@ -405,45 +485,46 @@ class _LoginPageState extends State<LoginPage> {
                               : const SizedBox.shrink(),
                         ),
 
-                        AppGap.h32,
+                        if (!kbOpen || showNotFound) ...[
+                          AppGap.h28,
 
-                        // ── Bouton principal ──────────────────────────────
-                        AppButton(
-                          label: _buttonLabel,
-                          variant: ButtonVariant.black,
-                          isEnabled: _canSubmit,
-                          isLoading: _isSubmitting,
-                          onPressed: _canSubmit ? _submit : null,
-                        ),
+                          // ── Bouton principal ────────────────────────────
+                          AppButton(
+                            label: _buttonLabel,
+                            variant: ButtonVariant.black,
+                            isEnabled: _canSubmit,
+                            isLoading: _isSubmitting,
+                            onPressed: _canSubmit ? _submit : null,
+                          ),
 
-                        AppGap.h20,
+                          AppGap.h20,
+                        ],
 
                         // ── Lien inscription ──────────────────────────────
-                        Center(
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const RegisterFlow()),
-                            ),
-                            child: RichText(
-                              text: TextSpan(
-                                style: context.text.bodySmall?.copyWith(
-                                  color: context.colors.textSecondary,
-                                ),
-                                children: [
-                                  const TextSpan(text: 'Pas encore de compte ? '),
-                                  TextSpan(
-                                    text: 'S\'inscrire',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: context.colors.textPrimary,
-                                    ),
+                        if (!showNotFound)
+                          Center(
+                            child: GestureDetector(
+                              onTap: _goToRegister,
+                              child: RichText(
+                                text: TextSpan(
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: context.colors.textSecondary,
                                   ),
-                                ],
+                                  children: [
+                                    const TextSpan(
+                                        text: 'Pas encore de compte ? '),
+                                    TextSpan(
+                                      text: 'S\'inscrire',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: context.colors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -453,7 +534,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
 
           // ─── Barre clavier ────────────────────────────────────────────────
-          if (kbOpen && _canSubmit)
+          if (kbOpen && _canSubmit && !showNotFound)
             Positioned(
               bottom: kbH,
               left: 0,
@@ -466,6 +547,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   String get _buttonLabel {
+    if (_inputStatus == _InputStatus.notFound) return 'Créer un compte';
     if (_inputType == _InputType.phone) {
       return _otpSent ? 'Vérifier' : 'Envoyer le code';
     }
@@ -473,98 +555,80 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// ─── Indicateur de statut ─────────────────────────────────────────────────────
+// ─── Indicateur de statut (checking / found) ─────────────────────────────────
 
-class _StatusRow extends StatelessWidget {
-  final _InputType inputType;
+class _StatusIndicator extends StatelessWidget {
   final _InputStatus status;
-  final VoidCallback onRegister;
+  final _InputType inputType;
 
-  const _StatusRow({
-    required this.inputType,
-    required this.status,
-    required this.onRegister,
-  });
+  const _StatusIndicator({required this.status, required this.inputType});
 
   @override
   Widget build(BuildContext context) {
-    if (status == _InputStatus.idle) return const SizedBox.shrink();
-
-    if (status == _InputStatus.validPhone) {
-      return Row(children: [
-        const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success),
-        AppGap.w8,
-        Text(
-          'Numéro valide — code SMS sera envoyé',
-          style: context.text.bodySmall?.copyWith(
-            color: AppColors.success, fontWeight: FontWeight.w500,
-          ),
-        ),
-      ]);
+    if (status == _InputStatus.idle || status == _InputStatus.notFound) {
+      return const SizedBox.shrink();
     }
 
-    if (status == _InputStatus.notFound) {
-      return Container(
-        padding: AppInsets.h14v12,
-        decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(AppDesign.radius12),
-          border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
-        ),
-        child: Row(children: [
-          const Icon(Icons.person_off_rounded, size: 16, color: AppColors.error),
-          AppGap.w10,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Aucun compte avec cet email',
-                    style: context.text.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600, color: AppColors.error,
-                    )),
-                const SizedBox(height: 1),
-                Text('Vérifiez l\'adresse ou créez un compte.',
-                    style: context.text.labelMedium),
-              ],
-            ),
-          ),
-          AppGap.w8,
-          GestureDetector(
-            onTap: onRegister,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(AppDesign.radius20),
-              ),
-              child: Text("S'inscrire",
-                  style: context.text.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600, color: Colors.white,
-                  )),
-            ),
-          ),
-        ]),
+    if (status == _InputStatus.validPhone) {
+      return _chip(
+        context,
+        icon: Icons.check_circle_rounded,
+        label: 'Numéro valide',
+        color: AppColors.success,
       );
     }
 
-    final isChecking = status == _InputStatus.checking;
-    final color = isChecking ? context.colors.textTertiary : AppColors.success;
+    if (status == _InputStatus.checking) {
+      return Row(
+        children: [
+          SizedBox(
+            width: 13,
+            height: 13,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.8,
+              color: context.colors.textTertiary,
+            ),
+          ),
+          AppGap.w8,
+          Text(
+            'Vérification…',
+            style: context.text.bodySmall
+                ?.copyWith(color: context.colors.textTertiary),
+          ),
+        ],
+      );
+    }
 
-    return Row(children: [
-      if (isChecking)
-        SizedBox(
-          width: 14, height: 14,
-          child: CircularProgressIndicator(strokeWidth: 2, color: color),
-        )
-      else
-        Icon(Icons.check_circle_rounded, size: 16, color: color),
-      AppGap.w8,
-      Text(
-        isChecking ? 'Vérification…' : 'Compte trouvé',
-        style: context.text.bodySmall?.copyWith(
-          color: color, fontWeight: FontWeight.w500,
+    if (status == _InputStatus.found) {
+      return _chip(
+        context,
+        icon: Icons.check_circle_rounded,
+        label: 'Compte trouvé',
+        color: AppColors.success,
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _chip(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        AppGap.w6,
+        Text(
+          label,
+          style: context.text.bodySmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

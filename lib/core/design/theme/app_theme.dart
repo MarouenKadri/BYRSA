@@ -13,8 +13,8 @@ import '../components/app_text_field.dart';
 
 class _AppTokens {
   const _AppTokens();
-  Color get primary => AppColors.primary;
-  Color get error => AppColors.error;
+  Color get primary => const Color.fromARGB(255, 81, 86, 88);
+  Color get error => const Color.fromARGB(255, 194, 118, 118);
   Color get background => AppColors.background;
   Color get surface => AppColors.surface;
   Color get surfaceAlt => AppColors.surfaceAlt;

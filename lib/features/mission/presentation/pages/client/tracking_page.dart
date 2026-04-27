@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:latlong2/latlong.dart' as ll;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/design/app_design_system.dart';
@@ -25,21 +25,15 @@ class TrackingPage extends StatefulWidget {
 }
 
 class _TrackingPageState extends State<TrackingPage> {
-  gmaps.GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   bool _following = true;
-  bool _isProgrammaticCameraMove = false;
 
-  // Position temps réel du freelancer (reçue via broadcast)
-  ll.LatLng? _freelancerPosition;
+  LatLng? _freelancerPosition;
+  LatLng? _destinationLatLng;
 
-  // Destination géocodée
-  ll.LatLng? _destinationLatLng;
-
-  // ETA / distance
   double? _distanceKm;
   int _etaMinutes = 0;
 
-  // Supabase channel
   RealtimeChannel? _channel;
 
   @override
@@ -53,6 +47,7 @@ class _TrackingPageState extends State<TrackingPage> {
   @override
   void dispose() {
     _channel?.unsubscribe();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -69,14 +64,11 @@ class _TrackingPageState extends State<TrackingPage> {
       final lat = data['tracking_lat'];
       final lng = data['tracking_lng'];
       if (lat == null || lng == null) return;
-      _applyPosition(ll.LatLng(
-        (lat as num).toDouble(),
-        (lng as num).toDouble(),
-      ));
+      _applyPosition(LatLng((lat as num).toDouble(), (lng as num).toDouble()));
     } catch (_) {}
   }
 
-  // ── Supabase Realtime (DB changes) ───────────────────────────
+  // ── Supabase Realtime ─────────────────────────────────────────
 
   void _subscribeBroadcast() {
     _channel = Supabase.instance.client
@@ -95,7 +87,7 @@ class _TrackingPageState extends State<TrackingPage> {
             final lat = data['tracking_lat'];
             final lng = data['tracking_lng'];
             if (lat == null || lng == null) return;
-            _applyPosition(ll.LatLng(
+            _applyPosition(LatLng(
               (lat as num).toDouble(),
               (lng as num).toDouble(),
             ));
@@ -104,12 +96,10 @@ class _TrackingPageState extends State<TrackingPage> {
       ..subscribe();
   }
 
-  void _applyPosition(ll.LatLng pos) {
+  void _applyPosition(LatLng pos) {
     if (!mounted) return;
     setState(() => _freelancerPosition = pos);
-    if (_following) {
-      _moveCamera(pos, 15);
-    }
+    if (_following) _moveCamera(pos, 15);
     if (_destinationLatLng != null) _updateEta(pos);
   }
 
@@ -120,8 +110,7 @@ class _TrackingPageState extends State<TrackingPage> {
       final place = await NominatimService.geocodeSingle(
         widget.mission.address.fullAddress,
       );
-      if (!mounted) return;
-      if (place == null) return;
+      if (!mounted || place == null) return;
       setState(() => _destinationLatLng = place.latLng);
       if (_freelancerPosition != null) _updateEta(_freelancerPosition!);
     } catch (_) {}
@@ -129,9 +118,9 @@ class _TrackingPageState extends State<TrackingPage> {
 
   // ── ETA ───────────────────────────────────────────────────────
 
-  void _updateEta(ll.LatLng freelancer) {
+  void _updateEta(LatLng freelancer) {
     if (_destinationLatLng == null) return;
-    final meters = const ll.Distance()(freelancer, _destinationLatLng!);
+    final meters = const Distance()(freelancer, _destinationLatLng!);
     final km = meters / 1000;
     setState(() {
       _distanceKm = km;
@@ -156,20 +145,8 @@ class _TrackingPageState extends State<TrackingPage> {
     _moveCamera(_freelancerPosition!, 15);
   }
 
-  Future<void> _moveCamera(ll.LatLng target, double zoom) async {
-    final controller = _mapController;
-    if (controller == null) return;
-    _isProgrammaticCameraMove = true;
-    try {
-      await controller.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(
-          gmaps.LatLng(target.latitude, target.longitude),
-          zoom,
-        ),
-      );
-    } finally {
-      _isProgrammaticCameraMove = false;
-    }
+  void _moveCamera(LatLng target, double zoom) {
+    _mapController.move(target, zoom);
   }
 
   @override
@@ -178,78 +155,64 @@ class _TrackingPageState extends State<TrackingPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final isOnTheWay = widget.mission.status == MissionStatus.onTheWay;
 
-    // Centrer sur destination si pas encore de position freelancer
     final center = _freelancerPosition ??
         _destinationLatLng ??
-        const ll.LatLng(46.6034, 1.8883);
+        const LatLng(46.6034, 1.8883);
     final initialZoom = _freelancerPosition != null ? 15.0 : 14.0;
 
     return Scaffold(
       body: Stack(
         children: [
-          // ── Carte réelle ──────────────────────────────────────
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: gmaps.LatLng(center.latitude, center.longitude),
-              zoom: initialZoom,
+          const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
+          // ── Carte ─────────────────────────────────────────────
+          Positioned.fill(child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: initialZoom,
+              onMapEvent: (event) {
+                if (event is MapEventMoveStart &&
+                    event.source != MapEventSource.mapController &&
+                    _following) {
+                  setState(() => _following = false);
+                }
+              },
             ),
-            mapType: gmaps.MapType.normal,
-            myLocationEnabled: false,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            compassEnabled: false,
-            onMapCreated: (controller) => _mapController = controller,
-            onCameraMoveStarted: () {
-              if (_isProgrammaticCameraMove) return;
-              if (_following) {
-                setState(() => _following = false);
-              }
-            },
-            polylines: (_freelancerPosition != null && _destinationLatLng != null)
-                ? {
-                    gmaps.Polyline(
-                      polylineId: const gmaps.PolylineId('route'),
-                      points: [
-                        gmaps.LatLng(
-                          _freelancerPosition!.latitude,
-                          _freelancerPosition!.longitude,
-                        ),
-                        gmaps.LatLng(
-                          _destinationLatLng!.latitude,
-                          _destinationLatLng!.longitude,
-                        ),
-                      ],
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.flutter_application_1',
+              ),
+              if (_freelancerPosition != null && _destinationLatLng != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [_freelancerPosition!, _destinationLatLng!],
                       color: AppColors.iosBlue.withValues(alpha: 0.70),
-                      width: 4,
+                      strokeWidth: 4,
                     ),
-                  }
-                : const <gmaps.Polyline>{},
-            markers: {
-              if (_destinationLatLng != null)
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('destination'),
-                  position: gmaps.LatLng(
-                    _destinationLatLng!.latitude,
-                    _destinationLatLng!.longitude,
-                  ),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueGreen,
-                  ),
+                  ],
                 ),
-              if (_freelancerPosition != null)
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('freelancer'),
-                  position: gmaps.LatLng(
-                    _freelancerPosition!.latitude,
-                    _freelancerPosition!.longitude,
-                  ),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueAzure,
-                  ),
-                ),
-            },
-          ),
+              MarkerLayer(
+                markers: [
+                  if (_destinationLatLng != null)
+                    Marker(
+                      point: _destinationLatLng!,
+                      width: 36,
+                      height: 36,
+                      child: const Icon(Icons.location_on, color: AppColors.success, size: 36),
+                    ),
+                  if (_freelancerPosition != null)
+                    Marker(
+                      point: _freelancerPosition!,
+                      width: 36,
+                      height: 36,
+                      child: const Icon(Icons.directions_run_rounded, color: AppColors.iosBlue, size: 32),
+                    ),
+                ],
+              ),
+            ],
+          )),
 
           // ── Recentrer ─────────────────────────────────────────
           if (!_following && _freelancerPosition != null)
@@ -277,8 +240,7 @@ class _TrackingPageState extends State<TrackingPage> {
               right: 0,
               child: Center(
                 child: AppSurfaceCard(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(99),
                   boxShadow: AppShadows.card,
@@ -341,8 +303,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 boxShadow: AppShadows.card,
                 child: Text(
                   isOnTheWay ? 'Prestataire en route' : 'Mission en cours',
-                  style: context.text.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -409,13 +370,11 @@ class _ClientTrackingPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(presta?.name ?? 'Prestataire',
-                      style: context.text.titleLarge),
+                  Text(presta?.name ?? 'Prestataire', style: context.text.titleLarge),
                   AppGap.h2,
                   Row(
                     children: [
-                      MissionStatusBadge(
-                          status: mission.status, compact: true),
+                      MissionStatusBadge(status: mission.status, compact: true),
                     ],
                   ),
                 ],
@@ -432,8 +391,7 @@ class _ClientTrackingPanel extends StatelessWidget {
             border: Border.all(color: AppColors.success.withOpacity(0.3)),
             child: Row(
               children: [
-                const Icon(Icons.play_circle_rounded,
-                    color: AppColors.primary, size: 20),
+                const Icon(Icons.play_circle_rounded, color: AppColors.primary, size: 20),
                 AppGap.w10,
                 Text(
                   'Mission en cours',
@@ -451,8 +409,7 @@ class _ClientTrackingPanel extends StatelessWidget {
         AppGap.h12,
         Row(
           children: [
-            const Icon(Icons.location_on_rounded,
-                size: 16, color: AppColors.urgent),
+            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.urgent),
             AppGap.w6,
             Expanded(
               child: Text(
@@ -468,7 +425,7 @@ class _ClientTrackingPanel extends StatelessWidget {
   }
 }
 
-// ─── Carte ETA flottante (partagée client & freelancer) ───────────────────────
+// ─── Carte ETA flottante ──────────────────────────────────────────────────────
 
 class _EtaCard extends StatelessWidget {
   final int etaMinutes;
@@ -484,10 +441,8 @@ class _EtaCard extends StatelessWidget {
   });
 
   String get _timeLabel {
-    if (etaMinutes >= 60) {
-      return '${etaMinutes ~/ 60}h ${etaMinutes % 60}min';
-    }
-    return '${etaMinutes} min';
+    if (etaMinutes >= 60) return '${etaMinutes ~/ 60}h ${etaMinutes % 60}min';
+    return '$etaMinutes min';
   }
 
   String get _distLabel => distanceKm < 1

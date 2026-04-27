@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/design/app_primitives.dart';
+import 'mission_step_ui.dart';
 
 class StepService extends StatelessWidget {
   final List<Map<String, dynamic>> services;
@@ -34,25 +35,10 @@ class StepService extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Quel service recherchez-vous ?',
-            style: TextStyle(
-              fontSize: 31,
-              fontWeight: FontWeight.w700,
-              height: 1.16,
-              color: AppColors.inkDark,
-              letterSpacing: -0.7,
-            ),
-          ),
-          AppGap.h10,
-          Text(
-            'Choisissez votre catégorie puis un sous-service précis',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-              color: context.colors.textTertiary,
-            ),
+          const MissionStepHeader(
+            title: 'Quel service recherchez-vous ?',
+            subtitle:
+                'Choisissez votre catégorie puis un sous-service précis.',
           ),
           if (selectedMeta != null) ...[
             AppGap.h16,
@@ -327,9 +313,11 @@ class _SelectedServiceSummary extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: color.withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         children: [
@@ -352,7 +340,7 @@ class _SelectedServiceSummary extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.inkDark,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 Text(
@@ -362,7 +350,7 @@ class _SelectedServiceSummary extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.gray700,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -401,22 +389,13 @@ class _ServiceCategoryCard extends StatelessWidget {
       curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
         color: isSelected
-            ? color.withValues(alpha: 0.10)
+            ? color.withValues(alpha: 0.06)
             : context.colors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isSelected ? color : context.colors.border,
           width: isSelected ? 1.4 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: isSelected
-                ? color.withValues(alpha: 0.18)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: isSelected ? 14 : 8,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
@@ -452,7 +431,7 @@ class _ServiceCategoryCard extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
-                color: AppColors.inkDark,
+                color: context.colors.textPrimary,
                 letterSpacing: -0.2,
               ),
             ),

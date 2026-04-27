@@ -32,6 +32,16 @@ Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
       : int.tryParse('$rawHourlyRate') ?? 0;
   final categoryIds = ServiceCategory.resolveIds(row['service_categories']);
   final categoryNames = ServiceCategory.resolveNames(row['service_categories']);
+  final rawRating = row['rating'];
+  final rating = rawRating is num ? rawRating.toDouble() : 0.0;
+  final rawReviewsCount = row['reviews_count'];
+  final reviewsCount = rawReviewsCount is num
+      ? rawReviewsCount.toInt()
+      : int.tryParse('$rawReviewsCount') ?? 0;
+  final rawMissionsCount = row['completed_missions'];
+  final missionsCount = rawMissionsCount is num
+      ? rawMissionsCount.toInt()
+      : int.tryParse('$rawMissionsCount') ?? 0;
 
   return {
     'id': row['id'] ?? '',
@@ -42,13 +52,13 @@ Map<String, dynamic> _normalizeFreelancerRow(Map<String, dynamic> row) {
         : 'Multi-services',
     'categoryIds': categoryIds,
     'services': categoryNames,
-    'rating': 0.0,
-    'reviewsCount': 0,
+    'rating': rating,
+    'reviewsCount': reviewsCount,
     'hourlyRate': hourlyRate,
     'isVerified': (row['is_verified'] ?? false) as bool,
     'isOnline': false,
-    'missionsCount': 0,
-    'responseTime': '2h',
+    'missionsCount': missionsCount,
+    'responseTime': (row['response_time'] ?? '2h') as String,
     'experienceLevel': categoryNames.isNotEmpty ? 'Spécialisé' : 'Pro',
     'zone': (row['address'] ?? '') as String,
   };

@@ -169,14 +169,15 @@ class LocationAppBarCoordinator {
   static Future<void> openRoleSheet(
     BuildContext context, {
     required String firstName,
+    String avatarUrl = '',
     VoidCallback? onGoToAccount,
   }) {
     return showAppBottomSheet<void>(
       context: context,
       wrapWithSurface: false,
       child: RoleSwitchSheet(
-        avatarUrl: '',
         firstName: firstName,
+        avatarUrl: avatarUrl,
         onGoToAccount: onGoToAccount,
       ),
     );
@@ -260,6 +261,7 @@ class _LocationAppBarState extends State<LocationAppBar>
     final isClient  = auth.currentRole == UserRole.client;
     final address   = profile?.address;
     final firstName = profile?.firstName ?? '';
+    final avatarUrl = profile?.avatarUrl ?? '';
     final avatarLabel = firstName.isNotEmpty
         ? firstName[0].toUpperCase()
         : (isClient ? 'C' : 'F');
@@ -284,6 +286,7 @@ class _LocationAppBarState extends State<LocationAppBar>
       onAvatarTap: () => LocationAppBarCoordinator.openRoleSheet(
         context,
         firstName: firstName,
+        avatarUrl: avatarUrl,
         onGoToAccount: widget.onGoToAccount,
       ),
     );
@@ -295,26 +298,32 @@ class _LocationAppBarState extends State<LocationAppBar>
 // ─────────────────────────────────────────────────────────────
 class RoleSwitchSheet extends StatelessWidget {
   final String firstName;
+  final String avatarUrl;
   final VoidCallback? onGoToAccount;
 
   const RoleSwitchSheet({
     super.key,
     required this.firstName,
-    String? avatarUrl, // kept for compatibility, unused
+    this.avatarUrl = '',
     this.onGoToAccount,
   });
-
 
   @override
   Widget build(BuildContext context) {
     final auth      = context.watch<AuthProvider>();
     final isClient  = auth.currentRole == UserRole.client;
     final isLoading = auth.isLoading;
+    final initials  = firstName.isNotEmpty
+        ? firstName[0].toUpperCase()
+        : (isClient ? 'C' : 'F');
+    final hasPhoto  = avatarUrl.isNotEmpty;
+
     return AppActionSheet(
       title: 'Mode',
       header: Padding(
         padding: AppInsets.h20,
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onGoToAccount != null
               ? () {
                   Navigator.pop(context);
@@ -323,17 +332,20 @@ class RoleSwitchSheet extends StatelessWidget {
               : null,
           child: Row(
             children: [
-              AppInitialCircle(
-                label: firstName.isNotEmpty
-                    ? firstName[0].toUpperCase()
-                    : (isClient ? 'C' : 'F'),
-                size: AppBarMetrics.sheetAvatarSize,
-                fontSize: AppBarMetrics.sheetAvatarFontSize,
-                backgroundColor: Colors.white.withValues(alpha: 0.08),
-                foregroundColor: AppColors.snow,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.20),
-                  width: 1.5,
+              // Avatar réel ou initiales
+              ClipOval(
+                child: SizedBox(
+                  width: AppBarMetrics.sheetAvatarSize,
+                  height: AppBarMetrics.sheetAvatarSize,
+                  child: hasPhoto
+                      ? Image.network(
+                          avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _SheetAvatarFallback(
+                            initials: initials,
+                          ),
+                        )
+                      : _SheetAvatarFallback(initials: initials),
                 ),
               ),
               AppGap.w12,
@@ -360,6 +372,11 @@ class RoleSwitchSheet extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.gray500,
+                size: 20,
               ),
             ],
           ),
@@ -475,6 +492,28 @@ class _RoleItem extends StatelessWidget {
                 color: AppColors.snow,
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetAvatarFallback extends StatelessWidget {
+  final String initials;
+  const _SheetAvatarFallback({required this.initials});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white.withValues(alpha: 0.08),
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: AppBarMetrics.sheetAvatarFontSize,
+            fontWeight: FontWeight.w600,
+            color: AppColors.snow,
+          ),
         ),
       ),
     );

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 // Source unique des couleurs de l'application.
 abstract class AppColors {
   // Brand
-  static const primary = Color(0xFF0088CC);
-  static const primaryDark = Color(0xFF006699);
+  static const primary = Color.fromARGB(255, 87, 115, 129);
+  static const primaryDark = Color.fromARGB(255, 16, 36, 46);
   static const primaryLight = Color(0xFFE0F2FE);
   static const secondary = Color(0xFFE0F2FE);
 
@@ -27,10 +27,10 @@ abstract class AppColors {
   static const textHint = Color(0xFFCBD5E1);
 
   // Status
-  static const error = Color(0xFFEF4444);
+  static const error = Color.fromARGB(255, 231, 214, 214);
   static const warning = Color(0xFFF59E0B);
-  static const success = Color(0xFF10B981);
-  static const info = Color(0xFF0088CC);
+  static const success = Color.fromARGB(255, 139, 175, 163);
+  static const info = Color.fromARGB(255, 144, 167, 179);
   static const rating = Color(0xFFFFCC00);
   static const urgent = error;
   static const gold = rating;

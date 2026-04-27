@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../../../core/design/app_design_system.dart';
+import 'mission_step_ui.dart';
 
 class StepSummary extends StatelessWidget {
   final String? service;
@@ -48,41 +49,19 @@ class StepSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Resume de votre mission',
-            style: TextStyle(
-              fontSize: 31,
-              fontWeight: FontWeight.w600,
-              height: 1.16,
-              color: AppColors.inkDark,
-              letterSpacing: -0.6,
-            ),
-          ),
-          AppGap.h10,
-          Text(
-            isEdit
+          MissionStepHeader(
+            title: 'Resume de votre mission',
+            subtitle: isEdit
                 ? 'Verifiez les details avant d\'enregistrer.'
                 : 'Verifiez les details avant de publier.',
-            style: TextStyle(
-              fontSize: AppFontSize.mdHalf,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-              color: context.colors.textTertiary,
-            ),
           ),
           AppGap.h24,
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color.fromRGBO(16, 20, 24, 0.04),
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
-                ),
-              ],
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: context.colors.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +95,7 @@ class StepSummary extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.inkDark,
+                              color: context.colors.textPrimary,
                             ),
                           ),
                           AppGap.h4,
@@ -125,7 +104,7 @@ class StepSummary extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.gray600,
+                              color: context.colors.textSecondary,
                             ),
                           ),
                         ],
@@ -134,7 +113,7 @@ class StepSummary extends StatelessWidget {
                   ],
                 ),
                 AppGap.h20,
-                const Divider(height: 1, color: AppColors.gray50),
+                Divider(height: 1, color: context.colors.divider),
                 AppGap.h18,
                 SummaryRow(
                   icon: Icons.calendar_month_outlined,
@@ -167,15 +146,7 @@ class StepSummary extends StatelessWidget {
                 ],
                 if (photos.isNotEmpty) ...[
                   AppGap.h18,
-                  Text(
-                    'PHOTOS',
-                    style: TextStyle(
-                      fontSize: AppFontSize.xsHalf,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.gray600,
-                      letterSpacing: 1.8,
-                    ),
-                  ),
+                  const MissionSectionLabel(label: 'Photos'),
                   AppGap.h10,
                   SizedBox(
                     height: 84,
@@ -222,7 +193,7 @@ class StepSummary extends StatelessWidget {
                   ),
                 ],
                 AppGap.h22,
-                const Divider(height: 1, color: AppColors.gray50),
+                Divider(height: 1, color: context.colors.divider),
                 AppGap.h18,
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -237,12 +208,12 @@ class StepSummary extends StatelessWidget {
                                 : budgetType == 'fixed'
                                     ? 'Budget fixe'
                                     : 'Sur devis',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.gray600,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: context.colors.textSecondary,
+                              ),
                             ),
-                          ),
                           if (budgetType == 'hourly') ...[
                             AppGap.h4,
                             Text(
@@ -265,8 +236,8 @@ class StepSummary extends StatelessWidget {
                               text: '${totalBudget.round()}',
                               style: TextStyle(
                                 fontSize: 32,
-                                fontWeight: FontWeight.w300,
-                                color: AppColors.inkDark,
+                                fontWeight: FontWeight.w400,
+                                color: context.colors.textPrimary,
                                 letterSpacing: -1,
                               ),
                             ),
@@ -288,7 +259,7 @@ class StepSummary extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.deepNavy,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                   ],
@@ -299,17 +270,10 @@ class StepSummary extends StatelessWidget {
           AppGap.h18,
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              isEdit
+            child: MissionStepHelper(
+              text: isEdit
                   ? 'Vos modifications seront visibles immediatement par les freelancers.'
                   : 'Votre demande sera transmise aux meilleurs experts disponibles.',
-              style: TextStyle(
-                fontSize: AppFontSize.smHalf,
-                fontWeight: FontWeight.w400,
-                fontStyle: FontStyle.italic,
-                color: context.colors.textTertiary,
-                height: 1.45,
-              ),
             ),
           ),
         ],

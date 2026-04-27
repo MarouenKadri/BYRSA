@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import 'create_mission_models.dart';
+import 'mission_step_ui.dart';
 
 class StepTarif extends StatefulWidget {
   final String budgetType;
@@ -65,29 +66,15 @@ class _StepTarifState extends State<StepTarif> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Quel tarif horaire ?',
-            style: TextStyle(
-              fontSize: 31,
-              fontWeight: FontWeight.w600,
-              height: 1.16,
-              color: AppColors.inkDark,
-              letterSpacing: -0.6,
-            ),
-          ),
-          AppGap.h10,
-          Text(
-            'Choisissez ou saisissez un montant adapte a votre mission.',
-            style: TextStyle(
-              fontSize: AppFontSize.mdHalf,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-              color: context.colors.textTertiary,
-            ),
+          const MissionStepHeader(
+            title: 'Quel tarif horaire ?',
+            subtitle:
+                'Choisissez ou saisissez un montant adapte a votre mission.',
           ),
           const SizedBox(height: 30),
           _AmountInput(
             controller: _rateCtrl,
+            label: 'Tarif horaire',
             suffix: 'EUR / h',
             onChanged: (v) {
               final val = double.tryParse(v);
@@ -111,15 +98,7 @@ class _StepTarifState extends State<StepTarif> {
             }).toList(),
           ),
           const SizedBox(height: 34),
-          Text(
-            'DUREE ESTIMEE',
-            style: TextStyle(
-              fontSize: AppFontSize.xsHalf,
-              fontWeight: FontWeight.w600,
-              color: AppColors.gray600,
-              letterSpacing: 1.8,
-            ),
-          ),
+          const MissionSectionLabel(label: 'Duree estimee'),
           AppGap.h14,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -138,7 +117,7 @@ class _StepTarifState extends State<StepTarif> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.inkDark,
+                  color: context.colors.textPrimary,
                 ),
               ),
               AppGap.w28,
@@ -155,14 +134,9 @@ class _StepTarifState extends State<StepTarif> {
           AppGap.h14,
           if (widget.hourlyRate > 0)
             Center(
-              child: Text(
-                'Total estime : ${total.round()} EUR',
-                style: TextStyle(
-                  fontSize: AppFontSize.smHalf,
-                  fontWeight: FontWeight.w400,
-                  fontStyle: FontStyle.italic,
-                  color: context.colors.textTertiary,
-                ),
+              child: MissionStepHelper(
+                text:
+                    'Total estime : ${total.round()} EUR',
               ),
             ),
         ],
@@ -178,29 +152,15 @@ class _StepTarifState extends State<StepTarif> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Quel est votre budget ?',
-            style: TextStyle(
-              fontSize: 31,
-              fontWeight: FontWeight.w600,
-              height: 1.16,
-              color: AppColors.inkDark,
-              letterSpacing: -0.6,
-            ),
-          ),
-          AppGap.h10,
-          Text(
-            'Renseignez un montant clair pour recevoir des propositions precises.',
-            style: TextStyle(
-              fontSize: AppFontSize.mdHalf,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-              color: context.colors.textTertiary,
-            ),
+          const MissionStepHeader(
+            title: 'Quel est votre budget ?',
+            subtitle:
+                'Renseignez un montant clair pour recevoir des propositions precises.',
           ),
           const SizedBox(height: 30),
           _AmountInput(
             controller: _fixedCtrl,
+            label: 'Budget fixe',
             suffix: 'EUR',
             useLightHint: true,
             onChanged: (v) {
@@ -224,14 +184,9 @@ class _StepTarifState extends State<StepTarif> {
             }).toList(),
           ),
           AppGap.h14,
-          Text(
-            'Vous pourrez ajuster ce montant plus tard avec votre prestataire.',
-            style: TextStyle(
-              fontSize: AppFontSize.smHalf,
-              fontWeight: FontWeight.w400,
-              color: context.colors.textTertiary,
-              height: 1.45,
-            ),
+          const MissionStepHelper(
+            text:
+                'Vous pourrez ajuster ce montant plus tard avec votre prestataire.',
           ),
         ],
       ),
@@ -241,12 +196,14 @@ class _StepTarifState extends State<StepTarif> {
 
 class _AmountInput extends StatelessWidget {
   final TextEditingController controller;
+  final String label;
   final String suffix;
   final Function(String) onChanged;
   final bool useLightHint;
 
   const _AmountInput({
     required this.controller,
+    required this.label,
     required this.suffix,
     required this.onChanged,
     this.useLightHint = false,
@@ -254,56 +211,44 @@ class _AmountInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(16, 20, 24, 0.04),
-            blurRadius: 18,
-            offset: Offset(0, 6),
-          ),
-        ],
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      style: TextStyle(
+        fontSize: 34,
+        fontWeight: FontWeight.w600,
+        color: context.colors.textPrimary,
+        letterSpacing: -1,
       ),
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.w600,
-          color: context.colors.textPrimary,
+      decoration: AppInputDecorations.profileField(
+        context,
+        hintText: '0',
+        radius: 18,
+      ).copyWith(
+        labelText: label,
+        hintStyle: TextStyle(
+          color: context.colors.textHint,
+          fontSize: 34,
+          fontWeight: useLightHint ? FontWeight.w300 : FontWeight.w600,
           letterSpacing: -1,
         ),
-        decoration: AppInputDecorations.formField(
-          context,
-          hintText: '0',
-          hintStyle: TextStyle(
-            color: context.colors.textHint,
-            fontSize: 36,
-            fontWeight: useLightHint ? FontWeight.w300 : FontWeight.w600,
-            letterSpacing: -1,
-          ),
-          fillColor: context.colors.surface,
-          contentPadding: const EdgeInsets.fromLTRB(22, 20, 0, 20),
-          radius: 18,
-        ).copyWith(
-          suffixIcon: Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Text(
-              suffix,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textPrimary,
-              ),
+        contentPadding: const EdgeInsets.fromLTRB(16, 18, 0, 18),
+        suffixIcon: Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Text(
+            suffix,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: context.colors.textSecondary,
             ),
           ),
-          suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         ),
-        onChanged: onChanged,
+        suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+        errorStyle: context.profileErrorStyle,
       ),
+      onChanged: onChanged,
     );
   }
 }
@@ -327,8 +272,10 @@ class _RateChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? context.colors.textPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: selected
+              ? context.colors.textPrimary.withValues(alpha: 0.08)
+              : context.colors.surface,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? context.colors.textPrimary : context.colors.border,
           ),
@@ -338,7 +285,9 @@ class _RateChip extends StatelessWidget {
           style: TextStyle(
             fontSize: AppFontSize.mdHalf,
             fontWeight: FontWeight.w600,
-            color: selected ? context.colors.surface : context.colors.textSecondary,
+            color: selected
+                ? context.colors.textPrimary
+                : context.colors.textSecondary,
           ),
         ),
       ),
@@ -363,15 +312,8 @@ class _CounterBtn extends StatelessWidget {
           color: context.colors.surface,
           shape: BoxShape.circle,
           border: Border.all(color: context.colors.border),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(16, 20, 24, 0.03),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
         ),
-        child: Icon(icon, color: AppColors.inkDark, size: 18),
+        child: Icon(icon, color: context.colors.textPrimary, size: 18),
       ),
     );
   }

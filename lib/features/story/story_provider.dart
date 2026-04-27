@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,8 +28,10 @@ class StoryProvider extends ChangeNotifier {
     _stories.where((s) => s.isOwner).toList(),
   );
 
+  StreamSubscription<AuthState>? _authSub;
+
   StoryProvider() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         _load();
       } else if (data.event == AuthChangeEvent.signedOut) {
@@ -49,7 +52,8 @@ class StoryProvider extends ChangeNotifier {
           .select(
             '*, author:profiles!author_id(first_name, last_name, avatar_url), post_likes(user_id)',
           )
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(100);
       _stories = (data as List)
           .map<Story?>((j) {
             final images = List<String>.from(j['images'] as List? ?? []);
@@ -142,43 +146,30 @@ class StoryProvider extends ChangeNotifier {
 
     try {
       if (newLiked) {
-        // Insérer un like (n'importe quel utilisateur authentifié peut le faire)
         await _supabase.from('post_likes').insert({
           'post_id': storyId,
           'user_id': userId,
         });
       } else {
-        // Supprimer son propre like
         await _supabase
             .from('post_likes')
             .delete()
             .eq('post_id', storyId)
             .eq('user_id', userId);
       }
-
-      // Re-fetch le vrai compte depuis le serveur
-      final rows = await _supabase
-          .from('post_likes')
-          .select('user_id')
-          .eq('post_id', storyId);
-      final freshIds = List<String>.from(
-        (rows as List).map((r) => r['user_id'].toString()),
-      );
-      final currentIdx = _stories.indexWhere((s) => s.id == storyId);
-      if (currentIdx >= 0) {
-        _stories = List.from(_stories)
-          ..[currentIdx] = _stories[currentIdx].copyWith(
-            isLiked: freshIds.contains(userId),
-            likesCount: freshIds.length,
-          );
-        notifyListeners();
-      }
+      // Optimistic state is already applied; no re-fetch needed
     } catch (e) {
-      // Revert on error
+      // Revert optimistic update on error
       _stories = List.from(_stories)..[idx] = story;
       notifyListeners();
       debugPrint('StoryProvider toggleLike error: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   Future<bool> updateStory(

@@ -137,13 +137,11 @@ class _MethodCard extends StatelessWidget {
       onTap: onTap,
       child: AppSurfaceCard(
         padding: AppInsets.a20,
-        color: isSelected
-            ? context.colors.successLight
-            : context.colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(AppDesign.radius14),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppDesign.radius16),
         border: Border.all(
-          color: isSelected ? AppColors.primary : context.colors.border,
-          width: isSelected ? 2 : 1,
+          color: isSelected ? context.colors.textPrimary : context.colors.border,
+          width: isSelected ? 1.5 : 1,
         ),
         child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -155,15 +153,16 @@ class _MethodCard extends StatelessWidget {
                 height: 52,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary.withOpacity(0.1)
-                      : context.colors.background,
+                      ? context.colors.textPrimary.withValues(alpha: 0.08)
+                      : context.colors.surfaceAlt,
                   borderRadius: BorderRadius.circular(AppDesign.radius14),
                 ),
                 child: Icon(
                   icon,
-                  color:
-                      isSelected ? AppColors.primary : context.colors.textSecondary,
-                  size: 26,
+                  color: isSelected
+                      ? context.colors.textPrimary
+                      : context.colors.textSecondary,
+                  size: 22,
                 ),
               ),
               AppGap.w16,
@@ -174,11 +173,8 @@ class _MethodCard extends StatelessWidget {
                     Text(
                       title,
                       style: context.text.titleMedium?.copyWith(
-                        fontSize: AppFontSize.lg,
                         fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? AppColors.primary
-                            : context.colors.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     AppGap.h4,
@@ -197,10 +193,13 @@ class _MethodCard extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected
+                      ? context.colors.textPrimary
+                      : Colors.transparent,
                   border: Border.all(
-                    color:
-                        isSelected ? AppColors.primary : context.colors.border,
+                    color: isSelected
+                        ? context.colors.textPrimary
+                        : context.colors.border,
                     width: 2,
                   ),
                 ),

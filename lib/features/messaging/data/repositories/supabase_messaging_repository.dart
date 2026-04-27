@@ -11,43 +11,61 @@ class SupabaseMessagingRepository implements MessagingRepository {
     try {
       final rows = await _supabase
           .from('conversations')
-          .select('*')
+          .select('id, client_id, freelancer_id, mission_id, mission_title, last_message, last_message_at')
           .or('client_id.eq.$userId,freelancer_id.eq.$userId')
-          .order('last_message_at', ascending: false);
+          .order('last_message_at', ascending: false)
+          .limit(50);
 
-      final List<Conversation> result = [];
-      for (final row in rows as List) {
+      if ((rows as List).isEmpty) return [];
+
+      // Collect all other user IDs in one pass (deduplicated)
+      final otherUserIds = rows
+          .map<String>((row) => row['client_id'] == userId
+              ? row['freelancer_id'] as String
+              : row['client_id'] as String)
+          .toSet()
+          .toList(growable: false);
+
+      // Batch-fetch all profiles (1 query instead of N)
+      final profileRows = await _supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url')
+          .inFilter('id', otherUserIds);
+
+      final profileMap = <String, Map<String, dynamic>>{
+        for (final p in (profileRows as List).whereType<Map<String, dynamic>>())
+          p['id'] as String: p,
+      };
+
+      // Batch-count unread messages for all conversations (1 query instead of N)
+      final conversationIds =
+          rows.map<String>((r) => r['id'] as String).toList(growable: false);
+
+      final unreadRows = await _supabase
+          .from('messages')
+          .select('conversation_id')
+          .inFilter('conversation_id', conversationIds)
+          .neq('status', 'read')
+          .neq('sender_id', userId);
+
+      final unreadMap = <String, int>{};
+      for (final msg in (unreadRows as List)) {
+        final convId = msg['conversation_id'] as String;
+        unreadMap[convId] = (unreadMap[convId] ?? 0) + 1;
+      }
+
+      return rows.map<Conversation>((row) {
         final isClient = row['client_id'] == userId;
-        final otherUserId =
-            isClient ? row['freelancer_id'] as String : row['client_id'] as String;
+        final otherUserId = isClient
+            ? row['freelancer_id'] as String
+            : row['client_id'] as String;
+        final profile = profileMap[otherUserId];
+        final otherName = profile != null
+            ? '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'
+                .trim()
+            : '';
 
-        // Fetch other user's profile
-        String otherName = 'Utilisateur';
-        String? otherAvatar;
-        try {
-          final profile = await _supabase
-              .from('profiles')
-              .select('first_name, last_name, avatar_url')
-              .eq('id', otherUserId)
-              .single();
-          otherName =
-              '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim();
-          otherAvatar = profile['avatar_url'] as String?;
-        } catch (_) {}
-
-        // Count unread messages
-        int unreadCount = 0;
-        try {
-          final countResult = await _supabase
-              .from('messages')
-              .select('id')
-              .eq('conversation_id', row['id'] as String)
-              .neq('status', 'read')
-              .neq('sender_id', userId);
-          unreadCount = (countResult as List).length;
-        } catch (_) {}
-
-        result.add(Conversation(
+        return Conversation(
           id: row['id'] as String,
           clientId: row['client_id'] as String,
           freelancerId: row['freelancer_id'] as String,
@@ -57,13 +75,12 @@ class SupabaseMessagingRepository implements MessagingRepository {
           lastMessageAt: row['last_message_at'] != null
               ? DateTime.parse(row['last_message_at'] as String)
               : null,
-          unreadCount: unreadCount,
+          unreadCount: unreadMap[row['id'] as String] ?? 0,
           otherUserId: otherUserId,
           otherUserName: otherName.isEmpty ? 'Utilisateur' : otherName,
-          otherUserAvatar: otherAvatar,
-        ));
-      }
-      return result;
+          otherUserAvatar: profile?['avatar_url'] as String?,
+        );
+      }).toList();
     } catch (e) {
       debugPrint('getConversations error: $e');
       return [];
@@ -76,14 +93,45 @@ class SupabaseMessagingRepository implements MessagingRepository {
       final currentUserId = _supabase.auth.currentUser?.id ?? '';
       final rows = await _supabase
           .from('messages')
-          .select()
+          .select('id, conversation_id, sender_id, content, status, created_at')
           .eq('conversation_id', conversationId)
-          .order('created_at', ascending: true);
+          .order('created_at', ascending: true)
+          .limit(100);
       return (rows as List)
-          .map((r) => ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
+          .map((r) =>
+              ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
           .toList();
     } catch (e) {
       debugPrint('getMessages error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ChatMessage>> getMessagesBefore(
+      String conversationId, String beforeMessageId,
+      {int limit = 50}) async {
+    try {
+      final currentUserId = _supabase.auth.currentUser?.id ?? '';
+      final anchorRow = await _supabase
+          .from('messages')
+          .select('created_at')
+          .eq('id', beforeMessageId)
+          .single();
+      final rows = await _supabase
+          .from('messages')
+          .select('id, conversation_id, sender_id, content, status, created_at')
+          .eq('conversation_id', conversationId)
+          .lt('created_at', anchorRow['created_at'] as String)
+          .order('created_at', ascending: false)
+          .limit(limit);
+      return (rows as List)
+          .reversed
+          .map((r) =>
+              ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
+          .toList();
+    } catch (e) {
+      debugPrint('getMessagesBefore error: $e');
       return [];
     }
   }
@@ -112,7 +160,6 @@ class SupabaseMessagingRepository implements MessagingRepository {
     String? missionId,
   }) async {
     try {
-      // Check if conversation already exists
       var query = _supabase
           .from('conversations')
           .select('id')
@@ -126,7 +173,6 @@ class SupabaseMessagingRepository implements MessagingRepository {
       final existing = await query.maybeSingle();
       if (existing != null) return existing['id'] as String;
 
-      // Create new conversation
       final data = <String, dynamic>{
         'client_id': clientId,
         'freelancer_id': freelancerId,

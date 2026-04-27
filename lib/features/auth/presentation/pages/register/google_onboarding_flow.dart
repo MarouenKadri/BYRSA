@@ -439,13 +439,11 @@ class _SelectableCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: AppInsets.a18,
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary.withOpacity(0.06)
-              : Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppDesign.radius16),
           border: Border.all(
-            color: selected ? AppColors.primary : context.colors.border,
-            width: selected ? 2 : 1,
+            color: selected ? context.colors.textPrimary : context.colors.border,
+            width: selected ? 1.5 : 1,
           ),
         ),
         child: Row(
@@ -455,13 +453,15 @@ class _SelectableCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.primary.withOpacity(0.12)
-                    : context.colors.background,
+                    ? context.colors.textPrimary.withValues(alpha: 0.08)
+                    : context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppDesign.radius12),
               ),
               child: Icon(
                 icon,
-                color: selected ? AppColors.primary : context.colors.textSecondary,
+                color: selected
+                    ? context.colors.textPrimary
+                    : context.colors.textSecondary,
                 size: 24,
               ),
             ),
@@ -473,9 +473,7 @@ class _SelectableCard extends StatelessWidget {
                   Text(
                     label,
                     style: context.text.titleMedium?.copyWith(
-                      color: selected
-                          ? AppColors.primary
-                          : null,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -494,9 +492,13 @@ class _SelectableCard extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selected ? AppColors.primary : Colors.transparent,
+                color: selected
+                    ? context.colors.textPrimary
+                    : Colors.transparent,
                 border: Border.all(
-                  color: selected ? AppColors.primary : context.colors.border,
+                  color: selected
+                      ? context.colors.textPrimary
+                      : context.colors.border,
                   width: 2,
                 ),
               ),

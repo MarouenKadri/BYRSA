@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:latlong2/latlong.dart' as ll;
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,24 +28,21 @@ class FreelancerTrackingPage extends StatefulWidget {
 class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   late Mission _mission;
 
-  // Map
-  gmaps.GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   bool _following = true;
-  bool _isProgrammaticCameraMove = false;
 
   // GPS
   StreamSubscription<Position>? _positionSub;
-  ll.LatLng? _currentPosition;
+  LatLng? _currentPosition;
   bool _locationError = false;
 
   // Destination
-  ll.LatLng? _destinationLatLng;
+  LatLng? _destinationLatLng;
 
   // ETA / distance
   double? _distanceKm;
   int _etaMinutes = 0;
 
-  // Supabase broadcast channel
   RealtimeChannel? _broadcastChannel;
 
   @override
@@ -67,6 +64,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   void dispose() {
     _positionSub?.cancel();
     _broadcastChannel?.unsubscribe();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -91,7 +89,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
         ),
       );
       if (!mounted) return;
-      _onNewPosition(ll.LatLng(pos.latitude, pos.longitude), moveMap: true);
+      _onNewPosition(LatLng(pos.latitude, pos.longitude), moveMap: true);
     } catch (_) {}
 
     _positionSub = Geolocator.getPositionStream(
@@ -101,26 +99,22 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
       ),
     ).listen((pos) {
       if (!mounted) return;
-      _onNewPosition(ll.LatLng(pos.latitude, pos.longitude));
+      _onNewPosition(LatLng(pos.latitude, pos.longitude));
     });
   }
 
-  void _onNewPosition(ll.LatLng latlng, {bool moveMap = false}) {
+  void _onNewPosition(LatLng latlng, {bool moveMap = false}) {
     setState(() => _currentPosition = latlng);
-    if (_following || moveMap) {
-      _moveCamera(latlng, 15);
-    }
+    if (_following || moveMap) _moveCamera(latlng, 15);
     _updateDistanceEta(latlng);
     _broadcastPosition(latlng);
   }
 
-  void _broadcastPosition(ll.LatLng latlng) {
-    // Broadcast temps réel
+  void _broadcastPosition(LatLng latlng) {
     _broadcastChannel?.sendBroadcastMessage(
       event: 'position',
       payload: {'lat': latlng.latitude, 'lng': latlng.longitude},
     );
-    // Persister dans la table missions existante
     Supabase.instance.client.from('missions').update({
       'tracking_lat': latlng.latitude,
       'tracking_lng': latlng.longitude,
@@ -135,8 +129,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
       final place = await NominatimService.geocodeSingle(
         _mission.address.fullAddress,
       );
-      if (!mounted) return;
-      if (place == null) return;
+      if (!mounted || place == null) return;
       setState(() => _destinationLatLng = place.latLng);
       if (_currentPosition != null) _updateDistanceEta(_currentPosition!);
     } catch (_) {}
@@ -144,13 +137,12 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
 
   // ── ETA & distance ───────────────────────────────────────────
 
-  void _updateDistanceEta(ll.LatLng current) {
+  void _updateDistanceEta(LatLng current) {
     if (_destinationLatLng == null) return;
-    final meters = const ll.Distance()(current, _destinationLatLng!);
+    final meters = const Distance()(current, _destinationLatLng!);
     final km = meters / 1000;
     setState(() {
       _distanceKm = km;
-      // 30 km/h moyenne urbaine
       _etaMinutes = (km / 30 * 60).ceil().clamp(1, 999);
     });
   }
@@ -174,20 +166,8 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
     _moveCamera(_currentPosition!, 15);
   }
 
-  Future<void> _moveCamera(ll.LatLng target, double zoom) async {
-    final controller = _mapController;
-    if (controller == null) return;
-    _isProgrammaticCameraMove = true;
-    try {
-      await controller.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(
-          gmaps.LatLng(target.latitude, target.longitude),
-          zoom,
-        ),
-      );
-    } finally {
-      _isProgrammaticCameraMove = false;
-    }
+  void _moveCamera(LatLng target, double zoom) {
+    _mapController.move(target, zoom);
   }
 
   // ── Statut mission ───────────────────────────────────────────
@@ -270,29 +250,83 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final center = _currentPosition ??
+        _destinationLatLng ??
+        const LatLng(46.6034, 1.8883);
+
     return Scaffold(
       body: Stack(
         children: [
-          // ── Carte réelle ───────────────────────────────────
-          _RealMap(
-            currentPosition: _currentPosition,
-            destinationLatLng: _destinationLatLng,
-            isProgrammaticCameraMove: _isProgrammaticCameraMove,
-            onMapCreated: (controller) => _mapController = controller,
-            onGesture: () {
-              if (_following) setState(() => _following = false);
-            },
-          ),
+          const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
+          // ── Carte ─────────────────────────────────────────────
+          Positioned.fill(child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: _currentPosition != null ? 15 : 12,
+              onMapEvent: (event) {
+                if (event is MapEventMoveStart &&
+                    event.source != MapEventSource.mapController &&
+                    _following) {
+                  setState(() => _following = false);
+                }
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.flutter_application_1',
+              ),
+              if (_currentPosition != null && _destinationLatLng != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [_currentPosition!, _destinationLatLng!],
+                      color: AppColors.iosBlue.withValues(alpha: 0.70),
+                      strokeWidth: 4,
+                    ),
+                  ],
+                ),
+              MarkerLayer(
+                markers: [
+                  if (_destinationLatLng != null)
+                    Marker(
+                      point: _destinationLatLng!,
+                      width: 36,
+                      height: 36,
+                      child: const Icon(Icons.location_on, color: AppColors.success, size: 36),
+                    ),
+                  if (_currentPosition != null)
+                    Marker(
+                      point: _currentPosition!,
+                      width: 36,
+                      height: 36,
+                      child: const Icon(Icons.navigation_rounded, color: AppColors.iosBlue, size: 32),
+                    ),
+                ],
+              ),
+            ],
+          )),
 
-          // ── Recentrer ──────────────────────────────────────
+          // ── Recentrer ──────────────────────────────────────────
           if (!_following && _currentPosition != null)
             Positioned(
               bottom: screenHeight * 0.42,
               right: 16,
-              child: _RecenterButton(onTap: _recenter),
+              child: GestureDetector(
+                onTap: _recenter,
+                child: AppIconCircle(
+                  icon: Icons.my_location_rounded,
+                  size: 44,
+                  iconSize: 20,
+                  backgroundColor: Colors.white,
+                  iconColor: AppColors.iosBlue,
+                  boxShadow: AppShadows.card,
+                ),
+              ),
             ),
 
-          // ── Indicateur GPS ─────────────────────────────────
+          // ── Indicateur GPS ─────────────────────────────────────
           if (_currentPosition == null && !_locationError)
             Positioned(
               top: topPadding + 64,
@@ -300,10 +334,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
               right: 0,
               child: Center(
                 child: AppSurfaceCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(99),
                   boxShadow: AppShadows.card,
@@ -319,10 +350,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                         ),
                       ),
                       AppGap.w8,
-                      Text(
-                        'Localisation en cours…',
-                        style: context.text.labelMedium,
-                      ),
+                      Text('Localisation en cours…', style: context.text.labelMedium),
                     ],
                   ),
                 ),
@@ -335,27 +363,18 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
               left: 16,
               right: 16,
               child: AppSurfaceCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: context.colors.errorLight,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: AppShadows.card,
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.location_off_rounded,
-                      size: 18,
-                      color: AppColors.urgent,
-                    ),
+                    const Icon(Icons.location_off_rounded, size: 18, color: AppColors.urgent),
                     AppGap.w8,
                     Expanded(
                       child: Text(
                         'Localisation non disponible. Vérifiez les permissions.',
-                        style: context.text.bodySmall?.copyWith(
-                          color: AppColors.urgent,
-                        ),
+                        style: context.text.bodySmall?.copyWith(color: AppColors.urgent),
                       ),
                     ),
                   ],
@@ -363,7 +382,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
               ),
             ),
 
-          // ── Bouton retour ──────────────────────────────────
+          // ── Bouton retour ──────────────────────────────────────
           Positioned(
             top: topPadding + 4,
             left: 4,
@@ -387,7 +406,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
             ),
           ),
 
-          // ── Titre ─────────────────────────────────────────
+          // ── Titre ─────────────────────────────────────────────
           Positioned(
             top: topPadding + 12,
             left: 60,
@@ -400,15 +419,13 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                 boxShadow: AppShadows.card,
                 child: Text(
                   _pageTitle,
-                  style: context.text.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
             ),
           ),
 
-          // ── Carte ETA flottante ────────────────────────────
+          // ── Carte ETA flottante ────────────────────────────────
           if (_distanceKm != null)
             Positioned(
               bottom: screenHeight * 0.41,
@@ -426,7 +443,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
               ),
             ),
 
-          // ── Panneau bas ────────────────────────────────────
+          // ── Panneau bas ────────────────────────────────────────
           AppScrollableSheet(
             initialChildSize: 0.38,
             minChildSize: 0.24,
@@ -461,11 +478,9 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                             );
                           }
                         },
-                  onFinishMission:
-                      _mission.status == MissionStatus.inProgress
-                          ? () =>
-                              _updateStatus(MissionStatus.completionRequested)
-                          : null,
+                  onFinishMission: _mission.status == MissionStatus.inProgress
+                      ? () => _updateStatus(MissionStatus.completionRequested)
+                      : null,
                 ),
               ],
             ),
@@ -476,111 +491,253 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   }
 }
 
-// ─── Carte réelle Google Maps ────────────────────────────────────────────────
+// ─── Carte ETA flottante ──────────────────────────────────────────────────────
 
-class _RealMap extends StatelessWidget {
-  final ll.LatLng? currentPosition;
-  final ll.LatLng? destinationLatLng;
-  final bool isProgrammaticCameraMove;
-  final ValueChanged<gmaps.GoogleMapController> onMapCreated;
-  final VoidCallback onGesture;
+class _EtaCard extends StatelessWidget {
+  final int etaMinutes;
+  final double distanceKm;
+  final Color color;
+  final String label;
 
-  const _RealMap({
-    required this.currentPosition,
-    required this.destinationLatLng,
-    required this.isProgrammaticCameraMove,
-    required this.onMapCreated,
-    required this.onGesture,
+  const _EtaCard({
+    required this.etaMinutes,
+    required this.distanceKm,
+    required this.color,
+    required this.label,
   });
+
+  String get _timeLabel {
+    if (etaMinutes >= 60) return '${etaMinutes ~/ 60}h ${etaMinutes % 60}min';
+    return '$etaMinutes min';
+  }
+
+  String get _distLabel => distanceKm < 1
+      ? '${(distanceKm * 1000).round()} m'
+      : '${distanceKm.toStringAsFixed(1)} km';
 
   @override
   Widget build(BuildContext context) {
-    final center = currentPosition ??
-        destinationLatLng ??
-        const ll.LatLng(46.6034, 1.8883);
-
-    return gmaps.GoogleMap(
-      initialCameraPosition: gmaps.CameraPosition(
-        target: gmaps.LatLng(center.latitude, center.longitude),
-        zoom: currentPosition != null ? 15 : 12,
-      ),
-      mapType: gmaps.MapType.normal,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      mapToolbarEnabled: false,
-      compassEnabled: false,
-      onMapCreated: onMapCreated,
-      onCameraMoveStarted: () {
-        if (!isProgrammaticCameraMove) {
-          onGesture();
-        }
-      },
-      polylines: (currentPosition != null && destinationLatLng != null)
-          ? {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: [
-                  gmaps.LatLng(
-                    currentPosition!.latitude,
-                    currentPosition!.longitude,
+    return AppSurfaceCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: AppShadows.card,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.schedule_rounded, color: color, size: 22),
+          ),
+          AppGap.w14,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: context.text.labelSmall?.copyWith(
+                    color: context.colors.textTertiary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
-                  gmaps.LatLng(
-                    destinationLatLng!.latitude,
-                    destinationLatLng!.longitude,
+                ),
+                AppGap.h2,
+                Text(
+                  _timeLabel,
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color,
                   ),
-                ],
-                color: AppColors.iosBlue.withValues(alpha: 0.70),
-                width: 4,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              _distLabel,
+              style: context.text.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
               ),
-            }
-          : const <gmaps.Polyline>{},
-      markers: {
-        if (destinationLatLng != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('destination'),
-            position: gmaps.LatLng(
-              destinationLatLng!.latitude,
-              destinationLatLng!.longitude,
-            ),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueGreen,
             ),
           ),
-        if (currentPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('current'),
-            position: gmaps.LatLng(
-              currentPosition!.latitude,
-              currentPosition!.longitude,
-            ),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueAzure,
-            ),
-          ),
-      },
+        ],
+      ),
     );
   }
 }
 
-// ─── Bouton recentrer ─────────────────────────────────────────────────────────
+// ─── Panneau de suivi freelancer ──────────────────────────────────────────────
 
-class _RecenterButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _RecenterButton({required this.onTap});
+class _FreelancerTrackingPanel extends StatelessWidget {
+  final Mission mission;
+  final String? etaLabel;
+  final VoidCallback? onStartRoute;
+  final VoidCallback? onEnterStartCode;
+  final VoidCallback? onFinishMission;
+  final String? startCodeHint;
+  final VoidCallback? onCopyHint;
+
+  const _FreelancerTrackingPanel({
+    required this.mission,
+    this.etaLabel,
+    this.onStartRoute,
+    this.onEnterStartCode,
+    this.onFinishMission,
+    this.startCodeHint,
+    this.onCopyHint,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AppIconCircle(
-        icon: Icons.my_location_rounded,
-        size: 44,
-        iconSize: 20,
-        backgroundColor: Colors.white,
-        iconColor: AppColors.iosBlue,
-        boxShadow: AppShadows.card,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: mission.status.color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(mission.status.icon, color: mission.status.color, size: 28),
+            ),
+            AppGap.w14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mission.title,
+                    style: context.text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  AppGap.h4,
+                  Row(
+                    children: [
+                      MissionStatusBadge(status: mission.status, compact: true),
+                      if (etaLabel != null && mission.status == MissionStatus.onTheWay) ...[
+                        AppGap.w10,
+                        Text(
+                          etaLabel!,
+                          style: context.text.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.iosBlue,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        AppGap.h18,
+        AppSurfaceCard(
+          padding: AppInsets.a14,
+          color: context.colors.surfaceAlt,
+          borderRadius: BorderRadius.circular(AppDesign.radius14),
+          child: Row(
+            children: [
+              Icon(
+                mission.status == MissionStatus.inProgress
+                    ? Icons.handyman_rounded
+                    : Icons.password_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              AppGap.w10,
+              Expanded(
+                child: Text(
+                  switch (mission.status) {
+                    MissionStatus.confirmed =>
+                      'Partez vers le client puis demandez le code a 6 chiffres une fois sur place.',
+                    MissionStatus.onTheWay =>
+                      'Quand vous arrivez, entrez le code donne par le client pour demarrer la mission.',
+                    MissionStatus.inProgress =>
+                      'La mission est en cours. Terminez-la ici a la fin de l intervention.',
+                    MissionStatus.completionRequested =>
+                      'Vous avez signale la fin. Le client doit maintenant confirmer ou contester.',
+                    _ => 'Le suivi de mission est termine.',
+                  },
+                  style: context.text.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (startCodeHint != null &&
+            (mission.status == MissionStatus.confirmed ||
+                mission.status == MissionStatus.onTheWay)) ...[
+          AppGap.h12,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Test local: code ${startCodeHint!.substring(0, 3)} ${startCodeHint!.substring(3)}',
+                  style: context.text.labelMedium?.copyWith(
+                    color: context.colors.textTertiary,
+                  ),
+                ),
+              ),
+              if (onCopyHint != null)
+                TextButton(onPressed: onCopyHint, child: const Text('Copier')),
+            ],
+          ),
+        ],
+        AppGap.h16,
+        Row(
+          children: [
+            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.urgent),
+            AppGap.w6,
+            Expanded(
+              child: Text(
+                mission.address.fullAddress,
+                style: context.text.bodySmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        AppGap.h18,
+        if (onStartRoute != null)
+          _TrackingPrimaryButton(
+            label: 'Je suis en route',
+            icon: Icons.navigation_rounded,
+            onTap: onStartRoute!,
+          ),
+        if (onEnterStartCode != null) ...[
+          if (onStartRoute != null) AppGap.h10,
+          _TrackingPrimaryButton(
+            label: 'Entrer le code client',
+            icon: Icons.password_rounded,
+            onTap: onEnterStartCode!,
+          ),
+        ],
+        if (onFinishMission != null) ...[
+          AppGap.h10,
+          _TrackingPrimaryButton(
+            label: 'J ai termine',
+            icon: Icons.check_circle_rounded,
+            onTap: onFinishMission!,
+          ),
+        ],
+      ],
     );
   }
 }
@@ -591,10 +748,7 @@ class _StartCodeSheet extends StatefulWidget {
   final String missionTitle;
   final Future<bool> Function(String code) onSubmit;
 
-  const _StartCodeSheet({
-    required this.missionTitle,
-    required this.onSubmit,
-  });
+  const _StartCodeSheet({required this.missionTitle, required this.onSubmit});
 
   @override
   State<_StartCodeSheet> createState() => _StartCodeSheetState();
@@ -689,10 +843,7 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Text('Verifier le code'),
           ),
@@ -702,273 +853,7 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
   }
 }
 
-// ─── Panneau de suivi ─────────────────────────────────────────────────────────
-
-class _FreelancerTrackingPanel extends StatelessWidget {
-  final Mission mission;
-  final String? etaLabel;
-  final VoidCallback? onStartRoute;
-  final VoidCallback? onEnterStartCode;
-  final VoidCallback? onFinishMission;
-  final String? startCodeHint;
-  final VoidCallback? onCopyHint;
-
-  const _FreelancerTrackingPanel({
-    required this.mission,
-    this.etaLabel,
-    this.onStartRoute,
-    this.onEnterStartCode,
-    this.onFinishMission,
-    this.startCodeHint,
-    this.onCopyHint,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: mission.status.color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(
-                mission.status.icon,
-                color: mission.status.color,
-                size: 28,
-              ),
-            ),
-            AppGap.w14,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    mission.title,
-                    style: context.text.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  AppGap.h4,
-                  Row(
-                    children: [
-                      MissionStatusBadge(
-                        status: mission.status,
-                        compact: true,
-                      ),
-                      if (etaLabel != null &&
-                          mission.status == MissionStatus.onTheWay) ...[
-                        AppGap.w10,
-                        Text(
-                          etaLabel!,
-                          style: context.text.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.iosBlue,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        AppGap.h18,
-        AppSurfaceCard(
-          padding: AppInsets.a14,
-          color: context.colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(AppDesign.radius14),
-          child: Row(
-            children: [
-              Icon(
-                mission.status == MissionStatus.inProgress
-                    ? Icons.handyman_rounded
-                    : Icons.password_rounded,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              AppGap.w10,
-              Expanded(
-                child: Text(
-                  switch (mission.status) {
-                    MissionStatus.confirmed =>
-                      'Partez vers le client puis demandez le code a 6 chiffres une fois sur place.',
-                    MissionStatus.onTheWay =>
-                      'Quand vous arrivez, entrez le code donne par le client pour demarrer la mission.',
-                    MissionStatus.inProgress =>
-                      'La mission est en cours. Terminez-la ici a la fin de l intervention.',
-                    MissionStatus.completionRequested =>
-                      'Vous avez signale la fin. Le client doit maintenant confirmer ou contester.',
-                    _ => 'Le suivi de mission est termine.',
-                  },
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (startCodeHint != null &&
-            (mission.status == MissionStatus.confirmed ||
-                mission.status == MissionStatus.onTheWay)) ...[
-          AppGap.h12,
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Test local: code ${startCodeHint!.substring(0, 3)} ${startCodeHint!.substring(3)}',
-                  style: context.text.labelMedium?.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-                ),
-              ),
-              if (onCopyHint != null)
-                TextButton(
-                  onPressed: onCopyHint,
-                  child: const Text('Copier'),
-                ),
-            ],
-          ),
-        ],
-        AppGap.h16,
-        Row(
-          children: [
-            const Icon(
-              Icons.location_on_rounded,
-              size: 16,
-              color: AppColors.urgent,
-            ),
-            AppGap.w6,
-            Expanded(
-              child: Text(
-                mission.address.fullAddress,
-                style: context.text.bodySmall,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        AppGap.h18,
-        if (onStartRoute != null)
-          _TrackingPrimaryButton(
-            label: 'Je suis en route',
-            icon: Icons.navigation_rounded,
-            onTap: onStartRoute!,
-          ),
-        if (onEnterStartCode != null) ...[
-          if (onStartRoute != null) AppGap.h10,
-          _TrackingPrimaryButton(
-            label: 'Entrer le code client',
-            icon: Icons.password_rounded,
-            onTap: onEnterStartCode!,
-          ),
-        ],
-        if (onFinishMission != null) ...[
-          AppGap.h10,
-          _TrackingPrimaryButton(
-            label: 'J ai termine',
-            icon: Icons.check_circle_rounded,
-            onTap: onFinishMission!,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ─── Carte ETA flottante ──────────────────────────────────────────────────────
-
-class _EtaCard extends StatelessWidget {
-  final int etaMinutes;
-  final double distanceKm;
-  final Color color;
-  final String label;
-
-  const _EtaCard({
-    required this.etaMinutes,
-    required this.distanceKm,
-    required this.color,
-    required this.label,
-  });
-
-  String get _timeLabel {
-    if (etaMinutes >= 60) return '${etaMinutes ~/ 60}h ${etaMinutes % 60}min';
-    return '$etaMinutes min';
-  }
-
-  String get _distLabel => distanceKm < 1
-      ? '${(distanceKm * 1000).round()} m'
-      : '${distanceKm.toStringAsFixed(1)} km';
-
-  @override
-  Widget build(BuildContext context) {
-    return AppSurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: AppShadows.card,
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.schedule_rounded, color: color, size: 22),
-          ),
-          AppGap.w14,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: context.text.labelSmall?.copyWith(
-                    color: context.colors.textTertiary,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                AppGap.h2,
-                Text(
-                  _timeLabel,
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              _distLabel,
-              style: context.text.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ─── Bouton action principal ──────────────────────────────────────────────────
 
 class _TrackingPrimaryButton extends StatelessWidget {
   final String label;

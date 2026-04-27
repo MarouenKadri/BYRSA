@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,17 +19,17 @@ class MissionProvider extends ChangeNotifier {
   List<Mission> _freelancerMissions = [];
   bool isLoading = false;
 
+  StreamSubscription<AuthState>? _authSub;
+
   MissionProvider({MissionRepository? repository})
       : _repository = repository ?? SupabaseMissionRepository() {
-    // Reload when a user signs in, clear when they sign out
-    _supabase.auth.onAuthStateChange.listen((data) {
+    _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         _load();
       } else if (data.event == AuthChangeEvent.signedOut) {
         _reset();
       }
     });
-    // Handle persisted session (app restart with user already logged in)
     if (_supabase.auth.currentUser != null) _load();
   }
 
@@ -313,5 +314,11 @@ class MissionProvider extends ChangeNotifier {
       if (mission.id == id) return mission;
     }
     return null;
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 }

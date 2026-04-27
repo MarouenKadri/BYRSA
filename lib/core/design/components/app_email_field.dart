@@ -41,16 +41,24 @@ class _AppEmailFieldState extends AppBaseFieldState<AppEmailField> {
       validator: widget.validator,
       onChanged: widget.onChanged,
       autofocus: widget.autofocus,
-      style: context.text.titleMedium,
-      decoration: AppInputDecorations.formField(
+      style: context.text.bodyLarge?.copyWith(
+        fontSize: AppFontSize.body,
+        fontWeight: FontWeight.w500,
+        color: context.colors.textPrimary,
+      ),
+      decoration: AppInputDecorations.profileField(
         context,
         hintText: widget.hint ?? 'exemple@mail.com',
         prefixIcon: Icon(
           Icons.mail_outline_rounded,
-          color: context.colors.textSecondary,
-          size: 22,
+          color: context.colors.textHint,
+          size: 16,
         ),
-        fillColor: isFocused ? context.colors.surface : context.colors.surfaceAlt,
+        radius: 18,
+      ).copyWith(
+        labelText: widget.label,
+        contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        errorStyle: context.profileErrorStyle,
       ),
     );
   }

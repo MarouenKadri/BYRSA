@@ -1,14 +1,14 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:latlong2/latlong.dart' as ll;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission_address.dart';
 import '../../../../../core/design/app_design_system.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
-/// 📍 Inkern - Page Carte — Lieu d'intervention
+/// 📍 Page Carte — Lieu d'intervention (OpenStreetMap, aucune clé API)
 /// ═══════════════════════════════════════════════════════════════════════════
 
 class MissionMapPage extends StatefulWidget {
@@ -21,10 +21,10 @@ class MissionMapPage extends StatefulWidget {
 }
 
 class _MissionMapPageState extends State<MissionMapPage> {
-  gmaps.GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
 
-  ll.LatLng _center = const ll.LatLng(48.8566, 2.3522);
-  ll.LatLng? _pinLatLng;
+  LatLng _center = const LatLng(48.8566, 2.3522);
+  LatLng? _pinLatLng;
   bool _loading = false;
   bool _sheetVisible = false;
 
@@ -32,7 +32,7 @@ class _MissionMapPageState extends State<MissionMapPage> {
   void initState() {
     super.initState();
     if (widget.address.latitude != null && widget.address.longitude != null) {
-      _pinLatLng = ll.LatLng(widget.address.latitude!, widget.address.longitude!);
+      _pinLatLng = LatLng(widget.address.latitude!, widget.address.longitude!);
       _center = _pinLatLng!;
     } else {
       _geocode();
@@ -51,12 +51,7 @@ class _MissionMapPageState extends State<MissionMapPage> {
         _pinLatLng = place.latLng;
         _center = place.latLng;
       });
-      await _mapController?.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(
-          gmaps.LatLng(_center.latitude, _center.longitude),
-          14.2,
-        ),
-      );
+      _mapController.move(_center, 14.2);
     } catch (_) {
       // silencieux
     } finally {
@@ -64,23 +59,12 @@ class _MissionMapPageState extends State<MissionMapPage> {
     }
   }
 
-
-  Future<void> _focusMap() async {
+  void _focusMap() async {
     final target = _pinLatLng ?? _center;
-    await _mapController?.animateCamera(
-      gmaps.CameraUpdate.newLatLngZoom(
-        gmaps.LatLng(target.latitude, target.longitude),
-        15.6,
-      ),
-    );
+    _mapController.move(target, 15.6);
     await Future.delayed(const Duration(milliseconds: 170));
     if (!mounted) return;
     setState(() => _sheetVisible = true);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -91,32 +75,36 @@ class _MissionMapPageState extends State<MissionMapPage> {
       backgroundColor: AppColors.snow,
       body: Stack(
         children: [
+          const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
           // ── Carte plein écran ──────────────────────────────────────────
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: gmaps.LatLng(_center.latitude, _center.longitude),
-              zoom: 14.0,
+          Positioned.fill(child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _center,
+              initialZoom: 14.0,
+              onTap: (_, __) => _focusMap(),
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+              ),
             ),
-            mapType: gmaps.MapType.normal,
-            myLocationEnabled: false,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            compassEnabled: false,
-            onMapCreated: (controller) => _mapController = controller,
-            onTap: (_) => _focusMap(),
-            markers: _pinLatLng == null
-                ? const <gmaps.Marker>{}
-                : {
-                    gmaps.Marker(
-                      markerId: const gmaps.MarkerId('mission'),
-                      position: gmaps.LatLng(
-                        _pinLatLng!.latitude,
-                        _pinLatLng!.longitude,
-                      ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.flutter_application_1',
+              ),
+              if (_pinLatLng != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _pinLatLng!,
+                      width: 36,
+                      height: 36,
+                      child: const _MapPin(),
                     ),
-                  },
-          ),
+                  ],
+                ),
+            ],
+          )),
 
           // ── Loader géocodage ──────────────────────────────────────────
           if (_loading)
@@ -141,7 +129,7 @@ class _MissionMapPageState extends State<MissionMapPage> {
                       Colors.white.withValues(alpha: 0.0),
                       Colors.white.withValues(alpha: 0.05),
                     ],
-                    stops: [0.0, 0.22, 1.0],
+                    stops: const [0.0, 0.22, 1.0],
                   ),
                 ),
               ),
@@ -181,6 +169,17 @@ class _MissionMapPageState extends State<MissionMapPage> {
       ),
     );
   }
+}
+
+class _MapPin extends StatelessWidget {
+  const _MapPin();
+
+  @override
+  Widget build(BuildContext context) => const Icon(
+        Icons.location_on,
+        color: AppColors.mapPin,
+        size: 36,
+      );
 }
 
 // ── Carte adresse ──────────────────────────────────────────────────────────
@@ -233,7 +232,7 @@ class _AddressCard extends StatelessWidget {
                     AppGap.h4,
                     Text(
                       address,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.6,

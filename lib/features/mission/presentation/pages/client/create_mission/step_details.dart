@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../../core/design/app_design_system.dart';
 import '../../../../../../core/design/app_primitives.dart';
+import 'mission_step_ui.dart';
 
 /// ─────────────────────────────────────────────────────────────
 /// 📝 Step 4: Details (Description + Photos) - With Camera
@@ -172,25 +173,10 @@ class _StepDetailsState extends State<StepDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Décrivez votre besoin',
-                  style: TextStyle(
-                    fontSize: 31,
-                    fontWeight: FontWeight.w600,
-                    height: 1.16,
-                    color: AppColors.inkDark,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-                AppGap.h10,
-                Text(
-                  'Quelques détails bien choisis aideront les freelancers à vous répondre plus précisément.',
-                  style: TextStyle(
-                    fontSize: AppFontSize.mdHalf,
-                    fontWeight: FontWeight.w400,
-                    height: 1.5,
-                    color: context.colors.textTertiary,
-                  ),
+                const MissionStepHeader(
+                  title: 'Décrivez votre besoin',
+                  subtitle:
+                      'Quelques détails bien choisis aideront les freelancers à vous répondre plus précisément.',
                 ),
                 const SizedBox(height: 28),
                 _buildDescriptionSection(),
@@ -208,53 +194,43 @@ class _StepDetailsState extends State<StepDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'DESCRIPTION',
+        const MissionSectionLabel(label: 'Description'),
+        AppGap.h12,
+        TextField(
+          controller: _descriptionController,
+          onChanged: widget.onDescriptionChanged,
+          maxLines: 6,
+          maxLength: 500,
           style: TextStyle(
-            fontSize: AppFontSize.xsHalf,
-            fontWeight: FontWeight.w600,
-            color: AppColors.gray600,
-            letterSpacing: 1.8,
+            fontSize: AppFontSize.body,
+            fontWeight: FontWeight.w400,
+            height: 1.55,
+            color: context.colors.textPrimary,
+          ),
+          decoration: AppInputDecorations.profileField(
+            context,
+            hintText:
+                "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
+            radius: 18,
+            prefixIcon: Icon(
+              Icons.notes_rounded,
+              size: 16,
+              color: context.colors.textHint,
+            ),
+          ).copyWith(
+            labelText: 'Description de la mission',
+            alignLabelWithHint: true,
+            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            counterStyle: context.text.labelSmall?.copyWith(
+              color: context.colors.textTertiary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         AppGap.h12,
-        Container(
-          decoration: BoxDecoration(
-            color: context.colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: TextField(
-            controller: _descriptionController,
-            onChanged: widget.onDescriptionChanged,
-            maxLines: 6,
-            maxLength: 500,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              height: 1.55,
-              color: AppColors.inkDark,
-            ),
-            decoration: AppInputDecorations.formField(
-              context,
-              hintText:
-                  "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
-              hintStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                height: 1.5,
-                color: context.colors.textHint,
-              ),
-              contentPadding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-              noBorder: true,
-              fillColor: Colors.transparent,
-            ).copyWith(
-              counterStyle: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textTertiary,
-              ),
-            ),
-          ),
+        const MissionStepHelper(
+          text:
+              'Plus votre description est précise, plus les propositions seront adaptées.',
         ),
       ],
     );
@@ -319,20 +295,12 @@ class _StepDetailsState extends State<StepDetails> {
       children: [
         Row(
           children: [
-            Text(
-              'PHOTOS ${widget.photos.length}/10',
-              style: TextStyle(
-                fontSize: AppFontSize.xsHalf,
-                fontWeight: FontWeight.w600,
-                color: AppColors.gray600,
-                letterSpacing: 1.8,
-              ),
-            ),
+            MissionSectionLabel(label: 'Photos ${widget.photos.length}/10'),
             AppGap.w10,
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(color: context.colors.border),
               ),
@@ -346,7 +314,7 @@ class _StepDetailsState extends State<StepDetails> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.gray600,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ],
@@ -417,18 +385,13 @@ class _StepDetailsState extends State<StepDetails> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.inkDark,
+                  color: context.colors.textPrimary,
                 ),
               ),
               AppGap.h4,
-                Text(
-                  "Camera ou galerie, jusqu'a 10 images",
-                  style: TextStyle(
-                    fontSize: AppFontSize.smHalf,
-                    fontWeight: FontWeight.w400,
-                    color: context.colors.textTertiary,
-                  ),
-                ),
+              const MissionStepHelper(
+                text: "Camera ou galerie, jusqu'a 10 images",
+              ),
             ],
           ),
         ),

@@ -70,13 +70,14 @@ class _AppPhoneFieldState extends AppBaseFieldState<AppPhoneField> {
       validator: widget.validator,
       onChanged: widget.onChanged,
       autofocus: widget.autofocus,
-      style: context.text.titleMedium,
-      decoration: AppInputDecorations.formField(
+      style: context.text.bodyLarge?.copyWith(
+        fontSize: AppFontSize.body,
+        fontWeight: FontWeight.w500,
+        color: context.colors.textPrimary,
+      ),
+      decoration: AppInputDecorations.profileField(
         context,
         hintText: _country.hint,
-        hintStyle: context.text.bodyLarge?.copyWith(
-          color: context.colors.textHint,
-        ),
         prefixIcon: GestureDetector(
           onTap: _showCountryPicker,
           child: Container(
@@ -89,7 +90,7 @@ class _AppPhoneFieldState extends AppBaseFieldState<AppPhoneField> {
                 AppGap.w4,
                 Text(
                   _country.dialCode,
-                  style: context.text.titleSmall?.copyWith(
+                  style: context.text.bodySmall?.copyWith(
                     color: context.colors.textSecondary,
                   ),
                 ),
@@ -103,9 +104,11 @@ class _AppPhoneFieldState extends AppBaseFieldState<AppPhoneField> {
             ),
           ),
         ),
-        fillColor: isFocused ? context.colors.surface : context.colors.surfaceAlt,
-        contentPadding: AppInputTokens.compactPadding,
-        radius: AppInputTokens.compactRadius,
+        radius: 18,
+        contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      ).copyWith(
+        labelText: widget.label,
+        errorStyle: context.profileErrorStyle,
       ),
     );
   }

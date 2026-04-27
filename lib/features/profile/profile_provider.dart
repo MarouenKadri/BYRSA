@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' show StreamSubscription, unawaited;
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -17,8 +17,11 @@ class ProfileProvider extends ChangeNotifier {
   bool isSaving = false;
   String? error;
 
-  List<Map<String, dynamic>> freelancers = [];
+  List<Map<String, dynamic>> _freelancers = [];
   bool isLoadingFreelancers = false;
+  StreamSubscription<AuthState>? _authSub;
+
+  List<Map<String, dynamic>> get freelancers => List.unmodifiable(_freelancers);
 
   String? get currentUserId => _supabase.auth.currentUser?.id;
   String? get currentUserEmail => _supabase.auth.currentUser?.email;
@@ -26,7 +29,7 @@ class ProfileProvider extends ChangeNotifier {
   ProfileProvider({FreelancerCatalogRepository? freelancerCatalogRepository})
     : _freelancerCatalogRepository =
           freelancerCatalogRepository ?? SupabaseFreelancerCatalogRepository() {
-    _supabase.auth.onAuthStateChange.listen((data) {
+    _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         loadProfile();
       } else if (data.event == AuthChangeEvent.signedOut) {
@@ -205,10 +208,10 @@ class ProfileProvider extends ChangeNotifier {
         }
       }
 
-      freelancers = results;
+      _freelancers = results;
     } catch (e) {
       debugPrint('loadFreelancers error: $e');
-      freelancers = [];
+      _freelancers = [];
     } finally {
       isLoadingFreelancers = false;
       notifyListeners();
@@ -264,7 +267,14 @@ class ProfileProvider extends ChangeNotifier {
   void clear() {
     profile = null;
     error = null;
+    _freelancers = [];
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   static String _normalizeToken(String raw) {

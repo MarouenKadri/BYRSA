@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:latlong2/latlong.dart' as ll;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/app_primitives.dart';
@@ -196,67 +196,72 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MissionMapPage(address: mission.address),
-                ),
+            Container(
+              height: 182,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: context.colors.border),
               ),
-              child: Container(
-                height: 182,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: context.colors.border),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: _DetailMapPreview(address: mission.address),
-                      ),
+              clipBehavior: Clip.hardEdge,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: _DetailMapPreview(address: mission.address),
                     ),
-                    const Center(child: DetailMiniMapPin()),
-                    Positioned(
-                      right: 12,
-                      bottom: 12,
-                      child: GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                MissionMapPage(address: mission.address),
-                          ),
+                  ),
+                  // Overlay Flutter au-dessus de la platform view pour capturer les taps
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MissionMapPage(address: mission.address),
                         ),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.96),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.colors.border,
-                              width: 0.8,
+                      ),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                  const Center(child: DetailMiniMapPin()),
+                  Positioned(
+                    right: 12,
+                    bottom: 12,
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              MissionMapPage(address: mission.address),
+                        ),
+                      ),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.96),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: context.colors.border,
+                            width: 0.8,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.07),
+                              blurRadius: 18,
+                              offset: const Offset(0, 10),
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.07),
-                                blurRadius: 18,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.search_rounded,
-                            size: 18,
-                            color: context.colors.textPrimary,
-                          ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.search_rounded,
+                          size: 18,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             AppGap.h14,
@@ -355,7 +360,7 @@ class _DetailMapPreview extends StatefulWidget {
 }
 
 class _DetailMapPreviewState extends State<_DetailMapPreview> {
-  Future<ll.LatLng?>? _centerFuture;
+  Future<LatLng?>? _centerFuture;
 
   @override
   void initState() {
@@ -363,11 +368,11 @@ class _DetailMapPreviewState extends State<_DetailMapPreview> {
     _centerFuture = _resolveCenter();
   }
 
-  Future<ll.LatLng?> _resolveCenter() async {
+  Future<LatLng?> _resolveCenter() async {
     final lat = widget.address.latitude;
     final lon = widget.address.longitude;
     if (lat != null && lon != null) {
-      return ll.LatLng(lat, lon);
+      return LatLng(lat, lon);
     }
 
     final query = widget.address.fullAddress.trim();
@@ -379,7 +384,7 @@ class _DetailMapPreviewState extends State<_DetailMapPreview> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ll.LatLng?>(
+    return FutureBuilder<LatLng?>(
       future: _centerFuture,
       builder: (context, snapshot) {
         final center = snapshot.data;
@@ -389,23 +394,28 @@ class _DetailMapPreviewState extends State<_DetailMapPreview> {
           );
         }
 
-        return gmaps.GoogleMap(
-          initialCameraPosition: gmaps.CameraPosition(
-            target: gmaps.LatLng(center.latitude, center.longitude),
-            zoom: 13,
+        return FlutterMap(
+          options: MapOptions(
+            initialCenter: center,
+            initialZoom: 13,
+            interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
           ),
-          mapType: gmaps.MapType.normal,
-          myLocationEnabled: false,
-          zoomControlsEnabled: false,
-          compassEnabled: false,
-          myLocationButtonEnabled: false,
-          mapToolbarEnabled: false,
-          rotateGesturesEnabled: false,
-          tiltGesturesEnabled: false,
-          scrollGesturesEnabled: false,
-          zoomGesturesEnabled: false,
-          liteModeEnabled: true,
-          markers: const <gmaps.Marker>{},
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.example.flutter_application_1',
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: center,
+                  width: 30,
+                  height: 30,
+                  child: const Icon(Icons.location_on, color: AppColors.mapPin, size: 30),
+                ),
+              ],
+            ),
+          ],
         );
       },
     );

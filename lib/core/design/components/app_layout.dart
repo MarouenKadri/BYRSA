@@ -428,8 +428,9 @@ class AppInfoBanner extends StatelessWidget {
     final tone = color ?? context.colors.info;
     return AppSurfaceCard(
       padding: AppInsets.a14,
-      color: tone.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(AppRadius.button),
+      color: context.colors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.card),
+      border: Border.all(color: context.colors.border),
       child: Row(
         children: [
           Icon(icon, color: tone, size: 20),
@@ -439,7 +440,7 @@ class AppInfoBanner extends StatelessWidget {
               message,
               style: context.text.bodySmall?.copyWith(
                 fontSize: AppFontSize.md,
-                color: tone,
+                color: context.colors.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -471,20 +472,20 @@ class AppPageHeaderBlock extends StatelessWidget {
       children: [
         Text(
           title,
-          style: context.text.displayMedium?.copyWith(
-            fontSize: AppFontSize.h1,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
+          style: context.text.headlineMedium?.copyWith(
+            fontSize: AppFontSize.h2,
+            fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
           ),
         ),
         AppGap.h8,
         Text(
           subtitle,
-          style: context.text.bodyLarge?.copyWith(
+          style: context.text.bodyMedium?.copyWith(
             fontSize: AppFontSize.body,
             fontWeight: FontWeight.w400,
             color: context.colors.textSecondary,
+            height: 1.45,
           ),
         ),
       ],
@@ -582,16 +583,18 @@ class AppProgressHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Back arrow ────────────────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 8, 20, 0),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: context.colors.textPrimary,
-            onPressed: onBack,
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                color: context.colors.textPrimary,
+                onPressed: onBack,
+              ),
+            ],
           ),
         ),
-        // ── Barre + label ─────────────────────────────────────────────────
         AppProgressBar(
           currentStep: currentStep,
           totalSteps: totalSteps,

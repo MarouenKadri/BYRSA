@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/models/app_notification.dart';
@@ -15,12 +16,13 @@ class NotificationProvider extends ChangeNotifier {
   List<AppNotification> _notifications = [];
   bool isLoading = false;
   RealtimeChannel? _channel;
+  StreamSubscription<AuthState>? _authSub;
 
   String? get _userId => Supabase.instance.client.auth.currentUser?.id;
 
   NotificationProvider({NotificationRepository? repository})
       : _repository = repository ?? SupabaseNotificationRepository() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         _channel?.unsubscribe();
         _channel = null;
@@ -134,6 +136,7 @@ class NotificationProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSub?.cancel();
     _channel?.unsubscribe();
     super.dispose();
   }

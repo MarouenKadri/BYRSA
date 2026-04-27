@@ -54,7 +54,8 @@ class _AccountPageState extends State<AccountPage> {
             if (isFreelancer) const _MyStoriesSection(),
             AppGap.h12,
             _FlatSection(
-              label: 'COMPTE',
+              label: 'Compte',
+              description: 'Profil, activité et avis',
               children: [
                 _FlatTile(
                   icon: Icons.badge_outlined,
@@ -103,7 +104,8 @@ class _AccountPageState extends State<AccountPage> {
               ],
             ),
             _FlatSection(
-              label: 'PAIEMENTS ET SÉCURITÉ',
+              label: 'Paiements et sécurité',
+              description: 'Méthodes de paiement, protection et accès',
               children: [
                 _FlatTile(
                   icon: Icons.credit_card_outlined,
@@ -177,7 +179,8 @@ class _AccountPageState extends State<AccountPage> {
               ],
             ),
             _FlatSection(
-              label: 'AIDE ET SESSION',
+              label: 'Aide et session',
+              description: 'Support, informations et déconnexion',
               children: [
                 _FlatTile(
                   icon: Icons.help_outline_rounded,
@@ -224,28 +227,31 @@ class _AccountPageState extends State<AccountPage> {
 
 class _FlatSection extends StatelessWidget {
   final String label;
+  final String? description;
   final List<Widget> children;
 
-  const _FlatSection({required this.label, required this.children});
+  const _FlatSection({
+    required this.label,
+    this.description,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 14, top: 16, bottom: 8),
-            child: Text(
-              label,
-              style: context.text.labelSmall?.copyWith(
-                color: context.colors.textTertiary,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-              ),
+          Text(
+            label.toUpperCase(),
+            style: context.text.labelSmall?.copyWith(
+              color: context.colors.textTertiary,
+              letterSpacing: 0.8,
+              fontWeight: FontWeight.w600,
             ),
           ),
+          AppGap.h4,
           ...children,
         ],
       ),
@@ -274,20 +280,19 @@ class _FlatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedIconColor = iconColor ?? context.colors.textSecondary;
+    final resolvedTitleColor = titleColor ?? context.colors.textPrimary;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(vertical: 11),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: iconColor ?? context.colors.textSecondary,
-            ),
-            AppGap.w14,
+            Icon(icon, size: 18, color: resolvedIconColor),
+            AppGap.w12,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,25 +301,26 @@ class _FlatTile extends StatelessWidget {
                     title,
                     style: context.text.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: titleColor ?? context.colors.textPrimary,
+                      color: resolvedTitleColor,
                     ),
                   ),
-                  AppGap.h2,
-                  Text(
-                    subtitle,
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.4,
+                  if (subtitle.isNotEmpty) ...[
+                    AppGap.h2,
+                    Text(
+                      subtitle,
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.colors.textTertiary,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            AppGap.w12,
+            AppGap.w8,
             trailing ??
                 Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
+                  Icons.chevron_right_rounded,
+                  size: 18,
                   color: context.colors.textTertiary,
                 ),
           ],
@@ -340,42 +346,30 @@ class _ProfileHeader extends StatelessWidget {
     final isVerified = profile?.isVerified ?? false;
     final isUploading = profileProv.isSaving;
 
-    return Container(
-      margin: const EdgeInsets.only(top: 14),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.colors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromRGBO(15, 23, 42, 0.03),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // ── Avatar cliquable ──────────────────────────────────────
           GestureDetector(
             onTap: isUploading ? null : () => _pickAvatar(context, profileProv),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 76,
-                  height: 76,
+                  width: 78,
+                  height: 78,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.surfaceAlt,
                     border: Border.all(
                       color: context.colors.border,
-                      width: 1.2,
+                      width: 1.5,
                     ),
                   ),
                   child: CircleAvatar(
-                    radius: 36,
+                    radius: 37,
                     backgroundColor: Colors.transparent,
                     backgroundImage: avatarUrl != null
                         ? NetworkImage(avatarUrl)
@@ -386,7 +380,7 @@ class _ProfileHeader extends StatelessWidget {
                                 ? displayName[0].toUpperCase()
                                 : '?',
                             style: TextStyle(
-                              fontSize: 26,
+                              fontSize: 28,
                               fontWeight: FontWeight.w700,
                               color: context.colors.textSecondary,
                             ),
@@ -394,6 +388,7 @@ class _ProfileHeader extends StatelessWidget {
                         : null,
                   ),
                 ),
+                // Overlay chargement
                 if (isUploading)
                   Positioned.fill(
                     child: Container(
@@ -413,21 +408,48 @@ class _ProfileHeader extends StatelessWidget {
                       ),
                     ),
                   ),
+                // Icône caméra (tap pour changer l'avatar)
+                if (!isUploading)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: context.colors.textPrimary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.colors.background,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                // Badge vérifié (en haut à droite si vérifié)
                 if (isVerified && !isUploading)
                   Positioned(
                     right: -2,
-                    bottom: -2,
+                    top: -2,
                     child: Container(
-                      width: 22,
-                      height: 22,
+                      width: 20,
+                      height: 20,
                       decoration: BoxDecoration(
                         color: context.colors.success,
                         shape: BoxShape.circle,
-                        border: Border.all(color: context.colors.surface, width: 2),
+                        border: Border.all(
+                          color: context.colors.background,
+                          width: 2,
+                        ),
                       ),
                       child: const Icon(
                         Icons.check_rounded,
-                        size: 13,
+                        size: 11,
                         color: Colors.white,
                       ),
                     ),
@@ -435,7 +457,10 @@ class _ProfileHeader extends StatelessWidget {
               ],
             ),
           ),
+
           AppGap.w16,
+
+          // ── Nom + rôle ────────────────────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,54 +480,10 @@ class _ProfileHeader extends StatelessWidget {
                 AppGap.h4,
                 Text(
                   isFreelancerMode ? 'Freelancer' : 'Client',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFontSize.md,
                     fontWeight: FontWeight.w500,
                     color: context.colors.textSecondary,
-                  ),
-                ),
-                AppGap.h12,
-                TextButton(
-                  onPressed: isUploading
-                      ? null
-                      : () => _pickAvatar(context, profileProv),
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.textPrimary,
-                    backgroundColor: context.colors.surfaceAlt,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                      side: BorderSide(
-                        color: context.colors.border,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Modifier le profil',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textPrimary,
-                        ),
-                      ),
-                      AppGap.w8,
-                      Icon(
-                        Icons.arrow_outward_rounded,
-                        size: 15,
-                        color: context.colors.textSecondary,
-                      ),
-                    ],
                   ),
                 ),
               ],

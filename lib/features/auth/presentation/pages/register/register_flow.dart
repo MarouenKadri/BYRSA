@@ -431,9 +431,7 @@ class _SelectableCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: AppInsets.a20,
         decoration: BoxDecoration(
-          color: isSelected
-              ? context.colors.textPrimary.withValues(alpha: 0.06)
-              : context.colors.surfaceAlt,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppDesign.radius16),
           border: Border.all(
             color: isSelected
@@ -450,7 +448,7 @@ class _SelectableCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? context.colors.textPrimary.withValues(alpha: 0.08)
-                    : context.colors.background,
+                    : context.colors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppDesign.radius14),
               ),
               child: Icon(

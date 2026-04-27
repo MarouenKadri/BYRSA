@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/models/message.dart';
@@ -8,22 +9,26 @@ class MessagingProvider extends ChangeNotifier {
   final MessagingRepository _repo = SupabaseMessagingRepository();
   final _supabase = Supabase.instance.client;
 
-  List<Conversation> conversations = [];
-  List<ChatMessage> currentMessages = [];
+  List<Conversation> _conversations = [];
+  List<ChatMessage> _currentMessages = [];
   String? currentConversationId;
   bool isLoadingConversations = false;
   bool isLoadingMessages = false;
 
   RealtimeChannel? _messagesChannel;
+  StreamSubscription<AuthState>? _authSub;
+
+  List<Conversation> get conversations => List.unmodifiable(_conversations);
+  List<ChatMessage> get currentMessages => List.unmodifiable(_currentMessages);
 
   String? get currentUserId => _supabase.auth.currentUser?.id;
 
   MessagingProvider() {
-    _supabase.auth.onAuthStateChange.listen((data) {
+    _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedOut) {
         _unsubscribe();
-        conversations = [];
-        currentMessages = [];
+        _conversations = [];
+        _currentMessages = [];
         currentConversationId = null;
         notifyListeners();
       }
@@ -37,7 +42,7 @@ class MessagingProvider extends ChangeNotifier {
     if (userId == null) return;
     isLoadingConversations = true;
     notifyListeners();
-    conversations = await _repo.getConversations(userId);
+    _conversations = await _repo.getConversations(userId);
     isLoadingConversations = false;
     notifyListeners();
   }
@@ -52,7 +57,7 @@ class MessagingProvider extends ChangeNotifier {
     isLoadingMessages = true;
     notifyListeners();
 
-    currentMessages = await _repo.getMessages(conversationId);
+    _currentMessages = await _repo.getMessages(conversationId);
     isLoadingMessages = false;
     notifyListeners();
 
@@ -67,7 +72,7 @@ class MessagingProvider extends ChangeNotifier {
   void closeConversation() {
     _unsubscribe();
     currentConversationId = null;
-    currentMessages = [];
+    _currentMessages = [];
   }
 
   Future<String?> sendMessage(String content) async {
@@ -84,37 +89,37 @@ class MessagingProvider extends ChangeNotifier {
       createdAt: DateTime.now(),
       status: MessageStatus.sending,
     );
-    currentMessages = [...currentMessages, optimistic];
+    _currentMessages = [..._currentMessages, optimistic];
     notifyListeners();
 
     final sent = await _repo.sendMessage(currentConversationId!, userId, content);
     if (sent == null) {
-      // Remove optimistic on failure
-      currentMessages = currentMessages.where((m) => m.id != tempId).toList();
+      _currentMessages = _currentMessages.where((m) => m.id != tempId).toList();
       notifyListeners();
       return 'Erreur lors de l\'envoi';
     }
 
     // Replace optimistic with real message
-    currentMessages = currentMessages
-        .where((m) => m.id != tempId)
-        .toList()
-      ..add(sent);
+    _currentMessages = [
+      ..._currentMessages.where((m) => m.id != tempId),
+      sent,
+    ];
     notifyListeners();
 
     // Update conversation last_message
-    await _repo.updateConversationLastMessage(currentConversationId!, content);
+    unawaited(_repo.updateConversationLastMessage(currentConversationId!, content));
 
     // Refresh conversation list in memory
     final convIndex =
-        conversations.indexWhere((c) => c.id == currentConversationId);
+        _conversations.indexWhere((c) => c.id == currentConversationId);
     if (convIndex != -1) {
-      final updated = conversations[convIndex].copyWith(
+      final updated = _conversations[convIndex].copyWith(
         lastMessage: content,
         lastMessageAt: DateTime.now(),
       );
-      conversations = [...conversations];
-      conversations[convIndex] = updated;
+      final updated_ = List<Conversation>.from(_conversations);
+      updated_[convIndex] = updated;
+      _conversations = updated_;
       notifyListeners();
     }
 
@@ -159,8 +164,8 @@ class MessagingProvider extends ChangeNotifier {
               userId,
             );
             // Avoid duplicate (already added via optimistic)
-            if (!currentMessages.any((m) => m.id == newMsg.id)) {
-              currentMessages = [...currentMessages, newMsg];
+            if (!_currentMessages.any((m) => m.id == newMsg.id)) {
+              _currentMessages = [..._currentMessages, newMsg];
               notifyListeners();
               // Mark as read immediately if it's from the other person
               if (newMsg.senderId != userId) {
@@ -179,6 +184,7 @@ class MessagingProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSub?.cancel();
     _unsubscribe();
     super.dispose();
   }

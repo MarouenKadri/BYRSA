@@ -8,16 +8,20 @@ class SupabaseReviewRepository implements ReviewRepository {
 
   static const String _clientRole = 'client';
   static const String _freelancerRole = 'freelancer';
+  static const int _defaultLimit = 50;
 
   @override
   Future<List<Review>> getReceivedReviews(String userId) async {
     try {
       final rows = await _supabase
           .from('reviews')
-          .select()
+          .select('id, reviewee_id, reviewer_id, reviewer_name, reviewer_avatar, rating, comment, mission_id, mission_title, created_at')
           .eq('reviewee_id', userId)
-          .order('created_at', ascending: false);
-      return (rows as List).map((r) => Review.fromJson(r as Map<String, dynamic>)).toList();
+          .order('created_at', ascending: false)
+          .limit(_defaultLimit);
+      return (rows as List)
+          .map((r) => Review.fromJson(r as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       debugPrint('getReceivedReviews error: $e');
       return [];
@@ -29,10 +33,13 @@ class SupabaseReviewRepository implements ReviewRepository {
     try {
       final rows = await _supabase
           .from('reviews')
-          .select()
+          .select('id, reviewee_id, reviewer_id, reviewer_name, reviewer_avatar, rating, comment, mission_id, mission_title, created_at')
           .eq('reviewer_id', userId)
-          .order('created_at', ascending: false);
-      return (rows as List).map((r) => Review.fromJson(r as Map<String, dynamic>)).toList();
+          .order('created_at', ascending: false)
+          .limit(_defaultLimit);
+      return (rows as List)
+          .map((r) => Review.fromJson(r as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       debugPrint('getGivenReviews error: $e');
       return [];
@@ -47,9 +54,10 @@ class SupabaseReviewRepository implements ReviewRepository {
     try {
       final rows = await _supabase
           .from('reviews')
-          .select()
+          .select('id, reviewee_id, reviewer_id, reviewer_name, reviewer_avatar, rating, comment, mission_id, mission_title, created_at')
           .eq('reviewee_id', revieweeId)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(_defaultLimit);
       final reviews = (rows as List)
           .map((r) => Review.fromJson(r as Map<String, dynamic>))
           .toList();
@@ -72,9 +80,10 @@ class SupabaseReviewRepository implements ReviewRepository {
     try {
       final rows = await _supabase
           .from('reviews')
-          .select()
+          .select('id, reviewee_id, reviewer_id, reviewer_name, reviewer_avatar, rating, comment, mission_id, mission_title, created_at')
           .eq('reviewer_id', reviewerId)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(_defaultLimit);
       final reviews = (rows as List)
           .map((r) => Review.fromJson(r as Map<String, dynamic>))
           .toList();
@@ -121,13 +130,18 @@ class SupabaseReviewRepository implements ReviewRepository {
   @override
   Future<double> getAverageRating(String userId) async {
     try {
+      // Fetch up to 200 ratings — sufficient sample for any average computation
       final rows = await _supabase
           .from('reviews')
           .select('rating')
-          .eq('reviewee_id', userId);
+          .eq('reviewee_id', userId)
+          .limit(200);
       final list = rows as List;
       if (list.isEmpty) return 0.0;
-      final sum = list.fold<int>(0, (acc, r) => acc + ((r as Map<String, dynamic>)['rating'] as num).toInt());
+      final sum = list.fold<int>(
+          0,
+          (acc, r) =>
+              acc + ((r as Map<String, dynamic>)['rating'] as num).toInt());
       return sum / list.length;
     } catch (e) {
       debugPrint('getAverageRating error: $e');
@@ -227,7 +241,8 @@ class SupabaseReviewRepository implements ReviewRepository {
     }
   }
 
-  Future<Map<String, String>> _loadRolesFromProfiles(List<String> userIds) async {
+  Future<Map<String, String>> _loadRolesFromProfiles(
+      List<String> userIds) async {
     if (userIds.isEmpty) return const {};
 
     try {
@@ -251,7 +266,8 @@ class SupabaseReviewRepository implements ReviewRepository {
     }
   }
 
-  String? _roleFromMissionForUser(Map<String, dynamic> mission, String userId) {
+  String? _roleFromMissionForUser(
+      Map<String, dynamic> mission, String userId) {
     final normalizedUserId = userId.trim();
     if (normalizedUserId.isEmpty) return null;
 

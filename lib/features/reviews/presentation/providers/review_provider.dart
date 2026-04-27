@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +12,7 @@ class ReviewProvider extends ChangeNotifier {
   final GetGivenReviews _getGivenReviews;
   final SupabaseReviewRepository _reviewRepository = SupabaseReviewRepository();
   final _supabase = Supabase.instance.client;
+  StreamSubscription<AuthState>? _authSub;
 
   List<Review> _receivedReviews = [];
   List<Review> _givenReviews = [];
@@ -28,14 +30,19 @@ class ReviewProvider extends ChangeNotifier {
         _getGivenReviews =
             getGivenReviews ?? GetGivenReviews(SupabaseReviewRepository()) {
     if (autoLoad) {
-      _supabase.auth.onAuthStateChange.listen((data) {
-        if (data.event == AuthChangeEvent.signedIn) {
-          _reset();
-        } else if (data.event == AuthChangeEvent.signedOut) {
+      _authSub = _supabase.auth.onAuthStateChange.listen((data) {
+        if (data.event == AuthChangeEvent.signedIn ||
+            data.event == AuthChangeEvent.signedOut) {
           _reset();
         }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   List<Review> get receivedReviews => List.unmodifiable(_receivedReviews);
