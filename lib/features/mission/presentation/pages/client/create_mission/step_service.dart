@@ -91,34 +91,23 @@ class StepService extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.02,
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 20,
+        childAspectRatio: 0.95,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final service = items[index];
         final isSelected = selectedService == service['id'];
         final color = service['color'] as Color? ?? AppColors.primary;
-        final subServices = _readSubServices(service['subServices']);
         return GestureDetector(
           onTap: () => _showSubServices(context, service),
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 1, end: isSelected ? 1.015 : 1),
-            duration: const Duration(milliseconds: 170),
-            curve: Curves.easeOutCubic,
-            builder: (context, scale, child) =>
-                Transform.scale(scale: scale, child: child),
-            child: _ServiceCategoryCard(
-              title: service['name'] as String? ?? 'Service',
-              icon: service['icon'] as IconData? ?? Icons.category_rounded,
-              color: color,
-              isSelected: isSelected,
-              subtitle: isSelected
-                  ? selectedSubService
-                  : '${subServices.length} options',
-            ),
+          child: _ServiceIconCell(
+            title: service['name'] as String? ?? 'Service',
+            icon: service['icon'] as IconData? ?? Icons.category_rounded,
+            color: color,
+            isSelected: isSelected,
           ),
         );
       },
@@ -367,16 +356,14 @@ class _SelectedServiceSummary extends StatelessWidget {
   }
 }
 
-class _ServiceCategoryCard extends StatelessWidget {
+class _ServiceIconCell extends StatelessWidget {
   final String title;
-  final String? subtitle;
   final IconData icon;
   final Color color;
   final bool isSelected;
 
-  const _ServiceCategoryCard({
+  const _ServiceIconCell({
     required this.title,
-    required this.subtitle,
     required this.icon,
     required this.color,
     required this.isSelected,
@@ -384,73 +371,58 @@ class _ServiceCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 170),
-      curve: Curves.easeOutCubic,
-      decoration: BoxDecoration(
-        color: isSelected
-            ? color.withValues(alpha: 0.06)
-            : context.colors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isSelected ? color : context.colors.border,
-          width: isSelected ? 1.4 : 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isSelected ? color : color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icon,
+                size: 26,
+                color: isSelected ? Colors.white : color,
+              ),
+            ),
+            if (isSelected)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  width: 18,
+                  height: 18,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(11),
+                    color: AppColors.inkDark,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1.5),
                   ),
-                  child: Icon(icon, size: 19, color: color),
-                ),
-                const Spacer(),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 18,
-                    color: color,
-                  ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
-                color: context.colors.textPrimary,
-                letterSpacing: -0.2,
-              ),
-            ),
-            if (subtitle != null && subtitle!.isNotEmpty) ...[
-              AppGap.h5,
-              Text(
-                subtitle!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? color : context.colors.textSecondary,
+                  child: const Icon(Icons.check_rounded, color: Colors.white, size: 11),
                 ),
               ),
-            ],
           ],
         ),
-      ),
+        AppGap.h8,
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: AppFontSize.xs,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+            height: 1.3,
+          ),
+        ),
+      ],
     );
   }
 }

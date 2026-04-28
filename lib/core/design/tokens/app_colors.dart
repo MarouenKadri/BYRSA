@@ -124,6 +124,11 @@ abstract class AppColors {
   static const categoryDemenagement = Color(0xFF9C27B0);
   static const categoryPetsitting = Color(0xFFE91E63);
   static const categoryCours = Color(0xFF3F51B5);
+  static const categoryMaconnerie = Color(0xFF795548);
+  static const categoryMecanique = Color(0xFF546E7A);
+  static const categoryGardeEnfant = Color(0xFFFF7043);
+  static const categoryAidePersonnesAgees = Color(0xFF26A69A);
+  static const categoryAutre = Color(0xFF78909C);
 
   // External brands
   static const googleBlue = Color(0xFF4285F4);

@@ -33,7 +33,8 @@ class ServiceCategory {
   static const String allFilterLabel = 'Toutes';
 
   static const List<ServiceCategory> all = [
-    menage, jardinage, bricolage, plomberie, electricite, demenagement, petsitting, cours,
+    menage, jardinage, bricolage, plomberie, electricite, maconnerie, mecanique,
+    gardeEnfant, aidePersonnesAgees, demenagement, petsitting, cours, autre,
   ];
 
   static const ServiceCategory menage = ServiceCategory(
@@ -79,15 +80,56 @@ class ServiceCategory {
   static const ServiceCategory electricite = ServiceCategory(
     id: 'electricite', name: 'Électricité', icon: Icons.electrical_services_rounded, color: AppColors.categoryElectricite,
     sortOrder: 5,
+    isPopular: true,
     description: 'Installations et dépannages électriques',
-    subServices: ['Prise électrique', 'Interrupteur', 'Luminaire', 'Dépannage', 'Tableau électrique', 'Mise aux normes', 'Installation domotique'],
+    subServices: ['Prise électrique', 'Interrupteur', 'Luminaire', 'Dépannage', 'Tableau électrique', 'Mise aux normes', 'Installation domotique', 'Passage de câbles'],
     popularTags: ['certifié', 'mise aux normes', 'urgence'],
     aliases: ['électricité', 'electricien', 'elec'],
   );
 
+  static const ServiceCategory maconnerie = ServiceCategory(
+    id: 'maconnerie', name: 'Maçonnerie', icon: Icons.foundation_rounded, color: AppColors.categoryMaconnerie,
+    sortOrder: 6,
+    isPopular: true,
+    description: 'Travaux de maçonnerie, carrelage et revêtements',
+    subServices: ['Carrelage', 'Dallage', 'Pose de parquet', 'Enduit / crépi', 'Petite maçonnerie', 'Réparation mur / sol', 'Ragréage', 'Montage cloison'],
+    popularTags: ['intérieur', 'extérieur', 'rénovation', 'neuf'],
+    aliases: ['maçon', 'carrelage', 'travaux'],
+  );
+
+  static const ServiceCategory mecanique = ServiceCategory(
+    id: 'mecanique', name: 'Mécanique', icon: Icons.build_rounded, color: AppColors.categoryMecanique,
+    sortOrder: 7,
+    isPopular: true,
+    description: 'Entretien et réparation automobile',
+    subServices: ['Vidange', 'Changement de pneus', 'Freins', 'Batterie', 'Courroie de distribution', 'Diagnostic électronique', 'Révision complète', 'Carrosserie mineure'],
+    popularTags: ['à domicile', 'toutes marques', 'urgence', 'devis gratuit'],
+    aliases: ['mécanicien', 'voiture', 'auto', 'garage'],
+  );
+
+  static const ServiceCategory gardeEnfant = ServiceCategory(
+    id: 'garde_enfant', name: 'Garde enfant', icon: Icons.child_care_rounded, color: AppColors.categoryGardeEnfant,
+    sortOrder: 8,
+    isPopular: true,
+    description: 'Garde d\'enfants à domicile ou en sortie',
+    subServices: ['Garde à domicile', 'Sortie d\'école', 'Garde le soir', 'Garde le week-end', 'Baby-sitting ponctuel', 'Aide aux devoirs', 'Activités enfants'],
+    popularTags: ['0-3 ans', '3-6 ans', '6-12 ans', 'diplômé', 'expérimenté'],
+    aliases: ['baby-sitting', 'babysitting', 'garde enfants', 'nounou'],
+  );
+
+  static const ServiceCategory aidePersonnesAgees = ServiceCategory(
+    id: 'aide_personnes_agees', name: 'Aide séniors', icon: Icons.elderly_rounded, color: AppColors.categoryAidePersonnesAgees,
+    sortOrder: 9,
+    isPopular: true,
+    description: 'Accompagnement et aide à domicile pour personnes âgées',
+    subServices: ['Aide à la toilette', 'Préparation des repas', 'Courses', 'Accompagnement médical', 'Compagnie / visite', 'Aide au ménage', 'Aide administrative'],
+    popularTags: ['domicile', 'régulier', 'ponctuel', 'diplômé'],
+    aliases: ['senior', 'personnes âgées', 'aide domicile', 'auxiliaire vie'],
+  );
+
   static const ServiceCategory demenagement = ServiceCategory(
     id: 'demenagement', name: 'Déménagement', icon: Icons.local_shipping_rounded, color: AppColors.categoryDemenagement,
-    sortOrder: 6,
+    sortOrder: 10,
     description: 'Aide au déménagement et transport',
     subServices: ['Aide déménagement', 'Transport meubles', 'Emballage', 'Montage/démontage', 'Portage', 'Location camion avec chauffeur'],
     popularTags: ['petit volume', 'grand volume', 'avec véhicule', 'muscles'],
@@ -96,16 +138,24 @@ class ServiceCategory {
 
   static const ServiceCategory petsitting = ServiceCategory(
     id: 'petsitting', name: 'Pet-sitting', icon: Icons.pets_rounded, color: AppColors.categoryPetsitting,
-    sortOrder: 7,
+    sortOrder: 11,
     description: 'Garde et promenade d\'animaux de compagnie',
     subServices: ['Garde chien', 'Garde chat', 'Promenade', 'Visite à domicile', 'Garde NAC', 'Garde longue durée'],
     popularTags: ['expérimenté', 'à domicile', 'chez le pet-sitter'],
     aliases: ['animaux', 'pet sitting', 'garde animaux'],
   );
 
+  static const ServiceCategory autre = ServiceCategory(
+    id: 'autre', name: 'Autre', icon: Icons.more_horiz_rounded, color: AppColors.categoryAutre,
+    sortOrder: 13,
+    description: 'Tout autre service non listé',
+    subServices: ['Service à définir'],
+    aliases: ['other', 'divers', 'autre chose'],
+  );
+
   static const ServiceCategory cours = ServiceCategory(
     id: 'cours', name: 'Cours', icon: Icons.school_rounded, color: AppColors.categoryCours,
-    sortOrder: 8,
+    sortOrder: 12,
     description: 'Cours particuliers et soutien scolaire',
     subServices: ['Mathématiques', 'Français', 'Anglais', 'Physique-Chimie', 'SVT', 'Musique', 'Informatique', 'Langues étrangères'],
     popularTags: ['primaire', 'collège', 'lycée', 'supérieur', 'adulte'],
@@ -195,6 +245,8 @@ class ServiceCategory {
     'orange': [bricolage, electricite],
     'blue': [plomberie, cours],
     'purple': [demenagement, petsitting],
+    'brown': [maconnerie],
+    'grey': [mecanique],
   };
 
   static List<String> _readRawList(dynamic rawValue) {

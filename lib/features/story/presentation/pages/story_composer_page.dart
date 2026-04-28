@@ -16,43 +16,29 @@ class StoryComposerPage extends StatefulWidget {
   State<StoryComposerPage> createState() => _StoryComposerPageState();
 }
 
-class _StoryComposerPageState extends State<StoryComposerPage> with SingleTickerProviderStateMixin {
+class _StoryComposerPageState extends State<StoryComposerPage> {
   final _captionController = TextEditingController();
+  late final PageController _mediaPageController;
+  final _thumbScrollController = ScrollController();
   late List<File> _mediaFiles;
   int _currentMediaIndex = 0;
   bool _isPosting = false;
   bool _showCaption = false;
   String? _selectedCategoryId;
   bool _didAutoOpenCategorySheet = false;
-  late final AnimationController _sendController;
-  late final Animation<Offset> _sendSlide;
-  late final Animation<double> _sendFade;
+
+  static const double _thumbW = 56;
+  static const double _thumbH = 76;
+  static const double _thumbSpacing = 6;
 
   @override
   void initState() {
     super.initState();
     _mediaFiles = [widget.mediaFile];
-    _sendController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 520),
-    );
-    _sendSlide = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.34, -0.24),
-    ).animate(CurvedAnimation(parent: _sendController, curve: Curves.easeOutCubic));
-    _sendFade = Tween<double>(begin: 1, end: 0.16).animate(
-      CurvedAnimation(parent: _sendController, curve: Curves.easeOut),
-    );
+    _mediaPageController = PageController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-
-      final preferred = _preferredCategoryId();
-      if (preferred != null && _selectedCategoryId == null) {
-        setState(() => _selectedCategoryId = preferred);
-      }
-
-      if (_didAutoOpenCategorySheet) return;
+      if (!mounted || _didAutoOpenCategorySheet) return;
       _didAutoOpenCategorySheet = true;
       await Future<void>.delayed(const Duration(milliseconds: 180));
       if (!mounted) return;
@@ -62,7 +48,8 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
 
   @override
   void dispose() {
-    _sendController.dispose();
+    _mediaPageController.dispose();
+    _thumbScrollController.dispose();
     _captionController.dispose();
     super.dispose();
   }
@@ -70,8 +57,6 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
   Future<void> _share() async {
     if (_isPosting || _selectedCategoryId == null || _mediaFiles.isEmpty) return;
     HapticFeedback.lightImpact();
-    await _sendController.forward(from: 0);
-    if (!mounted) return;
     setState(() => _isPosting = true);
 
     final provider = context.read<StoryProvider>();
@@ -95,30 +80,19 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
   }
 
   Future<void> _openCategoryPicker() async {
-    final selected = await showAppBottomSheet<String>(
+    final selected = await showModalBottomSheet<String>(
       context: context,
-      wrapWithSurface: false,
-      child: _CategoryPickerSheet(selected: _selectedCategoryId),
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CategoryPickerSheet(selected: _selectedCategoryId),
     );
-    if (!mounted || selected == null) return;
+    if (!mounted) return;
+    if (selected == null) {
+      Navigator.pop(context);
+      return;
+    }
     setState(() => _selectedCategoryId = selected);
-  }
-
-  String? _preferredCategoryId() {
-    final provider = context.read<StoryProvider>();
-    final recent = provider.myStoryGroups;
-    if (recent.isEmpty) return null;
-    return recent.first.categoryId;
-  }
-
-  Future<void> _replaceMedia() async {
-    if (_isPosting) return;
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    if (!mounted || picked == null) return;
-    setState(() => _mediaFiles[_currentMediaIndex] = File(picked.path));
   }
 
   Future<void> _addMoreMedia() async {
@@ -129,37 +103,74 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
       _mediaFiles.addAll(picked.map((f) => File(f.path)));
       _currentMediaIndex = _mediaFiles.length - 1;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _mediaPageController.animateToPage(
+        _currentMediaIndex,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+      );
+      _scrollThumbToIndex(_currentMediaIndex);
+    });
   }
 
-  void _selectMedia(int index) {
-    if (_currentMediaIndex == index) return;
-    setState(() => _currentMediaIndex = index);
+  void _removeMedia(int index) {
+    if (_mediaFiles.length <= 1) return;
+    setState(() {
+      _mediaFiles.removeAt(index);
+      if (_currentMediaIndex >= _mediaFiles.length) {
+        _currentMediaIndex = _mediaFiles.length - 1;
+      }
+    });
+    _mediaPageController.jumpToPage(_currentMediaIndex);
+    _scrollThumbToIndex(_currentMediaIndex);
+  }
+
+  void _scrollThumbToIndex(int index) {
+    final offset = index * (_thumbW + _thumbSpacing);
+    if (_thumbScrollController.hasClients) {
+      _thumbScrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
-    final currentMedia = _mediaFiles[_currentMediaIndex];
     final selectedCat = _selectedCategoryId != null
         ? ServiceCategory.findById(_selectedCategoryId!)
         : null;
+    const shadows = [Shadow(color: Color.fromRGBO(0, 0, 0, 0.34), blurRadius: 12, offset: Offset(0, 2))];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.black,
         resizeToAvoidBottomInset: false,
         body: Stack(
           fit: StackFit.expand,
           children: [
-            Image.file(currentMedia, fit: BoxFit.cover),
+            // ── Media ────────────────────────────────────────────
+            PageView.builder(
+              controller: _mediaPageController,
+              itemCount: _mediaFiles.length,
+              onPageChanged: (i) {
+                setState(() => _currentMediaIndex = i);
+                _scrollThumbToIndex(i);
+              },
+              itemBuilder: (_, i) => Image.file(_mediaFiles[i], fit: BoxFit.cover),
+            ),
+            // ── Gradients ────────────────────────────────────────
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.center,
                   colors: [
-                    AppColors.background.withValues(alpha: 0.65),
+                    Colors.black.withValues(alpha: AppStoryMetrics.viewerTopGradientAlpha),
                     Colors.transparent,
                   ],
                 ),
@@ -174,62 +185,62 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      AppColors.background.withValues(alpha: 0.65),
+                      Colors.black.withValues(alpha: AppStoryMetrics.viewerBottomGradientAlpha),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
+            // ── Controls ─────────────────────────────────────────
             SafeArea(
               child: Padding(
                 padding: EdgeInsets.only(bottom: bottom),
                 child: Column(
                   children: [
-                    // ── Top bar ──────────────────────────────────
+                    // ── Ligne 1 : Annuler | Publier ───────────────
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(
                         children: [
-                          IconButton(
+                          TextButton(
                             onPressed: _isPosting ? null : () => Navigator.pop(context),
-                            splashRadius: 20,
-                            icon: const Icon(
-                              Icons.close_rounded,
-                              color: AppColors.snow,
-                              size: 22,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              foregroundColor: AppColors.snow,
+                              textStyle: const TextStyle(fontSize: AppFontSize.lg, fontWeight: FontWeight.w500, letterSpacing: -0.1),
                             ),
+                            child: Text('Annuler', style: TextStyle(color: AppColors.snow.withValues(alpha: 0.96), shadows: shadows)),
                           ),
                           const Spacer(),
                           _isPosting
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: AppStoryMetrics.composerLoaderSize,
                                   height: AppStoryMetrics.composerLoaderSize,
                                   child: Center(
                                     child: SizedBox(
                                       width: AppStoryMetrics.composerLoaderInnerSize,
                                       height: AppStoryMetrics.composerLoaderInnerSize,
-                                      child: CircularProgressIndicator(
-                                        color: AppColors.snow,
-                                        strokeWidth: 2.2,
-                                      ),
+                                      child: const CircularProgressIndicator(color: AppColors.snow, strokeWidth: 2),
                                     ),
                                   ),
                                 )
-                              : IconButton(
+                              : TextButton(
                                   onPressed: _selectedCategoryId != null ? _share : null,
-                                  splashRadius: 20,
-                                  icon: FadeTransition(
-                                    opacity: _sendFade,
-                                    child: SlideTransition(
-                                      position: _sendSlide,
-                                      child: Icon(
-                                        Icons.send_outlined,
-                                        color: _selectedCategoryId != null
-                                            ? context.colors.secondary
-                                            : AppColors.gray500,
-                                        size: 20,
-                                      ),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    foregroundColor: AppColors.snow,
+                                    textStyle: const TextStyle(fontSize: AppFontSize.lg, fontWeight: FontWeight.w600, letterSpacing: -0.1),
+                                  ),
+                                  child: Text(
+                                    'Publier',
+                                    style: TextStyle(
+                                      color: AppColors.snow.withValues(alpha: _selectedCategoryId != null ? 0.96 : 0.42),
+                                      shadows: shadows,
                                     ),
                                   ),
                                 ),
@@ -237,218 +248,48 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
                       ),
                     ),
                     const Spacer(),
-                    // ── Category + Caption ───────────────────────
+                    // ── Bottom : catégorie + thumbnails + caption ──
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (_mediaFiles.length > 1)
-                            SizedBox(
-                              height: 68,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _mediaFiles.length + 1,
-                                separatorBuilder: (_, __) => AppGap.w8,
-                                itemBuilder: (context, index) {
-                                  if (index == _mediaFiles.length) {
-                                    return GestureDetector(
-                                      onTap: _addMoreMedia,
-                                      child: Container(
-                                        width: 52,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withValues(alpha: 0.18),
-                                          borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                            color: AppColors.snow.withValues(alpha: 0.14),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.add_photo_alternate_outlined,
-                                          color: AppColors.snow.withValues(alpha: 0.72),
-                                          size: 20,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  final active = index == _currentMediaIndex;
-                                  return GestureDetector(
-                                    onTap: () => _selectMedia(index),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 180),
-                                      width: 52,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: active
-                                              ? context.colors.secondary
-                                              : AppColors.snow.withValues(alpha: 0.10),
-                                          width: active ? 1.2 : 1,
-                                        ),
-                                        boxShadow: active
-                                            ? [
-                                                BoxShadow(
-                                                  color: context.colors.secondary.withValues(alpha: 0.22),
-                                                  blurRadius: 12,
-                                                  offset: Offset(0, 4),
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                      clipBehavior: Clip.antiAlias,
-                                      child: Image.file(
-                                        _mediaFiles[index],
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          if (_mediaFiles.length > 1) AppGap.h12,
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton.icon(
-                                onPressed: _replaceMedia,
-                                style: TextButton.styleFrom(
-                                  foregroundColor: context.colors.textSecondary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                                  textStyle: TextStyle(
-                                    fontSize: AppFontSize.smHalf,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                icon: const Icon(Icons.image_outlined, size: 16),
-                                label: const Text("Modifier l'image"),
-                              ),
-                              AppGap.w12,
-                              TextButton.icon(
-                                onPressed: _addMoreMedia,
-                                style: TextButton.styleFrom(
-                                  foregroundColor: context.colors.textSecondary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                                  textStyle: TextStyle(
-                                    fontSize: AppFontSize.smHalf,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                icon: const Icon(Icons.add_photo_alternate_outlined, size: 16),
-                                label: const Text('Ajouter des images'),
-                              ),
-                            ],
-                          ),
-                          AppGap.h6,
                           if (selectedCat != null) ...[
                             GestureDetector(
-                              onTap: _openCategoryPicker,
+                              onTap: _isPosting ? null : _openCategoryPicker,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.18),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: AppColors.snow.withValues(alpha: 0.34),
-                                    width: 1,
-                                  ),
+                                  color: selectedCat.color,
+                                  borderRadius: BorderRadius.circular(AppDesign.radiusFull),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      _storyCategoryIcon(selectedCat.id),
-                                      color: AppColors.snow,
-                                      size: 16,
-                                    ),
-                                    AppGap.w8,
+                                    Icon(selectedCat.icon, size: 15, color: AppColors.snow),
+                                    AppGap.w6,
                                     Text(
                                       selectedCat.name,
                                       style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.snow,
+                                        fontSize: AppFontSize.sm,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
+                                        color: AppColors.snow.withValues(alpha: 0.96),
+                                        shadows: shadows,
                                       ),
                                     ),
-                                    AppGap.w6,
-                                    const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      color: AppColors.snow,
-                                      size: 16,
-                                    ),
+                                    AppGap.w4,
+                                    Icon(Icons.keyboard_arrow_down_rounded, size: 15, color: AppColors.snow.withValues(alpha: 0.72)),
                                   ],
                                 ),
                               ),
                             ),
-                            AppGap.h14,
+                            AppGap.h10,
                           ],
-                          _showCaption
-                              ? Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: AppColors.snow.withValues(alpha: 0.20),
-                                        width: 1,
-                                      ),
-                                    ),
-                                  ),
-                                  child: TextField(
-                                    controller: _captionController,
-                                    autofocus: true,
-                                    maxLines: 3,
-                                    minLines: 1,
-                                    maxLength: 200,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.snow,
-                                      height: 1.45,
-                                    ),
-                                    decoration: AppInputDecorations.formField(
-                                      context,
-                                      hintText: 'Ajouter un commentaire...',
-                                      hintStyle: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColors.gray500,
-                                      ),
-                                      contentPadding: EdgeInsets.zero,
-                                      noBorder: true,
-                                      fillColor: Colors.transparent,
-                                    ).copyWith(
-                                      isDense: true,
-                                      counterStyle: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.gray500,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: () => setState(() => _showCaption = true),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: AppColors.snow.withValues(alpha: 0.16),
-                                          width: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Ajouter un commentaire...',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColors.gray500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                          _buildThumbnailStrip(shadows),
+                          AppGap.h12,
+                          _buildCaption(shadows),
                         ],
                       ),
                     ),
@@ -458,6 +299,119 @@ class _StoryComposerPageState extends State<StoryComposerPage> with SingleTicker
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailStrip(List<Shadow> shadows) {
+    return SizedBox(
+      height: _thumbH,
+      child: ListView.separated(
+        controller: _thumbScrollController,
+        scrollDirection: Axis.horizontal,
+        itemCount: _mediaFiles.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: _thumbSpacing),
+        itemBuilder: (_, i) {
+          if (i == _mediaFiles.length) {
+            return GestureDetector(
+              onTap: _isPosting ? null : _addMoreMedia,
+              child: Container(
+                width: _thumbW,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.22), width: 1),
+                ),
+                child: Icon(Icons.add_photo_alternate_outlined, color: AppColors.snow.withValues(alpha: 0.80), size: 22),
+              ),
+            );
+          }
+          final isActive = i == _currentMediaIndex;
+          return GestureDetector(
+            onTap: () {
+              setState(() => _currentMediaIndex = i);
+              _mediaPageController.animateToPage(i, duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic);
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: _thumbW,
+                  height: _thumbH,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isActive ? AppColors.snow : Colors.white.withValues(alpha: 0.18),
+                      width: isActive ? 2 : 1,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Image.file(_mediaFiles[i], fit: BoxFit.cover),
+                  ),
+                ),
+                if (_mediaFiles.length > 1)
+                  Positioned(
+                    top: -5,
+                    right: -5,
+                    child: GestureDetector(
+                      onTap: () => _removeMedia(i),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.72),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
+                        ),
+                        child: const Icon(Icons.close, color: AppColors.snow, size: 12),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCaption(List<Shadow> shadows) {
+    final border = Border(bottom: BorderSide(color: AppColors.snow.withValues(alpha: 0.84), width: 1));
+    if (_showCaption) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(border: border),
+        child: TextField(
+          controller: _captionController,
+          autofocus: true,
+          maxLines: 3,
+          minLines: 1,
+          maxLength: 200,
+          style: TextStyle(fontSize: AppFontSize.lg, fontWeight: FontWeight.w400, color: AppColors.snow.withValues(alpha: 0.96), height: 1.45, shadows: shadows),
+          decoration: AppInputDecorations.formField(
+            context,
+            hintText: 'Ajouter un commentaire...',
+            hintStyle: TextStyle(fontSize: AppFontSize.lg, fontWeight: FontWeight.w400, color: AppColors.snow.withValues(alpha: 0.68), shadows: shadows),
+            contentPadding: EdgeInsets.zero,
+            noBorder: true,
+            fillColor: Colors.transparent,
+          ).copyWith(
+            isDense: true,
+            counterStyle: TextStyle(fontSize: AppFontSize.xs, color: AppColors.snow.withValues(alpha: 0.68), shadows: shadows),
+          ),
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => setState(() => _showCaption = true),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(border: border),
+        child: Text('Ajouter un commentaire...', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: FontWeight.w400, color: AppColors.snow.withValues(alpha: 0.72), shadows: shadows)),
       ),
     );
   }
@@ -473,84 +427,67 @@ class _CategoryPickerSheet extends StatelessWidget {
     return AppPickerSheet(
       title: "Quel talent montrez-vous aujourd'hui ?",
       dark: true,
-      child: Flexible(
-        child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 24,
-            childAspectRatio: 0.88,
-          ),
-          itemCount: ServiceCategory.all.length,
-          itemBuilder: (_, i) {
-            final cat = ServiceCategory.all[i];
-            final isSelected = selected == cat.id;
-            return GestureDetector(
-              onTap: () => Navigator.pop(context, cat.id),
-              child: Opacity(
-                opacity: isSelected ? 1.0 : 0.32,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _storyCategoryIcon(cat.id),
-                      size: 22,
+      child: GridView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.82,
+        ),
+        itemCount: ServiceCategory.all.length,
+        itemBuilder: (_, i) {
+          final cat = ServiceCategory.all[i];
+          final isSelected = selected == cat.id;
+          return GestureDetector(
+            onTap: () => Navigator.pop(context, cat.id),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 180),
+              opacity: isSelected ? 1.0 : 0.55,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: AppStoryMetrics.editChipAnimationMs),
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? cat.color.withValues(alpha: 0.20)
+                          : Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected
+                            ? cat.color.withValues(alpha: 0.55)
+                            : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(
+                      cat.icon,
+                      size: 24,
+                      color: isSelected ? cat.color : AppColors.snow,
+                    ),
+                  ),
+                  AppGap.h6,
+                  Text(
+                    cat.name,
+                    style: TextStyle(
+                      fontSize: AppFontSize.xsHalf,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: AppColors.snow,
                     ),
-                    AppGap.h6,
-                    Text(
-                      cat.name,
-                      style: TextStyle(
-                        fontSize: AppFontSize.xsHalf,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: AppColors.snow,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                    ),
-                    AppGap.h4,
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: isSelected ? 14 : 0,
-                      height: 1.5,
-                      decoration: BoxDecoration(
-                        color: AppColors.snow,
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                    ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
-  }
-}
-
-IconData _storyCategoryIcon(String categoryId) {
-  switch (categoryId) {
-    case 'cleaning':
-      return Icons.cleaning_services_outlined;
-    case 'gardening':
-      return Icons.local_florist_outlined;
-    case 'plumbing':
-      return Icons.plumbing_outlined;
-    case 'electrical':
-      return Icons.electrical_services_outlined;
-    case 'moving':
-      return Icons.local_shipping_outlined;
-    case 'babysitting':
-      return Icons.child_friendly_outlined;
-    case 'pets':
-      return Icons.pets_outlined;
-    case 'it':
-      return Icons.laptop_mac_outlined;
-    default:
-      return Icons.category_outlined;
   }
 }
