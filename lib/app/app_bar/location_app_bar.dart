@@ -10,6 +10,7 @@ import '../../core/design/app_primitives.dart';
 import '../../core/location/nominatim_service.dart';
 import '../auth_provider.dart';
 import '../enum/user_role.dart';
+import '../widgets/sheet_profile_header.dart';
 import '../../features/notifications/notification_provider.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/profile/profile_provider.dart';
@@ -313,77 +314,10 @@ class RoleSwitchSheet extends StatelessWidget {
     final auth      = context.watch<AuthProvider>();
     final isClient  = auth.currentRole == UserRole.client;
     final isLoading = auth.isLoading;
-    final initials  = firstName.isNotEmpty
-        ? firstName[0].toUpperCase()
-        : (isClient ? 'C' : 'F');
-    final hasPhoto  = avatarUrl.isNotEmpty;
-
     return AppActionSheet(
       title: 'Mode',
-      header: Padding(
-        padding: AppInsets.h20,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onGoToAccount != null
-              ? () {
-                  Navigator.pop(context);
-                  onGoToAccount!();
-                }
-              : null,
-          child: Row(
-            children: [
-              // Avatar réel ou initiales
-              ClipOval(
-                child: SizedBox(
-                  width: AppBarMetrics.sheetAvatarSize,
-                  height: AppBarMetrics.sheetAvatarSize,
-                  child: hasPhoto
-                      ? Image.network(
-                          avatarUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _SheetAvatarFallback(
-                            initials: initials,
-                          ),
-                        )
-                      : _SheetAvatarFallback(initials: initials),
-                ),
-              ),
-              AppGap.w12,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      firstName.isNotEmpty ? firstName : 'Mon compte',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.snow,
-                      ),
-                    ),
-                    AppGap.h2,
-                    Text(
-                      isClient ? 'Mode Client actif' : 'Mode Prestataire actif',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.gray500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.gray500,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
+      header: AppSheetProfileHeader(onAccountTap: onGoToAccount),
       children: [
-        const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.whiteAlpha12),
         AppGap.h8,
         _RoleItem(
           icon: Icons.person_outline_rounded,
@@ -498,27 +432,6 @@ class _RoleItem extends StatelessWidget {
   }
 }
 
-class _SheetAvatarFallback extends StatelessWidget {
-  final String initials;
-  const _SheetAvatarFallback({required this.initials});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white.withValues(alpha: 0.08),
-      child: Center(
-        child: Text(
-          initials,
-          style: TextStyle(
-            fontSize: AppBarMetrics.sheetAvatarFontSize,
-            fontWeight: FontWeight.w600,
-            color: AppColors.snow,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // Kept for external compatibility — no longer used internally
 class RoleCard extends StatelessWidget {

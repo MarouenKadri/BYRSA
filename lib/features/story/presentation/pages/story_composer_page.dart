@@ -475,79 +475,53 @@ class _CategoryPickerSheet extends StatelessWidget {
       dark: true,
       child: Flexible(
         child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.78,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 24,
+            childAspectRatio: 0.88,
           ),
           itemCount: ServiceCategory.all.length,
           itemBuilder: (_, i) {
             final cat = ServiceCategory.all[i];
             final isSelected = selected == cat.id;
-            return AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: isSelected ? 1 : 0.72,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context, cat.id),
-                child: AnimatedScale(
-                  duration: const Duration(milliseconds: 180),
-                  scale: isSelected ? 1.05 : 1,
-                  curve: Curves.easeOut,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOut,
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: isSelected
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected
-                            ? context.colors.secondary.withValues(alpha: 0.60)
-                            : Colors.transparent,
-                        width: isSelected ? 1.1 : 1,
+            return GestureDetector(
+              onTap: () => Navigator.pop(context, cat.id),
+              child: Opacity(
+                opacity: isSelected ? 1.0 : 0.32,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _storyCategoryIcon(cat.id),
+                      size: 22,
+                      color: AppColors.snow,
+                    ),
+                    AppGap.h6,
+                    Text(
+                      cat.name,
+                      style: TextStyle(
+                        fontSize: AppFontSize.xsHalf,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        color: AppColors.snow,
                       ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: context.colors.secondary.withValues(alpha: 0.24),
-                                blurRadius: 14,
-                                offset: Offset(0, 4),
-                              ),
-                            ]
-                          : null,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _storyCategoryIcon(cat.id),
-                          size: 24,
-                          color: isSelected
-                              ? AppColors.snow
-                              : context.colors.textSecondary,
-                        ),
-                        AppGap.h8,
-                        Text(
-                          cat.name,
-                          style: TextStyle(
-                            fontSize: AppFontSize.xsHalf,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color: isSelected
-                                ? AppColors.snow
-                                : context.colors.textSecondary,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                        ),
-                      ],
+                    AppGap.h4,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: isSelected ? 14 : 0,
+                      height: 1.5,
+                      decoration: BoxDecoration(
+                        color: AppColors.snow,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             );

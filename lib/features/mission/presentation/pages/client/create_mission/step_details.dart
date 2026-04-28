@@ -47,7 +47,7 @@ class _StepDetailsState extends State<StepDetails> {
   Future<void> _takePhoto() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1200,
@@ -72,7 +72,7 @@ class _StepDetailsState extends State<StepDetails> {
   Future<void> _pickFromGallery() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1200,
@@ -207,25 +207,26 @@ class _StepDetailsState extends State<StepDetails> {
             height: 1.55,
             color: context.colors.textPrimary,
           ),
-          decoration: AppInputDecorations.profileField(
-            context,
-            hintText:
-                "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
-            radius: 18,
-            prefixIcon: Icon(
-              Icons.notes_rounded,
-              size: 16,
-              color: context.colors.textHint,
-            ),
-          ).copyWith(
-            labelText: 'Description de la mission',
-            alignLabelWithHint: true,
-            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-            counterStyle: context.text.labelSmall?.copyWith(
-              color: context.colors.textTertiary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          decoration:
+              AppInputDecorations.profileField(
+                context,
+                hintText:
+                    "Ex: Je recherche quelqu'un pour un menage complet de mon appartement. Merci de prevoir les zones difficiles d'acces et les surfaces fragiles.",
+                radius: 18,
+                prefixIcon: Icon(
+                  Icons.notes_rounded,
+                  size: 16,
+                  color: context.colors.textHint,
+                ),
+              ).copyWith(
+                labelText: 'Description de la mission',
+                alignLabelWithHint: true,
+                contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                counterStyle: context.text.labelSmall?.copyWith(
+                  color: context.colors.textTertiary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
         ),
         AppGap.h12,
         const MissionStepHelper(
@@ -242,27 +243,6 @@ class _StepDetailsState extends State<StepDetails> {
       wrapWithSurface: false,
       builder: (ctx) => AppFormSheet(
         title: 'Supprimer toutes les photos ?',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppSurfaceCard(
-              padding: AppInsets.a16,
-              color: AppColors.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-              child: const Icon(
-                Icons.delete_outline_rounded,
-                color: AppColors.error,
-                size: 32,
-              ),
-            ),
-            AppGap.h16,
-            Text(
-              '${widget.photos.length} photo${widget.photos.length > 1 ? 's' : ''} seront supprimées.',
-              style: ctx.text.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
         footer: Row(
           children: [
             Expanded(
@@ -282,6 +262,27 @@ class _StepDetailsState extends State<StepDetails> {
                   Navigator.pop(ctx);
                 },
               ),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppSurfaceCard(
+              padding: AppInsets.a16,
+              color: AppColors.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppRadius.full),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+                size: 32,
+              ),
+            ),
+            AppGap.h16,
+            Text(
+              '${widget.photos.length} photo${widget.photos.length > 1 ? 's' : ''} seront supprimées.',
+              style: ctx.text.bodyMedium,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -307,7 +308,11 @@ class _StepDetailsState extends State<StepDetails> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_border_rounded, size: 14, color: AppColors.gray600),
+                  const Icon(
+                    Icons.star_border_rounded,
+                    size: 14,
+                    color: AppColors.gray600,
+                  ),
                   AppGap.w4,
                   Text(
                     'Conseillé',
@@ -354,9 +359,7 @@ class _StepDetailsState extends State<StepDetails> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: context.colors.border),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 
@@ -406,19 +409,20 @@ class _StepDetailsState extends State<StepDetails> {
           height: 118,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: widget.photos.length + (widget.photos.length < 10 ? 1 : 0),
+            itemCount:
+                widget.photos.length + (widget.photos.length < 10 ? 1 : 0),
             itemBuilder: (context, index) {
               // Add button
               if (index == 0 && widget.photos.length < 10) {
                 return _buildAddPhotoButton();
               }
-              
+
               final photoIndex = widget.photos.length < 10 ? index - 1 : index;
               return _buildPhotoThumbnail(photoIndex);
             },
           ),
         ),
-        
+
         // Photo count indicator
         if (widget.photos.isNotEmpty) ...[
           AppGap.h12,
@@ -448,27 +452,31 @@ class _StepDetailsState extends State<StepDetails> {
       child: SizedBox(
         width: 110,
         height: 118,
-          child: AppSurfaceCard(
-            margin: const EdgeInsets.only(right: 10),
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: context.colors.border),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.photo_camera_outlined, size: 28, color: AppColors.gray600),
-                AppGap.h6,
-                Text(
-                  'Ajouter',
-                  style: TextStyle(
-                    fontSize: AppFontSize.smHalf,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.textSecondary,
-                  ),
+        child: AppSurfaceCard(
+          margin: const EdgeInsets.only(right: 10),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: context.colors.border),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.photo_camera_outlined,
+                size: 28,
+                color: AppColors.gray600,
+              ),
+              AppGap.h6,
+              Text(
+                'Ajouter',
+                style: TextStyle(
+                  fontSize: AppFontSize.smHalf,
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.textSecondary,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
       ),
     );
   }
@@ -476,7 +484,7 @@ class _StepDetailsState extends State<StepDetails> {
   Widget _buildPhotoThumbnail(int index) {
     final photo = widget.photos[index];
     final isLocalFile = !photo.startsWith('http');
-    
+
     return GestureDetector(
       onTap: () => _viewPhoto(photo, index),
       child: Container(
@@ -506,7 +514,10 @@ class _StepDetailsState extends State<StepDetails> {
                       errorBuilder: (ctx, error, stackTrace) {
                         return Container(
                           color: ctx.colors.divider,
-                          child: Icon(Icons.broken_image, color: ctx.colors.textHint),
+                          child: Icon(
+                            Icons.broken_image,
+                            color: ctx.colors.textHint,
+                          ),
                         );
                       },
                     )
@@ -525,11 +536,14 @@ class _StepDetailsState extends State<StepDetails> {
                       errorBuilder: (ctx, error, stackTrace) {
                         return Container(
                           color: ctx.colors.divider,
-                          child: Icon(Icons.broken_image, color: ctx.colors.textHint),
+                          child: Icon(
+                            Icons.broken_image,
+                            color: ctx.colors.textHint,
+                          ),
                         );
                       },
                     ),
-              
+
               // Gradient overlay
               Positioned(
                 bottom: 0,
@@ -549,7 +563,7 @@ class _StepDetailsState extends State<StepDetails> {
                   ),
                 ),
               ),
-              
+
               // Index badge
               Positioned(
                 bottom: 8,
@@ -569,7 +583,7 @@ class _StepDetailsState extends State<StepDetails> {
                   ),
                 ),
               ),
-              
+
               // Delete button
               Positioned(
                 top: 6,
@@ -596,7 +610,6 @@ class _StepDetailsState extends State<StepDetails> {
       ),
     );
   }
-
 }
 
 /// ─────────────────────────────────────────────────────────────
@@ -742,7 +755,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
         itemBuilder: (context, index) {
           final photo = widget.photos[index];
           final isLocalFile = !photo.startsWith('http');
-          
+
           return InteractiveViewer(
             minScale: 0.5,
             maxScale: 4.0,
@@ -755,11 +768,17 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.broken_image, size: 64, color: context.colors.textSecondary),
+                            Icon(
+                              Icons.broken_image,
+                              size: 64,
+                              color: context.colors.textSecondary,
+                            ),
                             AppGap.h16,
                             Text(
                               'Impossible de charger l\'image',
-                              style: context.text.bodyMedium?.copyWith(color: context.colors.textHint),
+                              style: context.text.bodyMedium?.copyWith(
+                                color: context.colors.textHint,
+                              ),
                             ),
                           ],
                         );
@@ -774,7 +793,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                           child: CircularProgressIndicator(
                             value: loadingProgress.expectedTotalBytes != null
                                 ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
+                                      loadingProgress.expectedTotalBytes!
                                 : null,
                             color: Colors.white,
                           ),
@@ -784,11 +803,17 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.broken_image, size: 64, color: context.colors.textSecondary),
+                            Icon(
+                              Icons.broken_image,
+                              size: 64,
+                              color: context.colors.textSecondary,
+                            ),
                             AppGap.h16,
                             Text(
                               'Impossible de charger l\'image',
-                              style: context.text.bodyMedium?.copyWith(color: context.colors.textHint),
+                              style: context.text.bodyMedium?.copyWith(
+                                color: context.colors.textHint,
+                              ),
                             ),
                           ],
                         );
@@ -816,7 +841,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                     final photo = widget.photos[index];
                     final isLocalFile = !photo.startsWith('http');
                     final isSelected = index == _currentIndex;
-                    
+
                     return GestureDetector(
                       onTap: () {
                         _pageController.animateToPage(
@@ -832,7 +857,9 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(AppRadius.small),
                           border: Border.all(
-                            color: isSelected ? Colors.white : Colors.transparent,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -841,14 +868,8 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                           child: Opacity(
                             opacity: isSelected ? 1.0 : 0.5,
                             child: isLocalFile
-                                ? Image.file(
-                                    File(photo),
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.network(
-                                    photo,
-                                    fit: BoxFit.cover,
-                                  ),
+                                ? Image.file(File(photo), fit: BoxFit.cover)
+                                : Image.network(photo, fit: BoxFit.cover),
                           ),
                         ),
                       ),

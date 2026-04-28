@@ -799,9 +799,7 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color:
-                      cat?.color.withValues(alpha: 0.12) ??
-                      context.colors.surfaceAlt,
+                  color: cat?.color.withValues(alpha: 0.12) ?? context.colors.surfaceAlt,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
