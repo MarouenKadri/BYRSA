@@ -114,10 +114,9 @@ class _StepTarifState extends State<StepTarif> {
               AppGap.w28,
               Text(
                 '${widget.estimatedHours.toStringAsFixed(widget.estimatedHours == widget.estimatedHours.truncateToDouble() ? 0 : 1)} h',
-                style: TextStyle(
-                  fontSize: 28,
+                style: context.missionSectionTitleStyle.copyWith(
+                  fontSize: AppFontSize.h1,
                   fontWeight: FontWeight.w600,
-                  color: context.colors.textPrimary,
                 ),
               ),
               AppGap.w28,
@@ -215,7 +214,7 @@ class _AmountInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: TextStyle(
+      style: context.text.displayMedium?.copyWith(
         fontSize: 34,
         fontWeight: FontWeight.w600,
         color: context.colors.textPrimary,
@@ -227,7 +226,7 @@ class _AmountInput extends StatelessWidget {
         radius: 18,
       ).copyWith(
         labelText: label,
-        hintStyle: TextStyle(
+        hintStyle: context.text.displayMedium?.copyWith(
           color: context.colors.textHint,
           fontSize: 34,
           fontWeight: useLightHint ? FontWeight.w300 : FontWeight.w600,
@@ -238,10 +237,8 @@ class _AmountInput extends StatelessWidget {
           padding: const EdgeInsets.only(right: 16),
           child: Text(
             suffix,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: context.colors.textSecondary,
+            style: context.missionStepMutedStyle.copyWith(
+              fontSize: AppFontSize.base,
             ),
           ),
         ),
@@ -282,9 +279,7 @@ class _RateChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: AppFontSize.mdHalf,
-            fontWeight: FontWeight.w600,
+          style: context.missionStepChipStyle.copyWith(
             color: selected
                 ? context.colors.textPrimary
                 : context.colors.textSecondary,

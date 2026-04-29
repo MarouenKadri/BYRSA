@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../../../../freelancer/presentation/pages/client_profile_view.dart';
 import 'mission_detail_primitives.dart';
@@ -75,11 +74,7 @@ class FreelancerClientCard extends StatelessWidget {
                             client.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
-                            ),
+                            style: context.missionEntityNameStyle,
                           ),
                         ),
                         if (client.isVerified) ...[
@@ -106,11 +101,7 @@ class FreelancerClientCard extends StatelessWidget {
                       'Client',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textSecondary,
-                      ),
+                      style: context.missionEntityMetaStyle,
                     ),
                     AppGap.h6,
                     Row(
@@ -124,11 +115,7 @@ class FreelancerClientCard extends StatelessWidget {
                         AppGap.w4,
                         Text(
                           client.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
-                          ),
+                          style: context.missionEntityRatingStyle,
                         ),
                       ],
                     ),
@@ -231,21 +218,12 @@ class FreelancerLocationShareCard extends StatelessWidget {
           AppGap.h8,
           Text(
             config.title,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
+            style: context.missionPrimaryValueStyle,
           ),
           AppGap.h14,
           Text(
             config.subtitle,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              height: 1.45,
-              color: context.colors.textSecondary,
-            ),
+            style: context.missionEmphasisBodyStyle,
           ),
           AppGap.h16,
           Container(
@@ -266,10 +244,8 @@ class FreelancerLocationShareCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Le partage live doit etre active depuis le pilotage de mission.',
-                    style: TextStyle(
+                    style: context.missionEmphasisBodyStyle.copyWith(
                       fontSize: AppFontSize.smHalf,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -365,11 +341,9 @@ class _FreelancerReportConfirmSheetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Signaler la mission ?',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
+              style: context.missionSectionTitleStyle.copyWith(
                 color: AppColors.snow,
               ),
             ),
@@ -378,19 +352,17 @@ class _FreelancerReportConfirmSheetState
               widget.missionTitle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
+              style: context.missionBodyStyle.copyWith(
+                fontSize: AppFontSize.md,
                 color: AppColors.gray500,
               ),
             ),
             AppGap.h18,
-            const Text(
+            Text(
               'Merci de nous aider à garder la plateforme sûre. Votre signalement sera examiné par notre équipe.',
-              style: TextStyle(
-                fontSize: 13,
+              style: context.missionBodyStyle.copyWith(
+                fontSize: AppFontSize.md,
                 height: 1.55,
-                fontWeight: FontWeight.w400,
                 color: AppColors.gray500,
               ),
             ),
@@ -420,10 +392,7 @@ class _FreelancerReportConfirmSheetState
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
-                textStyle: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+                textStyle: context.missionButtonStyle,
               ),
               child: _loading
                   ? const SizedBox(
@@ -442,10 +411,10 @@ class _FreelancerReportConfirmSheetState
         Center(
           child: GestureDetector(
             onTap: _loading ? null : () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Annuler',
-              style: TextStyle(
-                fontSize: 14,
+              style: context.missionEmphasisBodyStyle.copyWith(
+                fontSize: AppFontSize.base,
                 fontWeight: FontWeight.w500,
                 color: AppColors.gray500,
               ),
@@ -545,10 +514,10 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                   Expanded(
                     child: Text(
                       'Votre proposition',
-                      style: TextStyle(
-                        fontSize: 22,
+                      style: context.text.headlineLarge?.copyWith(
+                        fontSize: AppFontSize.h2Lg,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                   ),
@@ -574,19 +543,13 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       '${widget.mission.title} • ${widget.mission.formattedDate}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textSecondary,
-                      ),
+                      style: context.missionEmphasisBodyStyle,
                     ),
                     AppGap.h24,
                     Text(
                       'Votre tarif',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textTertiary,
+                      style: context.missionSectionLabelStyle.copyWith(
+                        letterSpacing: 0.2,
                       ),
                     ),
                     AppGap.h10,
@@ -595,16 +558,16 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       keyboardType: TextInputType.number,
                       autofocus: true,
                       onChanged: (_) => setState(() {}),
-                      style: TextStyle(
+                      style: context.text.displayMedium?.copyWith(
                         fontSize: 38,
                         fontWeight: FontWeight.w300,
                         letterSpacing: -1.2,
-                        color: AppColors.ink,
+                        color: context.colors.textPrimary,
                       ),
                       decoration: AppInputDecorations.formField(
                         context,
                         hintText: '0',
-                        hintStyle: TextStyle(
+                        hintStyle: context.text.displayMedium?.copyWith(
                           fontSize: 38,
                           fontWeight: FontWeight.w300,
                           letterSpacing: -1.2,
@@ -615,10 +578,10 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                         fillColor: Colors.transparent,
                       ).copyWith(
                         prefixText: '€ ',
-                        prefixStyle: const TextStyle(
+                        prefixStyle: context.text.headlineLarge?.copyWith(
                           fontSize: 28,
                           fontWeight: FontWeight.w300,
-                          color: AppColors.ink,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                     ),
@@ -648,12 +611,11 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                             ),
                             child: Text(
                               '$amount €',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                              style: context.missionButtonStyle.copyWith(
+                                fontSize: AppFontSize.base,
                                 color: isActive
                                     ? Colors.white
-                                    : AppColors.ink,
+                                    : context.colors.textPrimary,
                               ),
                             ),
                           ),
@@ -665,18 +627,14 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       children: [
                         Text(
                           'Message au client',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.textTertiary,
+                          style: context.missionSectionLabelStyle.copyWith(
+                            letterSpacing: 0.2,
                           ),
                         ),
                         const Spacer(),
                         Text(
                           '$_messageLength/400',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                          style: context.missionSubtleCaptionStyle.copyWith(
                             color: context.colors.textHint,
                           ),
                         ),
@@ -690,20 +648,13 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                       buildCounter:
                           (_, {required currentLength, required isFocused, maxLength}) =>
                               null,
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.5,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.ink,
-                      ),
+                      style: context.missionBodyStyle.copyWith(height: 1.5),
                       decoration: AppInputDecorations.formField(
                         context,
                         hintText:
                             'Présentez-vous, vos atouts, votre expérience...',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
+                        hintStyle: context.missionBodyStyle.copyWith(
                           height: 1.5,
-                          fontWeight: FontWeight.w400,
                           color: context.colors.textHint,
                         ),
                         fillColor: Colors.white,
@@ -747,10 +698,7 @@ class _FreelancerProposalSheetState extends State<FreelancerProposalSheet> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    textStyle: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    textStyle: context.missionButtonStyle,
                   ),
                   child: const Text('Envoyer ma proposition'),
                 ),

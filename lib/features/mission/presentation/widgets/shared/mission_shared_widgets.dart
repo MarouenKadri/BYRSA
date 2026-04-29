@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../cards/primitives/mission_card_frame.dart';
 
@@ -210,9 +209,8 @@ class BudgetBadge extends StatelessWidget {
             SizedBox(width: large ? 6 : 5),
             Text(
               'Sur devis',
-              style: TextStyle(
-                fontSize: large ? 15 : 13,
-                fontWeight: FontWeight.w600,
+              style: context.missionButtonStyle.copyWith(
+                fontSize: large ? AppFontSize.body : AppFontSize.md,
                 color: context.colors.textSecondary,
               ),
             ),
@@ -242,12 +240,8 @@ class BudgetBadge extends StatelessWidget {
       ),
       child: Text(
         valueText,
-        style: TextStyle(
-          fontSize: large ? 22 : 17,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          letterSpacing: -0.4,
-          height: 1,
+        style: context.missionDarkValueStyle.copyWith(
+          fontSize: large ? AppFontSize.h2Lg : AppFontSize.title,
         ),
       ),
     );
@@ -280,10 +274,8 @@ class BudgetText extends StatelessWidget {
 
     return Text(
       valueText,
-      style: TextStyle(
-        fontSize: large ? 18 : 16,
-        fontWeight: FontWeight.w700,
-        color: AppColors.cardTitle,
+      style: context.missionEntityNameStyle.copyWith(
+        fontSize: large ? AppFontSize.xl : AppFontSize.lg,
         letterSpacing: -0.2,
         height: 1,
       ),

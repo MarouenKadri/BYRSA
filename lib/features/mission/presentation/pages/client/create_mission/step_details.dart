@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
 import 'mission_step_ui.dart';
 
 /// ─────────────────────────────────────────────────────────────
@@ -201,12 +200,7 @@ class _StepDetailsState extends State<StepDetails> {
           onChanged: widget.onDescriptionChanged,
           maxLines: 6,
           maxLength: 500,
-          style: TextStyle(
-            fontSize: AppFontSize.body,
-            fontWeight: FontWeight.w400,
-            height: 1.55,
-            color: context.colors.textPrimary,
-          ),
+          style: context.missionStepFieldStyle,
           decoration:
               AppInputDecorations.profileField(
                 context,
@@ -316,10 +310,8 @@ class _StepDetailsState extends State<StepDetails> {
                   AppGap.w4,
                   Text(
                     'Conseillé',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textSecondary,
+                    style: context.missionSubtleCaptionStyle.copyWith(
+                      fontSize: AppFontSize.xs,
                     ),
                   ),
                 ],
@@ -331,9 +323,7 @@ class _StepDetailsState extends State<StepDetails> {
                 onTap: _confirmDeleteAll,
                 child: Text(
                   'Tout supprimer',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                  style: context.missionSubtleCaptionStyle.copyWith(
                     color: context.colors.error,
                   ),
                 ),
@@ -385,9 +375,7 @@ class _StepDetailsState extends State<StepDetails> {
               AppGap.h12,
               Text(
                 'Ajouter des photos',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                style: context.missionButtonStyle.copyWith(
                   color: context.colors.textPrimary,
                 ),
               ),
@@ -468,9 +456,8 @@ class _StepDetailsState extends State<StepDetails> {
               AppGap.h6,
               Text(
                 'Ajouter',
-                style: TextStyle(
+                style: context.missionSubtleCaptionStyle.copyWith(
                   fontSize: AppFontSize.smHalf,
-                  fontWeight: FontWeight.w500,
                   color: context.colors.textSecondary,
                 ),
               ),
@@ -644,18 +631,14 @@ class _PhotoOptionTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                    style: context.sheetActionTitleStyle.copyWith(
                       color: AppColors.snow,
                     ),
                   ),
                   AppGap.h2,
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
+                    style: context.sheetActionSubtitleStyle.copyWith(
                       color: AppColors.gray500,
                     ),
                   ),

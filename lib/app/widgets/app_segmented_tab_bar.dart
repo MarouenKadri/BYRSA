@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/design/tokens/app_colors.dart';
+import '../../core/design/app_design_system.dart';
 
 /// Data model for one segmented tab.
 class AppSegmentedTab {

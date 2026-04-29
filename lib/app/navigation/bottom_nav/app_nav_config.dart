@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../main_bottom_nav.dart';
-
 typedef AppNavPagesBuilder = List<Widget> Function(ValueChanged<int> goToIndex);
 typedef AppNavFabBuilder = Widget? Function(
   BuildContext context,
@@ -10,6 +8,14 @@ typedef AppNavFabBuilder = Widget? Function(
   ValueChanged<bool> setFabExpanded,
   ValueChanged<int> goToIndex,
 );
+
+class NavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+
+  const NavItem(this.icon, this.activeIcon, this.label);
+}
 
 class AppNavConfig {
   final List<NavItem> items;

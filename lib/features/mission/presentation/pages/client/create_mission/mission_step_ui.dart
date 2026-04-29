@@ -19,19 +19,12 @@ class MissionStepHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: context.text.headlineMedium?.copyWith(
-            fontSize: AppFontSize.h2,
-            fontWeight: FontWeight.w700,
-            color: context.colors.textPrimary,
-          ),
+          style: context.missionStepTitleStyle,
         ),
         AppGap.h8,
         Text(
           subtitle,
-          style: context.text.bodyMedium?.copyWith(
-            color: context.colors.textSecondary,
-            height: 1.45,
-          ),
+          style: context.missionStepSubtitleStyle,
         ),
       ],
     );
@@ -50,10 +43,7 @@ class MissionStepHelper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: context.text.bodyMedium?.copyWith(
-        color: context.colors.textSecondary,
-        height: 1.45,
-      ),
+      style: context.missionStepHelperStyle,
     );
   }
 }
@@ -70,11 +60,7 @@ class MissionSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label.toUpperCase(),
-      style: context.text.labelSmall?.copyWith(
-        color: context.colors.textTertiary,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.2,
-      ),
+      style: context.missionStepSectionLabelStyle,
     );
   }
 }

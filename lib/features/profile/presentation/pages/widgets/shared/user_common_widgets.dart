@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
+import '../../../../../../core/design/app_design_system.dart';
 
 /// ─── Widget partagé : section avec icon badge ────────────────────────────
 /// Utilise par les anciennes feuilles profil et par les écrans profil partagés.
@@ -25,9 +24,9 @@ class ProfileSheetSection extends StatelessWidget {
           Row(
             children: [
               AppSurfaceCard(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(AppProfileMetrics.sectionBadgePadding),
                 color: context.colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(AppDesign.radius8),
+                borderRadius: BorderRadius.circular(AppRadius.small),
                 border: Border.all(color: context.colors.border, width: 1),
                 child: Icon(icon, size: 16, color: context.colors.textPrimary),
               ),
@@ -72,8 +71,12 @@ class VerificationStep extends StatelessWidget {
           AppSurfaceCard(
             padding: AppInsets.a10,
             color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppDesign.radius10),
-            child: Icon(icon, color: AppColors.primary, size: 22),
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            child: Icon(
+              icon,
+              color: AppColors.primary,
+              size: AppProfileMetrics.verificationIconSize,
+            ),
           ),
           AppGap.w14,
           Expanded(
@@ -108,7 +111,7 @@ InputDecoration profileSheetInputDecoration(
   final labelColor = readOnly ? context.colors.textHint : context.colors.textSecondary;
 
   OutlineInputBorder outline(Color color, [double width = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppProfileMetrics.sheetFieldRadius),
         borderSide: BorderSide(color: color, width: width),
       );
 
@@ -118,8 +121,12 @@ InputDecoration profileSheetInputDecoration(
     floatingLabelStyle: context.profileSheetFieldLabelStyle.copyWith(
       color: readOnly ? context.colors.textHint : focusColor,
     ),
-    prefixIcon: Icon(icon, size: 18, color: context.colors.textPrimary),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+    prefixIcon: Icon(
+      icon,
+      size: AppProfileMetrics.sheetFieldIconSize,
+      color: context.colors.textPrimary,
+    ),
+    contentPadding: AppInsets.h16v18,
     filled: false,
     enabledBorder: outline(borderColor),
     focusedBorder: outline(readOnly ? borderColor : focusColor, readOnly ? 1 : 1.2),
@@ -143,7 +150,7 @@ class ProfileSheetPrimaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: AppProfileMetrics.sheetPrimaryActionHeight,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -152,7 +159,7 @@ class ProfileSheetPrimaryAction extends StatelessWidget {
           elevation: 0,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         ),
         child: Text(
@@ -184,7 +191,7 @@ class ProfileSheetSecondaryAction extends StatelessWidget {
       onPressed: onTap,
       style: TextButton.styleFrom(
         foregroundColor: context.colors.textTertiary,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: AppInsets.h12v8,
         textStyle: context.text.bodyMedium?.copyWith(
           fontWeight: FontWeight.w500,
           color: context.colors.textTertiary,

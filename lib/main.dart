@@ -7,7 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/navigation/root_nav.dart';
 import 'app/auth_provider.dart';
-import 'app/theme_provider.dart';
 import 'core/design/app_design_system.dart';
 import 'features/messaging/messaging_provider.dart';
 import 'features/mission/presentation/mission_provider.dart';
@@ -59,7 +58,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => MissionProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
@@ -72,21 +70,18 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (_, themeProv, __) => MaterialApp(
-          navigatorKey: appNavigatorKey,
-          debugShowCheckedModeBanner: false,
-          locale: const Locale('fr', 'FR'),
-          supportedLocales: const [Locale('fr', 'FR'), Locale('en', 'US')],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: themeProv.customTheme ?? AppThemeData.theme,
-          themeMode: themeProv.flutterThemeMode,
-          home: const RootNav(),
-        ),
+      child: MaterialApp(
+        navigatorKey: appNavigatorKey,
+        debugShowCheckedModeBanner: false,
+        locale: const Locale('fr', 'FR'),
+        supportedLocales: const [Locale('fr', 'FR'), Locale('en', 'US')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        theme: AppThemeData.theme,
+        home: const RootNav(),
       ),
     );
   }

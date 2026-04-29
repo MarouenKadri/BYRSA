@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../domain/entities/review.dart';
 import 'review_card.dart';
 

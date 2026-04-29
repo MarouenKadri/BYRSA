@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../app_design_system.dart';
-import '../app_primitives.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Modèle pays

@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';

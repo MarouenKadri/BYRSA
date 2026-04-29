@@ -68,17 +68,16 @@ class AppSheetProfileHeader extends StatelessWidget {
                     children: [
                       Text(
                         firstName.isNotEmpty ? firstName : 'Mon compte',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                        style: context.appBarSheetAccountTitleStyle.copyWith(
+                          fontSize: AppFontSize.body,
                           color: textColor,
                         ),
                       ),
                       AppGap.h2,
                       Text(
                         isClient ? 'Mode Client actif' : 'Mode Prestataire actif',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: context.appBarSheetAccountSubtitleStyle.copyWith(
+                          fontSize: AppFontSize.md,
                           fontWeight: FontWeight.w400,
                           color: subtitleColor,
                         ),
@@ -117,7 +116,7 @@ class _AvatarFallback extends StatelessWidget {
       child: Center(
         child: Text(
           initials,
-          style: TextStyle(
+          style: context.appBarAvatarLabelStyle.copyWith(
             fontSize: AppBarMetrics.sheetAvatarFontSize,
             fontWeight: FontWeight.w600,
             color: dark ? AppColors.snow : context.colors.textPrimary,

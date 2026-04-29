@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/candidate.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
@@ -353,10 +352,8 @@ class _CandidatesPageState extends State<CandidatesPage> {
                     widget.missionTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
+                    style: context.missionEntityNameStyle.copyWith(
+                      fontSize: AppFontSize.title,
                     ),
                   ),
                   AppGap.h2,
@@ -584,10 +581,8 @@ class _CandidateCard extends StatelessWidget {
                                   child: Text(
                                     candidate.name,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.ink,
+                                    style: context.missionEntityNameStyle.copyWith(
+                                      fontSize: AppFontSize.title,
                                     ),
                                   ),
                                 ),
@@ -709,11 +704,10 @@ class _OfferStatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.9,
+        style: context.missionSectionLabelStyle.copyWith(
+          fontSize: AppFontSize.tiny,
           color: fg,
+          letterSpacing: 0.9,
         ),
       ),
     );

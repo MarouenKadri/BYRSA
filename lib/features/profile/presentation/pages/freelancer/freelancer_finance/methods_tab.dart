@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
-import '../../../widgets/shared/payment_common_widgets.dart';
-import '../../../widgets/shared/user_common_widgets.dart';
+import '../../widgets/shared/payment_common_widgets.dart';
+import '../../widgets/shared/user_common_widgets.dart';
 
 class FreelancerFinanceMethodsTab extends StatefulWidget {
   const FreelancerFinanceMethodsTab({super.key});

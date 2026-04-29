@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
 
 // ─── Statut de vérification champ (email / téléphone) ────────────────────────
 enum RegisterFieldStatus { idle, checking, available, taken }

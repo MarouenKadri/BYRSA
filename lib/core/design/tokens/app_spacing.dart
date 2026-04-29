@@ -109,6 +109,7 @@ class AppInsets {
   static const EdgeInsets h10v4 = EdgeInsets.symmetric(horizontal: 10, vertical: 4);
   static const EdgeInsets h10v5 = EdgeInsets.symmetric(horizontal: 10, vertical: 5);
   static const EdgeInsets h10v6 = EdgeInsets.symmetric(horizontal: 10, vertical: 6);
+  static const EdgeInsets h10v8 = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
   static const EdgeInsets h8v2 = EdgeInsets.symmetric(horizontal: 8, vertical: 2);
   static const EdgeInsets h8v4 = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
   static const EdgeInsets h7v2 = EdgeInsets.symmetric(horizontal: 7, vertical: 2);
@@ -251,4 +252,48 @@ class AppReviewMetrics {
   static const double reviewAvatarRadius = 22;
   static const double satisfactionIconSize = 15;
   static const double missionIconSize = 13;
+}
+
+class AppProfileMetrics {
+  static const double flatTileVerticalPadding = 11;
+  static const double flatTileIconSize = 18;
+  static const double flatTileTrailingIconSize = 18;
+  static const double sectionBadgePadding = 7;
+  static const double verificationIconSize = 22;
+  static const double sheetFieldRadius = 22;
+  static const double sheetFieldIconSize = 18;
+  static const double sheetPrimaryActionHeight = 56;
+}
+
+class AppPaymentMetrics {
+  static const double shadowBlurRadius = 12;
+  static const double shadowOffsetY = 3;
+  static const double addButtonHeight = 52;
+  static const double commonIconSize = 18;
+  static const double infoIconSize = 16;
+  static const double deleteSheetIconWrapSize = 52;
+  static const double deleteSheetIconSize = 26;
+  static const double txLeadingBoxSize = 40;
+  static const double txLeadingRadius = 11;
+  static const double filterPillHeight = 34;
+  static const int filterAnimationMs = 180;
+  static const double pipelineDotSize = 12;
+  static const double pipelineConnectorHeight = 2;
+  static const double pipelineConnectorMargin = 5;
+}
+
+class AppRadius {
+  static const double micro = 2;
+  static const double xs = AppDesign.radiusXS;
+  static const double tag = 6;
+  static const double small = AppDesign.radiusS;
+  static const double badge = AppDesign.radiusBadge;
+  static const double input = AppDesign.radiusInput;
+  static const double button = AppDesign.radiusButton;
+  static const double card = AppDesign.radiusCard;
+  static const double lg = AppDesign.radius16;
+  static const double cardLg = AppDesign.radiusCardLg;
+  static const double chip = AppDesign.radiusChip;
+  static const double xl = AppDesign.radius24;
+  static const double full = AppDesign.radiusFull;
 }

@@ -7,7 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../app/navigation/root_nav.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/registration_data.dart';
 import '../../../data/models/user_type.dart';
 import '../../widgets/country_picker.dart';

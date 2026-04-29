@@ -15,7 +15,7 @@ export 'data/repositories/supabase_freelancer_catalog_repository.dart';
 export 'profile_provider.dart';
 
 // ─── Widgets - Shared ─────────────────────────────────────────────────────────
-export 'presentation/widgets/shared/user_common_widgets.dart';
+export 'presentation/pages/widgets/shared/user_common_widgets.dart';
 
 
 // ─── Pages - Shared ───────────────────────────────────────────────────────────

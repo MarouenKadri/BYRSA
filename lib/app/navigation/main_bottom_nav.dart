@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/design/app_design_system.dart';
-import '../../core/design/app_primitives.dart';
+import 'bottom_nav/app_nav_config.dart' show NavItem;
 
-class NavItem {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-
-  NavItem(this.icon, this.activeIcon, this.label);
-}
+export 'bottom_nav/app_nav_config.dart' show NavItem;
 
 /// ─── Floating bottom nav bar ─────────────────────────────────────────────────
 class MainBottomNav extends StatelessWidget {
@@ -147,12 +141,14 @@ class _NavTileState extends State<_NavTile>
                   const SizedBox(height: 4),
                   Text(
                     widget.item.label,
-                    style: TextStyle(
-                      fontSize: AppFontSize.tinyHalf,
-                      fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
-                      color: widget.selected ? activeColor : inactiveColor,
-                      height: 1,
-                    ),
+                    style: (widget.selected
+                            ? context.navLabelSelectedStyle
+                            : context.navLabelStyle)
+                        .copyWith(
+                          fontSize: AppFontSize.tinyHalf,
+                          color: widget.selected ? activeColor : inactiveColor,
+                          height: 1,
+                        ),
                   ),
                 ],
               ),

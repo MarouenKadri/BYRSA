@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../../core/design/app_primitives.dart';
+import '../../../../../../core/design/app_design_system.dart';
 import 'register_shared.dart';
 
 class RegisterEmailStep extends StatelessWidget {

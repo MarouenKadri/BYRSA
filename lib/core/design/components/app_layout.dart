@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
 import '../tokens/app_typography.dart';
-import '../tokens/app_radius.dart';
 import '../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -547,12 +546,7 @@ class AppProgressBar extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               stepLabel!,
-              style: TextStyle(
-                fontSize: AppFontSize.smHalf,
-                fontWeight: FontWeight.w600,
-                color: context.colors.primary,
-                letterSpacing: 0.2,
-              ),
+              style: context.progressStepLabelStyle,
             ),
           ],
         ],

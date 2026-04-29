@@ -10,7 +10,6 @@ import '../../features/mission/presentation/pages/client/create_mission_page.dar
 import '../../features/profile/presentation/pages/shared/account_page.dart';
 import 'bottom_nav/app_nav_config.dart';
 import 'bottom_nav/app_nav_shell.dart';
-import 'main_bottom_nav.dart';
 import 'shell/discover_shell.dart';
 import 'shell/missions_shell.dart';
 

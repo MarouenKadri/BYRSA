@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import 'mission_detail_primitives.dart';
 
@@ -64,10 +63,8 @@ class ClientCandidatesCard extends StatelessWidget {
                   count > 0
                       ? '$count candidat${count > 1 ? 's' : ''} interesse${count > 1 ? 's' : ''}'
                       : 'Aucune candidature pour le moment',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
+                  style: context.missionPrimaryValueStyle.copyWith(
+                    fontSize: AppFontSize.base,
                   ),
                 ),
               ),
@@ -135,23 +132,12 @@ class ClientPrestaCard extends StatelessWidget {
                 children: [
                   Text(
                     'Convenu',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.72),
-                      height: 1,
-                    ),
+                    style: context.missionDarkOverlineStyle,
                   ),
                   AppGap.h4,
                   Text(
                     agreedPrice,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -0.4,
-                      height: 1,
-                    ),
+                    style: context.missionDarkValueStyle,
                   ),
                 ],
               ),
@@ -193,11 +179,7 @@ class ClientPrestaCard extends StatelessWidget {
                             presta.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
-                            ),
+                            style: context.missionEntityNameStyle,
                           ),
                         ),
                         if (presta.isVerified) ...[
@@ -224,11 +206,7 @@ class ClientPrestaCard extends StatelessWidget {
                       'Prestataire confirmé',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textSecondary,
-                      ),
+                      style: context.missionEntityMetaStyle,
                     ),
                     AppGap.h6,
                     Row(
@@ -242,11 +220,7 @@ class ClientPrestaCard extends StatelessWidget {
                         AppGap.w4,
                         Text(
                           ratingValue.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
-                          ),
+                          style: context.missionEntityRatingStyle,
                         ),
                       ],
                     ),
@@ -358,21 +332,12 @@ class ClientTrackingCard extends StatelessWidget {
           AppGap.h8,
           Text(
             config.title,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
+            style: context.missionPrimaryValueStyle,
           ),
           AppGap.h14,
           Text(
             config.subtitle,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              height: 1.45,
-              color: context.colors.textSecondary,
-            ),
+            style: context.missionEmphasisBodyStyle,
           ),
           if (startCode != null &&
               (mission.status == MissionStatus.confirmed ||
@@ -393,20 +358,14 @@ class ClientTrackingCard extends StatelessWidget {
                       children: [
                         Text(
                           'Code de demarrage',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.72),
+                          style: context.missionDarkOverlineStyle.copyWith(
                             letterSpacing: 0.2,
                           ),
                         ),
                         AppGap.h8,
                         Text(
                           '${startCode.substring(0, 3)} ${startCode.substring(3)}',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                          style: context.missionHeroTitleStyle.copyWith(
                             letterSpacing: 2.4,
                           ),
                         ),
@@ -453,9 +412,8 @@ class ClientTrackingCard extends StatelessWidget {
                             AppGap.w6,
                             Text(
                               'Copier',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              style: context.missionButtonStyle.copyWith(
+                                fontSize: AppFontSize.md,
                                 color: Colors.white,
                               ),
                             ),
@@ -493,10 +451,8 @@ class ClientTrackingCard extends StatelessWidget {
                         : mission.status == MissionStatus.completionRequested
                             ? 'La mission est en attente de votre retour avant de passer au paiement.'
                             : 'Le tracking live est prevu ici pour suivre le trajet du prestataire.',
-                    style: TextStyle(
+                    style: context.missionEmphasisBodyStyle.copyWith(
                       fontSize: AppFontSize.smHalf,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -555,21 +511,12 @@ class ClientCompletionRequestedCard extends StatelessWidget {
           AppGap.h8,
           Text(
             'Fin de mission signalee',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
+            style: context.missionPrimaryValueStyle,
           ),
           AppGap.h14,
           Text(
             '$prestaName a signale avoir termine la mission. Confirmez la fin si tout est bon ou signalez un probleme.',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              height: 1.45,
-              color: context.colors.textSecondary,
-            ),
+            style: context.missionEmphasisBodyStyle,
           ),
           AppGap.h16,
           Container(
@@ -590,10 +537,8 @@ class ClientCompletionRequestedCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Sans action de votre part, le paiement pourra ensuite etre libere automatiquement.',
-                    style: TextStyle(
+                    style: context.missionEmphasisBodyStyle.copyWith(
                       fontSize: AppFontSize.smHalf,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -639,8 +584,8 @@ class _PrestaAvatarFallback extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initials.isEmpty ? '?' : initials,
-        style: TextStyle(
-          fontSize: 24,
+        style: context.missionEntityNameStyle.copyWith(
+          fontSize: AppFontSize.h2,
           fontWeight: FontWeight.w600,
           color: context.colors.textTertiary,
         ),
@@ -739,11 +684,9 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Annuler la mission ?',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
+              style: context.missionSectionTitleStyle.copyWith(
                 color: AppColors.snow,
               ),
             ),
@@ -752,9 +695,8 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
               widget.missionTitle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
+              style: context.missionBodyStyle.copyWith(
+                fontSize: AppFontSize.md,
                 color: AppColors.gray500,
               ),
             ),
@@ -780,7 +722,7 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
                     _isRefund100
                         ? 'Remboursement 100% (annulation > 24h)'
                         : 'Remboursement 50% (annulation <= 24h / jour J)',
-                    style: const TextStyle(
+                    style: context.missionButtonStyle.copyWith(
                       fontSize: AppFontSize.smHalf,
                       fontWeight: FontWeight.w700,
                       color: AppColors.snow,
@@ -789,9 +731,7 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
                   AppGap.h4,
                   Text(
                     'Montant estime: ${_refundAmount.toStringAsFixed(0)} €',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                    style: context.missionSubtleCaptionStyle.copyWith(
                       color: AppColors.gray500,
                     ),
                   ),
@@ -824,10 +764,10 @@ class _ClientCancelSheetState extends State<ClientCancelSheet> {
         Center(
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Garder la mission',
-              style: TextStyle(
-                fontSize: 14,
+              style: context.missionEmphasisBodyStyle.copyWith(
+                fontSize: AppFontSize.base,
                 fontWeight: FontWeight.w500,
                 color: AppColors.gray500,
               ),

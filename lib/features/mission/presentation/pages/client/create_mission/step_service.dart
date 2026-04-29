@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
 import 'mission_step_ui.dart';
 
 class StepService extends StatelessWidget {
@@ -198,11 +197,9 @@ class _SubServicesSheetState extends State<_SubServicesSheet> {
                 Expanded(
                   child: Text(
                     widget.serviceName,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                    style: context.missionSectionTitleStyle.copyWith(
+                      fontSize: AppFontSize.h3,
                       letterSpacing: -0.3,
-                      color: AppColors.inkDark,
                     ),
                   ),
                 ),
@@ -213,11 +210,7 @@ class _SubServicesSheetState extends State<_SubServicesSheet> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Text(
               'Sélectionnez le service exact pour votre mission',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textSecondary,
-              ),
+              style: context.missionStepMutedStyle,
             ),
           ),
           Flexible(
@@ -242,9 +235,8 @@ class _SubServicesSheetState extends State<_SubServicesSheet> {
                             AppGap.h8,
                             Text(
                               'Aucun sous-service disponible',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              style: context.missionButtonStyle.copyWith(
+                                fontSize: AppFontSize.md,
                                 color: context.colors.textSecondary,
                               ),
                             ),
@@ -326,21 +318,15 @@ class _SelectedServiceSummary extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textPrimary,
+                  style: context.missionEntityNameStyle.copyWith(
+                    fontSize: AppFontSize.base,
                   ),
                 ),
                 Text(
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.textSecondary,
-                  ),
+                  style: context.missionSubtleCaptionStyle,
                 ),
               ],
             ),
@@ -415,10 +401,12 @@ class _ServiceIconCell extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: context.missionSubtleCaptionStyle.copyWith(
             fontSize: AppFontSize.xs,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+            color: isSelected
+                ? context.colors.textPrimary
+                : context.colors.textSecondary,
             height: 1.3,
           ),
         ),

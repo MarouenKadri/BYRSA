@@ -71,31 +71,27 @@ class StepDate extends StatelessWidget {
                       children: [
                         Text(
                           isToday ? 'AUJ.' : _dayName(date.weekday).toUpperCase(),
-                          style: TextStyle(
+                          style: context.missionStepSectionLabelStyle.copyWith(
                             fontSize: AppFontSize.tinyHalf,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
-                            color: context.colors.textTertiary,
                           ),
                         ),
                         AppGap.h10,
                         Text(
                           '${date.day}',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.textPrimary,
+                          style: context.missionSectionTitleStyle.copyWith(
+                            fontSize: AppFontSize.h1,
                             height: 1,
                           ),
                         ),
                         AppGap.h6,
                         Text(
                           _monthName(date.month).toUpperCase(),
-                          style: TextStyle(
+                          style: context.missionStepSectionLabelStyle.copyWith(
                             fontSize: AppFontSize.tinyHalf,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.8,
-                            color: context.colors.textTertiary,
                           ),
                         ),
                         AppGap.h10,
@@ -155,9 +151,8 @@ class StepDate extends StatelessWidget {
             icon: const Icon(Icons.calendar_month_outlined, size: 18),
             label: Text(
               'Autre date',
-              style: TextStyle(
+              style: context.missionStepMutedStyle.copyWith(
                 fontSize: AppFontSize.baseHalf,
-                fontWeight: FontWeight.w500,
                 color: context.colors.textPrimary,
               ),
             ),
@@ -256,12 +251,8 @@ class StepTime extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected
-                              ? context.colors.textPrimary
-                              : context.colors.textPrimary,
+                        style: context.missionButtonStyle.copyWith(
+                          color: context.colors.textPrimary,
                         ),
                       ),
                     ),
@@ -306,9 +297,8 @@ class StepTime extends StatelessWidget {
             icon: const Icon(Icons.schedule_outlined, size: 18),
             label: Text(
               'Autre heure',
-              style: TextStyle(
+              style: context.missionStepMutedStyle.copyWith(
                 fontSize: AppFontSize.baseHalf,
-                fontWeight: FontWeight.w500,
                 color: context.colors.textPrimary,
               ),
             ),

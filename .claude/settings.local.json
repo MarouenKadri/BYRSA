@@ -82,7 +82,11 @@
       "Bash(/mnt/c/Users/marouen/Documents/flutter/bin/flutter analyze *)",
       "Bash(/home/marouen/.local/share/flutter/bin/flutter analyze *)",
       "Bash(flutter.bat analyze *)",
-      "Bash(/usr/bin/flutter analyze *)"
+      "Bash(/usr/bin/flutter analyze *)",
+      "Bash(/usr/bin/dart analyze *)",
+      "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/tokens/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/tokens/)",
+      "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/theme/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/theme/)",
+      "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/components/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/components/)"
     ]
   }
 }

@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppType {
   static TextTheme buildTextTheme({required Color primary, required Color secondary, required Color tertiary}) {
-    final base = GoogleFonts.interTextTheme();
+    final base = GoogleFonts.interTextTheme(); 
     return base.copyWith(
       // ── Display ─────────────────────────────────────────────────────────
       displayLarge:  base.displayLarge?.copyWith(fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0, color: primary, height: 1.15),
@@ -17,8 +17,8 @@ abstract class AppType {
       headlineSmall:  base.headlineSmall?.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: primary),
       // ── Title ───────────────────────────────────────────────────────────
       titleLarge:  base.titleLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w700, color: primary),
-      titleMedium: base.titleMedium?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: primary),
-      titleSmall:  base.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: primary),
+      titleMedium: base.titleMedium?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: secondary),
+      titleSmall:  base.titleSmall?.copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: const Color(0xFF777E91)),
       // ── Body ────────────────────────────────────────────────────────────
       bodyLarge:  base.bodyLarge?.copyWith(fontSize: 15, fontWeight: FontWeight.w400, color: primary, height: 1.6),
       bodyMedium: base.bodyMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: secondary, height: 1.5),

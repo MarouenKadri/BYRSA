@@ -92,20 +92,14 @@ class StepSummary extends StatelessWidget {
                             (subService?.isNotEmpty ?? false)
                                 ? subService!
                                 : serviceData['name'] as String,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.textPrimary,
+                            style: context.missionEntityNameStyle.copyWith(
+                              fontSize: AppFontSize.h2,
                             ),
                           ),
                           AppGap.h4,
                           Text(
                             serviceData['name'] as String,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: context.colors.textSecondary,
-                            ),
+                            style: context.missionStepMutedStyle,
                           ),
                         ],
                       ),
@@ -208,20 +202,14 @@ class StepSummary extends StatelessWidget {
                                 : budgetType == 'fixed'
                                     ? 'Budget fixe'
                                     : 'Sur devis',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textSecondary,
-                              ),
+                              style: context.missionSubtleCaptionStyle,
                             ),
                           if (budgetType == 'hourly') ...[
                             AppGap.h4,
                             Text(
                               '${estimatedHours.toStringAsFixed(estimatedHours.truncateToDouble() == estimatedHours ? 0 : 1)} heures estimees',
-                              style: TextStyle(
+                              style: context.missionStepMutedStyle.copyWith(
                                 fontSize: AppFontSize.mdHalf,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textSecondary,
                               ),
                             ),
                           ],
@@ -234,21 +222,11 @@ class StepSummary extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: '${totalBudget.round()}',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w400,
-                                color: context.colors.textPrimary,
-                                letterSpacing: -1,
-                              ),
+                              style: context.missionStepHeadlineValueStyle,
                             ),
                             TextSpan(
                               text: ' EUR',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textSecondary,
-                                letterSpacing: 0.4,
-                              ),
+                              style: context.missionStepCurrencyStyle,
                             ),
                           ],
                         ),
@@ -256,10 +234,9 @@ class StepSummary extends StatelessWidget {
                     else
                       Text(
                         'Sur devis',
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: context.missionSectionTitleStyle.copyWith(
+                          fontSize: AppFontSize.xl,
                           fontWeight: FontWeight.w600,
-                          color: context.colors.textPrimary,
                         ),
                       ),
                   ],
@@ -330,21 +307,14 @@ class SummaryRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: context.missionSubtleCaptionStyle.copyWith(
                   fontSize: AppFontSize.xsHalf,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textTertiary,
                 ),
               ),
               AppGap.h4,
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: AppFontSize.baseHalf,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.inkDark,
-                  height: 1.45,
-                ),
+                style: context.missionStepValueStyle,
               ),
             ],
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 
 // ─── StatusBannerConfig ───────────────────────────────────────────────────────
@@ -82,11 +81,7 @@ class DetailMetaChip extends StatelessWidget {
         child: Text(
           label,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: context.colors.textSecondary,
-          ),
+          style: context.missionMetaStyle,
         ),
       ),
     ],
@@ -110,11 +105,7 @@ class DetailLuxuryPill extends StatelessWidget {
     ),
     child: Text(
       label,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: AppColors.ink,
-      ),
+      style: context.missionPillStyle,
     ),
   );
 }
@@ -173,11 +164,7 @@ class DetailSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleText = Text(
       title,
-      style: TextStyle(
-        fontSize: 19,
-        fontWeight: FontWeight.w700,
-        color: context.colors.textPrimary,
-      ),
+      style: context.missionSectionTitleStyle,
     );
 
     if (trailing == null) return titleText;
@@ -204,12 +191,7 @@ class DetailSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: context.colors.textTertiary,
-        letterSpacing: 1.2,
-      ),
+      style: context.missionSectionLabelStyle,
     );
   }
 }
@@ -259,23 +241,14 @@ class DetailInfoRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textTertiary,
-                ),
+                style: context.missionSubtleCaptionStyle,
               ),
               AppGap.h4,
               Text(
                 text,
                 maxLines: twoLines ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.45,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink,
-                ),
+                style: context.missionPrimaryValueStyle,
               ),
             ],
           ),
@@ -372,9 +345,7 @@ class DetailTealButton extends StatelessWidget {
             ],
             Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+              style: context.missionButtonStyle.copyWith(
                 color: onTap != null ? fg : context.colors.textHint,
               ),
             ),
@@ -424,9 +395,7 @@ class DetailSecondaryButton extends StatelessWidget {
             ],
             Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+              style: context.missionButtonStyle.copyWith(
                 color: onTap != null
                     ? context.colors.textPrimary
                     : context.colors.textHint,
@@ -467,7 +436,7 @@ class DetailReadonlyBadge extends StatelessWidget {
         AppGap.w8,
         Text(
           label,
-          style: context.text.titleSmall?.copyWith(
+          style: context.missionButtonStyle.copyWith(
             color: context.colors.textTertiary,
           ),
         ),
@@ -568,20 +537,14 @@ class DetailStatusBanner extends StatelessWidget {
               children: [
                 Text(
                   config.title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
-                  ),
+                  style: context.missionPrimaryValueStyle,
                 ),
                 AppGap.h4,
                 Text(
                   config.subtitle,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.missionBodyStyle.copyWith(
+                    fontSize: AppFontSize.md,
                     height: 1.45,
-                    fontWeight: FontWeight.w400,
-                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -854,11 +817,7 @@ class _Pill extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: context.missionButtonStyle.copyWith(color: Colors.white),
             ),
           ],
         ),

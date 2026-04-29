@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../../messaging/messaging_provider.dart';
 import '../../../messaging/presentation/pages/chat_page.dart';
 import '../../../profile/data/models/user_profile.dart';

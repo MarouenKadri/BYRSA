@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../core/design/app_primitives.dart';
+import '../../../../../../core/design/app_design_system.dart';
 import '../../../../profile_provider.dart';
 import 'my_information_fields.dart';
 

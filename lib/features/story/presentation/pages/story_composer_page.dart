@@ -1,10 +1,10 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../../../features/mission/data/models/service_category.dart';
 import '../../story_provider.dart';
 
@@ -82,6 +82,7 @@ class _StoryComposerPageState extends State<StoryComposerPage> {
   Future<void> _openCategoryPicker() async {
     final selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
@@ -424,69 +425,100 @@ class _CategoryPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPickerSheet(
-      title: "Quel talent montrez-vous aujourd'hui ?",
-      dark: true,
-      child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.82,
-        ),
-        itemCount: ServiceCategory.all.length,
-        itemBuilder: (_, i) {
-          final cat = ServiceCategory.all[i];
-          final isSelected = selected == cat.id;
-          return GestureDetector(
-            onTap: () => Navigator.pop(context, cat.id),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: isSelected ? 1.0 : 0.55,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: AppStoryMetrics.editChipAnimationMs),
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? cat.color.withValues(alpha: 0.20)
-                          : Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected
-                            ? cat.color.withValues(alpha: 0.55)
-                            : Colors.transparent,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Icon(
-                      cat.icon,
-                      size: 24,
-                      color: isSelected ? cat.color : AppColors.snow,
-                    ),
+    final mediaQuery = MediaQuery.of(context);
+    final maxSheetHeight = math.min(mediaQuery.size.height * 0.78, 560.0);
+    final bottomPadding = math.max(mediaQuery.padding.bottom, 12.0);
+
+    return SafeArea(
+      top: false,
+      child: AppDarkSheet(
+        child: SizedBox(
+          height: maxSheetHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const AppBottomSheetHandle(),
+              AppGap.h12,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: Text(
+                  "Quel talent montrez-vous aujourd'hui ?",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.snow,
                   ),
-                  AppGap.h6,
-                  Text(
-                    cat.name,
-                    style: TextStyle(
-                      fontSize: AppFontSize.xsHalf,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: AppColors.snow,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                  ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+              AppGap.h8,
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.fromLTRB(20, 4, 20, 16 + bottomPadding),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.82,
+                  ),
+                  itemCount: ServiceCategory.all.length,
+                  itemBuilder: (_, i) {
+                    final cat = ServiceCategory.all[i];
+                    final isSelected = selected == cat.id;
+                    return GestureDetector(
+                      onTap: () => Navigator.pop(context, cat.id),
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 180),
+                        opacity: isSelected ? 1.0 : 0.55,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(
+                                milliseconds: AppStoryMetrics.editChipAnimationMs,
+                              ),
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? cat.color.withValues(alpha: 0.20)
+                                    : Colors.white.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? cat.color.withValues(alpha: 0.55)
+                                      : Colors.transparent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Icon(
+                                cat.icon,
+                                size: 24,
+                                color: isSelected ? cat.color : AppColors.snow,
+                              ),
+                            ),
+                            AppGap.h6,
+                            Text(
+                              cat.name,
+                              style: TextStyle(
+                                fontSize: AppFontSize.xsHalf,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: AppColors.snow,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

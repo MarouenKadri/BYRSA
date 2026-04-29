@@ -4,7 +4,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission.dart';
 import '../../../data/models/mission_address.dart';
@@ -141,12 +140,7 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
       children: [
         Text(
           mission.categoryName.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 2.1,
-            color: context.colors.textTertiary,
-          ),
+          style: context.missionCategoryStyle,
         ),
         AppGap.h12,
         Row(
@@ -282,11 +276,8 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
                     mission.address.shortAddress.isNotEmpty
                         ? mission.address.shortAddress
                         : mission.address.fullAddress,
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: context.missionEntityNameStyle.copyWith(
                       height: 1.35,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
@@ -320,21 +311,12 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
           children: [
             Text(
               'Description',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textPrimary,
-              ),
+              style: context.missionSectionTitleStyle,
             ),
             AppGap.h12,
             Text(
               mission.description,
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.65,
-                fontWeight: FontWeight.w400,
-                color: context.colors.textSecondary,
-              ),
+              style: context.missionBodyStyle,
             ),
           ],
         ),

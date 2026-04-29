@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/design/app_design_system.dart';
-import '../../core/design/app_primitives.dart';
 
 import '../auth_provider.dart';
 import '../enum/user_role.dart';
 
+import '../../features/auth/presentation/pages/home/home_page.dart';
 import '../../features/auth/presentation/pages/register/google_onboarding_flow.dart';
-import 'guest_nav.dart';
 import 'app_nav.dart';
 
 class RootNav extends StatelessWidget {
@@ -22,7 +21,7 @@ class RootNav extends StatelessWidget {
     }
 
     if (!auth.isLogged) {
-      return const GuestNav();
+      return const Scaffold(body: WelcomePage());
     }
 
     // _ModeSwitchSplash is only for role-switching (pendingRole set).

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/registration_data.dart';
 import '../../utils/auth_formatters.dart';
 import 'otp_verification_page.dart';

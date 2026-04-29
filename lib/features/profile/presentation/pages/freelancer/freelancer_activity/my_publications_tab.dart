@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
 import '../../../../../story/story.dart';
 
 class FreelancerMyPublicationsTab extends StatefulWidget {

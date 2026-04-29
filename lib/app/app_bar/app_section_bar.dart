@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/design/app_design_system.dart';
-import '../../core/design/app_primitives.dart';
 import '../../features/notifications/notifications.dart';
 import '../../features/profile/profile_provider.dart';
-import 'location_app_bar.dart' show RoleSwitchSheet;
+import 'role_switch_sheet.dart';
 
 /// App bar standard des pages de section.
 /// - Sans [pageTitle] : affiche une pill de marque

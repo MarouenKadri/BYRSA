@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_typography.dart';
 import '../tokens/app_spacing.dart';
-import '../tokens/app_radius.dart';
 import '../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -134,12 +133,7 @@ class AppFormSheet extends StatelessWidget {
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFontSize.title,
-                      fontWeight: FontWeight.w300,
-                      color: context.colors.textPrimary,
-                      letterSpacing: 0.1,
-                    ),
+                    style: context.sheetFormTitleStyle,
                   ),
                   AppGap.h16,
                   Divider(color: context.colors.divider, height: 1),
@@ -194,11 +188,9 @@ class AppPickerSheet extends StatelessWidget {
             alignment: titleAlignment,
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: dark ? AppColors.snow : context.colors.textPrimary,
-              ),
+              style: dark
+                  ? context.sheetPickerTitleDarkStyle
+                  : context.sheetPickerTitleStyle,
             ),
           ),
         ),
@@ -247,11 +239,9 @@ class AppActionSheet extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: dark ? AppColors.snow : context.colors.textPrimary,
-                ),
+                style: dark
+                    ? context.sheetPickerTitleDarkStyle
+                    : context.sheetPickerTitleStyle,
               ),
             ),
           ),
@@ -316,9 +306,7 @@ class AppActionSheetItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                    style: context.sheetActionTitleStyle.copyWith(
                       color: titleColor,
                     ),
                   ),
@@ -326,9 +314,7 @@ class AppActionSheetItem extends StatelessWidget {
                     AppGap.h2,
                     Text(
                       subtitle!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
+                      style: context.sheetActionSubtitleStyle.copyWith(
                         color: subtitleColor,
                       ),
                     ),
@@ -410,12 +396,7 @@ class AppScrollableSheet extends StatelessWidget {
                             child: Text(
                               title!,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: AppFontSize.title,
-                                fontWeight: FontWeight.w300,
-                                color: context.colors.textPrimary,
-                                letterSpacing: 0.1,
-                              ),
+                              style: context.sheetFormTitleStyle,
                             ),
                           ),
                           if (trailing != null) ...[

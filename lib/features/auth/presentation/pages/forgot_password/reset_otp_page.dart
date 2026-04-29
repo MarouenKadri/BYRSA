@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../mixins/otp_timer_mixin.dart';
 import '../../utils/auth_formatters.dart';
 import '../../widgets/otp_input_row.dart';

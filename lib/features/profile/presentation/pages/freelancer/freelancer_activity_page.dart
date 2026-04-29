@@ -3,10 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../profile_provider.dart';
 import 'freelancer_activity/activity_tab.dart';
-import 'freelancer_activity/archives_tab.dart';
 import 'freelancer_activity/my_publications_tab.dart';
 
 class FreelancerActivityPage extends StatefulWidget {
@@ -122,10 +120,6 @@ class _FreelancerActivityPageState extends State<FreelancerActivityPage> {
                 icon: Icons.auto_stories_rounded,
                 label: 'Mes publications',
               ),
-              AppSegmentedTab(
-                icon: Icons.archive_outlined,
-                label: 'Archives',
-              ),
             ],
           ),
           Expanded(
@@ -159,12 +153,6 @@ class _FreelancerActivityPageState extends State<FreelancerActivityPage> {
                     child: const FreelancerMyPublicationsTab(),
                   ),
                 ),
-                Positioned.fill(
-                  child: _AnimatedTabPane(
-                    visible: _selectedTabIndex == 2,
-                    child: const FreelancerArchivesTab(),
-                  ),
-                ),
               ],
             ),
           ),
@@ -175,7 +163,6 @@ class _FreelancerActivityPageState extends State<FreelancerActivityPage> {
 
   String get _tabTitle => switch (_selectedTabIndex) {
         1 => 'Mes publications',
-        2 => 'Archives',
         _ => 'Mon activité',
       };
 }

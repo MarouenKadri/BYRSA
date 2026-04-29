@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/registration_data.dart';
 import '../../mixins/otp_timer_mixin.dart';
 import '../../utils/auth_formatters.dart';

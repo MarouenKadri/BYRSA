@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../../../../app/widgets/app_location_picker_map.dart';
 import '../../../../../../core/design/app_design_system.dart';
-import '../../../../../../core/design/app_primitives.dart';
 import '../../shared/my_information/my_information_fields.dart';
 
 class FreelancerActivityTab extends StatelessWidget {

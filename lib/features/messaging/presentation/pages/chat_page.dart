@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../data/models/message.dart';
 import '../../messaging_provider.dart';
 import '../../../mission/presentation/pages/client/create_mission_page.dart';
@@ -163,13 +162,19 @@ class _ChatPageState extends State<ChatPage> {
                 const TextSpan(text: 'Vous allez accepter '),
                 TextSpan(
                   text: widget.contactName,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: context.chatBannerStyle.copyWith(
+                    color: _kCharcoal,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 if (widget.candidatePrice != null) ...[
                   const TextSpan(text: ' pour '),
                   TextSpan(
                     text: widget.candidatePrice,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                    style: context.chatBannerStyle.copyWith(
+                      color: _kCharcoal,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
                 const TextSpan(text: '.'),
@@ -190,7 +195,7 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: Text(
                     'Les autres candidats seront automatiquement refusés.',
-                    style: context.text.bodySmall?.copyWith(fontSize: AppFontSize.md),
+                    style: context.chatBannerStyle,
                   ),
                 ),
               ],
@@ -275,12 +280,7 @@ class _ChatPageState extends State<ChatPage> {
                     Flexible(
                       child: Text(
                         widget.contactName,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: _kInk,
-                          letterSpacing: -0.2,
-                        ),
+                        style: context.chatTitleStyle.copyWith(color: _kInk),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -293,11 +293,7 @@ class _ChatPageState extends State<ChatPage> {
                 const SizedBox(height: 1),
                 Text(
                   widget.isOnline ? 'En ligne' : 'Vu récemment',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: _kGrayLight,
-                  ),
+                  style: context.chatMetaStyle.copyWith(color: _kGrayLight),
                 ),
               ],
             ),
@@ -346,12 +342,7 @@ class _ChatPageState extends State<ChatPage> {
           Flexible(
             child: Text(
               summaryText,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: _kCharcoal,
-                letterSpacing: 0,
-              ),
+              style: context.chatBannerStyle.copyWith(color: _kCharcoal),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -367,13 +358,11 @@ class _ChatPageState extends State<ChatPage> {
                   color: _kInk,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Text(
+                child: Text(
                   'Accepter',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  style: context.chatPrimaryActionStyle.copyWith(
+                    fontSize: AppFontSize.sm,
                     color: _kWhite,
-                    letterSpacing: 0.1,
                   ),
                 ),
               ),
@@ -403,11 +392,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: Text(
               'Le partage de coordonnées personnelles n\'est pas autorisé.',
-              style: TextStyle(
-                fontSize: AppFontSize.sm,
-                color: AppColors.error,
-                height: 1.4,
-              ),
+              style: context.chatWarningStyle,
             ),
           ),
           GestureDetector(
@@ -465,12 +450,7 @@ class _ChatPageState extends State<ChatPage> {
       child: Center(
         child: Text(
           'Démarrez la conversation',
-          style: TextStyle(
-            fontSize: AppFontSize.base,
-            fontWeight: FontWeight.w300,
-            color: _kGrayXLight,
-            letterSpacing: 0.1,
-          ),
+          style: context.chatEmptyStateStyle.copyWith(color: _kGrayXLight),
         ),
       ),
     );
@@ -504,18 +484,16 @@ class _ChatPageState extends State<ChatPage> {
                   color: _kInk,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('⚡', style: TextStyle(fontSize: 14)),
-                    SizedBox(width: 6),
+                    Text('⚡', style: context.chatPrimaryActionStyle.copyWith(fontSize: 14)),
+                    const SizedBox(width: 6),
                     Text(
                       'Réserver ce service',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                      style: context.chatPrimaryActionStyle.copyWith(
+                        fontSize: AppFontSize.base,
                         color: _kWhite,
-                        letterSpacing: 0.1,
                       ),
                     ),
                   ],
@@ -555,18 +533,11 @@ class _ChatPageState extends State<ChatPage> {
                       maxLines: 4,
                       minLines: 1,
                       textCapitalization: TextCapitalization.sentences,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: _kInk,
-                        height: 1.45,
-                      ),
+                      style: context.chatInputStyle.copyWith(color: _kInk),
                       decoration: AppInputDecorations.formField(
                         context,
                         hintText: 'Votre message...',
-                        hintStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
+                        hintStyle: context.chatInputHintStyle.copyWith(
                           color: _kGrayXLight,
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
@@ -718,11 +689,7 @@ class _MessageBubbleFromModel extends StatelessWidget {
         ),
         child: Text(
           message.content,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: _kGrayMid,
-          ),
+          style: context.chatSystemStyle.copyWith(color: _kGrayMid),
           textAlign: TextAlign.center,
         ),
       );
@@ -777,12 +744,10 @@ class _MessageBubbleFromModel extends StatelessWidget {
                       children: [
                         Text(
                           message.content,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: isMe ? _kWhite : _kInk,
-                            height: 1.45,
-                          ),
+                          style: (isMe
+                                  ? context.chatBubbleTextOnDarkStyle
+                                  : context.chatBubbleTextStyle)
+                              .copyWith(color: isMe ? _kWhite : _kInk),
                         ),
                         AppGap.h3,
                         _TimeStatus(message: message, isMe: isMe),
@@ -832,8 +797,7 @@ class _TimeStatus extends StatelessWidget {
       children: [
         Text(
           '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
-          style: TextStyle(
-            fontSize: 10,
+          style: context.chatTimestampStyle.copyWith(
             color: isMe ? _kWhite.withValues(alpha: 0.55) : _kGrayLight,
           ),
         ),
@@ -928,12 +892,18 @@ class _LocationBubble extends StatelessWidget {
                       color: Colors.black.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white),
-                        SizedBox(width: 4),
-                        Text('Ouvrir', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600)),
+                        const Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Ouvrir',
+                          style: context.chatPrimaryActionStyle.copyWith(
+                            fontSize: AppFontSize.xs,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -952,9 +922,7 @@ class _LocationBubble extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Position partagée',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      style: context.chatLocationLabelStyle.copyWith(
                         color: isMe ? _kWhite : _kInk,
                       ),
                     ),

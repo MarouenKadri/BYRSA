@@ -21,8 +21,8 @@ abstract class AppColors {
   static const borderLight = Color(0xFFE8E8E8);
 
   // Text
-  static const textPrimary = Color(0xFF1E293B);
-  static const textSecondary = Color(0xFF64748B);
+  static const textPrimary = Color.fromARGB(255, 100, 100, 100);
+  static const textSecondary = Color.fromARGB(255, 41, 42, 43);
   static const textTertiary = Color(0xFF94A3B8);
   static const textHint = Color(0xFFCBD5E1);
 

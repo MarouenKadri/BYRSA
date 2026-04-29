@@ -5,7 +5,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../../messaging/messaging_provider.dart';
 import '../../../messaging/presentation/pages/chat_page.dart';
 import '../../../profile/presentation/pages/shared/base_profile_view.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 
 class ReviewsErrorCard extends StatelessWidget {
   final String message;

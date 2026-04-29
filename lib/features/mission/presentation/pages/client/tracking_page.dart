@@ -7,7 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/location/nominatim_service.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
 

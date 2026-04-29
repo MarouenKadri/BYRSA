@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../services/image_picker_service.dart';
 
 class PhotoPicker extends StatelessWidget {

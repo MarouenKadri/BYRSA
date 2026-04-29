@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 
 // Widget OTP partagé — cases numériques avec navigation focus automatique.
 // [length] définit le nombre de cases (défaut 4 pour la registration, 6 pour SMS login).

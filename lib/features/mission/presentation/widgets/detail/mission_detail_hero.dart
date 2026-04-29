@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../data/models/mission.dart';
 import 'mission_detail_primitives.dart';
 
@@ -127,13 +126,7 @@ class _MissionDetailHeroState extends State<MissionDetailHero> {
                     widget.mission.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 28,
-                      height: 1.08,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: -0.9,
-                    ),
+                    style: context.missionHeroTitleStyle,
                   ),
                   if (hasImages && widget.mission.images.length > 1) ...[
                     AppGap.h14,
@@ -284,8 +277,7 @@ class _MissionImageViewerPageState extends State<_MissionImageViewerPage> {
                   ),
                   child: Text(
                     '${_index + 1} / ${widget.images.length}',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: context.missionSubtleCaptionStyle.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),

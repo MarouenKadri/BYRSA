@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
 import '../../../../reviews/data/repositories/supabase_review_repository.dart';
 import '../../../../reviews/domain/entities/review.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
+import '../../../../../../core/design/app_design_system.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Composants partagés — Paiements (Client & Freelancer)
@@ -17,13 +16,13 @@ class PaymentShadowField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: context.colors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            blurRadius: AppPaymentMetrics.shadowBlurRadius,
+            offset: const Offset(0, AppPaymentMetrics.shadowOffsetY),
           ),
         ],
       ),
@@ -44,15 +43,19 @@ class PaymentAddButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 52,
+        height: AppPaymentMetrics.addButtonHeight,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(color: context.colors.border, width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_rounded, size: 18, color: context.colors.textSecondary),
+            Icon(
+              Icons.add_rounded,
+              size: AppPaymentMetrics.commonIconSize,
+              color: context.colors.textSecondary,
+            ),
             AppGap.w8,
             Text(
               label,
@@ -104,16 +107,20 @@ class PaymentInfoNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: AppInsets.a14,
       decoration: BoxDecoration(
         color: context.colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: context.colors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: context.colors.textTertiary),
+          Icon(
+            icon,
+            size: AppPaymentMetrics.infoIconSize,
+            color: context.colors.textTertiary,
+          ),
           AppGap.w10,
           Expanded(
             child: Column(
@@ -194,14 +201,17 @@ class PaymentDeleteConfirmSheet extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              width: 52,
-              height: 52,
+              width: AppPaymentMetrics.deleteSheetIconWrapSize,
+              height: AppPaymentMetrics.deleteSheetIconWrapSize,
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: AppColors.error, size: 26),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+                size: AppPaymentMetrics.deleteSheetIconSize,
+              ),
             ),
           ),
           AppGap.h14,
@@ -247,20 +257,24 @@ class PaymentTxTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppRadius.card),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: AppInsets.h16v14,
         child: Row(
           children: [
             // ─── Icône ───
             Container(
-              width: 40,
-              height: 40,
+              width: AppPaymentMetrics.txLeadingBoxSize,
+              height: AppPaymentMetrics.txLeadingBoxSize,
               decoration: BoxDecoration(
                 color: context.colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(AppPaymentMetrics.txLeadingRadius),
               ),
-              child: Icon(icon, size: 18, color: context.colors.textSecondary),
+              child: Icon(
+                icon,
+                size: AppPaymentMetrics.commonIconSize,
+                color: context.colors.textSecondary,
+              ),
             ),
             AppGap.w14,
             // ─── Titre + sous-titre ───
@@ -339,10 +353,10 @@ class PaymentFilterPills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 34,
+      height: AppPaymentMetrics.filterPillHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: AppInsets.h16,
         itemCount: filters.length,
         separatorBuilder: (_, __) => AppGap.w8,
         itemBuilder: (context, i) {
@@ -351,13 +365,15 @@ class PaymentFilterPills extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(f),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              duration: const Duration(
+                milliseconds: AppPaymentMetrics.filterAnimationMs,
+              ),
+              padding: AppInsets.h16,
               decoration: BoxDecoration(
                 color: active
                     ? context.colors.textPrimary
                     : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppRadius.chip),
                 border: Border.all(
                   color: active
                       ? context.colors.textPrimary
@@ -410,10 +426,10 @@ class PaymentMissionPipelineInline extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      padding: AppInsets.h10v8,
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.badge),
         border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
       child: Column(
@@ -482,8 +498,8 @@ class _PipelineDot extends StatelessWidget {
   Widget build(BuildContext context) {
     if (done) {
       return Container(
-        width: 12,
-        height: 12,
+        width: AppPaymentMetrics.pipelineDotSize,
+        height: AppPaymentMetrics.pipelineDotSize,
         decoration: BoxDecoration(
           color: accent,
           shape: BoxShape.circle,
@@ -492,8 +508,8 @@ class _PipelineDot extends StatelessWidget {
     }
     if (active) {
       return Container(
-        width: 12,
-        height: 12,
+        width: AppPaymentMetrics.pipelineDotSize,
+        height: AppPaymentMetrics.pipelineDotSize,
         decoration: BoxDecoration(
           color: accent.withValues(alpha: 0.22),
           shape: BoxShape.circle,
@@ -502,8 +518,8 @@ class _PipelineDot extends StatelessWidget {
       );
     }
     return Container(
-      width: 12,
-      height: 12,
+      width: AppPaymentMetrics.pipelineDotSize,
+      height: AppPaymentMetrics.pipelineDotSize,
       decoration: BoxDecoration(
         color: Colors.transparent,
         shape: BoxShape.circle,
@@ -523,11 +539,13 @@ class _PipelineConnector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 5),
+        height: AppPaymentMetrics.pipelineConnectorHeight,
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppPaymentMetrics.pipelineConnectorMargin,
+        ),
         decoration: BoxDecoration(
           color: done ? accent.withValues(alpha: 0.7) : context.colors.border,
-          borderRadius: BorderRadius.circular(99),
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
       ),
     );

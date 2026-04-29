@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design/app_design_system.dart';
-import '../../../../core/design/app_primitives.dart';
 import '../../../../features/mission/data/models/service_category.dart';
 
 class CategoryStoryStripAddAction {

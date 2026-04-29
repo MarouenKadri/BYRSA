@@ -4,90 +4,69 @@ import 'package:flutter/services.dart';
 import '../tokens/app_colors.dart';
 import '../tokens/app_spacing.dart';
 import '../tokens/app_typography.dart';
-import '../tokens/app_radius.dart';
 import '../components/app_text_field.dart';
 
 // ─── 5. THEMES ───────────────────────────────────────────────────────────────
 
-// ─── Tokens App ──────────────────────────────────────────────────────────────
-
-class _AppTokens {
-  const _AppTokens();
-  Color get primary => const Color.fromARGB(255, 81, 86, 88);
-  Color get error => const Color.fromARGB(255, 194, 118, 118);
-  Color get background => AppColors.background;
-  Color get surface => AppColors.surface;
-  Color get surfaceAlt => AppColors.surfaceAlt;
-  Color get sheetBg => AppColors.sheetBg;
-  Color get inputFill => AppColors.inputFill;
-  Color get border => AppColors.border;
-  Color get divider => AppColors.divider;
-  Color get textPrimary => AppColors.textPrimary;
-  Color get textSecondary => AppColors.textSecondary;
-  Color get textTertiary => AppColors.textTertiary;
-  Color get textHint => AppColors.textHint;
-  Color get appBarBg => AppColors.surface;
-}
-
 class AppThemeData {
   AppThemeData._();
+
+  // Colors used only within the theme build (slightly adjusted for Material theme context).
+  static const _themePrimary = Color.fromARGB(255, 81, 86, 88);
+  static const _themeError = Color.fromARGB(255, 194, 118, 118);
 
   static ThemeData get theme => _build();
 
   static ThemeData _build() {
-    const c = _AppTokens();
-
     final textTheme = AppType.buildTextTheme(
-      primary: c.textPrimary,
-      secondary: c.textSecondary,
-      tertiary: c.textTertiary,
+      primary: AppColors.textPrimary,
+      secondary: AppColors.textSecondary,
+      tertiary: AppColors.textTertiary,
     );
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: appColorScheme,
-      scaffoldBackgroundColor: c.background,
-      canvasColor: c.background,
+      scaffoldBackgroundColor: AppColors.background,
+      canvasColor: AppColors.background,
 
       // ── Typo ────────────────────────────────────────────────────────────
       textTheme: textTheme,
 
       // ── AppBar ───────────────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
-        backgroundColor: c.appBarBg,
+        backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: c.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: (textTheme.titleLarge ?? const TextStyle()).copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: c.textPrimary,
+          color: AppColors.textPrimary,
           letterSpacing: -0.2,
         ),
       ),
 
       // ── Bottom Nav ───────────────────────────────────────────────────────
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: c.surface,
-        selectedItemColor: c.primary,
-        unselectedItemColor: c.textTertiary,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        selectedItemColor: _themePrimary,
+        unselectedItemColor: AppColors.textTertiary,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
       ),
 
       // ── Nav Bar M3 ────────────────────────────────────────────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: c.surface,
-        indicatorColor: c.primary.withValues(alpha: 0.15),
+        backgroundColor: AppColors.surface,
+        indicatorColor: _themePrimary.withValues(alpha: 0.15),
         iconTheme: WidgetStateProperty.resolveWith(
           (s) => IconThemeData(
-            color: s.contains(WidgetState.selected)
-                ? c.primary
-                : c.textTertiary,
+            color: s.contains(WidgetState.selected) ? _themePrimary : AppColors.textTertiary,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith((s) {
@@ -95,80 +74,65 @@ class AppThemeData {
           return TextStyle(
             fontSize: 11,
             fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-            color: sel ? c.primary : c.textTertiary,
+            color: sel ? _themePrimary : AppColors.textTertiary,
           );
         }),
       ),
 
       // ── Tab Bar ──────────────────────────────────────────────────────────
-      tabBarTheme: TabBarThemeData(
-        labelColor: c.primary,
-        unselectedLabelColor: c.textTertiary,
-        indicatorColor: c.primary,
+      tabBarTheme: const TabBarThemeData(
+        labelColor: _themePrimary,
+        unselectedLabelColor: AppColors.textTertiary,
+        indicatorColor: _themePrimary,
         indicatorSize: TabBarIndicatorSize.tab,
-        labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
-        unselectedLabelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-        dividerColor: c.divider,
+        labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        dividerColor: AppColors.divider,
       ),
 
       // ── Boutons ───────────────────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: c.primary,
+          backgroundColor: _themePrimary,
           foregroundColor: Colors.white,
           elevation: 0,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDesign.radiusButton),
           ),
-          textStyle: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: c.primary,
-          side: BorderSide(color: c.primary),
+          foregroundColor: _themePrimary,
+          side: const BorderSide(color: _themePrimary),
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDesign.radiusButton),
           ),
-          textStyle: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: c.primary,
-          textStyle: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          foregroundColor: _themePrimary,
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
       // ── Input ────────────────────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: c.inputFill,
+        fillColor: AppColors.inputFill,
         contentPadding: AppDesign.paddingInput,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
-          borderSide: BorderSide(color: c.border),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
-          borderSide: BorderSide(color: c.border),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
@@ -179,54 +143,54 @@ class AppThemeData {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
-          borderSide: BorderSide(color: c.error),
+          borderSide: const BorderSide(color: _themeError),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusInput),
-          borderSide: BorderSide(color: c.error, width: 1.5),
+          borderSide: const BorderSide(color: _themeError, width: 1.5),
         ),
-        hintStyle: TextStyle(color: c.textHint),
-        labelStyle: TextStyle(color: c.textSecondary),
-        prefixIconColor: c.textTertiary,
-        suffixIconColor: c.textTertiary,
-        errorStyle: TextStyle(fontSize: 11, color: c.error),
+        hintStyle: const TextStyle(color: AppColors.textHint),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        prefixIconColor: AppColors.textTertiary,
+        suffixIconColor: AppColors.textTertiary,
+        errorStyle: const TextStyle(fontSize: 11, color: _themeError),
       ),
 
       // ── Card ─────────────────────────────────────────────────────────────
-      cardTheme: CardThemeData(
-        color: c.surface,
+      cardTheme: const CardThemeData(
+        color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDesign.radiusCard),
-          side: BorderSide(color: c.border),
+          borderRadius: BorderRadius.all(Radius.circular(AppDesign.radiusCard)),
+          side: BorderSide(color: AppColors.border),
         ),
         margin: EdgeInsets.zero,
       ),
 
       // ── Divider ──────────────────────────────────────────────────────────
-      dividerTheme: DividerThemeData(color: c.divider, thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 1, space: 1),
 
       // ── Chip ─────────────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
-        backgroundColor: c.surfaceAlt,
-        selectedColor: c.primary.withValues(alpha: 0.15),
-        side: BorderSide(color: c.border),
+        backgroundColor: AppColors.surfaceAlt,
+        selectedColor: _themePrimary.withValues(alpha: 0.15),
+        side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusChip),
         ),
-        labelStyle: TextStyle(
+        labelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: c.textPrimary,
+          color: AppColors.textPrimary,
         ),
         padding: AppDesign.paddingChip,
       ),
 
       // ── Bottom Sheet ─────────────────────────────────────────────────────
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: c.sheetBg,
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.sheetBg,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppDesign.radiusSheet),
           ),
@@ -234,20 +198,20 @@ class AppThemeData {
       ),
 
       // ── Dialog ───────────────────────────────────────────────────────────
-      dialogTheme: DialogThemeData(
-        backgroundColor: c.surface,
+      dialogTheme: const DialogThemeData(
+        backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDesign.radius16),
+          borderRadius: BorderRadius.all(Radius.circular(AppDesign.radius16)),
         ),
         titleTextStyle: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: c.textPrimary,
+          color: AppColors.textPrimary,
         ),
         contentTextStyle: TextStyle(
           fontSize: 14,
-          color: c.textSecondary,
+          color: AppColors.textSecondary,
           height: 1.5,
         ),
       ),
@@ -255,10 +219,7 @@ class AppThemeData {
       // ── SnackBar ─────────────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.ink,
-        contentTextStyle: const TextStyle(
-          fontSize: 14,
-          color: Colors.white,
-        ),
+        contentTextStyle: const TextStyle(fontSize: 14, color: Colors.white),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusCard),
         ),
@@ -268,25 +229,24 @@ class AppThemeData {
       // ── Switch ───────────────────────────────────────────────────────────
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (s) =>
-              s.contains(WidgetState.selected) ? Colors.white : c.textTertiary,
+          (s) => s.contains(WidgetState.selected) ? Colors.white : AppColors.textTertiary,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.primary : c.border,
+          (s) => s.contains(WidgetState.selected) ? _themePrimary : AppColors.border,
         ),
       ),
 
       // ── List Tile ────────────────────────────────────────────────────────
-      listTileTheme: ListTileThemeData(
+      listTileTheme: const ListTileThemeData(
         tileColor: Colors.transparent,
-        iconColor: c.textTertiary,
-        textColor: c.textPrimary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        iconColor: AppColors.textTertiary,
+        textColor: AppColors.textPrimary,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
 
       // ── Icon ─────────────────────────────────────────────────────────────
-      iconTheme: IconThemeData(color: c.textSecondary, size: 22),
-      primaryIconTheme: IconThemeData(color: c.primary),
+      iconTheme: const IconThemeData(color: AppColors.textSecondary, size: 22),
+      primaryIconTheme: const IconThemeData(color: _themePrimary),
     );
   }
 }
@@ -378,8 +338,9 @@ extension AppDesignContext on BuildContext {
 
 extension AppAccountTextStyles on BuildContext {
   TextStyle get accountProfileNameStyle => text.titleLarge!.copyWith(
-    fontSize: AppFontSize.h3,
+    fontSize: AppFontSize.h2,
     fontWeight: FontWeight.w700,
+    letterSpacing: -0.5,
     color: colors.textPrimary,
   );
 
@@ -390,20 +351,21 @@ extension AppAccountTextStyles on BuildContext {
 
   TextStyle get accountSectionStyle => text.labelSmall!.copyWith(
     fontSize: AppFontSize.xs,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: colors.textTertiary,
-    letterSpacing: 1.0,
+    letterSpacing: 0.8,
   );
 
-  TextStyle get accountMenuTitleStyle => text.bodyMedium!.copyWith(
-    fontSize: AppFontSize.body,
-    fontWeight: FontWeight.w500,
-    color: colors.textPrimary,
+  TextStyle get accountMenuTitleStyle => text.titleSmall!.copyWith(
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w600,
+    color: colors.textSecondary,
   );
 
   TextStyle get accountMenuSubtitleStyle => text.bodySmall!.copyWith(
     fontSize: AppFontSize.md,
-    color: colors.textSecondary,
+    fontWeight: FontWeight.w400,
+    color: colors.textTertiary,
   );
 
   TextStyle get accountStoryLabelStyle => text.labelSmall!.copyWith(
@@ -413,8 +375,299 @@ extension AppAccountTextStyles on BuildContext {
 
   TextStyle get accountDialogTitleStyle => text.titleLarge!.copyWith(
     fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
+}
+
+extension AppMissionDetailTextStyles on BuildContext {
+  TextStyle get missionHeroTitleStyle => text.displayMedium!.copyWith(
+    fontSize: AppFontSize.h1,
+    height: 1.08,
+    fontWeight: FontWeight.w700,
+    color: AppColors.snow,
+    letterSpacing: -0.9,
+  );
+
+  TextStyle get missionCategoryStyle => text.labelSmall!.copyWith(
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w600,
+    color: colors.textTertiary,
+    letterSpacing: 2.1,
+  );
+
+  TextStyle get missionMetaStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get missionPillStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionSectionTitleStyle => text.headlineSmall!.copyWith(
+    fontSize: 19,
     fontWeight: FontWeight.w700,
     color: colors.textPrimary,
+  );
+
+  TextStyle get missionSectionLabelStyle => text.labelSmall!.copyWith(
+    fontSize: AppFontSize.xs,
+    fontWeight: FontWeight.w700,
+    color: colors.textTertiary,
+    letterSpacing: 1.2,
+  );
+
+  TextStyle get missionBodyStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    height: 1.65,
+    fontWeight: FontWeight.w600,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get missionEmphasisBodyStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    height: 1.45,
+    fontWeight: FontWeight.w600,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get missionPrimaryValueStyle => text.titleMedium!.copyWith(
+    fontSize: AppFontSize.body,
+    height: 1.45,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionEntityNameStyle => text.titleMedium!.copyWith(
+    fontSize: AppFontSize.lg,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionEntityMetaStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get missionEntityRatingStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionDarkOverlineStyle => text.labelSmall!.copyWith(
+    fontSize: AppFontSize.tiny,
+    fontWeight: FontWeight.w600,
+    color: AppColors.snow.withValues(alpha: 0.72),
+    height: 1,
+  );
+
+  TextStyle get missionDarkValueStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w800,
+    color: AppColors.snow,
+    letterSpacing: -0.4,
+    height: 1,
+  );
+
+  TextStyle get missionButtonStyle => text.titleSmall!.copyWith(
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w600,
+  );
+
+  TextStyle get missionSubtleCaptionStyle => text.labelMedium!.copyWith(
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w500,
+    color: colors.textTertiary,
+  );
+}
+
+extension AppMissionStepTextStyles on BuildContext {
+  TextStyle get missionStepTitleStyle => text.headlineMedium!.copyWith(
+    fontSize: AppFontSize.h2,
+    fontWeight: FontWeight.w700,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionStepSubtitleStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    color: colors.textSecondary,
+    height: 1.45,
+  );
+
+  TextStyle get missionStepHelperStyle => missionStepSubtitleStyle;
+
+  TextStyle get missionStepSectionLabelStyle => text.labelSmall!.copyWith(
+    fontSize: AppFontSize.xs,
+    color: colors.textTertiary,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1.2,
+  );
+
+  TextStyle get missionStepFieldStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w400,
+    height: 1.55,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get missionStepValueStyle => text.titleMedium!.copyWith(
+    fontSize: AppFontSize.baseHalf,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+    height: 1.45,
+  );
+
+  TextStyle get missionStepMutedStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get missionStepHeadlineValueStyle => text.displayMedium!.copyWith(
+    fontSize: 32,
+    fontWeight: FontWeight.w400,
+    color: colors.textPrimary,
+    letterSpacing: -1,
+  );
+
+  TextStyle get missionStepCurrencyStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+    letterSpacing: 0.4,
+  );
+
+  TextStyle get missionStepChipStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.mdHalf,
+    fontWeight: FontWeight.w600,
+  );
+}
+
+extension AppChatTextStyles on BuildContext {
+  TextStyle get chatTitleStyle => text.titleSmall!.copyWith(
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+    letterSpacing: -0.2,
+  );
+
+  TextStyle get chatMetaStyle => text.labelMedium!.copyWith(
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w400,
+    color: colors.textHint,
+  );
+
+  TextStyle get chatBannerStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w500,
+    color: colors.textSecondary,
+  );
+
+  TextStyle get chatPrimaryActionStyle => text.labelLarge!.copyWith(
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w600,
+    color: AppColors.snow,
+    letterSpacing: 0.1,
+  );
+
+  TextStyle get chatWarningStyle => text.labelMedium!.copyWith(
+    fontSize: AppFontSize.sm,
+    color: colors.error,
+    height: 1.4,
+  );
+
+  TextStyle get chatEmptyStateStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w300,
+    color: colors.textHint,
+    letterSpacing: 0.1,
+  );
+
+  TextStyle get chatInputStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w400,
+    color: colors.textPrimary,
+    height: 1.45,
+  );
+
+  TextStyle get chatInputHintStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w400,
+    color: colors.textHint,
+  );
+
+  TextStyle get chatSystemStyle => text.labelMedium!.copyWith(
+    fontSize: AppFontSize.sm,
+    fontWeight: FontWeight.w500,
+    color: colors.textTertiary,
+  );
+
+  TextStyle get chatBubbleTextStyle => text.bodyMedium!.copyWith(
+    fontSize: AppFontSize.base,
+    fontWeight: FontWeight.w400,
+    color: colors.textPrimary,
+    height: 1.45,
+  );
+
+  TextStyle get chatBubbleTextOnDarkStyle => chatBubbleTextStyle.copyWith(
+    color: AppColors.snow,
+  );
+
+  TextStyle get chatTimestampStyle => text.labelSmall!.copyWith(
+    fontSize: AppFontSize.tiny,
+    color: colors.textHint,
+  );
+
+  TextStyle get chatLocationLabelStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
+}
+
+extension AppSheetTextStyles on BuildContext {
+  TextStyle get sheetFormTitleStyle => text.titleMedium!.copyWith(
+    fontSize: AppFontSize.title,
+    fontWeight: FontWeight.w300,
+    color: colors.textPrimary,
+    letterSpacing: 0.1,
+  );
+
+  TextStyle get sheetPickerTitleStyle => text.headlineSmall!.copyWith(
+    fontSize: AppFontSize.xl,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get sheetPickerTitleDarkStyle => sheetPickerTitleStyle.copyWith(
+    color: AppColors.snow,
+  );
+
+  TextStyle get sheetActionTitleStyle => text.titleSmall!.copyWith(
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w500,
+    color: colors.textPrimary,
+  );
+
+  TextStyle get sheetActionSubtitleStyle => text.bodySmall!.copyWith(
+    fontSize: AppFontSize.md,
+    fontWeight: FontWeight.w400,
+    color: colors.textSecondary,
+  );
+}
+
+extension AppCommonTextStyles on BuildContext {
+  TextStyle get progressStepLabelStyle => text.labelMedium!.copyWith(
+    fontSize: AppFontSize.smHalf,
+    fontWeight: FontWeight.w600,
+    color: colors.primary,
+    letterSpacing: 0.2,
   );
 }
 

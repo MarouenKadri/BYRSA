@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../app/enum/user_role.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
@@ -60,7 +59,6 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.badge_outlined,
                   title: 'Mes informations',
-                  subtitle: '',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -72,7 +70,6 @@ class _AccountPageState extends State<AccountPage> {
                   _FlatTile(
                     icon: Icons.work_outline,
                     title: 'Mon activité',
-                    subtitle: 'Skills, tarif, localisation, disponibilité',
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -80,20 +77,17 @@ class _AccountPageState extends State<AccountPage> {
                       ),
                     ),
                   ),
-                if (!isFreelancer)
-                  _FlatTile(
-                    icon: Icons.inventory_2_outlined,
-                    title: 'Archives',
-                    subtitle: 'Missions terminées et annulées',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ArchivesPage()),
-                    ),
+                _FlatTile(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'Archives',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ArchivesPage()),
                   ),
+                ),
                 _FlatTile(
                   icon: Icons.star_outline,
                   title: 'Mes avis',
-                  subtitle: isFreelancer ? '112 avis · 4.9 / 5' : '24 avis · 4.7 / 5',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -110,7 +104,6 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.credit_card_outlined,
                   title: 'Finance',
-                  subtitle: isFreelancer ? 'IBAN •••• 1234' : 'Visa •••• 4242',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -123,7 +116,6 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.verified_user_outlined,
                   title: "Vérification d'identité",
-                  subtitle: 'Compte vérifié et protégé',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -151,7 +143,6 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.key_outlined,
                   title: 'Mot de passe',
-                  subtitle: 'Modifié il y a 3 mois',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const ChangePasswordPage(),
@@ -161,13 +152,11 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.shield_outlined,
                   title: 'Confidentialité',
-                  subtitle: 'Autorisations, visibilité et données',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.delete_outline_rounded,
                   title: 'Supprimer mon compte',
-                  subtitle: 'Action irréversible',
                   iconColor: context.colors.error,
                   titleColor: context.colors.error,
                   onTap: () => Navigator.of(context).push(
@@ -185,31 +174,26 @@ class _AccountPageState extends State<AccountPage> {
                 _FlatTile(
                   icon: Icons.help_outline_rounded,
                   title: "Centre d'aide",
-                  subtitle: 'Guides et réponses rapides',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.mail_outline_rounded,
                   title: 'Nous contacter',
-                  subtitle: 'Réponse sous 24h',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.favorite_border_rounded,
                   title: "Noter l'application",
-                  subtitle: 'Partager votre expérience',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.info_outline_rounded,
                   title: 'À propos de Inkern',
-                  subtitle: 'Version 1.0.0',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.logout_rounded,
                   title: 'Se déconnecter',
-                  subtitle: 'Quitter la session en cours',
                   onTap: () async =>
                       await context.read<AuthProvider>().logout(),
                 ),
@@ -245,11 +229,7 @@ class _FlatSection extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: context.text.labelSmall?.copyWith(
-              color: context.colors.textTertiary,
-              letterSpacing: 0.8,
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.accountSectionStyle,
           ),
           AppGap.h4,
           ...children,
@@ -262,7 +242,6 @@ class _FlatSection extends StatelessWidget {
 class _FlatTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
   final VoidCallback onTap;
   final Widget? trailing;
   final Color? iconColor;
@@ -271,7 +250,6 @@ class _FlatTile extends StatelessWidget {
   const _FlatTile({
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.onTap,
     this.trailing,
     this.iconColor,
@@ -287,11 +265,17 @@ class _FlatTile extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppProfileMetrics.flatTileVerticalPadding,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: resolvedIconColor),
+            Icon(
+              icon,
+              size: AppProfileMetrics.flatTileIconSize,
+              color: resolvedIconColor,
+            ),
             AppGap.w12,
             Expanded(
               child: Column(
@@ -299,20 +283,10 @@ class _FlatTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    style: context.accountMenuTitleStyle.copyWith(
                       color: resolvedTitleColor,
                     ),
                   ),
-                  if (subtitle.isNotEmpty) ...[
-                    AppGap.h2,
-                    Text(
-                      subtitle,
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.colors.textTertiary,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -320,7 +294,7 @@ class _FlatTile extends StatelessWidget {
             trailing ??
                 Icon(
                   Icons.chevron_right_rounded,
-                  size: 18,
+                  size: AppProfileMetrics.flatTileTrailingIconSize,
                   color: context.colors.textTertiary,
                 ),
           ],
@@ -379,9 +353,8 @@ class _ProfileHeader extends StatelessWidget {
                             displayName.isNotEmpty
                                 ? displayName[0].toUpperCase()
                                 : '?',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
+                            style: context.accountProfileNameStyle.copyWith(
+                              fontSize: AppFontSize.h1,
                               color: context.colors.textSecondary,
                             ),
                           )
@@ -470,20 +443,14 @@ class _ProfileHeader extends StatelessWidget {
                   displayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: AppFontSize.h2,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    color: context.colors.textPrimary,
-                  ),
+                  style: context.accountProfileNameStyle,
                 ),
                 AppGap.h4,
                 Text(
                   isFreelancerMode ? 'Freelancer' : 'Client',
-                  style: TextStyle(
+                  style: context.accountProfileMetaStyle.copyWith(
                     fontSize: AppFontSize.md,
                     fontWeight: FontWeight.w500,
-                    color: context.colors.textSecondary,
                   ),
                 ),
               ],

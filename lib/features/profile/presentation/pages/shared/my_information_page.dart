@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../../../app/auth_provider.dart';
 import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/design/app_primitives.dart';
 import '../../../profile_provider.dart';
 import 'my_information/email_info_tab.dart';
 import 'my_information/personal_info_tab.dart';
