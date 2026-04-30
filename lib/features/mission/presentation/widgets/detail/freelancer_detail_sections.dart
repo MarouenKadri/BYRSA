@@ -171,7 +171,7 @@ class FreelancerLocationShareCard extends StatelessWidget {
           subtitle:
               'Quand vous arrivez, demandez le code de demarrage au client pour lancer officiellement la mission.',
           cta: 'Lancer le suivi',
-          accent: AppColors.iosBlue,
+          accent: AppColors.secondary,
         ),
       MissionStatus.onTheWay => (
           icon: Icons.location_searching_rounded,

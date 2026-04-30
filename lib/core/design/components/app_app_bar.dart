@@ -119,7 +119,7 @@ class AppBarPillTitle extends StatelessWidget {
     return Container(
       padding: AppInsets.h12v6,
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
@@ -193,7 +193,7 @@ class AppBarActionCircleButton extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.badgeLabel,
-    this.badgeColor = AppColors.urgent,
+    this.badgeColor = AppColors.error,
     this.scale,
   });
 

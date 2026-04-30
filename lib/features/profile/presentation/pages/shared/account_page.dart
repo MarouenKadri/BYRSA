@@ -13,12 +13,9 @@ import '../shared/archives_page.dart';
 import '../freelancer/freelancer_activity_page.dart';
 import '../freelancer/freelancer_payment_methods_page.dart';
 import 'change_password_page.dart';
+import 'contact_support_page.dart';
 import 'my_information_page.dart';
 import '../../../profile_provider.dart';
-
-/// ═══════════════════════════════════════════════════════════════════════════
-/// 👤 Inkern - Page Mon Compte
-/// ═══════════════════════════════════════════════════════════════════════════
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -45,157 +42,101 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: context.colors.background,
       appBar: AppSectionBar(pageTitle: 'Mon compte'),
       body: AppPageBody(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
         useSafeAreaBottom: true,
         child: ListView(
           children: [
             _ProfileHeader(),
-            if (isFreelancer) const _MyStoriesSection(),
-            AppGap.h12,
+            if (isFreelancer) ...[
+              AppGap.h24,
+              const _MyStoriesSection(),
+            ],
+            AppGap.h28,
             _FlatSection(
               label: 'Compte',
-              description: 'Profil, activité et avis',
               children: [
                 _FlatTile(
-                  icon: Icons.badge_outlined,
-                  title: 'Mes informations',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const MyInformationPage(),
-                    ),
-                  ),
+                  icon: Icons.badge_rounded,
+                  title: 'Profil & coordonnées',
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const MyInformationPage())),
                 ),
                 if (isFreelancer)
                   _FlatTile(
-                    icon: Icons.work_outline,
-                    title: 'Mon activité',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FreelancerActivityPage(),
-                      ),
-                    ),
+                    icon: Icons.work_history_rounded,
+                    title: 'Tableau de bord',
+                    onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const FreelancerActivityPage())),
                   ),
                 _FlatTile(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'Archives',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ArchivesPage()),
-                  ),
+                  icon: Icons.history_rounded,
+                  title: 'Missions archivées',
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ArchivesPage())),
                 ),
                 _FlatTile(
-                  icon: Icons.star_outline,
-                  title: 'Mes avis',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MyReviewsPage(isFreelancer: isFreelancer),
-                    ),
-                  ),
+                  icon: Icons.grade_rounded,
+                  title: 'Avis & évaluations',
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) =>
+                          MyReviewsPage(isFreelancer: isFreelancer))),
                 ),
               ],
             ),
+            AppGap.h28,
             _FlatSection(
               label: 'Paiements et sécurité',
-              description: 'Méthodes de paiement, protection et accès',
               children: [
                 _FlatTile(
-                  icon: Icons.credit_card_outlined,
-                  title: 'Finance',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => isFreelancer
-                          ? const FreelancerPaymentMethodsPage()
-                          : const ClientPaymentMethodsPage(),
-                    ),
-                  ),
+                  icon: Icons.credit_card_rounded,
+                  title: 'Portefeuille & paiements',
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => isFreelancer
+                              ? const FreelancerPaymentMethodsPage()
+                              : const ClientPaymentMethodsPage())),
                 ),
                 _FlatTile(
-                  icon: Icons.verified_user_outlined,
-                  title: "Vérification d'identité",
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.colors.success.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: context.colors.success.withValues(alpha: 0.18),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      'Vérifié',
-                      style: context.text.labelMedium?.copyWith(
-                        fontSize: AppFontSize.sm,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.success,
-                      ),
-                    ),
-                  ),
-                  onTap: () {},
-                ),
-                _FlatTile(
-                  icon: Icons.key_outlined,
-                  title: 'Mot de passe',
+                  icon: Icons.lock_outline_rounded,
+                  title: 'Changer le mot de passe',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ChangePasswordPage(),
-                    ),
-                  ),
-                ),
-                _FlatTile(
-                  icon: Icons.shield_outlined,
-                  title: 'Confidentialité',
-                  onTap: () {},
-                ),
-                _FlatTile(
-                  icon: Icons.delete_outline_rounded,
-                  title: 'Supprimer mon compte',
-                  iconColor: context.colors.error,
-                  titleColor: context.colors.error,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const DeleteAccountPage(),
-                    ),
-                  ),
+                      MaterialPageRoute(builder: (_) => const ChangePasswordPage())),
                 ),
               ],
             ),
+            AppGap.h28,
             _FlatSection(
               label: 'Aide et session',
-              description: 'Support, informations et déconnexion',
               children: [
                 _FlatTile(
                   icon: Icons.help_outline_rounded,
-                  title: "Centre d'aide",
+                  title: 'Aide & support',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.mail_outline_rounded,
-                  title: 'Nous contacter',
-                  onTap: () {},
-                ),
-                _FlatTile(
-                  icon: Icons.favorite_border_rounded,
-                  title: "Noter l'application",
-                  onTap: () {},
+                  title: 'Contacter le support',
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ContactSupportPage())),
                 ),
                 _FlatTile(
                   icon: Icons.info_outline_rounded,
-                  title: 'À propos de Inkern',
+                  title: 'À propos',
                   onTap: () {},
                 ),
                 _FlatTile(
                   icon: Icons.logout_rounded,
-                  title: 'Se déconnecter',
-                  onTap: () async =>
-                      await context.read<AuthProvider>().logout(),
+                  title: 'Déconnexion',
+                  showChevron: false,
+                  onTap: () async => context.read<AuthProvider>().logout(),
+                ),
+                _FlatTile(
+                  icon: Icons.delete_outline_rounded,
+                  title: 'Supprimer le compte',
+                  titleColor: context.colors.error,
+                  showChevron: false,
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DeleteAccountPage())),
                 ),
               ],
             ),
@@ -206,97 +147,83 @@ class _AccountPageState extends State<AccountPage> {
   }
 }
 
-
-// ─── Widgets flat génériques ─────────────────────────────────────────────────
+// ─── Section label + rows plats ──────────────────────────────────────────────
 
 class _FlatSection extends StatelessWidget {
   final String label;
-  final String? description;
   final List<Widget> children;
 
-  const _FlatSection({
-    required this.label,
-    this.description,
-    required this.children,
-  });
+  const _FlatSection({required this.label, required this.children});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: context.accountSectionStyle,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: context.accountSectionStyle),
+        AppGap.h8,
+        Divider(height: 1, thickness: 1, color: context.colors.divider),
+        for (int i = 0; i < children.length; i++) ...[
+          children[i],
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: context.colors.divider,
+            indent: i < children.length - 1 ? 34 : 0,
           ),
-          AppGap.h4,
-          ...children,
         ],
-      ),
+      ],
     );
   }
 }
+
+// ─── Ligne de menu ────────────────────────────────────────────────────────────
 
 class _FlatTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
   final Widget? trailing;
-  final Color? iconColor;
   final Color? titleColor;
+  final bool showChevron;
 
   const _FlatTile({
     required this.icon,
     required this.title,
     required this.onTap,
     this.trailing,
-    this.iconColor,
     this.titleColor,
+    this.showChevron = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final resolvedIconColor = iconColor ?? context.colors.textSecondary;
-    final resolvedTitleColor = titleColor ?? context.colors.textPrimary;
-
-    return GestureDetector(
+    final iconColor = titleColor ?? context.colors.textTertiary;
+    return InkWell(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      splashColor: Colors.transparent,
+      highlightColor: context.colors.surfaceAlt,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppProfileMetrics.flatTileVerticalPadding,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 13),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: AppProfileMetrics.flatTileIconSize,
-              color: resolvedIconColor,
-            ),
-            AppGap.w12,
+            Icon(icon, size: 20, color: iconColor),
+            AppGap.w14,
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: context.accountMenuTitleStyle.copyWith(
-                      color: resolvedTitleColor,
-                    ),
-                  ),
-                ],
+              child: Text(
+                title,
+                style: titleColor != null
+                    ? context.accountMenuTitleStyle.copyWith(color: titleColor)
+                    : context.accountMenuTitleStyle,
               ),
             ),
-            AppGap.w8,
-            trailing ??
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: AppProfileMetrics.flatTileTrailingIconSize,
-                  color: context.colors.textTertiary,
-                ),
+            if (trailing != null) trailing!
+            else if (showChevron)
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: context.colors.textHint,
+              ),
           ],
         ),
       ),
@@ -321,67 +248,58 @@ class _ProfileHeader extends StatelessWidget {
     final isUploading = profileProv.isSaving;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+      padding: const EdgeInsets.only(top: 24, bottom: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // ── Avatar cliquable ──────────────────────────────────────
           GestureDetector(
             onTap: isUploading ? null : () => _pickAvatar(context, profileProv),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 78,
-                  height: 78,
+                  width: 68,
+                  height: 68,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.surfaceAlt,
-                    border: Border.all(
-                      color: context.colors.border,
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: context.colors.border, width: 1.5),
                   ),
                   child: CircleAvatar(
-                    radius: 37,
+                    radius: 32,
                     backgroundColor: Colors.transparent,
-                    backgroundImage: avatarUrl != null
-                        ? NetworkImage(avatarUrl)
-                        : null,
+                    backgroundImage:
+                        avatarUrl != null ? NetworkImage(avatarUrl) : null,
                     child: avatarUrl == null
                         ? Text(
                             displayName.isNotEmpty
                                 ? displayName[0].toUpperCase()
                                 : '?',
-                            style: context.accountProfileNameStyle.copyWith(
-                              fontSize: AppFontSize.h1,
+                            style: context.text.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
                               color: context.colors.textSecondary,
                             ),
                           )
                         : null,
                   ),
                 ),
-                // Overlay chargement
                 if (isUploading)
                   Positioned.fill(
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.black26,
+                      decoration: BoxDecoration(
+                        color: AppColors.inkDark.withValues(alpha: 0.45),
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
                         child: SizedBox(
-                          width: 22,
-                          height: 22,
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2.2,
-                            color: Colors.white,
-                          ),
+                              strokeWidth: 2.2, color: Colors.white),
                         ),
                       ),
                     ),
                   ),
-                // Icône caméra (tap pour changer l'avatar)
                 if (!isUploading)
                   Positioned(
                     right: 0,
@@ -390,50 +308,36 @@ class _ProfileHeader extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: context.colors.textPrimary,
+                        color: AppColors.ink,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: context.colors.background,
-                          width: 2,
-                        ),
+                            color: context.colors.background, width: 2),
                       ),
-                      child: const Icon(
-                        Icons.camera_alt_rounded,
-                        size: 12,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.camera_alt_rounded,
+                          size: 12, color: Colors.white),
                     ),
                   ),
-                // Badge vérifié (en haut à droite si vérifié)
                 if (isVerified && !isUploading)
                   Positioned(
                     right: -2,
                     top: -2,
                     child: Container(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       decoration: BoxDecoration(
-                        color: context.colors.success,
+                        color: AppColors.successDark,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: context.colors.background,
-                          width: 2,
-                        ),
+                            color: context.colors.background, width: 2),
                       ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        size: 11,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.check_rounded,
+                          size: 10, color: Colors.white),
                     ),
                   ),
               ],
             ),
           ),
-
           AppGap.w16,
-
-          // ── Nom + rôle ────────────────────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +354,7 @@ class _ProfileHeader extends StatelessWidget {
                   isFreelancerMode ? 'Freelancer' : 'Client',
                   style: context.accountProfileMetaStyle.copyWith(
                     fontSize: AppFontSize.md,
-                    fontWeight: FontWeight.w500,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],
@@ -461,10 +365,7 @@ class _ProfileHeader extends StatelessWidget {
     );
   }
 
-  Future<void> _pickAvatar(
-    BuildContext context,
-    ProfileProvider profileProv,
-  ) async {
+  Future<void> _pickAvatar(BuildContext context, ProfileProvider profileProv) async {
     final file = await ImagePickerService.showPicker(context);
     if (file == null) return;
     await profileProv.uploadAvatar(file);
@@ -499,22 +400,13 @@ class DeleteAccountPageState extends State<DeleteAccountPage> {
       setState(() => _error = 'Entrez votre mot de passe');
       return;
     }
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    setState(() { _isLoading = true; _error = null; });
     final errorMsg = await auth.deleteAccount(_controller.text.trim());
     if (!mounted) return;
     if (errorMsg != null) {
-      setState(() {
-        _isLoading = false;
-        _error = errorMsg;
-      });
+      setState(() { _isLoading = false; _error = errorMsg; });
     } else {
-      Navigator.of(
-        context,
-        rootNavigator: true,
-      ).popUntil((route) => route.isFirst);
+      Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
     }
   }
 
@@ -527,10 +419,7 @@ class DeleteAccountPageState extends State<DeleteAccountPage> {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppPageAppBar(
-        titleWidget: Text(
-          'Supprimer le compte',
-          style: context.accountDialogTitleStyle,
-        ),
+        titleWidget: Text('Supprimer le compte', style: context.accountDialogTitleStyle),
         centerTitle: true,
         leading: AppBackButtonLeading(onPressed: () => Navigator.pop(context)),
       ),
@@ -561,46 +450,32 @@ class DeleteAccountPageState extends State<DeleteAccountPage> {
                   ? 'Cochez la case ci-dessous pour confirmer la suppression.'
                   : 'Entrez votre mot de passe pour confirmer.',
               style: context.text.bodyMedium?.copyWith(
-                color: context.colors.textSecondary,
-              ),
+                  color: context.colors.textSecondary),
             ),
             AppGap.h14,
             if (!isGoogleUser) ...[
               TextField(
                 controller: _controller,
                 obscureText: _obscure,
-                onSubmitted: (_) {
-                  if (canDelete) _confirm();
-                },
-                style: context.text.bodyMedium?.copyWith(
-                  fontSize: AppFontSize.body,
-                ),
-                decoration:
-                    AppInputDecorations.formField(
-                      context,
-                      hintText: 'Mot de passe',
-                      prefixIcon: Icon(
-                        Icons.lock_outline_rounded,
-                        size: 20,
-                        color: context.colors.textTertiary,
-                      ),
-                      contentPadding: AppInsets.h16v16,
-                    ).copyWith(
-                      hintStyle: context.text.bodyLarge?.copyWith(
-                        color: context.colors.textHint,
-                        fontSize: AppFontSize.base,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
-                          size: 20,
-                          color: context.colors.textTertiary,
-                        ),
-                        onPressed: () => setState(() => _obscure = !_obscure),
-                      ),
+                onSubmitted: (_) { if (canDelete) _confirm(); },
+                style: context.text.bodyMedium?.copyWith(fontSize: AppFontSize.body),
+                decoration: AppInputDecorations.formField(
+                  context,
+                  hintText: 'Mot de passe',
+                  prefixIcon: Icon(Icons.lock_outline_rounded,
+                      size: 20, color: context.colors.textTertiary),
+                  contentPadding: AppInsets.h16v16,
+                ).copyWith(
+                  hintStyle: context.text.bodyLarge?.copyWith(
+                      color: context.colors.textHint, fontSize: AppFontSize.base),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                      size: 20, color: context.colors.textTertiary,
                     ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                ),
               ),
               AppGap.h8,
             ],
@@ -628,10 +503,7 @@ class DeleteAccountPageState extends State<DeleteAccountPage> {
                             : (v) => setState(() => _confirmed = v ?? false),
                         activeColor: context.colors.error,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppDesign.radius4,
-                          ),
-                        ),
+                            borderRadius: BorderRadius.circular(AppDesign.radius4)),
                         side: BorderSide(
                           color: _confirmed
                               ? context.colors.error
@@ -650,7 +522,7 @@ class DeleteAccountPageState extends State<DeleteAccountPage> {
                           color: _confirmed
                               ? context.colors.textPrimary
                               : context.colors.textSecondary,
-                          height: 1.45,
+                          height: 1.5,
                         ),
                       ),
                     ),
@@ -700,29 +572,24 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
       groups: groups,
     );
 
-    final items = entries
-        .map((entry) {
-          final viewed = entry.hasStories
-              ? _viewed.contains(entry.categoryId)
-              : true;
-          return CategoryStoryStripItem(
-            categoryId: entry.categoryId,
-            label: entry.label,
-            count: entry.count,
-            viewed: viewed,
-            onTap: entry.hasStories
-                ? () {
-                    final index =
-                        groups.indexWhere((g) => g.groupId == entry.categoryId);
-                    if (index >= 0) _openViewer(context, groups, index);
-                  }
-                : null,
-            onLongPress: entry.hasStories
-                ? () => _showOptions(context, entry.group!)
-                : null,
-          );
-        })
-        .toList(growable: false);
+    final items = entries.map((entry) {
+      final viewed = entry.hasStories ? _viewed.contains(entry.categoryId) : true;
+      return CategoryStoryStripItem(
+        categoryId: entry.categoryId,
+        label: entry.label,
+        count: entry.count,
+        viewed: viewed,
+        onTap: entry.hasStories
+            ? () {
+                final index =
+                    groups.indexWhere((g) => g.groupId == entry.categoryId);
+                if (index >= 0) _openViewer(context, groups, index);
+              }
+            : null,
+        onLongPress:
+            entry.hasStories ? () => _showOptions(context, entry.group!) : null,
+      );
+    }).toList(growable: false);
 
     return CategoryStoryStrip(
       addAction: CategoryStoryStripAddAction(
@@ -766,7 +633,8 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: cat?.color.withValues(alpha: 0.12) ?? context.colors.surfaceAlt,
+                  color: cat?.color.withValues(alpha: 0.12) ??
+                      context.colors.surfaceAlt,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -803,9 +671,9 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
             dark: false,
             onTap: () {
               Navigator.pop(context);
-              final groups = context.read<StoryProvider>().myStoryGroups;
-              final idx = groups.indexWhere((g) => g.groupId == group.groupId);
-              if (idx >= 0) _openViewer(context, groups, idx);
+              final gs = context.read<StoryProvider>().myStoryGroups;
+              final idx = gs.indexWhere((g) => g.groupId == group.groupId);
+              if (idx >= 0) _openViewer(context, gs, idx);
             },
           ),
           AppActionSheetItem(
@@ -835,10 +703,8 @@ class _MyStoriesSectionState extends State<_MyStoriesSection> {
   void _confirmDeleteCategory(BuildContext context, StoryGroup group) {
     showAppDialog(
       context: context,
-      title: Text(
-        'Supprimer "${group.groupName}"',
-        style: context.accountDialogTitleStyle,
-      ),
+      title: Text('Supprimer "${group.groupName}"',
+          style: context.accountDialogTitleStyle),
       content: Text(
         'Supprimer les ${group.stories.length} story${group.stories.length > 1 ? 's' : ''} de cette catégorie ? Action irréversible.',
       ),

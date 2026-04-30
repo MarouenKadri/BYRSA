@@ -19,7 +19,17 @@ import 'create_mission/step_summary.dart';
 /// ─────────────────────────────────────────────────────────────
 class PostMissionFlow extends StatefulWidget {
   final Mission? mission;
-  const PostMissionFlow({super.key, this.mission});
+  final String? preAssignedFreelancerId;
+  final String? preAssignedFreelancerName;
+  final String? preAssignedFreelancerAvatar;
+
+  const PostMissionFlow({
+    super.key,
+    this.mission,
+    this.preAssignedFreelancerId,
+    this.preAssignedFreelancerName,
+    this.preAssignedFreelancerAvatar,
+  });
 
   @override
   State<PostMissionFlow> createState() => _PostMissionFlowState();
@@ -428,12 +438,22 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
       budget: budget,
       status: (isEdit && !isPublishingDraft)
           ? original!.status
-          : MissionStatus.waitingCandidates,
+          : widget.preAssignedFreelancerId != null
+              ? MissionStatus.prestaChosen
+              : MissionStatus.waitingCandidates,
       images: List<String>.from(_photos),
       createdAt: isEdit ? original!.createdAt : now,
       candidatesCount: isEdit ? original!.candidatesCount : 0,
       client: isEdit ? original!.client : null,
-      assignedPresta: isEdit ? original!.assignedPresta : null,
+      assignedPresta: isEdit
+          ? original!.assignedPresta
+          : widget.preAssignedFreelancerId != null
+              ? PrestaInfo(
+                  id: widget.preAssignedFreelancerId!,
+                  name: widget.preAssignedFreelancerName ?? '',
+                  avatarUrl: widget.preAssignedFreelancerAvatar ?? '',
+                )
+              : null,
       rating: isEdit ? original!.rating : null,
     );
 
@@ -446,6 +466,7 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
       context.read<MissionProvider>().publishMission(mission);
     }
 
-    Navigator.pop(context, isEdit && !isPublishingDraft ? null : 'published');
+    final title = mission.title;
+    Navigator.pop(context, isEdit && !isPublishingDraft ? null : 'published:$title');
   }
 }

@@ -90,7 +90,7 @@ class ReviewCard extends StatelessWidget {
                       vertical: 5,
                     ),
                     color: isReceived
-                        ? AppColors.primaryLight
+                        ? AppColors.secondary
                         : context.colors.surfaceAlt,
                     borderRadius: BorderRadius.circular(
                       AppDesign.radius14Lg,

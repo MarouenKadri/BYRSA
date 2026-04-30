@@ -15,6 +15,7 @@ import '../../../mission/presentation/widgets/cards/primitives/mission_card_fram
 import '../../../mission/presentation/widgets/cards/primitives/mission_meta_row.dart';
 import '../../../mission/presentation/widgets/cards/primitives/mission_status_chip.dart';
 import '../../../mission/presentation/pages/client/client_mission_detail_page.dart';
+import '../../../mission/presentation/pages/client/create_mission_page.dart';
 import '../../../mission/presentation/pages/client/tracking_page.dart';
 import '../../../messaging/presentation/pages/chat_page.dart';
 import '../../../auth/data/models/freelancer.dart';
@@ -368,7 +369,10 @@ class _EmptyTodayCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: onGoToMissions,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PostMissionFlow()),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
@@ -679,6 +683,7 @@ class _ActiveMissionCard extends StatelessWidget {
                                       contactName: presta.name,
                                       contactAvatar: presta.avatarUrl,
                                       isVerified: presta.isVerified,
+                                      confirmedMissionTitle: mission.title,
                                     ),
                                   ),
                                 ),

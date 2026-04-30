@@ -118,7 +118,7 @@ class _AppSectionBarState extends State<AppSectionBar>
         context,
         MaterialPageRoute(builder: (_) => const NotificationsPage()),
       ),
-      badgeColor: AppColors.urgent,
+      badgeColor: AppColors.error,
     );
   }
 }

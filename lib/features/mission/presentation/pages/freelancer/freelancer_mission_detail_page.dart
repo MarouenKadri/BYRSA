@@ -156,7 +156,7 @@ class _FreelancerMissionDetailPageState
         );
       case MissionStatus.onTheWay:
         return StatusBannerConfig(
-          color: AppColors.iosBlue,
+          color: AppColors.secondary,
           icon: Icons.directions_car_rounded,
           title: 'Vous etes en route',
           subtitle: 'Le client suit votre arrivee depuis son detail mission.',

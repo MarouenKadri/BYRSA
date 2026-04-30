@@ -110,7 +110,7 @@ class AppLocationRoleBar extends StatelessWidget implements PreferredSizeWidget 
           badgeLabel: unreadCount > 0
               ? (unreadCount > 99 ? '99+' : '$unreadCount')
               : null,
-          badgeColor: AppColors.urgent,
+          badgeColor: AppColors.error,
           scale: bellScale,
         ),
         AppBarActionCircleButton(

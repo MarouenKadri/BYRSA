@@ -86,7 +86,11 @@
       "Bash(/usr/bin/dart analyze *)",
       "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/tokens/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/tokens/)",
       "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/theme/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/theme/)",
-      "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/components/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/components/)"
+      "Bash(cp /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/app/core/design/components/* /mnt/c/Users/marouen/Desktop/WorkingSpace/BYRSA/lib/core/design/components/)",
+      "mcp__claude_ai_Supabase__list_organizations",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__list_migrations",
+      "mcp__claude_ai_Supabase__deploy_edge_function"
     ]
   }
 }

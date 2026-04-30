@@ -129,7 +129,7 @@ class _ClientMissionDetailPageState
     switch (mission.status) {
       case MissionStatus.onTheWay:
         return StatusBannerConfig(
-          color: AppColors.iosBlue,
+          color: AppColors.secondary,
           icon: Icons.directions_car_rounded,
           title: mission.assignedPresta != null
               ? '${mission.assignedPresta!.name} est en route'
@@ -232,6 +232,7 @@ class _ClientMissionDetailPageState
                   reviewsCount: presta.reviewsCount,
                   missionsCount: presta.completedMissions,
                   contactMode: FreelancerContactMode.confirmedPresta,
+                  confirmedMissionTitle: mission.title,
                 ),
               ),
             ),
@@ -288,7 +289,7 @@ class _ClientMissionDetailPageState
               ? "Suivre l'arrivée du prestataire"
               : 'Voir la progression en direct',
           icon: Icons.location_on_rounded,
-          color: AppColors.iosBlue,
+          color: AppColors.secondary,
           onTap: _openTracking,
         ),
       );

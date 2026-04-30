@@ -11,9 +11,7 @@ import '../components/app_text_field.dart';
 class AppThemeData {
   AppThemeData._();
 
-  // Colors used only within the theme build (slightly adjusted for Material theme context).
-  static const _themePrimary = Color.fromARGB(255, 81, 86, 88);
-  static const _themeError = Color.fromARGB(255, 194, 118, 118);
+  static const _themeError = AppColors.error;
 
   static ThemeData get theme => _build();
 
@@ -54,7 +52,7 @@ class AppThemeData {
       // ── Bottom Nav ───────────────────────────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        selectedItemColor: _themePrimary,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textTertiary,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
@@ -63,10 +61,10 @@ class AppThemeData {
       // ── Nav Bar M3 ────────────────────────────────────────────────────────
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: _themePrimary.withValues(alpha: 0.15),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.15),
         iconTheme: WidgetStateProperty.resolveWith(
           (s) => IconThemeData(
-            color: s.contains(WidgetState.selected) ? _themePrimary : AppColors.textTertiary,
+            color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.textTertiary,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith((s) {
@@ -74,16 +72,16 @@ class AppThemeData {
           return TextStyle(
             fontSize: 11,
             fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-            color: sel ? _themePrimary : AppColors.textTertiary,
+            color: sel ? AppColors.primary : AppColors.textTertiary,
           );
         }),
       ),
 
       // ── Tab Bar ──────────────────────────────────────────────────────────
       tabBarTheme: const TabBarThemeData(
-        labelColor: _themePrimary,
+        labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textTertiary,
-        indicatorColor: _themePrimary,
+        indicatorColor: AppColors.primary,
         indicatorSize: TabBarIndicatorSize.tab,
         labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         unselectedLabelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
@@ -93,7 +91,7 @@ class AppThemeData {
       // ── Boutons ───────────────────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _themePrimary,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           minimumSize: const Size(double.infinity, 56),
@@ -105,8 +103,8 @@ class AppThemeData {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: _themePrimary,
-          side: const BorderSide(color: _themePrimary),
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary),
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDesign.radiusButton),
@@ -116,7 +114,7 @@ class AppThemeData {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: _themePrimary,
+          foregroundColor: AppColors.primary,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
@@ -173,7 +171,7 @@ class AppThemeData {
       // ── Chip ─────────────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceAlt,
-        selectedColor: _themePrimary.withValues(alpha: 0.15),
+        selectedColor: AppColors.primary.withValues(alpha: 0.15),
         side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDesign.radiusChip),
@@ -232,7 +230,7 @@ class AppThemeData {
           (s) => s.contains(WidgetState.selected) ? Colors.white : AppColors.textTertiary,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? _themePrimary : AppColors.border,
+          (s) => s.contains(WidgetState.selected) ? AppColors.primary : AppColors.border,
         ),
       ),
 
@@ -246,7 +244,7 @@ class AppThemeData {
 
       // ── Icon ─────────────────────────────────────────────────────────────
       iconTheme: const IconThemeData(color: AppColors.textSecondary, size: 22),
-      primaryIconTheme: const IconThemeData(color: _themePrimary),
+      primaryIconTheme: const IconThemeData(color: AppColors.primary),
     );
   }
 }
@@ -263,7 +261,7 @@ class AppShadows {
 
   static List<BoxShadow> get card => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.3),
+      color: Colors.black.withValues(alpha: 0.07),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
@@ -271,7 +269,7 @@ class AppShadows {
 
   static List<BoxShadow> get elevated => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.5),
+      color: Colors.black.withValues(alpha: 0.13),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),
@@ -287,7 +285,7 @@ class AppShadows {
 
   static List<BoxShadow> get button => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.25),
+      color: Colors.black.withValues(alpha: 0.10),
       blurRadius: 8,
       offset: const Offset(0, 3),
     ),
@@ -356,14 +354,14 @@ extension AppAccountTextStyles on BuildContext {
     letterSpacing: 0.8,
   );
 
-  TextStyle get accountMenuTitleStyle => text.titleSmall!.copyWith(
-    fontSize: AppFontSize.title,
-    fontWeight: FontWeight.w600,
-    color: colors.textSecondary,
+  TextStyle get accountMenuTitleStyle => text.bodyLarge!.copyWith(
+    fontSize: AppFontSize.body,
+    fontWeight: FontWeight.w400,
+    color: colors.textPrimary,
   );
 
   TextStyle get accountMenuSubtitleStyle => text.bodySmall!.copyWith(
-    fontSize: AppFontSize.md,
+    fontSize: AppFontSize.sm,
     fontWeight: FontWeight.w400,
     color: colors.textTertiary,
   );

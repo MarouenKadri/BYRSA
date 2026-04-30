@@ -616,7 +616,7 @@ class EmptyState extends StatelessWidget {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: AppColors.primaryLight,
+                color: AppColors.secondary,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 44, color: AppColors.primary),

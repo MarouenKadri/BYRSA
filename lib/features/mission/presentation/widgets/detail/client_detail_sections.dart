@@ -285,7 +285,7 @@ class ClientTrackingCard extends StatelessWidget {
           title: '$prestaName est en route',
           subtitle:
               'Le suivi en direct doit vous permettre de voir sa progression jusqu a l adresse.',
-          accent: AppColors.iosBlue,
+          accent: AppColors.secondary,
           cta: 'Ouvrir le suivi',
         ),
       MissionStatus.inProgress => (

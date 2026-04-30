@@ -24,18 +24,18 @@ class AppInputTokens {
   static const double borderWidth = 1.0;
 
   /// Rayon pour les champs formulaire standard.
-  static const double formRadius = 16.0;
+  static const double formRadius = 14.0;
 
   /// Rayon pour les champs compacts (téléphone, recherche).
   static const double compactRadius = 12.0;
 
   /// Padding standard des champs formulaire.
   static const EdgeInsets formPadding =
-      EdgeInsets.symmetric(horizontal: 20, vertical: 20);
+      EdgeInsets.symmetric(horizontal: 20, vertical: 16);
 
   /// Padding compact.
   static const EdgeInsets compactPadding =
-      EdgeInsets.symmetric(horizontal: 16, vertical: 16);
+      EdgeInsets.symmetric(horizontal: 16, vertical: 13);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

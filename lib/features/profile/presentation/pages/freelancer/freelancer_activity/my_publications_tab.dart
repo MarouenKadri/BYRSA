@@ -296,7 +296,7 @@ class _FreelancerMyPublicationsTabState
                             story.imageUrl,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.primaryLight,
+                              color: AppColors.secondary,
                               child: const Icon(
                                 Icons.image_rounded,
                                 color: AppColors.primary,
@@ -304,7 +304,7 @@ class _FreelancerMyPublicationsTabState
                             ),
                           )
                         : Container(
-                            color: AppColors.primaryLight,
+                            color: AppColors.secondary,
                             child: const Icon(
                               Icons.image_rounded,
                               color: AppColors.primary,

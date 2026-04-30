@@ -158,7 +158,7 @@ class _NavTileState extends State<_NavTile>
                   right: AppNavMetrics.badgeRightOffset,
                   child: AppCountBadge(
                     label: widget.badgeCount > 9 ? '9+' : '${widget.badgeCount}',
-                    backgroundColor: AppColors.urgent,
+                    backgroundColor: AppColors.error,
                     foregroundColor: Colors.white,
                     padding: AppInsets.h4v1,
                   ),

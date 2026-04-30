@@ -66,6 +66,7 @@ class FreelancerProfileView extends StatefulWidget {
   final FreelancerContactMode contactMode;
   final VoidCallback? onCandidateAccepted;
   final String? candidatePrice;
+  final String? confirmedMissionTitle;
 
   const FreelancerProfileView({
     super.key,
@@ -84,6 +85,7 @@ class FreelancerProfileView extends StatefulWidget {
     this.contactMode = FreelancerContactMode.spontaneous,
     this.onCandidateAccepted,
     this.candidatePrice,
+    this.confirmedMissionTitle,
   });
 
   @override
@@ -251,7 +253,7 @@ class _FreelancerProfilePageState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.successBg,
+              color: AppColors.successLight,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -414,6 +416,7 @@ class _FreelancerProfilePageState
         widget.contactMode == FreelancerContactMode.pendingCandidate;
     final isSpontaneous =
         widget.contactMode == FreelancerContactMode.spontaneous;
+    final isConfirmed = widget.contactMode == FreelancerContactMode.confirmedPresta;
     return ChatPage(
       conversationId: conversationId,
       contactName: profileName,
@@ -423,6 +426,8 @@ class _FreelancerProfilePageState
       candidatePrice: isPending ? widget.candidatePrice : null,
       onAcceptCandidate: isPending ? widget.onCandidateAccepted : null,
       showReserveButton: isSpontaneous,
+      freelancerId: isSpontaneous ? widget.freelancerId : null,
+      confirmedMissionTitle: isConfirmed ? widget.confirmedMissionTitle : null,
     );
   }
 
@@ -693,13 +698,13 @@ class _FreelancerPublicationsContentState
                       story.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.primaryLight,
+                        color: AppColors.secondary,
                         child: const Icon(Icons.image_rounded,
                             color: AppColors.primary),
                       ),
                     )
                   : Container(
-                      color: AppColors.primaryLight,
+                      color: AppColors.secondary,
                       child: const Icon(Icons.image_rounded,
                           color: AppColors.primary),
                     ),

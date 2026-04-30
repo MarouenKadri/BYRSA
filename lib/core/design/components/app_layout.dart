@@ -1237,7 +1237,7 @@ class AppTransactionTile extends StatelessWidget {
     required this.amount,
     required this.date,
     this.iconColor = AppColors.primary,
-    this.iconBackground = AppColors.primaryLight,
+    this.iconBackground = AppColors.secondary,
     this.isCredit = false,
   });
 

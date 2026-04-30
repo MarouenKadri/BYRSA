@@ -67,8 +67,38 @@ class AuthProvider extends ChangeNotifier {
 
       String? userType;
 
-      if (data.isEmpty || (data.first['user_type'] as String?) == null) {
-        // Fallback: read user_type from Supabase Auth metadata (set during signUp)
+      if (data.isEmpty) {
+        // No profile row in DB — try to recreate it from auth metadata.
+        // This happens after a DB purge in dev, or an orphaned auth session.
+        final authUser = _supabase.auth.currentUser;
+        final meta = authUser?.userMetadata ?? {};
+        userType = meta['user_type'] as String?;
+
+        if (userType == null) {
+          needsRoleSelection = true;
+          isLogged = false;
+          notifyListeners();
+          return;
+        }
+
+        // Recreate the missing profile row so the rest of the app works normally.
+        try {
+          await _supabase.from('profiles').upsert({
+            'id': userId,
+            'email': authUser?.email ?? '',
+            'first_name': meta['first_name'] ?? '',
+            'last_name': meta['last_name'] ?? '',
+            if (meta['phone'] != null) 'phone': meta['phone'],
+            if (meta['birth_date'] != null) 'birth_date': meta['birth_date'],
+            if (meta['gender'] != null) 'gender': meta['gender'],
+            'user_type': userType,
+          });
+          debugPrint('_loadProfile: profile row recreated from auth metadata');
+        } catch (e) {
+          debugPrint('_loadProfile: profile recreate failed: $e');
+        }
+      } else if ((data.first['user_type'] as String?) == null) {
+        // Row exists but user_type is missing — fall back to auth metadata.
         userType =
             _supabase.auth.currentUser?.userMetadata?['user_type'] as String?;
         if (userType == null) {
@@ -438,7 +468,7 @@ class AuthProvider extends ChangeNotifier {
       error = _friendlyError(e.message);
       return error;
     } catch (e) {
-      error = 'Une erreur est survenue';
+      error = 'Une erreur est survenue : ${e.toString()}';
       return error;
     } finally {
       isLoading = false;

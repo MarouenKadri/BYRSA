@@ -5,35 +5,32 @@ abstract class AppColors {
   // Brand
   static const primary = Color.fromARGB(255, 87, 115, 129);
   static const primaryDark = Color.fromARGB(255, 16, 36, 46);
-  static const primaryLight = Color(0xFFE0F2FE);
   static const secondary = Color(0xFFE0F2FE);
 
   // Surfaces
   static const background = Color(0xFFFFFFFF);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceAlt = Color(0xFFF3F4F6);
+  static const surfaceAlt = Color(0xFFF5F5F7);
   static const sheetBg = Color(0xFFFFFFFF);
-  static const inputFill = Color(0xFFF8FAFC);
+  static const inputFill = Color(0xFFF5F5F7);
 
   // Borders
-  static const border = Color(0xFFF1F5F9);
-  static const divider = Color(0xFFF1F5F9);
-  static const borderLight = Color(0xFFE8E8E8);
+  static const border = Color(0xFFE8EDF3);
+  static const divider = Color(0xFFE8EDF3);
+  static const borderLight = Color(0xFFECECEC);
 
   // Text
-  static const textPrimary = Color.fromARGB(255, 100, 100, 100);
-  static const textSecondary = Color.fromARGB(255, 41, 42, 43);
+  static const textPrimary = Color(0xFF1A1A1E);
+  static const textSecondary = Color(0xFF505258);
   static const textTertiary = Color(0xFF94A3B8);
   static const textHint = Color(0xFFCBD5E1);
 
   // Status
-  static const error = Color.fromARGB(255, 231, 214, 214);
+  static const error = Color(0xFFBF5555);
   static const warning = Color(0xFFF59E0B);
   static const success = Color.fromARGB(255, 139, 175, 163);
   static const info = Color.fromARGB(255, 144, 167, 179);
   static const rating = Color(0xFFFFCC00);
-  static const urgent = error;
-  static const gold = rating;
 
   // Light semantic states
   static const errorLight = Color(0xFFFEE2E2);
@@ -41,7 +38,6 @@ abstract class AppColors {
   static const successLight = Color(0xFFD1FAE5);
   static const infoLight = Color(0xFFE0F2FE);
   static const purpleLight = Color(0xFFF3E5F5);
-  static const successBg = successLight;
 
   // Alpha / overlays
   static const whiteAlpha12 = Color(0x1FFFFFFF);
@@ -78,8 +74,6 @@ abstract class AppColors {
   static const blueDark = Color(0xFF1D4ED8);
   static const blueLight = Color(0xFF3B82F6);
   static const blueNavy = Color(0xFF1E40AF);
-  static const blueTracking = secondary;
-  static const cancelRed = error;
   static const deepNavy = Color(0xFF0F172A);
   static const draftAmber = Color(0xFFAA7700);
   static const errorStrong = Color(0xFFEF4444);
@@ -88,10 +82,8 @@ abstract class AppColors {
   static const greenForest = Color(0xFF2E7D32);
   static const greenMint = Color(0xFF66BB6A);
   static const greenNatural = Color(0xFF22C55E);
-  static const greenSystem = success;
   static const indigo = Color(0xFF5856D6);
   static const indigoTW = Color(0xFF6366F1);
-  static const iosBlue = secondary;
   static const lightBlue = Color(0xFF0A2A4A);
   static const mapGradientEnd = Color(0xFF253659);
   static const mapGradientStart = Color(0xFF1A2744);

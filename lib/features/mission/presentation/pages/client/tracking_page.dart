@@ -187,7 +187,7 @@ class _TrackingPageState extends State<TrackingPage> {
                   polylines: [
                     Polyline(
                       points: [_freelancerPosition!, _destinationLatLng!],
-                      color: AppColors.iosBlue.withValues(alpha: 0.70),
+                      color: AppColors.secondary.withValues(alpha: 0.70),
                       strokeWidth: 4,
                     ),
                   ],
@@ -206,7 +206,7 @@ class _TrackingPageState extends State<TrackingPage> {
                       point: _freelancerPosition!,
                       width: 36,
                       height: 36,
-                      child: const Icon(Icons.directions_run_rounded, color: AppColors.iosBlue, size: 32),
+                      child: const Icon(Icons.directions_run_rounded, color: AppColors.secondary, size: 32),
                     ),
                 ],
               ),
@@ -225,7 +225,7 @@ class _TrackingPageState extends State<TrackingPage> {
                   size: 44,
                   iconSize: 20,
                   backgroundColor: Colors.white,
-                  iconColor: AppColors.iosBlue,
+                  iconColor: AppColors.secondary,
                   boxShadow: AppShadows.card,
                 ),
               ),
@@ -251,7 +251,7 @@ class _TrackingPageState extends State<TrackingPage> {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.iosBlue,
+                          color: AppColors.secondary,
                         ),
                       ),
                       AppGap.w8,
@@ -317,7 +317,7 @@ class _TrackingPageState extends State<TrackingPage> {
               child: _EtaCard(
                 etaMinutes: _etaMinutes,
                 distanceKm: _distanceKm!,
-                color: isOnTheWay ? AppColors.iosBlue : AppColors.primary,
+                color: isOnTheWay ? AppColors.secondary : AppColors.primary,
                 label: isOnTheWay ? 'Arrivée estimée' : 'Mission en cours',
               ),
             ),
@@ -385,7 +385,7 @@ class _ClientTrackingPanel extends StatelessWidget {
           AppGap.h16,
           AppSurfaceCard(
             padding: AppInsets.a14,
-            color: AppColors.successBg,
+            color: AppColors.successLight,
             borderRadius: BorderRadius.circular(AppDesign.radius14),
             border: Border.all(color: AppColors.success.withOpacity(0.3)),
             child: Row(
@@ -408,7 +408,7 @@ class _ClientTrackingPanel extends StatelessWidget {
         AppGap.h12,
         Row(
           children: [
-            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.urgent),
+            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.error),
             AppGap.w6,
             Expanded(
               child: Text(

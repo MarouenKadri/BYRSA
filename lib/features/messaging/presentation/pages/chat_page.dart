@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/design/app_design_system.dart';
 import '../../data/models/message.dart';
+import '../../data/services/message_moderation_service.dart';
 import '../../messaging_provider.dart';
 import '../../../mission/presentation/pages/client/create_mission_page.dart';
 
@@ -32,6 +33,11 @@ class ChatPage extends StatefulWidget {
 
   // Mode réservation : affiche le bouton "Réserver ce service"
   final bool showReserveButton;
+  final String? freelancerId;
+  final String? freelancerAvatarUrl;
+
+  // Mission confirmée : badge en haut + masque le bouton réserver
+  final String? confirmedMissionTitle;
 
   // Navigation vers le profil du contact
   final VoidCallback? onProfileTap;
@@ -48,6 +54,9 @@ class ChatPage extends StatefulWidget {
     this.candidatePrice,
     this.onAcceptCandidate,
     this.showReserveButton = false,
+    this.freelancerId,
+    this.freelancerAvatarUrl,
+    this.confirmedMissionTitle,
     this.onProfileTap,
   });
 
@@ -62,16 +71,9 @@ class _ChatPageState extends State<ChatPage> {
 
   bool _showContactWarning = false;
   bool _candidateAccepted = false;
-  bool _missionBooked = false;
+  String? _bookedMissionTitle;
+  bool _isSendingLocation = false;
 
-  // Patterns pour détecter les coordonnées interdites
-  final List<RegExp> _forbiddenPatterns = [
-    RegExp(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', caseSensitive: false),
-    RegExp(r'(\+33|0033|0)[1-9](\s?[0-9]{2}){4}', caseSensitive: false),
-    RegExp(r'\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}', caseSensitive: false),
-    RegExp(r'\b(whatsapp|telegram|signal|viber|messenger|mon\s*(numéro|tel|téléphone|mail|email)|contacte[rz]?\s*moi\s*(sur|via|par)|appelle[rz]?\s*moi|sms)\b', caseSensitive: false),
-    RegExp(r'\b(gmail|yahoo|hotmail|outlook|orange|sfr|free|wanadoo)\b', caseSensitive: false),
-  ];
 
   @override
   void initState() {
@@ -96,40 +98,16 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
-  bool _containsForbiddenContent(String text) {
-    for (final pattern in _forbiddenPatterns) {
-      if (pattern.hasMatch(text)) return true;
-    }
-    return false;
-  }
-
-  void _showForbiddenContentAlert() {
-    setState(() => _showContactWarning = true);
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) setState(() => _showContactWarning = false);
-    });
-  }
-
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
-    if (_containsForbiddenContent(text)) {
-      _showForbiddenContentAlert();
-      return;
-    }
     _messageController.clear();
     if (widget.conversationId != null) {
       final error =
           await context.read<MessagingProvider>().sendMessage(text);
       if (!mounted) return;
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppSnackBar(context, error, type: SnackBarType.error);
         return;
       }
     }
@@ -220,10 +198,17 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _openReservation() async {
     final result = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (_) => const PostMissionFlow()),
+      MaterialPageRoute(
+        builder: (_) => PostMissionFlow(
+          preAssignedFreelancerId: widget.freelancerId,
+          preAssignedFreelancerName: widget.contactName,
+          preAssignedFreelancerAvatar: widget.freelancerAvatarUrl ?? widget.contactAvatar,
+        ),
+      ),
     );
-    if (result == 'published' && mounted) {
-      setState(() => _missionBooked = true);
+    if (result != null && result.startsWith('published:') && mounted) {
+      final title = result.substring('published:'.length);
+      setState(() => _bookedMissionTitle = title.isNotEmpty ? title : 'Mission réservée');
     }
   }
 
@@ -235,6 +220,8 @@ class _ChatPageState extends State<ChatPage> {
       appBar: _buildAppBar(),
       body: Column(
         children: [
+          if (_bookedMissionTitle != null || widget.confirmedMissionTitle != null)
+            _buildConfirmedMissionBadge(),
           if (widget.missionTitle != null) _buildMissionBanner(),
           if (_showContactWarning) _buildContactWarning(),
           Expanded(child: _buildMessageList()),
@@ -306,6 +293,36 @@ class _ChatPageState extends State<ChatPage> {
           onPressed: _showChatOptions,
         ),
       ],
+    );
+  }
+
+  // ─── Badge mission confirmée ──────────────────────────────────────────────
+
+  Widget _buildConfirmedMissionBadge() {
+    final title = _bookedMissionTitle ?? widget.confirmedMissionTitle ?? '';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+      color: _kInk,
+      child: Row(
+        children: [
+          const Icon(Icons.task_alt_rounded, size: 13, color: Colors.white70),
+          AppGap.w6,
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.1,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -460,13 +477,14 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildInputArea() {
     final hasText = _messageController.text.trim().isNotEmpty;
-    final isForbidden = hasText && _containsForbiddenContent(_messageController.text);
-    final showReserve = widget.showReserveButton && !_missionBooked;
+    final isForbidden = hasText &&
+        MessageModerationService.instance.check(_messageController.text).blocked;
+    final activeMissionTitle = _bookedMissionTitle ?? widget.confirmedMissionTitle;
+    final showReserve = widget.showReserveButton &&
+        _bookedMissionTitle == null &&
+        widget.confirmedMissionTitle == null;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        16, 10, 16, 10 + MediaQuery.of(context).padding.bottom,
-      ),
       decoration: const BoxDecoration(
         color: _kWhite,
         border: Border(top: BorderSide(color: _kBorder, width: 0.5)),
@@ -474,124 +492,191 @@ class _ChatPageState extends State<ChatPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showReserve) ...[
-            GestureDetector(
-              onTap: _openReservation,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                decoration: BoxDecoration(
-                  color: _kInk,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('⚡', style: context.chatPrimaryActionStyle.copyWith(fontSize: 14)),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Réserver ce service',
-                      style: context.chatPrimaryActionStyle.copyWith(
-                        fontSize: AppFontSize.base,
-                        color: _kWhite,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-          Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Pill input
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(minHeight: 44),
+          // ── Strip contexte freelancer · mission ───────────────────────────
+          if (activeMissionTitle != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _kWhite,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: _kBorder, width: 1),
+                color: _kCharcoal,
+                border: Border(bottom: BorderSide(color: _kBorder, width: 0.5)),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Localisation
-                  Padding(
-                    padding: const EdgeInsets.only(left: 14, bottom: 11),
-                    child: GestureDetector(
-                      onTap: _sendLocation,
-                      child: const Icon(Icons.location_on_outlined, color: _kGrayMid, size: 22),
-                    ),
+                  CircleAvatar(
+                    radius: 10,
+                    backgroundImage: NetworkImage(widget.contactAvatar),
+                    backgroundColor: _kBorder,
                   ),
-                  // TextField
+                  AppGap.w6,
                   Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      focusNode: _focusNode,
-                      maxLines: 4,
-                      minLines: 1,
-                      textCapitalization: TextCapitalization.sentences,
-                      style: context.chatInputStyle.copyWith(color: _kInk),
-                      decoration: AppInputDecorations.formField(
-                        context,
-                        hintText: 'Votre message...',
-                        hintStyle: context.chatInputHintStyle.copyWith(
-                          color: _kGrayXLight,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
-                        noBorder: true,
-                        fillColor: Colors.transparent,
+                    child: Text(
+                      '${widget.contactName}  ·  $activeMissionTitle',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: _kGrayMid,
                       ),
-                      onChanged: (value) {
-                        setState(() {});
-                        if (_containsForbiddenContent(value)) _showForbiddenContentAlert();
-                      },
-                      onSubmitted: (_) => _sendMessage(),
-                    ),
-                  ),
-                  // Emoji icon
-                  Padding(
-                    padding: const EdgeInsets.only(right: 14, bottom: 11),
-                    child: Icon(
-                      Icons.sentiment_satisfied_alt_outlined,
-                      color: _kGrayLight,
-                      size: 19,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-
-          // Send button — apparaît uniquement en cas de saisie
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            child: hasText
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: GestureDetector(
-                      onTap: _sendMessage,
+          // ── Zone de saisie ────────────────────────────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Bouton réserver
+                if (showReserve) ...[
+                  GestureDetector(
+                    onTap: _openReservation,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        color: _kInk,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('⚡',
+                              style: context.chatPrimaryActionStyle
+                                  .copyWith(fontSize: 14)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Réserver ce service',
+                            style: context.chatPrimaryActionStyle.copyWith(
+                              fontSize: AppFontSize.base,
+                              color: _kWhite,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Pill input + send
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        constraints: const BoxConstraints(minHeight: 44),
                         decoration: BoxDecoration(
-                          color: isForbidden ? AppColors.error : _kInk,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isForbidden ? Icons.block_rounded : Icons.arrow_upward_rounded,
                           color: _kWhite,
-                          size: 18,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: _kBorder, width: 1),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            // Localisation
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 14, bottom: 11),
+                              child: GestureDetector(
+                                onTap: _isSendingLocation ? null : _sendLocation,
+                                child: _isSendingLocation
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: _kGrayMid,
+                                        ),
+                                      )
+                                    : const Icon(Icons.location_on_outlined,
+                                        color: _kGrayMid, size: 22),
+                              ),
+                            ),
+                            // TextField
+                            Expanded(
+                              child: TextField(
+                                controller: _messageController,
+                                focusNode: _focusNode,
+                                maxLines: 4,
+                                minLines: 1,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                style: context.chatInputStyle
+                                    .copyWith(color: _kInk),
+                                decoration: AppInputDecorations.formField(
+                                  context,
+                                  hintText: 'Votre message...',
+                                  hintStyle: context.chatInputHintStyle
+                                      .copyWith(color: _kGrayXLight),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 11),
+                                  noBorder: true,
+                                  fillColor: Colors.transparent,
+                                ),
+                                onChanged: (value) {
+                                  final blocked =
+                                      MessageModerationService.instance
+                                          .check(value)
+                                          .blocked;
+                                  setState(
+                                      () => _showContactWarning = blocked);
+                                },
+                                onSubmitted: (_) => _sendMessage(),
+                              ),
+                            ),
+                            // Emoji icon
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  right: 14, bottom: 11),
+                              child: Icon(
+                                Icons.sentiment_satisfied_alt_outlined,
+                                color: _kGrayLight,
+                                size: 19,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
+                    // Send button
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOut,
+                      child: hasText
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: GestureDetector(
+                                onTap: _sendMessage,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: isForbidden
+                                        ? AppColors.error
+                                        : _kInk,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isForbidden
+                                        ? Icons.block_rounded
+                                        : Icons.arrow_upward_rounded,
+                                    color: _kWhite,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -647,17 +732,27 @@ class _ChatPageState extends State<ChatPage> {
       if (mounted) showAppSnackBar(context, 'Permission de localisation refusée');
       return;
     }
+    setState(() => _isSendingLocation = true);
     try {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
+      // Essaie d'abord la dernière position connue — instantané
+      Position? pos = await Geolocator.getLastKnownPosition();
+      // Si pas disponible ou trop ancienne (>2 min), acquisition fraîche
+      if (pos == null ||
+          DateTime.now().difference(pos.timestamp).inMinutes > 2) {
+        pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 6),
+          ),
+        );
+      }
+      if (!mounted) return;
       await context.read<MessagingProvider>().sendMessage('📍 ${pos.latitude},${pos.longitude}');
       _scrollToBottom();
     } catch (_) {
       if (mounted) showAppSnackBar(context, 'Impossible d\'obtenir la position');
+    } finally {
+      if (mounted) setState(() => _isSendingLocation = false);
     }
   }
 }

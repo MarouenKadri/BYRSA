@@ -142,6 +142,8 @@ class _ConversationTile extends StatelessWidget {
               contactAvatar: avatar,
               isVerified: conversation.isOtherVerified,
               missionTitle: conversation.missionTitle,
+              showReserveButton: conversation.missionId == null,
+              confirmedMissionTitle: conversation.missionTitle,
               onProfileTap: goToProfile,
             ),
           ),
@@ -189,7 +191,7 @@ class _ConversationTile extends StatelessWidget {
                       if (conversation.missionTitle != null) ...[
                         AppTagPill(
                           label: conversation.missionTitle!,
-                          backgroundColor: AppColors.primaryLight,
+                          backgroundColor: AppColors.secondary,
                           foregroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,

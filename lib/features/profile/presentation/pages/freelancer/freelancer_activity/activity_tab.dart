@@ -111,7 +111,7 @@ class _TarifCardState extends State<_TarifCard> {
     return _SectionCard(
       icon: Icons.euro_rounded,
       iconColor: AppColors.primary,
-      iconBg: AppColors.primaryLight,
+      iconBg: AppColors.secondary,
       title: 'Tarif horaire',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class _ZoneCard extends StatelessWidget {
           AppGap.h12,
           AppSurfaceCard(
             padding: AppInsets.h14v10,
-            color: AppColors.primaryLight,
+            color: AppColors.secondary,
             borderRadius: BorderRadius.circular(AppRadius.input),
             child: Row(
               children: [

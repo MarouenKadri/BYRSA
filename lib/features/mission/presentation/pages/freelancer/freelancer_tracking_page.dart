@@ -281,7 +281,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                   polylines: [
                     Polyline(
                       points: [_currentPosition!, _destinationLatLng!],
-                      color: AppColors.iosBlue.withValues(alpha: 0.70),
+                      color: AppColors.secondary.withValues(alpha: 0.70),
                       strokeWidth: 4,
                     ),
                   ],
@@ -300,7 +300,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                       point: _currentPosition!,
                       width: 36,
                       height: 36,
-                      child: const Icon(Icons.navigation_rounded, color: AppColors.iosBlue, size: 32),
+                      child: const Icon(Icons.navigation_rounded, color: AppColors.secondary, size: 32),
                     ),
                 ],
               ),
@@ -319,7 +319,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                   size: 44,
                   iconSize: 20,
                   backgroundColor: Colors.white,
-                  iconColor: AppColors.iosBlue,
+                  iconColor: AppColors.secondary,
                   boxShadow: AppShadows.card,
                 ),
               ),
@@ -345,7 +345,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.iosBlue,
+                          color: AppColors.secondary,
                         ),
                       ),
                       AppGap.w8,
@@ -368,12 +368,12 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                 boxShadow: AppShadows.card,
                 child: Row(
                   children: [
-                    const Icon(Icons.location_off_rounded, size: 18, color: AppColors.urgent),
+                    const Icon(Icons.location_off_rounded, size: 18, color: AppColors.error),
                     AppGap.w8,
                     Expanded(
                       child: Text(
                         'Localisation non disponible. Vérifiez les permissions.',
-                        style: context.text.bodySmall?.copyWith(color: AppColors.urgent),
+                        style: context.text.bodySmall?.copyWith(color: AppColors.error),
                       ),
                     ),
                   ],
@@ -434,7 +434,7 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
                 etaMinutes: _etaMinutes,
                 distanceKm: _distanceKm!,
                 color: _mission.status == MissionStatus.onTheWay
-                    ? AppColors.iosBlue
+                    ? AppColors.secondary
                     : AppColors.primary,
                 label: _mission.status == MissionStatus.onTheWay
                     ? 'Distance jusqu\'au client'
@@ -632,7 +632,7 @@ class _FreelancerTrackingPanel extends StatelessWidget {
                           etaLabel!,
                           style: context.text.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.iosBlue,
+                            color: AppColors.secondary,
                           ),
                         ),
                       ],
@@ -702,7 +702,7 @@ class _FreelancerTrackingPanel extends StatelessWidget {
         AppGap.h16,
         Row(
           children: [
-            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.urgent),
+            const Icon(Icons.location_on_rounded, size: 16, color: AppColors.error),
             AppGap.w6,
             Expanded(
               child: Text(

@@ -394,7 +394,7 @@ class _AppLocationPickerMapState extends State<AppLocationPickerMap> {
           padding: AppInsets.a12,
           decoration: BoxDecoration(
             color: _displayAddress.isNotEmpty
-                ? AppColors.primaryLight
+                ? AppColors.secondary
                 : context.colors.background,
             borderRadius: BorderRadius.circular(AppRadius.input),
             border: Border.all(

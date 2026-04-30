@@ -18,10 +18,10 @@ abstract class AppType {
       // ── Title ───────────────────────────────────────────────────────────
       titleLarge:  base.titleLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w700, color: primary),
       titleMedium: base.titleMedium?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: secondary),
-      titleSmall:  base.titleSmall?.copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: const Color(0xFF777E91)),
+      titleSmall:  base.titleSmall?.copyWith(fontSize: 14, fontWeight: FontWeight.w500, color: tertiary),
       // ── Body ────────────────────────────────────────────────────────────
-      bodyLarge:  base.bodyLarge?.copyWith(fontSize: 15, fontWeight: FontWeight.w400, color: primary, height: 1.6),
-      bodyMedium: base.bodyMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: secondary, height: 1.5),
+      bodyLarge:  base.bodyLarge?.copyWith(fontSize: 15, fontWeight: FontWeight.w400, color: primary, height: 1.65),
+      bodyMedium: base.bodyMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w400, color: secondary, height: 1.6),
       bodySmall:  base.bodySmall?.copyWith(fontSize: 13, fontWeight: FontWeight.w400, color: secondary),
       // ── Label ───────────────────────────────────────────────────────────
       labelLarge:  base.labelLarge?.copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: primary, letterSpacing: 0),

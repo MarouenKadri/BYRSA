@@ -484,6 +484,7 @@ class _CandidatesPageState extends State<CandidatesPage> {
           onCandidateAccepted: isPending
               ? () => _acceptCandidate(candidate)
               : null,
+          confirmedMissionTitle: isAccepted ? widget.missionTitle : null,
         ),
       ),
     );
@@ -685,7 +686,7 @@ class _OfferStatusChip extends StatelessWidget {
         ),
       CandidateStatus.accepte => (
           'CHOISIE',
-          AppColors.successBg,
+          AppColors.successLight,
           AppColors.successDark,
         ),
       CandidateStatus.refuse => (
@@ -1285,8 +1286,8 @@ class _AddCardSheetState extends State<_AddCardSheet> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppColors.gold.withValues(alpha: 0.5),
-                            AppColors.gold,
+                            AppColors.rating.withValues(alpha: 0.5),
+                            AppColors.rating,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(AppRadius.xs),

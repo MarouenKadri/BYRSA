@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/models/message.dart';
 import 'data/repositories/messaging_repository.dart';
 import 'data/repositories/supabase_messaging_repository.dart';
+import 'data/services/message_moderation_service.dart';
 
 class MessagingProvider extends ChangeNotifier {
   final MessagingRepository _repo = SupabaseMessagingRepository();
@@ -78,6 +79,9 @@ class MessagingProvider extends ChangeNotifier {
   Future<String?> sendMessage(String content) async {
     final userId = currentUserId;
     if (userId == null || currentConversationId == null) return 'Non connecté';
+
+    final moderation = MessageModerationService.instance.check(content);
+    if (moderation.blocked) return moderation.reason;
 
     // Optimistic update
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';

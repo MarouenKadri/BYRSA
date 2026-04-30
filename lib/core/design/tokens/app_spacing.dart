@@ -37,8 +37,8 @@ abstract class AppDesign {
   static const double radiusXS     = radius4;
   static const double radiusS      = radius8;
   static const double radiusBadge  = radius10;
-  static const double radiusInput  = radius10;
-  static const double radiusButton = radius12;
+  static const double radiusInput  = radius14;
+  static const double radiusButton = radius14;
   static const double radiusCard   = radius14;
   static const double radius14Lg   = radius14;
   static const double radiusCardLg = radius20;

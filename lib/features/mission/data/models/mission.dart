@@ -58,10 +58,10 @@ extension MissionStatusX on MissionStatus {
   Color get color => switch (this) {
     MissionStatus.draft               => AppColors.draftAmber,
     MissionStatus.waitingCandidates   => AppColors.warning,
-    MissionStatus.candidateReceived   => AppColors.iosBlue,
+    MissionStatus.candidateReceived   => AppColors.secondary,
     MissionStatus.prestaChosen        => AppColors.indigo,
     MissionStatus.confirmed           => AppColors.primary,
-    MissionStatus.onTheWay            => AppColors.iosBlue,
+    MissionStatus.onTheWay            => AppColors.secondary,
     MissionStatus.inProgress          => AppColors.indigo,
     MissionStatus.completionRequested => AppColors.warning,
     MissionStatus.completed           => AppColors.primary,
