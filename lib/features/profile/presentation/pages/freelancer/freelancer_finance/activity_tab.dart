@@ -1078,6 +1078,7 @@ class _WithdrawSheet extends StatelessWidget {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: AppFormSheet(
         title: 'Retirer des fonds',
+        color: context.colors.surface,
         footer: AppButton(
           label: 'Confirmer le retrait',
           variant: ButtonVariant.black,

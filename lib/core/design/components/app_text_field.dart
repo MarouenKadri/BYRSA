@@ -24,18 +24,22 @@ class AppInputTokens {
   static const double borderWidth = 1.0;
 
   /// Rayon pour les champs formulaire standard.
-  static const double formRadius = 14.0;
+  static const double formRadius = 16.0;
 
   /// Rayon pour les champs compacts (téléphone, recherche).
   static const double compactRadius = 12.0;
 
   /// Padding standard des champs formulaire.
-  static const EdgeInsets formPadding =
-      EdgeInsets.symmetric(horizontal: 20, vertical: 16);
+  static const EdgeInsets formPadding = EdgeInsets.symmetric(
+    horizontal: 20,
+    vertical: 20,
+  );
 
   /// Padding compact.
-  static const EdgeInsets compactPadding =
-      EdgeInsets.symmetric(horizontal: 16, vertical: 13);
+  static const EdgeInsets compactPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 16,
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -65,7 +69,8 @@ class AppInputDecorations {
     final side = noBorder ? BorderSide.none : BorderSide(color: divider);
     return InputDecoration(
       hintText: hintText,
-      hintStyle: hintStyle ??
+      hintStyle:
+          hintStyle ??
           context.text.bodyMedium?.copyWith(
             color: context.colors.textHint,
             fontSize: AppFontSize.body,
@@ -108,10 +113,7 @@ class AppInputDecorations {
   }
 
   // ── Case OTP ──────────────────────────────────────────────────────────────
-  static InputDecoration otpCell(
-    BuildContext context, {
-    required bool filled,
-  }) {
+  static InputDecoration otpCell(BuildContext context, {required bool filled}) {
     final br = BorderRadius.circular(AppInputTokens.formRadius);
     return InputDecoration(
       counterText: '',
@@ -147,12 +149,16 @@ class AppInputDecorations {
     Widget? prefixIcon,
     Widget? suffixIcon,
     bool readOnly = false,
-    EdgeInsetsGeometry contentPadding =
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+    EdgeInsetsGeometry contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 18,
+    ),
     double radius = 14.0,
   }) {
-    final hintColor = readOnly ? context.colors.textTertiary : context.colors.textHint;
-    OutlineInputBorder _b({bool error = false, bool focus = false}) =>
+    final hintColor = readOnly
+        ? context.colors.textTertiary
+        : context.colors.textHint;
+    OutlineInputBorder b({bool error = false, bool focus = false}) =>
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
           borderSide: (error || focus)
@@ -175,12 +181,12 @@ class AppInputDecorations {
       filled: true,
       fillColor: context.colors.surface,
       counterText: '',
-      border: _b(),
-      enabledBorder: _b(),
-      focusedBorder: _b(focus: true),
-      disabledBorder: _b(),
-      errorBorder: _b(error: true),
-      focusedErrorBorder: _b(error: true),
+      border: b(),
+      enabledBorder: b(),
+      focusedBorder: b(focus: true),
+      disabledBorder: b(),
+      errorBorder: b(error: true),
+      focusedErrorBorder: b(error: true),
     );
   }
 
@@ -191,8 +197,10 @@ class AppInputDecorations {
     Widget? prefixIcon,
     Widget? suffixIcon,
     Color? fillColor,
-    EdgeInsetsGeometry contentPadding =
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    EdgeInsetsGeometry contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 10,
+    ),
   }) {
     final br = BorderRadius.circular(AppInputTokens.compactRadius);
     const noSide = BorderSide.none;
@@ -288,11 +296,7 @@ abstract class AppBaseFieldState<T extends AppBaseField> extends State<T> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildLabel(context),
-        AppGap.h8,
-        buildInput(context),
-      ],
+      children: [buildLabel(context), AppGap.h8, buildInput(context)],
     );
   }
 }
@@ -375,7 +379,8 @@ class _AppTextFieldState extends AppBaseFieldState<AppTextField> {
                 size: 22,
               )
             : null,
-        suffixIcon: widget.suffixIcon ??
+        suffixIcon:
+            widget.suffixIcon ??
             (widget.obscureText
                 ? IconButton(
                     icon: Icon(
@@ -389,8 +394,9 @@ class _AppTextFieldState extends AppBaseFieldState<AppTextField> {
                         setState(() => _obscureText = !_obscureText),
                   )
                 : null),
-        fillColor:
-            isFocused ? context.colors.surface : context.colors.surfaceAlt,
+        fillColor: isFocused
+            ? context.colors.surface
+            : context.colors.surfaceAlt,
       ),
     );
   }

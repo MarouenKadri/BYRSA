@@ -730,6 +730,7 @@ class _EditStorySheetState extends State<_EditStorySheet> {
       padding: EdgeInsets.only(bottom: bottom),
       child: AppFormSheet(
         title: 'Modifier la story',
+        color: context.colors.surface,
         contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         footer: Row(
           children: [

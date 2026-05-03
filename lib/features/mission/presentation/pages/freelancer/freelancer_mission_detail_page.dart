@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/design/app_design_system.dart';
@@ -418,14 +419,13 @@ class _FreelancerMissionDetailPageState
     );
   }
 
-  void _openPhoneClient() {
-    if (mission.client == null) return;
-    showAppSnackBar(
-      context,
-      'Appel vers ${mission.client!.name}...',
-      icon: Icons.phone_rounded,
-      duration: const Duration(seconds: 2),
-    );
+  Future<void> _openPhoneClient() async {
+    final phone = mission.client?.phone;
+    if (phone == null || phone.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _openProposalSheet() {

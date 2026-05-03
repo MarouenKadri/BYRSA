@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
@@ -663,12 +664,14 @@ class _ActiveMissionCard extends StatelessWidget {
                               child: _CardAction(
                                 icon: Icons.phone_rounded,
                                 label: 'Appeler',
-                                onTap: () => showAppSnackBar(
-                                  context,
-                                  'Appel vers ${presta.name}...',
-                                  icon: Icons.phone_rounded,
-                                  duration: const Duration(seconds: 2),
-                                ),
+                                onTap: () async {
+                                  final phone = presta.phone;
+                                  if (phone == null || phone.isEmpty) return;
+                                  final uri = Uri(scheme: 'tel', path: phone);
+                                  if (await canLaunchUrl(uri)) {
+                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  }
+                                },
                               ),
                             ),
                             const SizedBox(width: 8),

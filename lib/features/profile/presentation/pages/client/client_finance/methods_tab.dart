@@ -1,39 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../core/design/app_design_system.dart';
+import '../../../payment_methods_provider.dart';
+import '../../../../data/models/payment_method.dart';
 import '../../widgets/shared/payment_common_widgets.dart';
-import '../../widgets/shared/user_common_widgets.dart';
 
-class ClientFinanceMethodsTab extends StatefulWidget {
+class ClientFinanceMethodsTab extends StatelessWidget {
   const ClientFinanceMethodsTab({super.key});
 
-  @override
-  State<ClientFinanceMethodsTab> createState() => _ClientFinanceMethodsTabState();
-}
-
-class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
-  final List<_Card> _cards = [
-    _Card(brand: 'Visa', last4: '4242', expiry: '12/26', isDefault: true),
-    _Card(
-      brand: 'Mastercard',
-      last4: '8888',
-      expiry: '08/25',
-      isDefault: false,
-    ),
-  ];
-
-  void _setDefault(int index) {
-    setState(() {
-      for (int i = 0; i < _cards.length; i++) {
-        _cards[i] = _cards[i].copyWith(isDefault: i == index);
-      }
-    });
-  }
-
-  void _removeCard(int index) => setState(() => _cards.removeAt(index));
-
-  void _showCardOptions(BuildContext context, int index) {
-    final card = _cards[index];
+  void _showCardOptions(BuildContext context, PaymentMethod card) {
+    final provider = context.read<PaymentMethodsProvider>();
     showAppBottomSheet(
       context: context,
       wrapWithSurface: false,
@@ -46,7 +23,7 @@ class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
               title: 'Définir par défaut',
               onTap: () {
                 Navigator.pop(context);
-                _setDefault(index);
+                provider.setDefault(card.id);
               },
             ),
           if (!card.isDefault)
@@ -69,7 +46,7 @@ class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
                   title: 'Supprimer la carte ?',
                   subtitle:
                       '${card.brand} •••• ${card.last4} sera supprimée définitivement.',
-                  onConfirm: () => _removeCard(index),
+                  onConfirm: () => provider.removeCard(card.id),
                 ),
               );
             },
@@ -84,12 +61,22 @@ class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      child: const _AddCardSheet(),
+      child: AddCardSheet(
+        onCardAdded: (brand, last4, expiry) {
+          context.read<PaymentMethodsProvider>().addCard(
+                brand: brand,
+                last4: last4,
+                expiry: expiry,
+              );
+        },
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cards = context.watch<PaymentMethodsProvider>().cards;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
       children: [
@@ -103,12 +90,12 @@ class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
           ),
           child: Column(
             children: [
-              ..._cards.asMap().entries.expand((entry) => [
+              ...cards.asMap().entries.expand((entry) => [
                     _CardRow(
                       card: entry.value,
-                      onTap: () => _showCardOptions(context, entry.key),
+                      onTap: () => _showCardOptions(context, entry.value),
                     ),
-                    if (entry.key < _cards.length - 1)
+                    if (entry.key < cards.length - 1)
                       Divider(
                         height: 1,
                         indent: 68,
@@ -135,7 +122,7 @@ class _ClientFinanceMethodsTabState extends State<ClientFinanceMethodsTab> {
 }
 
 class _CardRow extends StatelessWidget {
-  final _Card card;
+  final PaymentMethod card;
   final VoidCallback onTap;
 
   const _CardRow({required this.card, required this.onTap});
@@ -219,137 +206,6 @@ class _CardRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AddCardSheet extends StatelessWidget {
-  const _AddCardSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: AppFormSheet(
-        title: 'Ajouter une carte',
-        footer: Column(
-          children: [
-            ProfileSheetPrimaryAction(
-              label: 'Ajouter la carte',
-              onPressed: () => Navigator.pop(context),
-            ),
-            AppGap.h12,
-            Center(
-              child: ProfileSheetSecondaryAction(
-                label: 'Annuler',
-                onTap: () => Navigator.pop(context),
-              ),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            PaymentShadowField(
-              child: TextFormField(
-                keyboardType: TextInputType.number,
-                style: TextStyle(
-                  fontSize: AppFontSize.body,
-                  color: context.colors.textPrimary,
-                ),
-                decoration: AppInputDecorations.profileField(
-                  context,
-                  hintText: 'Numéro de carte',
-                  prefixIcon: Icon(
-                    Icons.credit_card_rounded,
-                    size: 16,
-                    color: context.colors.textHint,
-                  ),
-                ),
-              ),
-            ),
-            AppGap.h16,
-            Row(
-              children: [
-                Expanded(
-                  child: PaymentShadowField(
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        fontSize: AppFontSize.body,
-                        color: context.colors.textPrimary,
-                      ),
-                      decoration: AppInputDecorations.profileField(
-                        context,
-                        hintText: 'MM/AA',
-                      ),
-                    ),
-                  ),
-                ),
-                AppGap.w12,
-                Expanded(
-                  child: PaymentShadowField(
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      obscureText: true,
-                      style: TextStyle(
-                        fontSize: AppFontSize.body,
-                        color: context.colors.textPrimary,
-                      ),
-                      decoration: AppInputDecorations.profileField(
-                        context,
-                        hintText: 'CVV',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            AppGap.h16,
-            PaymentShadowField(
-              child: TextFormField(
-                style: TextStyle(
-                  fontSize: AppFontSize.body,
-                  color: context.colors.textPrimary,
-                ),
-                decoration: AppInputDecorations.profileField(
-                  context,
-                  hintText: 'Titulaire de la carte',
-                  prefixIcon: Icon(
-                    Icons.person_outline_rounded,
-                    size: 16,
-                    color: context.colors.textHint,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Card {
-  final String brand;
-  final String last4;
-  final String expiry;
-  final bool isDefault;
-
-  const _Card({
-    required this.brand,
-    required this.last4,
-    required this.expiry,
-    required this.isDefault,
-  });
-
-  _Card copyWith({bool? isDefault}) {
-    return _Card(
-      brand: brand,
-      last4: last4,
-      expiry: expiry,
-      isDefault: isDefault ?? this.isDefault,
     );
   }
 }

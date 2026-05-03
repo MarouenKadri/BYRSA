@@ -15,6 +15,7 @@ import 'features/story/story_provider.dart';
 import 'features/profile/profile_provider.dart';
 import 'features/profile/data/repositories/supabase_freelancer_catalog_repository.dart';
 import 'features/reviews/presentation/providers/review_provider.dart';
+import 'features/profile/presentation/payment_methods_provider.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentMethodsProvider()),
       ],
       child: MaterialApp(
         navigatorKey: appNavigatorKey,

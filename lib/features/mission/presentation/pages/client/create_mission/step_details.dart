@@ -237,6 +237,7 @@ class _StepDetailsState extends State<StepDetails> {
       wrapWithSurface: false,
       builder: (ctx) => AppFormSheet(
         title: 'Supprimer toutes les photos ?',
+        color: ctx.colors.surface,
         footer: Row(
           children: [
             Expanded(

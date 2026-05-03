@@ -793,6 +793,7 @@ class _StartCodeSheetState extends State<_StartCodeSheet> {
       padding: EdgeInsets.only(bottom: bottomPad),
       child: AppFormSheet(
         title: 'Entrer le code client',
+        color: context.colors.surface,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

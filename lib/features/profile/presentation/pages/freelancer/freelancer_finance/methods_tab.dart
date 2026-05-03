@@ -218,6 +218,7 @@ class _IbanSheet extends StatelessWidget {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: AppFormSheet(
         title: isEdit ? 'Modifier l\'IBAN SEPA' : 'Ajouter un IBAN SEPA',
+        color: context.colors.surface,
         footer: Column(
           children: [
             ProfileSheetPrimaryAction(
@@ -237,51 +238,48 @@ class _IbanSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PaymentShadowField(
-              child: TextFormField(
-                style: TextStyle(
-                  fontSize: AppFontSize.body,
-                  color: context.colors.textPrimary,
-                ),
-                decoration: AppInputDecorations.profileField(
-                  context,
-                  hintText: 'IBAN (FR76...)',
-                  prefixIcon: Icon(
-                    Icons.account_balance_rounded,
-                    size: 16,
-                    color: context.colors.textHint,
-                  ),
+            TextFormField(
+              style: TextStyle(
+                fontSize: AppFontSize.body,
+                color: context.colors.textPrimary,
+              ),
+              decoration: AppInputDecorations.profileField(
+                context,
+                hintText: 'IBAN (FR76...)',
+                radius: 18,
+                prefixIcon: Icon(
+                  Icons.account_balance_rounded,
+                  size: 16,
+                  color: context.colors.textHint,
                 ),
               ),
             ),
-            AppGap.h16,
-            PaymentShadowField(
-              child: TextFormField(
-                style: TextStyle(
-                  fontSize: AppFontSize.body,
-                  color: context.colors.textPrimary,
-                ),
-                decoration: AppInputDecorations.profileField(
-                  context,
-                  hintText: 'BIC / SWIFT (optionnel)',
-                ),
+            AppGap.h10,
+            TextFormField(
+              style: TextStyle(
+                fontSize: AppFontSize.body,
+                color: context.colors.textPrimary,
+              ),
+              decoration: AppInputDecorations.profileField(
+                context,
+                hintText: 'BIC / SWIFT (optionnel)',
+                radius: 18,
               ),
             ),
-            AppGap.h16,
-            PaymentShadowField(
-              child: TextFormField(
-                style: TextStyle(
-                  fontSize: AppFontSize.body,
-                  color: context.colors.textPrimary,
-                ),
-                decoration: AppInputDecorations.profileField(
-                  context,
-                  hintText: 'Titulaire du compte',
-                  prefixIcon: Icon(
-                    Icons.person_outline_rounded,
-                    size: 16,
-                    color: context.colors.textHint,
-                  ),
+            AppGap.h10,
+            TextFormField(
+              style: TextStyle(
+                fontSize: AppFontSize.body,
+                color: context.colors.textPrimary,
+              ),
+              decoration: AppInputDecorations.profileField(
+                context,
+                hintText: 'Titulaire du compte',
+                radius: 18,
+                prefixIcon: Icon(
+                  Icons.person_outline_rounded,
+                  size: 16,
+                  color: context.colors.textHint,
                 ),
               ),
             ),

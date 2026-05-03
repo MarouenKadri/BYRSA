@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -337,13 +338,13 @@ class _ClientMissionDetailPageState
     if (mounted) setState(() => _menuOpen = false);
   }
 
-  void _openPhone(PrestaInfo presta) {
-    showAppSnackBar(
-      context,
-      'Appel vers ${presta.name}...',
-      icon: Icons.phone_rounded,
-      duration: const Duration(seconds: 2),
-    );
+  Future<void> _openPhone(PrestaInfo presta) async {
+    final phone = presta.phone;
+    if (phone == null || phone.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Future<void> _shareMission() async {

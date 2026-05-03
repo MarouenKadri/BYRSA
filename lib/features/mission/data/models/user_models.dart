@@ -8,6 +8,7 @@ class ClientInfo {
   final double rating;
   final int missionsCount;
   final bool isVerified;
+  final String? phone;
 
   const ClientInfo({
     required this.id,
@@ -16,6 +17,7 @@ class ClientInfo {
     this.rating = 0,
     this.missionsCount = 0,
     this.isVerified = false,
+    this.phone,
   });
 }
 
@@ -29,6 +31,7 @@ class PrestaInfo {
   final int completedMissions;
   final bool isVerified;
   final String? acceptedPrice;
+  final String? phone;
 
   const PrestaInfo({
     required this.id,
@@ -39,5 +42,6 @@ class PrestaInfo {
     this.completedMissions = 0,
     this.isVerified = false,
     this.acceptedPrice,
+    this.phone,
   });
 }

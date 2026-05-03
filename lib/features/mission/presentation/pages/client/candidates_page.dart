@@ -7,6 +7,8 @@ import '../../mission_provider.dart';
 import '../../../../notifications/notification_provider.dart';
 import '../../../../notifications/data/models/app_notification.dart';
 import '../../../../client/presentation/pages/freelancer_profile_view.dart';
+import '../../../../profile/presentation/pages/widgets/shared/payment_common_widgets.dart';
+import '../../../../profile/presentation/payment_methods_provider.dart';
 
 class CandidatesPage extends StatefulWidget {
   final String missionId;
@@ -119,73 +121,9 @@ class _CandidatesPageState extends State<CandidatesPage> {
     return double.tryParse('${value ?? ''}') ?? 0;
   }
 
-  /// ─── Accepter un candidat (les autres sont rejetés) ───
+  /// ─── Accepter un candidat → paiement direct ───
   void _acceptCandidate(Candidate candidate) {
-    showAppDialog(
-      context: context,
-      title: const Text('Confirmer votre choix'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            text: TextSpan(
-              style: context.text.bodyLarge?.copyWith(height: 1.4),
-              children: [
-                const TextSpan(text: 'Vous allez accepter '),
-                TextSpan(
-                  text: candidate.name,
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const TextSpan(text: ' pour '),
-                TextSpan(
-                  text: candidate.proposedPrice,
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const TextSpan(text: '.'),
-              ],
-            ),
-          ),
-          AppGap.h12,
-          Container(
-            padding: AppInsets.a12,
-            decoration: BoxDecoration(
-              color: context.colors.background.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.small),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.info_outline_rounded,
-                  size: 20,
-                  color: AppColors.warning,
-                ),
-                AppGap.w8,
-                Expanded(
-                  child: Text(
-                    'Les autres candidats seront automatiquement refusés.',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.colors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      cancelLabel: 'Annuler',
-      confirmLabel: 'Confirmer',
-      onConfirm: () {
-        Navigator.pop(context);
-        _confirmAcceptance(candidate);
-      },
-    );
+    _confirmAcceptance(candidate);
   }
 
   /// Lance le flow de paiement après confirmation du candidat
@@ -735,6 +673,7 @@ class _PaymentSheet extends StatefulWidget {
 
 class _PaymentSheetState extends State<_PaymentSheet> {
   bool _isProcessing = false;
+  int? _selectedCardIdx;
 
   double get _amount =>
       double.tryParse(
@@ -744,40 +683,20 @@ class _PaymentSheetState extends State<_PaymentSheet> {
   double get _presta => _amount * 0.9;
   double get _cigale => _amount * 0.1;
 
-  int _selectedCard = 0;
-
-  final List<({String brand, String last4, String expiry, Color color})>
-  _cards = [
-    (
-      brand: 'Visa',
-      last4: '4242',
-      expiry: '12/26',
-      color: AppColors.blueAction,
-    ),
-    (
-      brand: 'Mastercard',
-      last4: '8888',
-      expiry: '08/25',
-      color: AppColors.mastercardOrange,
-    ),
-  ];
-
   void _showAddCardDialog() {
     showAppBottomSheet(
       context: context,
       isScrollControlled: true,
       wrapWithSurface: false,
-      child: _AddCardSheet(
-        onCardAdded: (last4, expiry) {
-          setState(() {
-            _cards.add((
-              brand: 'Carte',
-              last4: last4,
-              expiry: expiry,
-              color: context.colors.background,
-            ));
-            _selectedCard = _cards.length - 1;
-          });
+      child: AddCardSheet(
+        onCardAdded: (brand, last4, expiry) {
+          context.read<PaymentMethodsProvider>().addCard(
+                brand: brand,
+                last4: last4,
+                expiry: expiry,
+              );
+          final cards = context.read<PaymentMethodsProvider>().cards;
+          setState(() => _selectedCardIdx = cards.length - 1);
         },
       ),
     );
@@ -793,6 +712,9 @@ class _PaymentSheetState extends State<_PaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cards = context.watch<PaymentMethodsProvider>().cards;
+    final defaultIdx = cards.indexWhere((c) => c.isDefault);
+    final selectedIdx = (_selectedCardIdx ?? defaultIdx).clamp(0, cards.isEmpty ? 0 : cards.length - 1);
     final bottom = MediaQuery.of(context).padding.bottom;
 
     return Container(
@@ -800,7 +722,7 @@ class _PaymentSheetState extends State<_PaymentSheet> {
         color: context.colors.sheetBg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottom),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,123 +730,105 @@ class _PaymentSheetState extends State<_PaymentSheet> {
           // ─── Handle ───
           Center(
             child: Container(
-              margin: AppInsets.v12,
-              width: 40,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
                 color: context.colors.border,
-                borderRadius: BorderRadius.circular(AppRadius.micro),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
 
           // ─── Titre ───
-          Row(
-            children: [
-              Container(
-                padding: AppInsets.a8,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.badge),
-                ),
-                child: const Icon(
-                  Icons.lock_rounded,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-              ),
-              AppGap.w12,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Bloquer le paiement',
-                      style: context.text.headlineSmall,
-                    ),
-                    Text(
-                      widget.missionTitle,
-                      style: context.text.bodySmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            'Finaliser le paiement',
+            style: context.text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          AppGap.h2,
+          Text(
+            widget.missionTitle,
+            style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
 
-          AppGap.h20,
+          AppGap.h16,
 
-          // ─── Récapitulatif ───
+          // ─── Candidat ───
           Container(
-            padding: AppInsets.a16,
             decoration: BoxDecoration(
-              color: context.colors.background,
-              borderRadius: BorderRadius.circular(AppRadius.button),
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
             ),
-            child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundImage: NetworkImage(widget.candidate.avatar),
-                    ),
-                    AppGap.w10,
-                    Expanded(
-                      child: Text(
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(11),
+                    border: Border.all(color: context.colors.border),
+                  ),
+                  child: widget.candidate.avatar.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            widget.candidate.avatar,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            widget.candidate.name.isNotEmpty
+                                ? widget.candidate.name[0].toUpperCase()
+                                : '?',
+                            style: context.text.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                ),
+                AppGap.w12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         widget.candidate.name,
                         style: context.text.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: context.colors.textPrimary,
                         ),
                       ),
-                    ),
-                    Text(
-                      widget.candidate.proposedPrice,
-                      style: context.text.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                      AppGap.h2,
+                      Text(
+                        'Prestataire sélectionné',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.colors.textTertiary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-
-                const Padding(
-                  padding: AppInsets.v12,
-                  child: Divider(height: 1),
-                ),
-
-                _AmountRow(
-                  label: 'Prestataire (90%)',
-                  amount: _presta,
-                  color: AppColors.primary,
-                ),
-                AppGap.h8,
-                _AmountRow(
-                  label: 'Commission Inkern (10%)',
-                  amount: _cigale,
-                  color: context.colors.textTertiary,
-                ),
-
-                const Padding(
-                  padding: AppInsets.v12,
-                  child: Divider(height: 1),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'Total bloqué',
-                      style: context.text.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                     Text(
                       '${_amount.round()} €',
-                      style: context.text.headlineSmall?.copyWith(
+                      style: context.text.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      'Total TTC',
+                      style: context.text.labelSmall?.copyWith(
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   ],
@@ -933,179 +837,160 @@ class _PaymentSheetState extends State<_PaymentSheet> {
             ),
           ),
 
-          AppGap.h14,
+          AppGap.h16,
 
-          // ─── Info escrow ───
+          // ─── Répartition ───
+          const PaymentSectionLabel('RÉPARTITION'),
+          AppGap.h8,
           Container(
-            padding: AppInsets.h12v10,
             decoration: BoxDecoration(
-              color: context.colors.surfaceAlt,
-              borderRadius: BorderRadius.circular(AppRadius.badge),
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 15,
-                  color: AppColors.info,
+                _RepartitionRow(
+                  icon: Icons.handyman_outlined,
+                  label: 'Prestataire (90 %)',
+                  amount: '${_presta.round()} €',
+                  amountColor: AppColors.ink,
+                  context: context,
                 ),
-                AppGap.w8,
-                Expanded(
-                  child: Text(
-                    'Le montant est bloqué (non débité) et libéré au prestataire uniquement après votre validation.',
-                    style: context.text.labelMedium?.copyWith(
-                      color: AppColors.secondary,
-                      height: 1.4,
-                    ),
-                  ),
+                Divider(height: 1, indent: 68, color: context.colors.divider),
+                _RepartitionRow(
+                  icon: Icons.percent_rounded,
+                  label: 'Commission (10 %)',
+                  amount: '${_cigale.round()} €',
+                  amountColor: context.colors.textTertiary,
+                  context: context,
                 ),
               ],
             ),
           ),
 
-          AppGap.h20,
+          AppGap.h16,
 
-          // ─── Sélection carte ───
-          Text(
-            'MOYEN DE PAIEMENT',
-            style: context.text.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
+          // ─── Cartes (depuis PaymentMethodsProvider) ───
+          const PaymentSectionLabel('CARTE DE PAIEMENT'),
+          AppGap.h8,
+          Container(
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
             ),
-          ),
-          AppGap.h10,
-          ...List.generate(_cards.length, (i) {
-            final card = _cards[i];
-            return GestureDetector(
-              onTap: () => setState(() => _selectedCard = i),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: AppInsets.h14v12,
-                decoration: BoxDecoration(
-                  color: _selectedCard == i
-                      ? AppColors.primary.withValues(alpha: 0.06)
-                      : context.colors.background,
-                  borderRadius: BorderRadius.circular(AppRadius.input),
-                  border: Border.all(
-                    color: _selectedCard == i
-                        ? AppColors.primary
-                        : context.colors.divider,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: card.color,
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
-                      ),
-                      child: Center(
-                        child: Text(
-                          card.brand[0],
-                          style: context.text.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
+            child: Column(
+              children: [
+                ...cards.asMap().entries.expand(
+                  (entry) => [
+                    InkWell(
+                      onTap: () => setState(() => _selectedCardIdx = entry.key),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: context.colors.surfaceAlt,
+                                borderRadius: BorderRadius.circular(11),
+                                border: Border.all(color: context.colors.border),
+                              ),
+                              child: const Icon(
+                                Icons.credit_card_rounded,
+                                size: 18,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            AppGap.w12,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${entry.value.brand} •••• ${entry.value.last4}',
+                                    style: context.text.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: context.colors.textPrimary,
+                                    ),
+                                  ),
+                                  AppGap.h2,
+                                  Text(
+                                    'Expire ${entry.value.expiry}',
+                                    style: context.text.bodySmall?.copyWith(
+                                      color: context.colors.textTertiary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (selectedIdx == entry.key)
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 18,
+                                color: AppColors.ink,
+                              )
+                            else
+                              Icon(
+                                Icons.radio_button_unchecked,
+                                size: 18,
+                                color: context.colors.textHint,
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                    AppGap.w12,
-                    Expanded(
-                      child: Text(
-                        '•••• ${card.last4}  ·  ${card.expiry}',
-                        style: context.text.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    if (_selectedCard == i)
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        color: AppColors.primary,
-                        size: 20,
+                    if (entry.key < cards.length - 1)
+                      Divider(
+                        height: 1,
+                        indent: 68,
+                        color: context.colors.divider,
                       ),
                   ],
                 ),
-              ),
-            );
-          }),
-
-          // ─── Ajouter une carte ───
-          GestureDetector(
-            onTap: _showAddCardDialog,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: AppInsets.h14v12,
-              decoration: BoxDecoration(
-                color: context.colors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.input),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.4),
-                  style: BorderStyle.solid,
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
-                    ),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: AppColors.primary,
-                      size: 18,
-                    ),
-                  ),
-                  AppGap.w12,
-                  Expanded(
-                    child: Text(
-                      'Ajouter une carte bancaire',
-                      style: context.text.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.primary.withValues(alpha: 0.6),
-                    size: 20,
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
 
+          AppGap.h8,
+          PaymentAddButton(
+            label: 'Ajouter une carte',
+            onTap: _showAddCardDialog,
+          ),
+          AppGap.h12,
+          const PaymentInfoNote(
+            icon: Icons.shield_outlined,
+            body:
+                'Montant bloqué — libéré au prestataire uniquement après votre validation.',
+          ),
           AppGap.h20,
 
-          // ─── Bouton paiement ───
+          // ─── CTA ───
           AppButton(
-            label: 'Payer ${_amount.round()} € et bloquer',
-            variant: ButtonVariant.primary,
+            label: 'Payer ${_amount.round()} €',
+            variant: ButtonVariant.black,
             isLoading: _isProcessing,
             onPressed: _isProcessing ? null : _pay,
           ),
-
           AppGap.h10,
-
           Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.lock_outline_rounded,
-                  size: 13,
+                  size: 12,
                   color: context.colors.textHint,
                 ),
                 AppGap.w4,
                 Text(
-                  'Paiement sécurisé par Inkern',
+                  'Paiement sécurisé',
                   style: context.text.labelSmall?.copyWith(
                     color: context.colors.textHint,
                   ),
@@ -1119,400 +1004,52 @@ class _PaymentSheetState extends State<_PaymentSheet> {
   }
 }
 
-class _AmountRow extends StatelessWidget {
+class _RepartitionRow extends StatelessWidget {
+  final IconData icon;
   final String label;
-  final double amount;
-  final Color color;
-  const _AmountRow({
+  final String amount;
+  final Color amountColor;
+  final BuildContext context;
+
+  const _RepartitionRow({
+    required this.icon,
     required this.label,
     required this.amount,
-    required this.color,
+    required this.amountColor,
+    required this.context,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: context.text.bodySmall),
-        Text(
-          '${amount.round()} €',
-          style: context.text.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
+  Widget build(BuildContext ctx) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: ctx.colors.surfaceAlt,
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(color: ctx.colors.border),
+            ),
+            child: Icon(icon, size: 18, color: ctx.colors.textSecondary),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// ─────────────────────────────────────────────────────────────
-/// 💳 Formulaire ajout carte — bottom sheet redesigné
-/// ─────────────────────────────────────────────────────────────
-class _AddCardSheet extends StatefulWidget {
-  final void Function(String last4, String expiry) onCardAdded;
-  const _AddCardSheet({required this.onCardAdded});
-
-  @override
-  State<_AddCardSheet> createState() => _AddCardSheetState();
-}
-
-class _AddCardSheetState extends State<_AddCardSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _numberCtrl = TextEditingController();
-  final _expiryCtrl = TextEditingController();
-  final _cvvCtrl = TextEditingController();
-  final _nameCtrl = TextEditingController();
-  bool _cvvVisible = false;
-
-  @override
-  void dispose() {
-    _numberCtrl.dispose();
-    _expiryCtrl.dispose();
-    _cvvCtrl.dispose();
-    _nameCtrl.dispose();
-    super.dispose();
-  }
-
-  String get _previewNumber {
-    final digits = _numberCtrl.text.replaceAll(' ', '');
-    final padded = digits.padRight(16, '•');
-    return '${padded.substring(0, 4)}  ${padded.substring(4, 8)}  ${padded.substring(8, 12)}  ${padded.substring(12, 16)}';
-  }
-
-  String get _previewExpiry =>
-      _expiryCtrl.text.isEmpty ? 'MM/AA' : _expiryCtrl.text;
-  String get _previewName => _nameCtrl.text.trim().isEmpty
-      ? 'VOTRE NOM'
-      : _nameCtrl.text.toUpperCase();
-
-  @override
-  Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.sheetBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottom),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ─── Handle ───
-              Center(
-                child: Container(
-                  margin: AppInsets.v12,
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(AppRadius.micro),
-                  ),
-                ),
-              ),
-
-              // ─── Titre ───
-              Text(
-                'Ajouter une carte',
-                style: context.text.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              AppGap.h4,
-              Text(
-                'Vos données sont chiffrées et sécurisées',
-                style: context.text.bodySmall?.copyWith(
-                  color: context.colors.textTertiary,
-                ),
-              ),
-
-              AppGap.h22,
-
-              // ─── Aperçu carte ───
-              Container(
-                height: 190,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.greenForest,
-                      AppColors.primary,
-                      AppColors.greenMint,
-                    ],
-                    stops: [0.0, 0.55, 1.0],
-                  ),
-                  borderRadius: BorderRadius.circular(AppRadius.cardLg),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.4),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Inkern PAY',
-                          style: context.text.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        Icon(
-                          Icons.contactless_rounded,
-                          color: Colors.white.withValues(alpha: 0.85),
-                          size: 26,
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    // Puce
-                    Container(
-                      width: 38,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.rating.withValues(alpha: 0.5),
-                            AppColors.rating,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
-                      ),
-                      child: const Icon(
-                        Icons.memory_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                    AppGap.h14,
-                    Text(
-                      _previewNumber,
-                      style: context.text.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    AppGap.h14,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'TITULAIRE',
-                              style: context.text.labelSmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            AppGap.h2,
-                            Text(
-                              _previewName,
-                              style: context.text.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'EXPIRE',
-                              style: context.text.labelSmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            AppGap.h2,
-                            Text(
-                              _previewExpiry,
-                              style: context.text.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              AppGap.h24,
-
-              // ─── Numéro ───
-              _buildField(
-                controller: _numberCtrl,
-                label: 'Numéro de carte',
-                hint: '0000  0000  0000  0000',
-                icon: Icons.credit_card_rounded,
-                keyboardType: TextInputType.number,
-                maxLength: 19,
-                onChanged: (v) {
-                  final digits = v.replaceAll(' ', '');
-                  final formatted = digits
-                      .replaceAllMapped(
-                        RegExp(r'.{1,4}'),
-                        (m) => '${m.group(0)} ',
-                      )
-                      .trim();
-                  if (formatted != v) {
-                    _numberCtrl.value = TextEditingValue(
-                      text: formatted,
-                      selection: TextSelection.collapsed(
-                        offset: formatted.length,
-                      ),
-                    );
-                  }
-                  setState(() {});
-                },
-                validator: (v) =>
-                    (v == null || v.replaceAll(' ', '').length < 16)
-                    ? 'Numéro invalide'
-                    : null,
-              ),
-
-              AppGap.h12,
-
-              // ─── Nom ───
-              _buildField(
-                controller: _nameCtrl,
-                label: 'Nom du titulaire',
-                hint: 'Jean Dupont',
-                icon: Icons.person_outline_rounded,
-                textCapitalization: TextCapitalization.characters,
-                onChanged: (_) => setState(() {}),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Nom requis' : null,
-              ),
-
-              AppGap.h12,
-
-              // ─── Expiry + CVV ───
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildField(
-                      controller: _expiryCtrl,
-                      label: 'MM/AA',
-                      icon: Icons.calendar_today_rounded,
-                      keyboardType: TextInputType.number,
-                      maxLength: 5,
-                      onChanged: (v) {
-                        if (v.length == 2 && !v.contains('/')) {
-                          _expiryCtrl.value = TextEditingValue(
-                            text: '$v/',
-                            selection: const TextSelection.collapsed(offset: 3),
-                          );
-                        }
-                        setState(() {});
-                      },
-                      validator: (v) =>
-                          (v == null || v.length < 5) ? 'Invalide' : null,
-                    ),
-                  ),
-                  AppGap.w12,
-                  Expanded(
-                    child: TextFormField(
-                      controller: _cvvCtrl,
-                      keyboardType: TextInputType.number,
-                      maxLength: 3,
-                      obscureText: !_cvvVisible,
-                      decoration: AppInputDecorations.formField(
-                        context,
-                        fillColor: context.colors.background,
-                        prefixIcon: const Icon(
-                          Icons.lock_outline_rounded,
-                          size: 18,
-                        ),
-                        suffixIcon: GestureDetector(
-                          onTap: () =>
-                              setState(() => _cvvVisible = !_cvvVisible),
-                          child: Icon(
-                            _cvvVisible
-                                ? Icons.visibility_off_rounded
-                                : Icons.visibility_rounded,
-                            size: 18,
-                            color: context.colors.textTertiary,
-                          ),
-                        ),
-                      ).copyWith(
-                        labelText: 'CVV',
-                        counterText: '',
-                      ),
-                      validator: (v) =>
-                          (v == null || v.length < 3) ? 'Invalide' : null,
-                    ),
-                  ),
-                ],
-              ),
-
-              AppGap.h28,
-
-              // ─── Bouton ───
-              AppButton(
-                label: 'Ajouter la carte',
-                variant: ButtonVariant.primary,
-                onPressed: () {
-                  if (!_formKey.currentState!.validate()) return;
-                  final digits = _numberCtrl.text.replaceAll(' ', '');
-                  final last4 = digits.substring(digits.length - 4);
-                  Navigator.pop(context);
-                  widget.onCardAdded(last4, _expiryCtrl.text);
-                },
-              ),
-            ],
+          AppGap.w12,
+          Expanded(
+            child: Text(
+              label,
+              style: ctx.text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    required IconData icon,
-    TextInputType? keyboardType,
-    int? maxLength,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    void Function(String)? onChanged,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      textCapitalization: textCapitalization,
-      onChanged: onChanged,
-      validator: validator,
-      decoration: AppInputDecorations.formField(
-        context,
-        hintText: hint,
-        fillColor: context.colors.background,
-        prefixIcon: Icon(icon, size: 18),
-      ).copyWith(
-        labelText: label,
-        counterText: '',
+          Text(
+            amount,
+            style: ctx.text.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
+          ),
+        ],
       ),
     );
   }

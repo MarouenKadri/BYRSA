@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../../core/design/app_design_system.dart';
+import 'user_common_widgets.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Composants partagés — Paiements (Client & Freelancer)
@@ -170,6 +171,7 @@ class PaymentDeleteConfirmSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppFormSheet(
       title: title,
+      color: context.colors.surface,
       footer: Column(
         children: [
           AppButton(
@@ -546,6 +548,520 @@ class _PipelineConnector extends StatelessWidget {
         decoration: BoxDecoration(
           color: done ? accent.withValues(alpha: 0.7) : context.colors.border,
           borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Sheet ajout carte — réutilisable (brand detection + auto-advance) ────────
+
+enum _AddCardBrand { unknown, visa, mastercard, amex }
+
+class AddCardSheet extends StatefulWidget {
+  final void Function(String brand, String last4, String expiry) onCardAdded;
+  const AddCardSheet({super.key, required this.onCardAdded});
+
+  @override
+  State<AddCardSheet> createState() => _AddCardSheetState();
+}
+
+class _AddCardSheetState extends State<AddCardSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _numberCtrl = TextEditingController();
+  final _expiryCtrl = TextEditingController();
+  final _cvvCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
+
+  final _expiryFocus = FocusNode();
+  final _cvvFocus = FocusNode();
+  final _nameFocus = FocusNode();
+
+  _AddCardBrand _brand = _AddCardBrand.unknown;
+
+  @override
+  void dispose() {
+    _numberCtrl.dispose();
+    _expiryCtrl.dispose();
+    _cvvCtrl.dispose();
+    _nameCtrl.dispose();
+    _expiryFocus.dispose();
+    _cvvFocus.dispose();
+    _nameFocus.dispose();
+    super.dispose();
+  }
+
+  int get _maxDigits => _brand == _AddCardBrand.amex ? 15 : 16;
+  int get _cvvLen => _brand == _AddCardBrand.amex ? 4 : 3;
+
+  _AddCardBrand _detect(String digits) {
+    if (digits.isEmpty) return _AddCardBrand.unknown;
+    if (digits.startsWith('4')) return _AddCardBrand.visa;
+    if (digits.length >= 2) {
+      final p2 = int.tryParse(digits.substring(0, 2)) ?? 0;
+      if (p2 == 34 || p2 == 37) return _AddCardBrand.amex;
+      if (p2 >= 51 && p2 <= 55) return _AddCardBrand.mastercard;
+    }
+    if (digits.length >= 4) {
+      final p4 = int.tryParse(digits.substring(0, 4)) ?? 0;
+      if (p4 >= 2221 && p4 <= 2720) return _AddCardBrand.mastercard;
+    }
+    return _AddCardBrand.unknown;
+  }
+
+  void _onNumberChanged(String v) {
+    final raw = v.replaceAll(' ', '');
+    final newBrand = _detect(raw);
+    final maxD = newBrand == _AddCardBrand.amex ? 15 : 16;
+
+    final clamped = raw.length > maxD ? raw.substring(0, maxD) : raw;
+    final formatted = clamped
+        .replaceAllMapped(RegExp(r'.{1,4}'), (m) => '${m.group(0)} ')
+        .trim();
+    if (formatted != v) {
+      _numberCtrl.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+    setState(() => _brand = newBrand);
+    if (clamped.length >= maxD) _expiryFocus.requestFocus();
+  }
+
+  void _onExpiryChanged(String v) {
+    if (v.length == 2 && !v.contains('/')) {
+      _expiryCtrl.value = TextEditingValue(
+        text: '$v/',
+        selection: const TextSelection.collapsed(offset: 3),
+      );
+    }
+    setState(() {});
+    if (_expiryCtrl.text.length >= 5) _cvvFocus.requestFocus();
+  }
+
+  void _onCvvChanged(String v) {
+    if (v.length >= _cvvLen) _nameFocus.requestFocus();
+  }
+
+  String get _brandLabel => switch (_brand) {
+    _AddCardBrand.visa => 'Visa',
+    _AddCardBrand.mastercard => 'Mastercard',
+    _AddCardBrand.amex => 'Amex',
+    _AddCardBrand.unknown => 'Carte',
+  };
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    final digits = _numberCtrl.text.replaceAll(' ', '');
+    final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : digits;
+    Navigator.pop(context);
+    widget.onCardAdded(_brandLabel, last4, _expiryCtrl.text);
+  }
+
+  Widget _brandBadge() {
+    if (_brand == _AddCardBrand.unknown) return const SizedBox(width: 16);
+    final (label, color) = switch (_brand) {
+      _AddCardBrand.visa => ('VISA', AppColors.blueAction),
+      _AddCardBrand.mastercard => ('MC', AppColors.mastercardOrange),
+      _AddCardBrand.amex => ('AMEX', AppColors.ink),
+      _AddCardBrand.unknown => ('', Colors.transparent),
+    };
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 180),
+      transitionBuilder: (child, anim) =>
+          ScaleTransition(scale: anim, child: child),
+      child: Container(
+        key: ValueKey(_brand),
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final digits = _numberCtrl.text.replaceAll(' ', '');
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Form(
+        key: _formKey,
+        child: AppSheetSurface(
+          color: context.colors.surface,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ─── Header fixe ───
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const AppBottomSheetHandle(),
+                      AppGap.h20,
+                      Text(
+                        'Ajouter une carte',
+                        textAlign: TextAlign.center,
+                        style: context.sheetFormTitleStyle,
+                      ),
+                      AppGap.h16,
+                      Divider(color: context.colors.divider, height: 1),
+                    ],
+                  ),
+                ),
+                // ─── Zone scrollable bornée ───
+                Flexible(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _LiveCardPreview(
+                          digits: digits,
+                          expiry: _expiryCtrl.text,
+                          name: _nameCtrl.text,
+                          brand: _brand,
+                        ),
+                        AppGap.h16,
+                        TextFormField(
+                          controller: _numberCtrl,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: context.colors.textPrimary,
+                            letterSpacing: 1.5,
+                          ),
+                          onChanged: _onNumberChanged,
+                          decoration: AppInputDecorations.profileField(
+                            context,
+                            hintText: 'Numéro de carte',
+                            radius: 18,
+                            prefixIcon: Icon(
+                              Icons.credit_card_rounded,
+                              size: 16,
+                              color: context.colors.textHint,
+                            ),
+                          ).copyWith(suffixIcon: _brandBadge()),
+                          validator: (v) =>
+                              (v == null || v.replaceAll(' ', '').length < _maxDigits)
+                                  ? 'Numéro invalide'
+                                  : null,
+                        ),
+                        AppGap.h10,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _expiryCtrl,
+                                focusNode: _expiryFocus,
+                                keyboardType: TextInputType.number,
+                                maxLength: 5,
+                                style: TextStyle(
+                                  fontSize: AppFontSize.body,
+                                  color: context.colors.textPrimary,
+                                ),
+                                onChanged: _onExpiryChanged,
+                                decoration: AppInputDecorations.profileField(
+                                  context,
+                                  hintText: 'MM/AA',
+                                  radius: 18,
+                                ).copyWith(counterText: ''),
+                                validator: (v) =>
+                                    (v == null || v.length < 5) ? 'Invalide' : null,
+                              ),
+                            ),
+                            AppGap.w10,
+                            Expanded(
+                              child: TextFormField(
+                                controller: _cvvCtrl,
+                                focusNode: _cvvFocus,
+                                keyboardType: TextInputType.number,
+                                maxLength: _cvvLen,
+                                obscureText: true,
+                                style: TextStyle(
+                                  fontSize: AppFontSize.body,
+                                  color: context.colors.textPrimary,
+                                ),
+                                onChanged: _onCvvChanged,
+                                decoration: AppInputDecorations.profileField(
+                                  context,
+                                  hintText: 'CVV',
+                                  radius: 18,
+                                ).copyWith(counterText: ''),
+                                validator: (v) =>
+                                    (v == null || v.length < _cvvLen) ? 'Invalide' : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                        AppGap.h10,
+                        TextFormField(
+                          controller: _nameCtrl,
+                          focusNode: _nameFocus,
+                          textCapitalization: TextCapitalization.characters,
+                          onChanged: (_) => setState(() {}),
+                          style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: context.colors.textPrimary,
+                          ),
+                          decoration: AppInputDecorations.profileField(
+                            context,
+                            hintText: 'Titulaire de la carte',
+                            radius: 18,
+                            prefixIcon: Icon(
+                              Icons.person_outline_rounded,
+                              size: 16,
+                              color: context.colors.textHint,
+                            ),
+                          ),
+                          validator: (v) =>
+                              (v == null || v.trim().isEmpty) ? 'Nom requis' : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // ─── Footer fixe ───
+                Divider(color: context.colors.divider, height: 1),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ProfileSheetPrimaryAction(
+                        label: 'Ajouter la carte',
+                        onPressed: _submit,
+                      ),
+                      AppGap.h12,
+                      Center(
+                        child: ProfileSheetSecondaryAction(
+                          label: 'Annuler',
+                          onTap: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Aperçu carte live ────────────────────────────────────────────────────────
+
+class _LiveCardPreview extends StatelessWidget {
+  final String digits;
+  final String expiry;
+  final String name;
+  final _AddCardBrand brand;
+
+  const _LiveCardPreview({
+    required this.digits,
+    required this.expiry,
+    required this.name,
+    required this.brand,
+  });
+
+  String get _displayNumber {
+    final isAmex = brand == _AddCardBrand.amex;
+    final maxLen = isAmex ? 15 : 16;
+    final raw = digits.length > maxLen
+        ? digits.substring(0, maxLen)
+        : digits.padRight(maxLen, '•');
+    if (isAmex) {
+      return '${raw.substring(0, 4)}  ${raw.substring(4, 10)}  ${raw.substring(10, 15)}';
+    }
+    return '${raw.substring(0, 4)}  ${raw.substring(4, 8)}  ${raw.substring(8, 12)}  ${raw.substring(12, 16)}';
+  }
+
+  List<Color> get _gradientColors => switch (brand) {
+    _AddCardBrand.visa       => [const Color(0xFF1E3A5F), AppColors.blueAction],
+    _AddCardBrand.mastercard => [const Color(0xFF7A1A00), AppColors.mastercardOrange],
+    _AddCardBrand.amex       => [AppColors.deepNavy, AppColors.blueNavy],
+    _AddCardBrand.unknown    => [AppColors.primaryDark, AppColors.primary],
+  };
+
+  String get _networkLabel => switch (brand) {
+    _AddCardBrand.visa       => 'VISA',
+    _AddCardBrand.mastercard => 'MC',
+    _AddCardBrand.amex       => 'AMEX',
+    _AddCardBrand.unknown    => '',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName = name.trim().isEmpty ? 'TITULAIRE' : name.toUpperCase();
+    final displayExpiry = expiry.isEmpty ? '••/••' : expiry;
+    final colors = _gradientColors;
+
+    return SizedBox(
+      height: 176,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 380),
+        transitionBuilder: (child, anim) => FadeTransition(
+          opacity: anim,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.97, end: 1.0).animate(
+              CurvedAnimation(parent: anim, curve: Curves.easeOut),
+            ),
+            child: child,
+          ),
+        ),
+        child: Container(
+          key: ValueKey(brand),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: colors,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: colors.last.withValues(alpha: 0.38),
+                blurRadius: 22,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ─── Chip doré + sans-contact + marque ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFD4AF37), Color(0xFFB8860B)],
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Transform.rotate(
+                        angle: 1.5708,
+                        child: const Icon(
+                          Icons.wifi_rounded,
+                          size: 18,
+                          color: Colors.white54,
+                        ),
+                      ),
+                      if (brand != _AddCardBrand.unknown) ...[
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            _networkLabel,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // ─── Numéro ───
+              Text(
+                _displayNumber,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2.5,
+                ),
+              ),
+              const SizedBox(height: 14),
+              // ─── Expiry + nom ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'EXPIRE',
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 8,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      Text(
+                        displayExpiry,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    displayName,
+                    style: TextStyle(
+                      color: name.trim().isEmpty
+                          ? Colors.white38
+                          : Colors.white.withValues(alpha: 0.85),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

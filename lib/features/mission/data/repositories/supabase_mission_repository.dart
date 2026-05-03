@@ -15,8 +15,8 @@ class SupabaseMissionRepository implements MissionRepository {
   // Only fetch profile columns actually used by _clientFromJson / _prestaFromJson
   static const _select =
       '*, '
-      'client:profiles!client_id(id, first_name, last_name, avatar_url, rating, completed_missions, is_verified), '
-      'presta:profiles!assigned_presta_id(id, first_name, last_name, avatar_url, rating, reviews_count, completed_missions, is_verified)';
+      'client:profiles!client_id(id, first_name, last_name, avatar_url, rating, completed_missions, is_verified, phone), '
+      'presta:profiles!assigned_presta_id(id, first_name, last_name, avatar_url, rating, reviews_count, completed_missions, is_verified, phone)';
 
   // ─── Fetch ───────────────────────────────────────────────────────────────
 
@@ -51,9 +51,7 @@ class SupabaseMissionRepository implements MissionRepository {
         query = query.neq('client_id', _userId!);
       }
 
-      final data = await query
-          .order('created_at', ascending: false)
-          .limit(100);
+      final data = await query.order('created_at', ascending: false).limit(100);
       debugPrint('fetchPublicMissions: ${(data as List).length} missions');
       return data.map<Mission>((e) => _fromJson(e)).toList();
     } catch (e, st) {
@@ -113,8 +111,9 @@ class SupabaseMissionRepository implements MissionRepository {
   @override
   Future<void> saveMission(Mission mission) async {
     final clientId = _userId;
-    if (clientId == null)
+    if (clientId == null) {
       throw StateError('saveMission: user not authenticated');
+    }
     final json = _toJson(mission, clientId);
     debugPrint('saveMission payload: $json');
     try {
@@ -129,8 +128,9 @@ class SupabaseMissionRepository implements MissionRepository {
   @override
   Future<void> updateMission(Mission mission) async {
     final clientId = _userId;
-    if (clientId == null)
+    if (clientId == null) {
       throw StateError('updateMission: user not authenticated');
+    }
     final json = _toJson(mission, clientId);
     debugPrint('updateMission payload: $json');
     try {
@@ -192,9 +192,7 @@ class SupabaseMissionRepository implements MissionRepository {
           .map((row) => Map<String, dynamic>.from(row))
           .toList();
 
-      debugPrint(
-        'fetchCandidates: ${data.length} rows for mission $missionId',
-      );
+      debugPrint('fetchCandidates: ${data.length} rows for mission $missionId');
 
       if (data.isEmpty) return [];
 
@@ -310,6 +308,7 @@ class SupabaseMissionRepository implements MissionRepository {
     rating: (j['rating'] as num?)?.toDouble() ?? 0,
     missionsCount: j['completed_missions'] as int? ?? 0,
     isVerified: j['is_verified'] as bool? ?? false,
+    phone: j['phone'] as String?,
   );
 
   static PrestaInfo _prestaFromJson(Map<String, dynamic> j) => PrestaInfo(
@@ -320,6 +319,7 @@ class SupabaseMissionRepository implements MissionRepository {
     reviewsCount: j['reviews_count'] as int? ?? 0,
     completedMissions: j['completed_missions'] as int? ?? 0,
     isVerified: j['is_verified'] as bool? ?? false,
+    phone: j['phone'] as String?,
   );
 
   static Map<String, dynamic> _toJson(Mission m, String clientId) {
@@ -355,13 +355,13 @@ class SupabaseMissionRepository implements MissionRepository {
     MissionStatus.onTheWay => 'on_the_way',
     MissionStatus.inProgress => 'in_progress',
     MissionStatus.completionRequested => 'completion_requested',
-    MissionStatus.completed           => 'completed',
-    MissionStatus.paymentHeld         => 'payment_held',
-    MissionStatus.awaitingRelease     => 'awaiting_release',
-    MissionStatus.inDispute           => 'in_dispute',
-    MissionStatus.closed              => 'closed',
-    MissionStatus.cancelled           => 'cancelled',
-    MissionStatus.expired             => 'expired',
+    MissionStatus.completed => 'completed',
+    MissionStatus.paymentHeld => 'payment_held',
+    MissionStatus.awaitingRelease => 'awaiting_release',
+    MissionStatus.inDispute => 'in_dispute',
+    MissionStatus.closed => 'closed',
+    MissionStatus.cancelled => 'cancelled',
+    MissionStatus.expired => 'expired',
   };
 
   static MissionStatus _statusFromDb(String? s) => switch (s) {
@@ -373,15 +373,15 @@ class SupabaseMissionRepository implements MissionRepository {
     'on_the_way' => MissionStatus.onTheWay,
     'in_progress' => MissionStatus.inProgress,
     'completion_requested' => MissionStatus.completionRequested,
-    'completed'            => MissionStatus.completed,
-    'payment_held'         => MissionStatus.paymentHeld,
-    'awaiting_release'     => MissionStatus.awaitingRelease,
-    'waiting_payment'      => MissionStatus.awaitingRelease, // rétro-compatibilité
-    'in_dispute'           => MissionStatus.inDispute,
-    'dispute'              => MissionStatus.inDispute, // rétro-compatibilité
-    'closed'               => MissionStatus.closed,
-    'cancelled'            => MissionStatus.cancelled,
-    'expired'              => MissionStatus.expired,
-    _                      => MissionStatus.waitingCandidates,
+    'completed' => MissionStatus.completed,
+    'payment_held' => MissionStatus.paymentHeld,
+    'awaiting_release' => MissionStatus.awaitingRelease,
+    'waiting_payment' => MissionStatus.awaitingRelease, // rétro-compatibilité
+    'in_dispute' => MissionStatus.inDispute,
+    'dispute' => MissionStatus.inDispute, // rétro-compatibilité
+    'closed' => MissionStatus.closed,
+    'cancelled' => MissionStatus.cancelled,
+    'expired' => MissionStatus.expired,
+    _ => MissionStatus.waitingCandidates,
   };
 }
