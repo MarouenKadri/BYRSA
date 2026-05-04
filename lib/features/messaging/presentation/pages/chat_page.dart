@@ -20,6 +20,7 @@ const _kBorder      = AppColors.divider;
 
 class ChatPage extends StatefulWidget {
   final String? conversationId;
+  final String? contactUserId;
   final String contactName;
   final String contactAvatar;
   final bool isOnline;
@@ -45,6 +46,7 @@ class ChatPage extends StatefulWidget {
   const ChatPage({
     super.key,
     this.conversationId,
+    this.contactUserId,
     required this.contactName,
     required this.contactAvatar,
     this.isOnline = false,
@@ -437,6 +439,18 @@ class _ChatPageState extends State<ChatPage> {
           }
           final messages = provider.currentMessages;
           final currentUserId = provider.currentUserId ?? '';
+          // Toujours comparer au currentUserId (source de vérité),
+          // sauf si vide (race condition de démarrage) où on
+          // se rabat sur "l'expéditeur n'est pas le contact".
+          bool isMyMessage(ChatMessage msg) {
+            if (currentUserId.isNotEmpty) {
+              return msg.senderId == currentUserId;
+            }
+            if (widget.contactUserId != null) {
+              return msg.senderId != widget.contactUserId;
+            }
+            return false;
+          }
           WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
           return GestureDetector(
             onTap: () => _focusNode.unfocus(),
@@ -446,8 +460,9 @@ class _ChatPageState extends State<ChatPage> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final msg = messages[index];
-                final isMe = msg.isMe(currentUserId);
-                final showAvatar = !isMe && (index == 0 || messages[index - 1].isMe(currentUserId));
+                final isMe = isMyMessage(msg);
+                final showAvatar =
+                    !isMe && (index == 0 || isMyMessage(messages[index - 1]));
                 return _MessageBubbleFromModel(
                   message: msg,
                   isMe: isMe,
@@ -633,10 +648,13 @@ class _ChatPageState extends State<ChatPage> {
                             Padding(
                               padding: const EdgeInsets.only(
                                   right: 14, bottom: 11),
-                              child: Icon(
-                                Icons.sentiment_satisfied_alt_outlined,
-                                color: _kGrayLight,
-                                size: 19,
+                              child: GestureDetector(
+                                onTap: _showEmojiPicker,
+                                child: const Icon(
+                                  Icons.sentiment_satisfied_alt_outlined,
+                                  color: _kGrayLight,
+                                  size: 19,
+                                ),
                               ),
                             ),
                           ],
@@ -724,6 +742,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _sendLocation() async {
+    if (widget.conversationId == null) return;
+
     LocationPermission perm = await Geolocator.checkPermission();
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
@@ -734,9 +754,7 @@ class _ChatPageState extends State<ChatPage> {
     }
     setState(() => _isSendingLocation = true);
     try {
-      // Essaie d'abord la dernière position connue — instantané
       Position? pos = await Geolocator.getLastKnownPosition();
-      // Si pas disponible ou trop ancienne (>2 min), acquisition fraîche
       if (pos == null ||
           DateTime.now().difference(pos.timestamp).inMinutes > 2) {
         pos = await Geolocator.getCurrentPosition(
@@ -747,13 +765,75 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
       if (!mounted) return;
-      await context.read<MessagingProvider>().sendMessage('📍 ${pos.latitude},${pos.longitude}');
-      _scrollToBottom();
+      final error = await context
+          .read<MessagingProvider>()
+          .sendMessage('📍 ${pos.latitude},${pos.longitude}');
+      if (!mounted) return;
+      if (error != null) {
+        showAppSnackBar(context, error, type: SnackBarType.error);
+      } else {
+        _scrollToBottom();
+      }
     } catch (_) {
       if (mounted) showAppSnackBar(context, 'Impossible d\'obtenir la position');
     } finally {
       if (mounted) setState(() => _isSendingLocation = false);
     }
+  }
+
+  void _showEmojiPicker() {
+    if (widget.conversationId == null) return;
+    const emojis = ['😊', '👍', '❤️', '😂', '🙏', '🔥', '👌', '😍', '🎉', '😎'];
+    showAppBottomSheet(
+      context: context,
+      wrapWithSurface: true,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Réactions rapides',
+                style: context.text.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600)),
+            AppGap.h16,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: emojis
+                  .map((e) => GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final error = await context
+                              .read<MessagingProvider>()
+                              .sendMessage(e);
+                          if (!mounted) return;
+                          if (error != null) {
+                            showAppSnackBar(context, error,
+                                type: SnackBarType.error);
+                          } else {
+                            _scrollToBottom();
+                          }
+                        },
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: _kCharcoal.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Center(
+                            child: Text(e,
+                                style: const TextStyle(fontSize: 26)),
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -790,66 +870,82 @@ class _MessageBubbleFromModel extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 3,
-        bottom: 3,
-        left: isMe ? 64 : 0,
-        right: isMe ? 0 : 64,
+    final bubble = ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.68,
       ),
+      child: _isLocationMessage(message.content)
+          ? _LocationBubble(
+              message: message,
+              isMe: isMe,
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: isMe ? _kInk : _kWhite,
+                border: isMe ? null : Border.all(color: _kBorder, width: 0.8),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  bottomLeft: Radius.circular(isMe ? 18 : 4),
+                  bottomRight: Radius.circular(isMe ? 4 : 18),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment:
+                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.content,
+                    style: (isMe
+                            ? context.chatBubbleTextOnDarkStyle
+                            : context.chatBubbleTextStyle)
+                        .copyWith(color: isMe ? _kWhite : _kInk),
+                  ),
+                  AppGap.h4,
+                  _TimeStatus(message: message, isMe: isMe),
+                ],
+              ),
+            ),
+    );
+
+    if (isMe) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            const Spacer(),
+            bubble,
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isMe)
-            showAvatar
-                ? CircleAvatar(
-                    radius: 15,
-                    backgroundImage: NetworkImage(contactAvatar),
-                    backgroundColor: _kBorder,
-                  )
-                : const SizedBox(width: 30),
-          if (!isMe) AppGap.w6,
-          Flexible(
-            child: _isLocationMessage(message.content)
-                ? _LocationBubble(
-                    message: message,
-                    isMe: isMe,
-                  )
-                : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isMe ? _kInk : _kWhite,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(18),
-                        topRight: const Radius.circular(18),
-                        bottomLeft: Radius.circular(isMe ? 18 : 4),
-                        bottomRight: Radius.circular(isMe ? 4 : 18),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          message.content,
-                          style: (isMe
-                                  ? context.chatBubbleTextOnDarkStyle
-                                  : context.chatBubbleTextStyle)
-                              .copyWith(color: isMe ? _kWhite : _kInk),
-                        ),
-                        AppGap.h3,
-                        _TimeStatus(message: message, isMe: isMe),
-                      ],
-                    ),
-                  ),
-          ),
+          showAvatar
+              ? CircleAvatar(
+                  radius: 15,
+                  backgroundImage: NetworkImage(contactAvatar),
+                  backgroundColor: _kBorder,
+                )
+              : const SizedBox(width: 30),
+          AppGap.w8,
+          bubble,
+          const Spacer(),
         ],
       ),
     );
@@ -893,23 +989,55 @@ class _TimeStatus extends StatelessWidget {
         Text(
           '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
           style: context.chatTimestampStyle.copyWith(
-            color: isMe ? _kWhite.withValues(alpha: 0.55) : _kGrayLight,
+            color: isMe ? _kWhite.withValues(alpha: 0.75) : _kGrayLight,
           ),
         ),
         if (isMe) ...[
           AppGap.w4,
+          Text(
+            _statusLabel(message.status),
+            style: context.chatTimestampStyle.copyWith(
+              fontWeight: FontWeight.w700,
+              color: _statusColor(message.status),
+            ),
+          ),
+          AppGap.w3,
           Icon(
-            message.status == MessageStatus.read
-                ? Icons.done_all_rounded
-                : Icons.done_rounded,
-            size: 13,
-            color: message.status == MessageStatus.read
-                ? _kWhite
-                : _kWhite.withValues(alpha: 0.45),
+            _statusIcon(message.status),
+            size: 14,
+            color: _statusColor(message.status),
           ),
         ],
       ],
     );
+  }
+
+  String _statusLabel(MessageStatus status) {
+    return switch (status) {
+      MessageStatus.sending => 'Envoi',
+      MessageStatus.sent => 'Envoye',
+      MessageStatus.delivered => 'Non lu',
+      MessageStatus.read => 'Lu',
+      MessageStatus.failed => 'Erreur',
+    };
+  }
+
+  IconData _statusIcon(MessageStatus status) {
+    return switch (status) {
+      MessageStatus.sending => Icons.schedule_rounded,
+      MessageStatus.sent => Icons.done_rounded,
+      MessageStatus.delivered => Icons.done_all_rounded,
+      MessageStatus.read => Icons.done_all_rounded,
+      MessageStatus.failed => Icons.error_outline_rounded,
+    };
+  }
+
+  Color _statusColor(MessageStatus status) {
+    return switch (status) {
+      MessageStatus.read => const Color(0xFFB8FFCF),
+      MessageStatus.failed => AppColors.error,
+      _ => _kWhite.withValues(alpha: 0.82),
+    };
   }
 }
 
@@ -1034,4 +1162,3 @@ class _LocationBubble extends StatelessWidget {
 }
 
 // ─── Bottom sheet row ─────────────────────────────────────────────────────────
-

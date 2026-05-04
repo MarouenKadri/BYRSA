@@ -23,6 +23,7 @@ class AppNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final role = context.watch<AuthProvider>().currentRole;
     final isClient = role == UserRole.client;
+    const accountIndex = 3;
 
     return Consumer<MessagingProvider>(
       builder: (_, messaging, __) => AppNavShell(
@@ -53,11 +54,11 @@ class AppNav extends StatelessWidget {
           ],
           pagesBuilder: (goToIndex) => [
             DiscoverShell(
-              onGoToAccount: () => goToIndex(3),
+              onGoToAccount: () => goToIndex(accountIndex),
               onGoToMissions: () => goToIndex(1),
             ),
-            MissionsShell(onGoToAccount: () => goToIndex(3)),
-            MessagesPage(onGoToAccount: () => goToIndex(3)),
+            MissionsShell(onGoToAccount: () => goToIndex(accountIndex)),
+            MessagesPage(onGoToAccount: () => goToIndex(accountIndex)),
             const AccountPage(),
           ],
           fabBuilder: isClient

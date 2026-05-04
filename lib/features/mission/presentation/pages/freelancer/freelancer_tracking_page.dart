@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -26,9 +25,6 @@ class FreelancerTrackingPage extends StatefulWidget {
 
 class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   late Mission _mission;
-
-  final MapController _mapController = MapController();
-  bool _following = true;
 
   // GPS
   StreamSubscription<Position>? _positionSub;
@@ -63,7 +59,6 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   void dispose() {
     _positionSub?.cancel();
     _broadcastChannel?.unsubscribe();
-    _mapController.dispose();
     super.dispose();
   }
 
@@ -104,7 +99,6 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
 
   void _onNewPosition(LatLng latlng, {bool moveMap = false}) {
     setState(() => _currentPosition = latlng);
-    if (_following || moveMap) _moveCamera(latlng, 15);
     _updateDistanceEta(latlng);
     _broadcastPosition(latlng);
   }
@@ -158,16 +152,6 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
   }
 
   // ── Recentrage ───────────────────────────────────────────────
-
-  void _recenter() {
-    if (_currentPosition == null) return;
-    setState(() => _following = true);
-    _moveCamera(_currentPosition!, 15);
-  }
-
-  void _moveCamera(LatLng target, double zoom) {
-    _mapController.move(target, zoom);
-  }
 
   // ── Statut mission ───────────────────────────────────────────
 
@@ -249,113 +233,25 @@ class _FreelancerTrackingPageState extends State<FreelancerTrackingPage> {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final center = _currentPosition ??
-        _destinationLatLng ??
-        const LatLng(46.6034, 1.8883);
-
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
           // ── Carte ─────────────────────────────────────────────
-          Positioned.fill(child: FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: center,
-              initialZoom: _currentPosition != null ? 15 : 12,
-              onMapEvent: (event) {
-                if (event is MapEventMoveStart &&
-                    event.source != MapEventSource.mapController &&
-                    _following) {
-                  setState(() => _following = false);
-                }
-              },
+          Positioned.fill(
+            child: AppMap.tracking(
+              freelancerPosition: _currentPosition,
+              destination: _destinationLatLng,
+              freelancerMarker: const Icon(
+                Icons.navigation_rounded,
+                color: AppColors.secondary,
+                size: 32,
+              ),
+              showWaiting: !_locationError,
+              waitingText: 'Localisation en cours…',
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.flutter_application_1',
-              ),
-              if (_currentPosition != null && _destinationLatLng != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [_currentPosition!, _destinationLatLng!],
-                      color: AppColors.secondary.withValues(alpha: 0.70),
-                      strokeWidth: 4,
-                    ),
-                  ],
-                ),
-              MarkerLayer(
-                markers: [
-                  if (_destinationLatLng != null)
-                    Marker(
-                      point: _destinationLatLng!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.location_on, color: AppColors.success, size: 36),
-                    ),
-                  if (_currentPosition != null)
-                    Marker(
-                      point: _currentPosition!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.navigation_rounded, color: AppColors.secondary, size: 32),
-                    ),
-                ],
-              ),
-            ],
-          )),
+          ),
 
-          // ── Recentrer ──────────────────────────────────────────
-          if (!_following && _currentPosition != null)
-            Positioned(
-              bottom: screenHeight * 0.42,
-              right: 16,
-              child: GestureDetector(
-                onTap: _recenter,
-                child: AppIconCircle(
-                  icon: Icons.my_location_rounded,
-                  size: 44,
-                  iconSize: 20,
-                  backgroundColor: Colors.white,
-                  iconColor: AppColors.secondary,
-                  boxShadow: AppShadows.card,
-                ),
-              ),
-            ),
-
-          // ── Indicateur GPS ─────────────────────────────────────
-          if (_currentPosition == null && !_locationError)
-            Positioned(
-              top: topPadding + 64,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: AppSurfaceCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(99),
-                  boxShadow: AppShadows.card,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                      AppGap.w8,
-                      Text('Localisation en cours…', style: context.text.labelMedium),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
+          // ── Erreur GPS ─────────────────────────────────────────
           if (_locationError)
             Positioned(
               top: topPadding + 64,

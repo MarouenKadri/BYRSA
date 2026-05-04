@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/design/app_design_system.dart';
+import '../../../../messaging/messaging_provider.dart';
+import '../../../../messaging/presentation/pages/chat_page.dart';
 import '../../../data/models/mission.dart';
 import '../../mission_provider.dart';
 import '../../widgets/detail/mission_detail_primitives.dart';
@@ -10,7 +12,6 @@ import '../../widgets/detail/mission_detail_template.dart';
 import '../../widgets/shared/mission_finance_ui.dart';
 import '../../widgets/shared/mission_status_ui.dart';
 import '../../widgets/shared/mission_shared_widgets.dart';
-import '../../../../messaging/presentation/pages/chat_page.dart';
 import '../../widgets/detail/freelancer_detail_sections.dart';
 import 'freelancer_tracking_page.dart';
 
@@ -239,8 +240,7 @@ class _FreelancerMissionDetailPageState
   Widget buildRoleSection(BuildContext ctx) {
     if (mission.client == null) return const SizedBox.shrink();
 
-    final contactable =
-        widget.isOwn && _isAccepted && !_isArchived;
+    final contactable = widget.isOwn && _isAccepted && !_isArchived;
     final children = <Widget>[
       FreelancerClientCard(
         client: mission.client!,
@@ -404,16 +404,37 @@ class _FreelancerMissionDetailPageState
     );
   }
 
-  void _openChat() {
-    if (mission.client == null) return;
+  Future<void> _openChat() async {
+    final client = mission.client;
+    if (client == null) return;
+
+    final conversationId = await context.read<MessagingProvider>().findConversation(
+          otherUserId: client.id,
+          iAmClient: false,
+          missionId: mission.id,
+        );
+    if (!mounted) return;
+
+    if (conversationId == null) {
+      showAppSnackBar(
+        context,
+        'Aucune conversation n\'est encore disponible pour cette mission.',
+        type: SnackBarType.info,
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ChatPage(
-          contactName: mission.client!.name,
-          contactAvatar: mission.client!.avatarUrl,
-          isVerified: mission.client!.isVerified,
+          conversationId: conversationId,
+          contactUserId: client.id,
+          contactName: client.name,
+          contactAvatar: client.avatarUrl,
+          isVerified: client.isVerified,
           missionTitle: mission.title,
+          confirmedMissionTitle: mission.title,
         ),
       ),
     );

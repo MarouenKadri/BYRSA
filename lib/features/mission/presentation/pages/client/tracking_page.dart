@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,9 +23,6 @@ class TrackingPage extends StatefulWidget {
 }
 
 class _TrackingPageState extends State<TrackingPage> {
-  final MapController _mapController = MapController();
-  bool _following = true;
-
   LatLng? _freelancerPosition;
   LatLng? _destinationLatLng;
 
@@ -46,7 +42,6 @@ class _TrackingPageState extends State<TrackingPage> {
   @override
   void dispose() {
     _channel?.unsubscribe();
-    _mapController.dispose();
     super.dispose();
   }
 
@@ -98,7 +93,6 @@ class _TrackingPageState extends State<TrackingPage> {
   void _applyPosition(LatLng pos) {
     if (!mounted) return;
     setState(() => _freelancerPosition = pos);
-    if (_following) _moveCamera(pos, 15);
     if (_destinationLatLng != null) _updateEta(pos);
   }
 
@@ -138,132 +132,23 @@ class _TrackingPageState extends State<TrackingPage> {
     return '~$eta · $dist';
   }
 
-  void _recenter() {
-    if (_freelancerPosition == null) return;
-    setState(() => _following = true);
-    _moveCamera(_freelancerPosition!, 15);
-  }
-
-  void _moveCamera(LatLng target, double zoom) {
-    _mapController.move(target, zoom);
-  }
-
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenHeight = MediaQuery.of(context).size.height;
     final isOnTheWay = widget.mission.status == MissionStatus.onTheWay;
 
-    final center = _freelancerPosition ??
-        _destinationLatLng ??
-        const LatLng(46.6034, 1.8883);
-    final initialZoom = _freelancerPosition != null ? 15.0 : 14.0;
-
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
           // ── Carte ─────────────────────────────────────────────
-          Positioned.fill(child: FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: center,
-              initialZoom: initialZoom,
-              onMapEvent: (event) {
-                if (event is MapEventMoveStart &&
-                    event.source != MapEventSource.mapController &&
-                    _following) {
-                  setState(() => _following = false);
-                }
-              },
+          Positioned.fill(
+            child: AppMap.tracking(
+              freelancerPosition: _freelancerPosition,
+              destination: _destinationLatLng,
+              waitingText: 'En attente de la position du prestataire…',
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.flutter_application_1',
-              ),
-              if (_freelancerPosition != null && _destinationLatLng != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [_freelancerPosition!, _destinationLatLng!],
-                      color: AppColors.secondary.withValues(alpha: 0.70),
-                      strokeWidth: 4,
-                    ),
-                  ],
-                ),
-              MarkerLayer(
-                markers: [
-                  if (_destinationLatLng != null)
-                    Marker(
-                      point: _destinationLatLng!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.location_on, color: AppColors.success, size: 36),
-                    ),
-                  if (_freelancerPosition != null)
-                    Marker(
-                      point: _freelancerPosition!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.directions_run_rounded, color: AppColors.secondary, size: 32),
-                    ),
-                ],
-              ),
-            ],
-          )),
-
-          // ── Recentrer ─────────────────────────────────────────
-          if (!_following && _freelancerPosition != null)
-            Positioned(
-              bottom: screenHeight * 0.42,
-              right: 16,
-              child: GestureDetector(
-                onTap: _recenter,
-                child: AppIconCircle(
-                  icon: Icons.my_location_rounded,
-                  size: 44,
-                  iconSize: 20,
-                  backgroundColor: Colors.white,
-                  iconColor: AppColors.secondary,
-                  boxShadow: AppShadows.card,
-                ),
-              ),
-            ),
-
-          // ── En attente de signal GPS freelancer ───────────────
-          if (_freelancerPosition == null)
-            Positioned(
-              top: topPadding + 64,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: AppSurfaceCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(99),
-                  boxShadow: AppShadows.card,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                      AppGap.w8,
-                      Text(
-                        'En attente de la position du prestataire…',
-                        style: context.text.labelMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          ),
 
           // ── Bouton retour ─────────────────────────────────────
           Positioned(

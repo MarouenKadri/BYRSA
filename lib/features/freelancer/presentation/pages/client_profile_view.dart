@@ -217,6 +217,7 @@ class _ClientProfileViewState extends BaseProfileState<ClientProfileView> {
   @override
   Widget buildChatPage(String? conversationId) => ChatPage(
         conversationId: conversationId,
+        contactUserId: widget.clientId,
         contactName: profileName,
         contactAvatar: profileAvatar,
       );

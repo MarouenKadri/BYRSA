@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../../app/auth_provider.dart';
+import '../../../../../app/enum/user_role.dart';
 import '../../../../../app/widgets/app_segmented_tab_bar.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../../mission/presentation/widgets/detail/mission_detail_primitives.dart';
@@ -109,26 +112,31 @@ abstract class BaseProfileState<T extends StatefulWidget> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final canContact = auth.currentRole != UserRole.provider &&
+        (profileUserId == null || profileUserId != auth.userId);
     final proposal = buildProposalSection(context);
     final extra = buildExtraSection(context);
 
     return Scaffold(
       backgroundColor: context.colors.background,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            border: Border(top: BorderSide(color: context.colors.divider)),
-          ),
-          child: AppButton(
-            label: isOpeningChat ? 'Connexion...' : contactButtonLabel,
-            variant: ButtonVariant.black,
-            icon: Icons.chat_bubble_outline_rounded,
-            onPressed: isOpeningChat ? null : () => openChat(context),
-          ),
-        ),
-      ),
+      bottomNavigationBar: canContact
+          ? SafeArea(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                decoration: BoxDecoration(
+                  color: context.colors.background,
+                  border: Border(top: BorderSide(color: context.colors.divider)),
+                ),
+                child: AppButton(
+                  label: isOpeningChat ? 'Connexion...' : contactButtonLabel,
+                  variant: ButtonVariant.black,
+                  icon: Icons.chat_bubble_outline_rounded,
+                  onPressed: isOpeningChat ? null : () => openChat(context),
+                ),
+              ),
+            )
+          : null,
       body: Column(
         children: [
           _buildProfileHeader(context),

@@ -1,7 +1,7 @@
 import '../models/message.dart';
 
 abstract class MessagingRepository {
-  Future<List<Conversation>> getConversations(String userId);
+  Future<List<Conversation>> getConversations(String userId, {required bool isClientMode});
   Future<List<ChatMessage>> getMessages(String conversationId);
   Future<List<ChatMessage>> getMessagesBefore(
       String conversationId, String beforeMessageId,
@@ -9,6 +9,11 @@ abstract class MessagingRepository {
   Future<ChatMessage?> sendMessage(
       String conversationId, String senderId, String content);
   Future<String?> getOrCreateConversation({
+    required String clientId,
+    required String freelancerId,
+    String? missionId,
+  });
+  Future<String?> findConversation({
     required String clientId,
     required String freelancerId,
     String? missionId,

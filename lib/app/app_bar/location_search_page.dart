@@ -369,8 +369,7 @@ class _LocationSearchPageState extends State<LocationSearchPage>
                       filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         height: top + 76,
-                        color:
-                            context.colors.surface.withValues(alpha: 0.08),
+                        color: context.colors.surface.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -387,8 +386,7 @@ class _LocationSearchPageState extends State<LocationSearchPage>
                         context.colors.surface.withValues(alpha: 0.72),
                     iconColor: context.colors.textPrimary,
                     border: Border.all(
-                        color:
-                            context.colors.border.withValues(alpha: 0.65)),
+                        color: context.colors.border.withValues(alpha: 0.65)),
                     boxShadow: const [
                       BoxShadow(
                         color: Color.fromRGBO(0, 0, 0, 0.08),
@@ -406,7 +404,7 @@ class _LocationSearchPageState extends State<LocationSearchPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 const AppBottomSheetHandle(),
-                const SizedBox(height: 8),
+                AppGap.h8,
                 Text(
                   'Lieu',
                   style: context.appBarPanelTitleStyle.copyWith(
@@ -414,22 +412,22 @@ class _LocationSearchPageState extends State<LocationSearchPage>
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 14),
+                AppGap.h14,
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: AppInsets.h16,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: context.colors.surfaceAlt.withValues(alpha: 0.86),
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color.fromRGBO(255, 255, 255, 0.85),
-                          offset: Offset(-2, -2),
+                          color: Colors.white.withValues(alpha: 0.85),
+                          offset: const Offset(-2, -2),
                           blurRadius: 6,
                         ),
                         BoxShadow(
-                          color: Color.fromRGBO(15, 23, 42, 0.05),
-                          offset: Offset(2, 3),
+                          color: context.colors.textPrimary.withValues(alpha: 0.05),
+                          offset: const Offset(2, 3),
                           blurRadius: 10,
                         ),
                       ],
@@ -447,21 +445,18 @@ class _LocationSearchPageState extends State<LocationSearchPage>
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                if (!_isSearching) _buildRecentPlaces(),
+                AppGap.h12,
+                if (!_isSearching) _buildRecentPlaces(context),
                 ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: MediaQuery.of(context).size.height * 0.30,
                   ),
-                  child: _isSearching
-                      ? _buildResults()
-                      : _buildAddressList(),
+                  child: _isSearching ? _buildResults() : _buildAddressList(),
                 ),
                 Padding(
                   padding: EdgeInsets.only(
                     top: 12,
-                    bottom:
-                        16 + MediaQuery.of(context).padding.bottom,
+                    bottom: 16 + MediaQuery.of(context).padding.bottom,
                   ),
                   child: GestureDetector(
                     onTap: () => Navigator.pop(context),
@@ -568,7 +563,7 @@ class _LocationSearchPageState extends State<LocationSearchPage>
     );
   }
 
-  Widget _buildRecentPlaces() {
+  Widget _buildRecentPlaces(BuildContext context) {
     const places = ['Maison', 'Paris 11e', 'Bureau'];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -583,7 +578,7 @@ class _LocationSearchPageState extends State<LocationSearchPage>
               letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 10),
+          AppGap.h10,
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -599,10 +594,10 @@ class _LocationSearchPageState extends State<LocationSearchPage>
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.56),
+                            color: context.colors.surface.withValues(alpha: 0.56),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: context.colors.border.withValues(alpha: 0.5),
                             ),
                           ),
                           child: Text(

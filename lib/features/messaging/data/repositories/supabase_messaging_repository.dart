@@ -7,12 +7,14 @@ class SupabaseMessagingRepository implements MessagingRepository {
   final _supabase = Supabase.instance.client;
 
   @override
-  Future<List<Conversation>> getConversations(String userId) async {
+  Future<List<Conversation>> getConversations(String userId, {required bool isClientMode}) async {
     try {
-      final rows = await _supabase
+      final query = _supabase
           .from('conversations')
-          .select('id, client_id, freelancer_id, mission_id, mission_title, last_message, last_message_at')
-          .or('client_id.eq.$userId,freelancer_id.eq.$userId')
+          .select('id, client_id, freelancer_id, mission_id, mission_title, last_message, last_message_at');
+      final rows = await (isClientMode
+              ? query.eq('client_id', userId)
+              : query.eq('freelancer_id', userId))
           .order('last_message_at', ascending: false)
           .limit(50);
 
@@ -184,6 +186,31 @@ class SupabaseMessagingRepository implements MessagingRepository {
       return row['id'] as String;
     } catch (e) {
       debugPrint('getOrCreateConversation error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<String?> findConversation({
+    required String clientId,
+    required String freelancerId,
+    String? missionId,
+  }) async {
+    try {
+      var query = _supabase
+          .from('conversations')
+          .select('id')
+          .eq('client_id', clientId)
+          .eq('freelancer_id', freelancerId);
+
+      if (missionId != null) {
+        query = query.eq('mission_id', missionId);
+      }
+
+      final existing = await query.maybeSingle();
+      return existing?['id'] as String?;
+    } catch (e) {
+      debugPrint('findConversation error: $e');
       return null;
     }
   }

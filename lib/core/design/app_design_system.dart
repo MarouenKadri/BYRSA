@@ -13,3 +13,4 @@ export 'components/app_sheet.dart';
 export 'components/app_dialog.dart';
 export 'components/app_nav.dart';
 export 'components/app_layout.dart';
+export 'components/app_map.dart';

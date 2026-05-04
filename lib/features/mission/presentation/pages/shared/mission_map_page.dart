@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission_address.dart';
-import '../../../../../core/design/app_design_system.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// 📍 Page Carte — Lieu d'intervention (OpenStreetMap, aucune clé API)
@@ -77,34 +77,15 @@ class _MissionMapPageState extends State<MissionMapPage> {
         children: [
           const Positioned.fill(child: ColoredBox(color: Color(0xFFF0EDE8))),
           // ── Carte plein écran ──────────────────────────────────────────
-          Positioned.fill(child: FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _center,
-              initialZoom: 14.0,
-              onTap: (_, __) => _focusMap(),
-              interactionOptions: const InteractionOptions(
-                flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-              ),
+          Positioned.fill(
+            child: AppMap.preview(
+              latLng: _pinLatLng,
+              interactive: true,
+              tile: AppMapTile.cartoLight,
+              controller: _mapController,
+              onTap: _focusMap,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.flutter_application_1',
-              ),
-              if (_pinLatLng != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _pinLatLng!,
-                      width: 36,
-                      height: 36,
-                      child: const _MapPin(),
-                    ),
-                  ],
-                ),
-            ],
-          )),
+          ),
 
           // ── Loader géocodage ──────────────────────────────────────────
           if (_loading)
@@ -169,17 +150,6 @@ class _MissionMapPageState extends State<MissionMapPage> {
       ),
     );
   }
-}
-
-class _MapPin extends StatelessWidget {
-  const _MapPin();
-
-  @override
-  Widget build(BuildContext context) => const Icon(
-        Icons.location_on,
-        color: AppColors.mapPin,
-        size: 36,
-      );
 }
 
 // ── Carte adresse ──────────────────────────────────────────────────────────

@@ -419,6 +419,7 @@ class _FreelancerProfilePageState
     final isConfirmed = widget.contactMode == FreelancerContactMode.confirmedPresta;
     return ChatPage(
       conversationId: conversationId,
+      contactUserId: widget.freelancerId,
       contactName: profileName,
       contactAvatar: profileAvatar,
       isVerified: true,

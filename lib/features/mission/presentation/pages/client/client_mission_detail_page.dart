@@ -391,6 +391,7 @@ class _ClientMissionDetailPageState
         context,
         MaterialPageRoute(
           builder: (_) => ChatPage(
+            contactUserId: presta.id,
             contactName: presta.name,
             contactAvatar: presta.avatarUrl,
             isVerified: presta.isVerified,

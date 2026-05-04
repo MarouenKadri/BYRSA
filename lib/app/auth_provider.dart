@@ -21,6 +21,8 @@ class AuthProvider extends ChangeNotifier {
   String? error;
   int _switchToken = 0;
 
+  String? get userId => _supabase.auth.currentUser?.id;
+
   bool get isGoogleUser {
     final identities = _supabase.auth.currentUser?.identities ?? [];
     return identities.any((i) => i.provider == 'google');
@@ -126,7 +128,13 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('_loadProfile error: $e');
       isLogged = true;
-      currentRole = UserRole.client;
+      // Fall back to the user's registered type from auth metadata rather than
+      // hardcoding client, which would be wrong for freelancer accounts.
+      final meta = _supabase.auth.currentUser?.userMetadata ?? {};
+      final fallbackType = meta['user_type'] as String?;
+      currentRole = fallbackType == 'freelancer'
+          ? UserRole.provider
+          : UserRole.client;
     } finally {
       _isLoadingProfile = false;
     }
@@ -632,12 +640,6 @@ class AuthProvider extends ChangeNotifier {
   // ─── Logout ───────────────────────────────────────────────────────────────
 
   Future<void> logout() async {
-    // Clear the persisted role for this user
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('role_$userId');
-    }
     _switchToken++;
     pendingRole = null;
     await _supabase.auth.signOut();

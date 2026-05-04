@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/design/app_design_system.dart';
+import '../../../../app/auth_provider.dart';
+import '../../../../app/enum/user_role.dart';
 import '../../data/models/message.dart';
 import '../../messaging_provider.dart';
 import 'chat_page.dart';
@@ -17,16 +19,34 @@ class MessagesPage extends StatefulWidget {
 }
 
 class _MessagesPageState extends State<MessagesPage> {
+  UserRole? _lastRole;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MessagingProvider>().loadConversations();
+      final isClient = context.read<AuthProvider>().currentRole == UserRole.client;
+      _lastRole = isClient ? UserRole.client : UserRole.provider;
+      context.read<MessagingProvider>().loadConversations(isClientMode: isClient);
     });
+  }
+
+  void _reloadIfRoleChanged(BuildContext context) {
+    final role = context.read<AuthProvider>().currentRole;
+    if (role != _lastRole) {
+      _lastRole = role;
+      final isClient = role == UserRole.client;
+      context.read<MessagingProvider>().loadConversations(
+        forceRefresh: true,
+        isClientMode: isClient,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    context.watch<AuthProvider>();
+    _reloadIfRoleChanged(context);
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppSectionBar(pageTitle: 'Messages', onGoToAccount: widget.onGoToAccount),
@@ -47,7 +67,7 @@ class _MessagesPageState extends State<MessagesPage> {
           }
 
           return RefreshIndicator(
-            onRefresh: provider.loadConversations,
+            onRefresh: () => provider.loadConversations(forceRefresh: true),
             color: AppColors.primary,
             child: ListView.separated(
               padding: AppInsets.v8,
@@ -57,6 +77,7 @@ class _MessagesPageState extends State<MessagesPage> {
               itemBuilder: (context, i) => _ConversationTile(
                 conversation: provider.conversations[i],
                 currentUserId: provider.currentUserId ?? '',
+                isClientMode: context.read<AuthProvider>().currentRole == UserRole.client,
               ),
             ),
           );
@@ -70,9 +91,13 @@ class _MessagesPageState extends State<MessagesPage> {
 class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final String currentUserId;
+  final bool isClientMode;
 
-  const _ConversationTile(
-      {required this.conversation, required this.currentUserId});
+  const _ConversationTile({
+    required this.conversation,
+    required this.currentUserId,
+    required this.isClientMode,
+  });
 
   TextStyle? _nameStyle(BuildContext context, bool hasUnread) =>
       context.text.titleMedium?.copyWith(
@@ -138,17 +163,18 @@ class _ConversationTile extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => ChatPage(
               conversationId: conversation.id,
+              contactUserId: conversation.otherUserId,
               contactName: conversation.otherUserName,
               contactAvatar: avatar,
               isVerified: conversation.isOtherVerified,
               missionTitle: conversation.missionTitle,
-              showReserveButton: conversation.missionId == null,
+              showReserveButton: conversation.missionId == null && isClientMode,
               confirmedMissionTitle: conversation.missionTitle,
               onProfileTap: goToProfile,
             ),
           ),
         ).then((_) {
-          if (context.mounted) context.read<MessagingProvider>().loadConversations();
+          if (context.mounted) context.read<MessagingProvider>().loadConversations(forceRefresh: true);
         });
       },
       child: Padding(

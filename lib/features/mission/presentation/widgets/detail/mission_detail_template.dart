@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../../core/design/app_design_system.dart';
-import '../../../../../core/location/nominatim_service.dart';
 import '../../../data/models/mission.dart';
 import '../../../data/models/mission_address.dart';
 import '../../pages/shared/mission_map_page.dart';
@@ -332,74 +330,23 @@ abstract class MissionDetailBase<T extends StatefulWidget> extends State<T> {
   }
 }
 
-class _DetailMapPreview extends StatefulWidget {
+class _DetailMapPreview extends StatelessWidget {
   final MissionAddress address;
 
   const _DetailMapPreview({required this.address});
 
-  @override
-  State<_DetailMapPreview> createState() => _DetailMapPreviewState();
-}
-
-class _DetailMapPreviewState extends State<_DetailMapPreview> {
-  Future<LatLng?>? _centerFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _centerFuture = _resolveCenter();
-  }
-
-  Future<LatLng?> _resolveCenter() async {
-    final lat = widget.address.latitude;
-    final lon = widget.address.longitude;
-    if (lat != null && lon != null) {
-      return LatLng(lat, lon);
-    }
-
-    final query = widget.address.fullAddress.trim();
-    if (query.isEmpty) return null;
-
-    final place = await NominatimService.geocodeSingle(query);
-    return place?.latLng;
+  LatLng? get _knownLatLng {
+    final lat = address.latitude;
+    final lon = address.longitude;
+    return lat != null && lon != null ? LatLng(lat, lon) : null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<LatLng?>(
-      future: _centerFuture,
-      builder: (context, snapshot) {
-        final center = snapshot.data;
-        if (center == null) {
-          return DetailMapPlaceholder(
-            address: widget.address.shortAddress,
-          );
-        }
-
-        return FlutterMap(
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: 13,
-            interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.flutter_application_1',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: center,
-                  width: 30,
-                  height: 30,
-                  child: const Icon(Icons.location_on, color: AppColors.mapPin, size: 30),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+    return AppMap.preview(
+      latLng: _knownLatLng,
+      address: _knownLatLng == null ? address.fullAddress : null,
+      tile: AppMapTile.cartoLight,
     );
   }
 }
