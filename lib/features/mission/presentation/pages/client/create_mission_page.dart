@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../../core/design/app_design_system.dart';
@@ -12,6 +13,7 @@ import 'create_mission/step_details.dart';
 import 'create_mission/step_budget_type.dart';
 import 'create_mission/step_tarif.dart';
 import 'create_mission/step_summary.dart';
+import '../../../../profile/data/services/payment_service.dart';
 
 /// ─────────────────────────────────────────────────────────────
 /// 📝 Post Mission Flow — style BlaBlaCar
@@ -64,6 +66,12 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
   static const int _kTarif      = 6;
   static const int _kSummary    = 7;
 
+  String? get _resolvedPreAssignedFreelancerId {
+    final raw = widget.preAssignedFreelancerId?.trim();
+    if (raw == null || raw.isEmpty) return null;
+    return raw;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -74,24 +82,25 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
   void initState() {
     super.initState();
     final m = widget.mission;
-    if (m == null) return;
-    _selectedService = m.categoryId;
-    _selectedSubService = m.title;
-    _selectedDate = m.date;
-    _selectedTime = _parseTimeSlot(m.timeSlot);
-    _address = m.address.fullAddress;
-    _description = m.description;
-    _photos = List<String>.from(m.images);
-    switch (m.budget.type) {
-      case BudgetType.hourly:
-        _budgetType = CreateBudgetType.hourly;
-        _hourlyRate = m.budget.amount ?? 0;
-        _estimatedHours = m.budget.estimatedHours ?? 2;
-      case BudgetType.fixed:
-        _budgetType = CreateBudgetType.fixed;
-        _fixedBudget = m.budget.amount ?? 0;
-      case BudgetType.quote:
-        _budgetType = CreateBudgetType.quote;
+    if (m != null) {
+      _selectedService = m.categoryId;
+      _selectedSubService = m.title;
+      _selectedDate = m.date;
+      _selectedTime = _parseTimeSlot(m.timeSlot);
+      _address = m.address.fullAddress;
+      _description = m.description;
+      _photos = List<String>.from(m.images);
+      switch (m.budget.type) {
+        case BudgetType.hourly:
+          _budgetType = CreateBudgetType.hourly;
+          _hourlyRate = m.budget.amount ?? 0;
+          _estimatedHours = m.budget.estimatedHours ?? 2;
+        case BudgetType.fixed:
+          _budgetType = CreateBudgetType.fixed;
+          _fixedBudget = m.budget.amount ?? 0;
+        case BudgetType.quote:
+          _budgetType = CreateBudgetType.quote;
+      }
     }
   }
 
@@ -406,12 +415,14 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
     );
   }
 
-  void _submitMission() {
+  Future<void> _submitMission() async {
     final isEdit = widget.mission != null;
     final original = widget.mission;
     final isPublishingDraft =
         isEdit && original!.status == MissionStatus.draft;
     final now = DateTime.now();
+    final preAssignedFreelancerId = _resolvedPreAssignedFreelancerId;
+    final hasPreAssignedFreelancer = preAssignedFreelancerId != null;
 
     final budget = _buildBudget();
     final serviceLabel = missionServices
@@ -438,8 +449,8 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
       budget: budget,
       status: (isEdit && !isPublishingDraft)
           ? original!.status
-          : widget.preAssignedFreelancerId != null
-              ? MissionStatus.prestaChosen
+          : hasPreAssignedFreelancer
+              ? MissionStatus.confirmed
               : MissionStatus.waitingCandidates,
       images: List<String>.from(_photos),
       createdAt: isEdit ? original!.createdAt : now,
@@ -447,9 +458,9 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
       client: isEdit ? original!.client : null,
       assignedPresta: isEdit
           ? original!.assignedPresta
-          : widget.preAssignedFreelancerId != null
+          : hasPreAssignedFreelancer
               ? PrestaInfo(
-                  id: widget.preAssignedFreelancerId!,
+                  id: preAssignedFreelancerId!,
                   name: widget.preAssignedFreelancerName ?? '',
                   avatarUrl: widget.preAssignedFreelancerAvatar ?? '',
                 )
@@ -458,15 +469,53 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
     );
 
     _submitted = true;
-    if (isPublishingDraft) {
-      context.read<MissionProvider>().publishDraft(mission);
-    } else if (isEdit) {
-      context.read<MissionProvider>().updateMission(mission);
-    } else {
-      context.read<MissionProvider>().publishMission(mission);
+    try {
+      if (isPublishingDraft) {
+        await context.read<MissionProvider>().publishDraft(mission);
+      } else if (isEdit) {
+        await context.read<MissionProvider>().updateMission(mission);
+      } else {
+        await context.read<MissionProvider>().publishMission(mission);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _submitted = false);
+        showAppSnackBar(
+          context,
+          'Erreur lors de la création de la mission. Réessayez.',
+          type: SnackBarType.error,
+        );
+      }
+      return;
     }
 
+    if (!mounted) return;
+
+    if (!isEdit && hasPreAssignedFreelancer) {
+      try {
+        await PaymentService.payMissionWithSheet(mission.id);
+      } on StripeException catch (e) {
+        if (e.error.code != FailureCode.Canceled && mounted) {
+          showAppSnackBar(
+            context,
+            e.error.localizedMessage ?? 'Erreur paiement',
+            type: SnackBarType.error,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          final msg = e.toString().replaceAll('Exception: ', '');
+          showAppSnackBar(
+            context,
+            msg.isNotEmpty ? msg : 'Erreur paiement',
+            type: SnackBarType.error,
+          );
+        }
+      }
+    }
+
+    if (!mounted) return;
     final title = mission.title;
-    Navigator.pop(context, isEdit && !isPublishingDraft ? null : 'published:$title');
+    Navigator.pop(context, isEdit && !isPublishingDraft ? null : 'published:${mission.id}:$title');
   }
 }

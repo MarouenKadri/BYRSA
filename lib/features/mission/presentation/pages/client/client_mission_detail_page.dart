@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ import '../../widgets/shared/mission_status_ui.dart';
 import 'create_mission_page.dart';
 import 'mission_validation_page.dart';
 import 'tracking_page.dart';
+import '../../../../profile/data/services/payment_service.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// ClientMissionDetailPage — rôle client
@@ -43,6 +45,7 @@ class ClientMissionDetailPage extends StatefulWidget {
 class _ClientMissionDetailPageState
     extends MissionDetailBase<ClientMissionDetailPage> {
   bool _menuOpen = false;
+  bool _isPayingNow = false;
 
   // ─── Computed flags ─────────────────────────────────────────────────────────
 
@@ -260,6 +263,19 @@ class _ClientMissionDetailPageState
 
   @override
   Widget buildBottom(BuildContext ctx) {
+    if (mission.status == MissionStatus.confirmed ||
+        mission.status == MissionStatus.prestaChosen) {
+      final prestaName = mission.assignedPresta?.name ?? 'le prestataire';
+      return DetailBottomArea(
+        caption: 'Mission confirmée avec $prestaName',
+        child: DetailTealButton(
+          label: _isPayingNow ? 'Traitement…' : 'Payer maintenant',
+          icon: Icons.payment_rounded,
+          onTap: _isPayingNow ? null : _openPayment,
+        ),
+      );
+    }
+
     if (mission.status == MissionStatus.awaitingRelease) {
       return DetailBottomArea(
         child: DetailTealButton(
@@ -312,6 +328,35 @@ class _ClientMissionDetailPageState
   }
 
   // ─── Actions ─────────────────────────────────────────────────────────────
+
+  Future<void> _openPayment() async {
+    setState(() => _isPayingNow = true);
+    try {
+      await PaymentService.payMissionWithSheet(mission.id);
+      if (mounted) {
+        showAppSnackBar(context, 'Paiement effectué !', type: SnackBarType.success);
+      }
+    } on StripeException catch (e) {
+      if (e.error.code != FailureCode.Canceled && mounted) {
+        showAppSnackBar(
+          context,
+          e.error.localizedMessage ?? 'Erreur paiement',
+          type: SnackBarType.error,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final msg = e.toString().replaceAll('Exception: ', '');
+        showAppSnackBar(
+          context,
+          msg.isNotEmpty ? msg : 'Erreur paiement',
+          type: SnackBarType.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isPayingNow = false);
+    }
+  }
 
   Future<void> _showMissionOptions() async {
     setState(() => _menuOpen = true);

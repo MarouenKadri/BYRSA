@@ -21,4 +21,6 @@ abstract class MessagingRepository {
   Future<void> markAsRead(String conversationId, String userId);
   Future<void> updateConversationLastMessage(
       String conversationId, String lastMessage);
+  Future<void> linkMissionToConversation(
+      String conversationId, String missionId, String missionTitle);
 }

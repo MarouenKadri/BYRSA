@@ -25,64 +25,76 @@ class _MessagesPageState extends State<MessagesPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final isClient = context.read<AuthProvider>().currentRole == UserRole.client;
+      if (!mounted) return;
+      final isClient =
+          context.read<AuthProvider>().currentRole == UserRole.client;
       _lastRole = isClient ? UserRole.client : UserRole.provider;
-      context.read<MessagingProvider>().loadConversations(isClientMode: isClient);
+      context
+          .read<MessagingProvider>()
+          .loadConversations(isClientMode: isClient);
     });
   }
 
-  void _reloadIfRoleChanged(BuildContext context) {
-    final role = context.read<AuthProvider>().currentRole;
-    if (role != _lastRole) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final role = Provider.of<AuthProvider>(context).currentRole;
+    if (role != _lastRole && _lastRole != null) {
       _lastRole = role;
-      final isClient = role == UserRole.client;
-      context.read<MessagingProvider>().loadConversations(
-        forceRefresh: true,
-        isClientMode: isClient,
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<MessagingProvider>().loadConversations(
+          forceRefresh: true,
+          isClientMode: role == UserRole.client,
+        );
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<AuthProvider>();
-    _reloadIfRoleChanged(context);
     return Scaffold(
       backgroundColor: context.colors.background,
-      appBar: AppSectionBar(pageTitle: 'Messages', onGoToAccount: widget.onGoToAccount),
+      appBar: AppSectionBar(
+        pageTitle: 'Messages',
+        onGoToAccount: widget.onGoToAccount,
+      ),
       body: AppPageBody(
         child: Consumer<MessagingProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoadingConversations) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          builder: (context, provider, _) {
+            if (provider.isLoadingConversations) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (provider.conversations.isEmpty) {
-            return const AppEmptyStateBlock(
-              icon: Icons.forum_rounded,
-              title: 'Aucune conversation',
-              message:
-                  'Vos échanges avec vos clients\net freelancers apparaîtront ici.',
-            );
-          }
+            if (provider.conversations.isEmpty) {
+              return const AppEmptyStateBlock(
+                icon: Icons.forum_rounded,
+                title: 'Aucune conversation',
+                message:
+                    'Vos échanges avec vos clients\net freelancers apparaîtront ici.',
+              );
+            }
 
-          return RefreshIndicator(
-            onRefresh: () => provider.loadConversations(forceRefresh: true),
-            color: AppColors.primary,
-            child: ListView.separated(
-              padding: AppInsets.v8,
-              itemCount: provider.conversations.length,
-              separatorBuilder: (_, __) => Divider(
-                  height: 1, indent: 80, color: context.colors.divider),
-              itemBuilder: (context, i) => _ConversationTile(
-                conversation: provider.conversations[i],
-                currentUserId: provider.currentUserId ?? '',
-                isClientMode: context.read<AuthProvider>().currentRole == UserRole.client,
+            return RefreshIndicator(
+              onRefresh: () =>
+                  provider.loadConversations(forceRefresh: true),
+              color: AppColors.primary,
+              child: ListView.separated(
+                padding: AppInsets.v8,
+                itemCount: provider.conversations.length,
+                separatorBuilder: (_, __) =>
+                    Divider(height: 1, indent: 80, color: context.colors.divider),
+                itemBuilder: (context, i) => _ConversationTile(
+                  conversation: provider.conversations[i],
+                  currentUserId: provider.currentUserId ?? '',
+                  isClientMode:
+                      context.read<AuthProvider>().currentRole ==
+                          UserRole.client,
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -99,65 +111,41 @@ class _ConversationTile extends StatelessWidget {
     required this.isClientMode,
   });
 
-  TextStyle? _nameStyle(BuildContext context, bool hasUnread) =>
-      context.text.titleMedium?.copyWith(
-        fontSize: AppFontSize.lg,
-        fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w600,
-        color: context.colors.textPrimary,
-      );
-
-  TextStyle? _metaStyle(BuildContext context, bool hasUnread) =>
-      context.text.labelMedium?.copyWith(
-        fontSize: AppFontSize.sm,
-        color: hasUnread ? AppColors.primary : context.colors.textTertiary,
-        fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
-      );
-
-  TextStyle? _messageStyle(BuildContext context, bool hasUnread) =>
-      context.text.bodyMedium?.copyWith(
-        fontSize: AppFontSize.base,
-        color: hasUnread
-            ? context.colors.textPrimary
-            : context.colors.textSecondary,
-        fontWeight: hasUnread ? FontWeight.w500 : FontWeight.w400,
-      );
-
   @override
   Widget build(BuildContext context) {
     final hasUnread = conversation.unreadCount > 0;
+    final avatar = conversation.otherUserAvatar ??
+        'https://api.dicebear.com/7.x/avataaars/png?seed=${conversation.otherUserId}';
+    final isOtherFreelancer = currentUserId == conversation.clientId;
+
+    void goToProfile() {
+      if (isOtherFreelancer) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FreelancerProfileView(
+              freelancerId: conversation.otherUserId,
+              freelancerName: conversation.otherUserName,
+              freelancerAvatar: avatar,
+            ),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ClientProfileView(
+              clientId: conversation.otherUserId,
+              clientName: conversation.otherUserName,
+              clientAvatar: avatar,
+            ),
+          ),
+        );
+      }
+    }
 
     return InkWell(
       onTap: () {
-        final isOtherFreelancer = currentUserId == conversation.clientId;
-        final avatar = conversation.otherUserAvatar ??
-            'https://api.dicebear.com/7.x/avataaars/png?seed=${conversation.otherUserId}';
-
-        void goToProfile() {
-          if (isOtherFreelancer) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => FreelancerProfileView(
-                  freelancerId: conversation.otherUserId,
-                  freelancerName: conversation.otherUserName,
-                  freelancerAvatar: avatar,
-                ),
-              ),
-            );
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ClientProfileView(
-                  clientId: conversation.otherUserId,
-                  clientName: conversation.otherUserName,
-                  clientAvatar: avatar,
-                ),
-              ),
-            );
-          }
-        }
-
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -168,29 +156,30 @@ class _ConversationTile extends StatelessWidget {
               contactAvatar: avatar,
               isVerified: conversation.isOtherVerified,
               missionTitle: conversation.missionTitle,
-              showReserveButton: conversation.missionId == null && isClientMode,
+              showReserveButton:
+                  conversation.missionId == null && isClientMode,
+              freelancerId:
+                  conversation.missionId == null && isClientMode
+                      ? conversation.otherUserId
+                      : null,
               confirmedMissionTitle: conversation.missionTitle,
               onProfileTap: goToProfile,
             ),
           ),
         ).then((_) {
-          if (context.mounted) context.read<MessagingProvider>().loadConversations(forceRefresh: true);
+          if (context.mounted) {
+            context
+                .read<MessagingProvider>()
+                .loadConversations(forceRefresh: true);
+          }
         });
       },
       child: Padding(
         padding: AppInsets.h16v12,
         child: Row(
           children: [
-            // Avatar
-            CircleAvatar(
-              radius: 28,
-              backgroundImage: NetworkImage(
-                conversation.otherUserAvatar ??
-                    'https://api.dicebear.com/7.x/avataaars/png?seed=${conversation.otherUserId}',
-              ),
-            ),
+            CircleAvatar(radius: 28, backgroundImage: NetworkImage(avatar)),
             AppGap.w14,
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,9 +209,7 @@ class _ConversationTile extends StatelessWidget {
                           backgroundColor: AppColors.secondary,
                           foregroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
+                              horizontal: 6, vertical: 2),
                           fontSize: AppFontSize.xs,
                           fontWeight: FontWeight.w600,
                         ),
@@ -230,7 +217,7 @@ class _ConversationTile extends StatelessWidget {
                       ],
                       Expanded(
                         child: Text(
-                          conversation.lastMessage ?? 'Démarrez la conversation',
+                          _formatLastMessage(conversation.lastMessage),
                           style: _messageStyle(context, hasUnread),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -242,9 +229,7 @@ class _ConversationTile extends StatelessWidget {
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 3,
-                          ),
+                              horizontal: 7, vertical: 3),
                         ),
                     ],
                   ),
@@ -257,6 +242,12 @@ class _ConversationTile extends StatelessWidget {
     );
   }
 
+  String _formatLastMessage(String? raw) {
+    if (raw == null) return 'Démarrez la conversation';
+    if (raw.startsWith('📍 ')) return '📍 Position partagée';
+    return raw;
+  }
+
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
@@ -267,4 +258,27 @@ class _ConversationTile extends StatelessWidget {
     }
     return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
   }
+
+  TextStyle? _nameStyle(BuildContext context, bool hasUnread) =>
+      context.text.titleMedium?.copyWith(
+        fontSize: AppFontSize.lg,
+        fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w600,
+        color: context.colors.textPrimary,
+      );
+
+  TextStyle? _metaStyle(BuildContext context, bool hasUnread) =>
+      context.text.labelMedium?.copyWith(
+        fontSize: AppFontSize.sm,
+        color: hasUnread ? AppColors.primary : context.colors.textTertiary,
+        fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+      );
+
+  TextStyle? _messageStyle(BuildContext context, bool hasUnread) =>
+      context.text.bodyMedium?.copyWith(
+        fontSize: AppFontSize.base,
+        color: hasUnread
+            ? context.colors.textPrimary
+            : context.colors.textSecondary,
+        fontWeight: hasUnread ? FontWeight.w500 : FontWeight.w400,
+      );
 }

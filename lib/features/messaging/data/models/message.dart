@@ -1,3 +1,7 @@
+import 'message_content.dart';
+
+export 'message_content.dart';
+
 enum MessageStatus { sending, sent, delivered, read, failed }
 
 class ChatMessage {
@@ -35,10 +39,25 @@ class ChatMessage {
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       status: status,
+      isSystemMessage: (json['type'] as String?) == 'system',
     );
   }
 
   bool isMe(String currentUserId) => senderId == currentUserId;
+
+  MessageContent get parsedContent {
+    if (isSystemMessage) return SystemContent(content);
+    final loc = LocationContent.tryParse(content);
+    if (loc != null) return loc;
+    return TextContent(content);
+  }
+
+  /// Preview text shown in conversation list tiles.
+  String get displayPreview => switch (parsedContent) {
+    TextContent(:final text) => text,
+    LocationContent() => '📍 Position partagée',
+    SystemContent(:final text) => text,
+  };
 
   ChatMessage copyWith({MessageStatus? status}) => ChatMessage(
     id: id,
@@ -84,13 +103,15 @@ class Conversation {
     String? lastMessage,
     DateTime? lastMessageAt,
     int? unreadCount,
+    String? missionId,
+    String? missionTitle,
   }) =>
       Conversation(
         id: id,
         clientId: clientId,
         freelancerId: freelancerId,
-        missionId: missionId,
-        missionTitle: missionTitle,
+        missionId: missionId ?? this.missionId,
+        missionTitle: missionTitle ?? this.missionTitle,
         lastMessage: lastMessage ?? this.lastMessage,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         unreadCount: unreadCount ?? this.unreadCount,

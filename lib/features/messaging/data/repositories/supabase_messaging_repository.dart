@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../models/message.dart';
 import 'messaging_repository.dart';
 
@@ -7,11 +8,15 @@ class SupabaseMessagingRepository implements MessagingRepository {
   final _supabase = Supabase.instance.client;
 
   @override
-  Future<List<Conversation>> getConversations(String userId, {required bool isClientMode}) async {
+  Future<List<Conversation>> getConversations(
+    String userId, {
+    required bool isClientMode,
+  }) async {
     try {
-      final query = _supabase
-          .from('conversations')
-          .select('id, client_id, freelancer_id, mission_id, mission_title, last_message, last_message_at');
+      final query = _supabase.from('conversations').select(
+            'id, client_id, freelancer_id, mission_id, mission_title, '
+            'last_message, last_message_at',
+          );
       final rows = await (isClientMode
               ? query.eq('client_id', userId)
               : query.eq('freelancer_id', userId))
@@ -20,7 +25,6 @@ class SupabaseMessagingRepository implements MessagingRepository {
 
       if ((rows as List).isEmpty) return [];
 
-      // Collect all other user IDs in one pass (deduplicated)
       final otherUserIds = rows
           .map<String>((row) => row['client_id'] == userId
               ? row['freelancer_id'] as String
@@ -28,18 +32,19 @@ class SupabaseMessagingRepository implements MessagingRepository {
           .toSet()
           .toList(growable: false);
 
-      // Batch-fetch all profiles (1 query instead of N)
+      // Batch-fetch profiles — 1 query, includes is_verified
       final profileRows = await _supabase
           .from('profiles')
-          .select('id, first_name, last_name, avatar_url')
+          .select('id, first_name, last_name, avatar_url, is_verified')
           .inFilter('id', otherUserIds);
 
       final profileMap = <String, Map<String, dynamic>>{
-        for (final p in (profileRows as List).whereType<Map<String, dynamic>>())
+        for (final p
+            in (profileRows as List).whereType<Map<String, dynamic>>())
           p['id'] as String: p,
       };
 
-      // Batch-count unread messages for all conversations (1 query instead of N)
+      // Batch-count unread — 1 query
       final conversationIds =
           rows.map<String>((r) => r['id'] as String).toList(growable: false);
 
@@ -81,11 +86,15 @@ class SupabaseMessagingRepository implements MessagingRepository {
           otherUserId: otherUserId,
           otherUserName: otherName.isEmpty ? 'Utilisateur' : otherName,
           otherUserAvatar: profile?['avatar_url'] as String?,
+          isOtherVerified: profile?['is_verified'] as bool? ?? false,
         );
       }).toList();
     } catch (e) {
       debugPrint('getConversations error: $e');
-      return [];
+      throw const AppException(
+        'Impossible de charger les conversations',
+        kind: AppErrorKind.network,
+      );
     }
   }
 
@@ -100,19 +109,23 @@ class SupabaseMessagingRepository implements MessagingRepository {
           .order('created_at', ascending: true)
           .limit(100);
       return (rows as List)
-          .map((r) =>
-              ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
+          .map((r) => ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
           .toList();
     } catch (e) {
       debugPrint('getMessages error: $e');
-      return [];
+      throw const AppException(
+        'Impossible de charger les messages',
+        kind: AppErrorKind.network,
+      );
     }
   }
 
   @override
   Future<List<ChatMessage>> getMessagesBefore(
-      String conversationId, String beforeMessageId,
-      {int limit = 50}) async {
+    String conversationId,
+    String beforeMessageId, {
+    int limit = 50,
+  }) async {
     try {
       final currentUserId = _supabase.auth.currentUser?.id ?? '';
       final anchorRow = await _supabase
@@ -129,18 +142,23 @@ class SupabaseMessagingRepository implements MessagingRepository {
           .limit(limit);
       return (rows as List)
           .reversed
-          .map((r) =>
-              ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
+          .map((r) => ChatMessage.fromJson(r as Map<String, dynamic>, currentUserId))
           .toList();
     } catch (e) {
       debugPrint('getMessagesBefore error: $e');
-      return [];
+      throw const AppException(
+        'Impossible de charger les messages précédents',
+        kind: AppErrorKind.network,
+      );
     }
   }
 
   @override
   Future<ChatMessage?> sendMessage(
-      String conversationId, String senderId, String content) async {
+    String conversationId,
+    String senderId,
+    String content,
+  ) async {
     try {
       final row = await _supabase.from('messages').insert({
         'conversation_id': conversationId,
@@ -151,7 +169,10 @@ class SupabaseMessagingRepository implements MessagingRepository {
       return ChatMessage.fromJson(row, senderId);
     } catch (e) {
       debugPrint('sendMessage error: $e');
-      return null;
+      throw const AppException(
+        'Erreur lors de l\'envoi',
+        kind: AppErrorKind.network,
+      );
     }
   }
 
@@ -168,9 +189,7 @@ class SupabaseMessagingRepository implements MessagingRepository {
           .eq('client_id', clientId)
           .eq('freelancer_id', freelancerId);
 
-      if (missionId != null) {
-        query = query.eq('mission_id', missionId);
-      }
+      if (missionId != null) query = query.eq('mission_id', missionId);
 
       final existing = await query.maybeSingle();
       if (existing != null) return existing['id'] as String;
@@ -181,8 +200,11 @@ class SupabaseMessagingRepository implements MessagingRepository {
       };
       if (missionId != null) data['mission_id'] = missionId;
 
-      final row =
-          await _supabase.from('conversations').insert(data).select('id').single();
+      final row = await _supabase
+          .from('conversations')
+          .insert(data)
+          .select('id')
+          .single();
       return row['id'] as String;
     } catch (e) {
       debugPrint('getOrCreateConversation error: $e');
@@ -203,9 +225,7 @@ class SupabaseMessagingRepository implements MessagingRepository {
           .eq('client_id', clientId)
           .eq('freelancer_id', freelancerId);
 
-      if (missionId != null) {
-        query = query.eq('mission_id', missionId);
-      }
+      if (missionId != null) query = query.eq('mission_id', missionId);
 
       final existing = await query.maybeSingle();
       return existing?['id'] as String?;
@@ -230,7 +250,9 @@ class SupabaseMessagingRepository implements MessagingRepository {
 
   @override
   Future<void> updateConversationLastMessage(
-      String conversationId, String lastMessage) async {
+    String conversationId,
+    String lastMessage,
+  ) async {
     try {
       await _supabase.from('conversations').update({
         'last_message': lastMessage,
@@ -238,6 +260,22 @@ class SupabaseMessagingRepository implements MessagingRepository {
       }).eq('id', conversationId);
     } catch (e) {
       debugPrint('updateConversationLastMessage error: $e');
+    }
+  }
+
+  @override
+  Future<void> linkMissionToConversation(
+    String conversationId,
+    String missionId,
+    String missionTitle,
+  ) async {
+    try {
+      await _supabase
+          .from('conversations')
+          .update({'mission_id': missionId, 'mission_title': missionTitle})
+          .eq('id', conversationId);
+    } catch (e) {
+      debugPrint('linkMissionToConversation error: $e');
     }
   }
 }

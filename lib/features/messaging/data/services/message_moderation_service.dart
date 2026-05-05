@@ -48,7 +48,7 @@ class MessageModerationService {
   // ── Intentions de contact hors plateforme ─────────────────────────────────
   static final _contactIntent = RegExp(
     r'\b(mon\s*(numéro|num|tel|téléphone|portable|mobile|mail|email|adresse)'
-    r'|appelle[rz]?\s*moi|contacte[rz]?\s*moi'
+    r'|appelle[rz]?[\s\-]*moi|contacte[rz]?[\s\-]*moi'
     r'|écri[st]?\s*(moi|nous)\s*(sur|via|par)'
     r'|envoie[rz]?\s*(moi|nous)\s*(un\s*sms|un\s*message)\s*(sur|via|par)'
     r'|rejoins?\s*moi\s*(sur|via|par)'
@@ -65,7 +65,12 @@ class MessageModerationService {
 
   // ─────────────────────────────────────────────────────────────────────────
 
+  static final _locationMessage = RegExp(
+    r'^📍\s+-?\d+\.\d+,-?\d+\.\d+$',
+  );
+
   ModerationResult check(String text) {
+    if (_locationMessage.hasMatch(text)) return ModerationResult.allowed;
     if (_email.hasMatch(text)) {
       return const ModerationResult(
         blocked: true,
