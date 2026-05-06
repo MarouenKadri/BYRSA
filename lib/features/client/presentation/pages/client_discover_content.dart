@@ -176,7 +176,6 @@ class _ClientDiscoverContentState extends State<ClientDiscoverContent>
 
 Color _statusAccentColor(MissionStatus status) {
   switch (status) {
-    case MissionStatus.prestaChosen:
     case MissionStatus.confirmed:
       return AppColors.amberDark; // 0xFFF59E0B
     case MissionStatus.onTheWay:

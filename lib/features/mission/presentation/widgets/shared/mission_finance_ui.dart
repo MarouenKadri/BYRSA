@@ -14,17 +14,6 @@ enum MissionFinanceState {
   refund50,
 }
 
-class _FinancePipelineConfig {
-  final List<String> labels;
-  final List<IconData> icons;
-  final int activeStep;
-
-  const _FinancePipelineConfig({
-    required this.labels,
-    required this.icons,
-    required this.activeStep,
-  });
-}
 
 class MissionFinanceUi {
   static const Set<MissionStatus> _paymentLinkedStatuses = {
@@ -56,7 +45,6 @@ class MissionFinanceUi {
       case MissionStatus.draft:
       case MissionStatus.waitingCandidates:
       case MissionStatus.candidateReceived:
-      case MissionStatus.prestaChosen:
       case MissionStatus.expired:
         return MissionFinanceState.pending;
       case MissionStatus.confirmed:
@@ -97,43 +85,6 @@ class MissionFinanceUi {
         state == MissionFinanceState.refund50;
   }
 
-  static _FinancePipelineConfig pipeline({
-    required MissionFinanceState state,
-    required MissionUiRole role,
-  }) {
-    if (role == MissionUiRole.client) {
-      final activeStep = switch (state) {
-        MissionFinanceState.pending => -1,
-        _ => 0,
-      };
-      return _FinancePipelineConfig(
-        labels: const ['Montant reserve'],
-        icons: const [Icons.payments_rounded],
-        activeStep: activeStep,
-      );
-    }
-
-    final activeStep = switch (state) {
-      MissionFinanceState.pending => -1,
-      MissionFinanceState.awaitingRelease24h => 1,
-      MissionFinanceState.paidOut => 2,
-      MissionFinanceState.disputeHold => 1,
-      _ => 0,
-    };
-
-    return _FinancePipelineConfig(
-      labels: [
-        'Fonds reserves',
-        'Versement',
-      ],
-      icons: const [
-        Icons.lock_rounded,
-        Icons.schedule_rounded,
-      ],
-      activeStep: activeStep,
-    );
-  }
-
   static Color accentColor(BuildContext context, MissionFinanceState state) {
     return switch (state) {
       MissionFinanceState.pending => context.colors.textTertiary,
@@ -148,13 +99,13 @@ class MissionFinanceUi {
 
   static IconData stateIcon(MissionFinanceState state) {
     return switch (state) {
-      MissionFinanceState.pending => Icons.hourglass_bottom_rounded,
-      MissionFinanceState.secured => Icons.lock_rounded,
-      MissionFinanceState.awaitingRelease24h => Icons.schedule_rounded,
-      MissionFinanceState.paidOut => Icons.check_circle_rounded,
-      MissionFinanceState.disputeHold => Icons.flag_rounded,
-      MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
-        Icons.replay_rounded,
+      MissionFinanceState.pending            => Icons.hourglass_empty_rounded,
+      MissionFinanceState.secured            => Icons.shield_rounded,
+      MissionFinanceState.awaitingRelease24h => Icons.timer_rounded,
+      MissionFinanceState.paidOut            => Icons.check_circle_rounded,
+      MissionFinanceState.disputeHold        => Icons.gavel_rounded,
+      MissionFinanceState.refund100          => Icons.undo_rounded,
+      MissionFinanceState.refund50           => Icons.undo_rounded,
     };
   }
 
@@ -167,22 +118,22 @@ class MissionFinanceUi {
 
     return switch (role) {
       MissionUiRole.client => switch (state) {
-        MissionFinanceState.pending => 'En attente',
-        MissionFinanceState.secured => 'Montant reserve',
-        MissionFinanceState.awaitingRelease24h => 'Liberation 24h',
-        MissionFinanceState.paidOut => 'Verse',
-        MissionFinanceState.disputeHold => 'Suspendu',
-        MissionFinanceState.refund100 => 'Remboursement',
-        MissionFinanceState.refund50 => 'Remboursement',
+        MissionFinanceState.pending            => 'Paiement en attente',
+        MissionFinanceState.secured            => 'Argent sécurisé',
+        MissionFinanceState.awaitingRelease24h => 'Versement auto dans 24h',
+        MissionFinanceState.paidOut            => 'Prestataire payé',
+        MissionFinanceState.disputeHold        => 'Paiement suspendu',
+        MissionFinanceState.refund100          => 'Remboursement total',
+        MissionFinanceState.refund50           => 'Remboursement 50 %',
       },
       MissionUiRole.freelancer => switch (state) {
-        MissionFinanceState.pending => 'En attente',
-        MissionFinanceState.secured => 'Fonds reserves',
-        MissionFinanceState.awaitingRelease24h => 'Versement 24h',
-        MissionFinanceState.paidOut => 'Verse',
-        MissionFinanceState.disputeHold => 'Suspendu',
-        MissionFinanceState.refund100 || MissionFinanceState.refund50 =>
-          'Annulee',
+        MissionFinanceState.pending            => 'Paiement garanti à la fin',
+        MissionFinanceState.secured            => 'Fonds réservés pour vous',
+        MissionFinanceState.awaitingRelease24h => 'Versement automatique sous 24h',
+        MissionFinanceState.paidOut            => 'Versement reçu',
+        MissionFinanceState.disputeHold        => 'Versement suspendu',
+        MissionFinanceState.refund100 ||
+        MissionFinanceState.refund50           => 'Mission annulée',
       },
     };
   }
@@ -335,7 +286,7 @@ class MissionFinanceUi {
     );
   }
 
-  static String _euro(double value) {
+  static String _euro(double value) { // ignore: library_private_types_in_public_api
     final rounded = value.roundToDouble();
     if (rounded == value) return '${rounded.toInt()} €';
     return '${value.toStringAsFixed(2)} €';
@@ -402,105 +353,41 @@ class MissionFinanceExposureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = MissionFinanceUi.resolveState(mission);
+    final state  = MissionFinanceUi.resolveState(mission);
     final accent = MissionFinanceUi.accentColor(context, state);
-    final amountPills = MissionFinanceUi.amountPills(
-      mission: mission,
-      state: state,
-      role: role,
+    final icon   = MissionFinanceUi.stateIcon(state);
+    final label  = MissionFinanceUi.outsideLabel(mission: mission, role: role);
+    final amount = MissionFinanceUi._euro(
+      role == MissionUiRole.client
+          ? mission.budget.averageAmount
+          : mission.budget.averageAmount * 0.9,
     );
-    final reservedActive = state == MissionFinanceState.secured ||
-        state == MissionFinanceState.awaitingRelease24h ||
-        state == MissionFinanceState.disputeHold;
-    final paidActive = state == MissionFinanceState.paidOut;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Suivi paiement',
-          style: context.text.labelMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: context.colors.textPrimary,
-            letterSpacing: 0.1,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _FinanceAmountPill(
-                label: 'Réservé',
-                value: amountPills.reserved,
-                active: reservedActive,
-                accent: accent,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _FinanceAmountPill(
-                label: 'Versé',
-                value: amountPills.paid,
-                active: paidActive,
-                accent: accent,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _FinanceAmountPill extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool active;
-  final Color accent;
-
-  const _FinanceAmountPill({
-    required this.label,
-    required this.value,
-    required this.active,
-    required this.accent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final background = active
-        ? accent.withValues(alpha: 0.16)
-        : context.colors.surface;
-    final borderColor = active
-        ? accent.withValues(alpha: 0.34)
-        : context.colors.border.withValues(alpha: 0.65);
-    final labelColor = active ? accent : context.colors.textTertiary;
-    final valueColor = active
-        ? context.colors.textPrimary
-        : context.colors.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor),
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            label,
-            style: context.text.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: labelColor,
+          Icon(icon, size: 15, color: accent),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: context.text.labelMedium?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          const SizedBox(height: 4),
           Text(
-            value,
-            style: context.text.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: valueColor,
+            amount,
+            style: context.text.labelMedium?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

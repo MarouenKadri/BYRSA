@@ -15,7 +15,9 @@ class FreelancerExploreContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: LocationAppBar(onGoToAccount: onGoToAccount),
-      body: const MissionBrowsePage(onLocationTap: null),
+      body: MissionBrowsePage(
+        onLocationTap: null,
+      ),
     );
   }
 }

@@ -22,8 +22,7 @@ enum MissionStatus {
   draft,               // Brouillon (création en cours)
   waitingCandidates,   // Publiée, aucune candidature
   candidateReceived,   // ≥1 candidature reçue
-  prestaChosen,        // Client a choisi, attente confirmation freelancer
-  confirmed,           // Les deux ont confirmé → prêt à démarrer
+  confirmed,           // Freelancer accepté et payé → prêt à démarrer
   onTheWay,            // Freelancer en route
   inProgress,          // Mission démarrée (timer actif)
   completionRequested, // Freelancer a signalé la fin, attente action client
@@ -41,7 +40,6 @@ extension MissionStatusX on MissionStatus {
     MissionStatus.draft                => 'Brouillon',
     MissionStatus.waitingCandidates    => 'En attente',
     MissionStatus.candidateReceived    => 'Candidatures',
-    MissionStatus.prestaChosen         => 'Presta choisi',
     MissionStatus.confirmed            => 'Confirmée',
     MissionStatus.onTheWay             => 'En route',
     MissionStatus.inProgress           => 'En cours',
@@ -59,7 +57,6 @@ extension MissionStatusX on MissionStatus {
     MissionStatus.draft               => AppColors.draftAmber,
     MissionStatus.waitingCandidates   => AppColors.warning,
     MissionStatus.candidateReceived   => AppColors.secondary,
-    MissionStatus.prestaChosen        => AppColors.indigo,
     MissionStatus.confirmed           => AppColors.primary,
     MissionStatus.onTheWay            => AppColors.secondary,
     MissionStatus.inProgress          => AppColors.indigo,
@@ -77,7 +74,6 @@ extension MissionStatusX on MissionStatus {
     MissionStatus.draft               => Icons.edit_note_rounded,
     MissionStatus.waitingCandidates   => Icons.hourglass_empty_rounded,
     MissionStatus.candidateReceived   => Icons.people_rounded,
-    MissionStatus.prestaChosen        => Icons.handshake_rounded,
     MissionStatus.confirmed           => Icons.check_circle_rounded,
     MissionStatus.onTheWay            => Icons.directions_car_rounded,
     MissionStatus.inProgress          => Icons.play_circle_rounded,
@@ -94,7 +90,6 @@ extension MissionStatusX on MissionStatus {
   bool get isActive =>
       this == MissionStatus.waitingCandidates ||
       this == MissionStatus.candidateReceived ||
-      this == MissionStatus.prestaChosen ||
       this == MissionStatus.confirmed ||
       this == MissionStatus.onTheWay ||
       this == MissionStatus.inProgress ||

@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'enum/user_role.dart';
 import '../features/auth/data/models/registration_data.dart';
 import '../features/auth/data/models/user_type.dart';
+import '../features/auth/presentation/utils/auth_formatters.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
@@ -651,17 +652,7 @@ class AuthProvider extends ChangeNotifier {
 
   // ─── Erreurs lisibles ─────────────────────────────────────────────────────
 
-  String _friendlyError(String message) {
-    if (message.contains('Invalid login credentials'))
-      return 'Email ou mot de passe incorrect';
-    if (message.contains('Email not confirmed'))
-      return 'Confirmez votre email avant de vous connecter';
-    if (message.contains('User already registered'))
-      return 'Cet email est déjà utilisé';
-    if (message.contains('Password should be'))
-      return 'Mot de passe trop court (minimum 8 caractères)';
-    return 'Une erreur est survenue';
-  }
+  String _friendlyError(String message) => friendlyAuthError(message);
 
   @override
   void dispose() {

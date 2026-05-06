@@ -60,6 +60,8 @@ class PaymentService {
     final pubKey = data['publishableKey'] as String? ?? '';
     if (pubKey.isNotEmpty && !pubKey.contains('YOUR_STRIPE')) {
       Stripe.publishableKey = pubKey;
+    }
+    if (Stripe.publishableKey.isNotEmpty) {
       await Stripe.instance.applySettings();
     }
   }
@@ -132,8 +134,12 @@ class PaymentService {
       body: jsonEncode({'missionId': missionId}),
     );
     if (res.statusCode != 200) {
-      final err = (jsonDecode(res.body) as Map<String, dynamic>)['error'];
-      throw Exception(err ?? 'Erreur paiement');
+      String? err;
+      try {
+        err = (jsonDecode(res.body) as Map<String, dynamic>)['error'] as String?;
+      } catch (_) {}
+      debugPrint('stripe-pay-mission error ${res.statusCode}: ${res.body}');
+      throw Exception(err ?? 'Erreur paiement (${res.statusCode})');
     }
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     await _initStripeIfNeeded(data);

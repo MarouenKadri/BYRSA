@@ -76,8 +76,7 @@ class _TimelineTrack extends StatelessWidget {
   int get _currentIndex {
     return switch (currentStatus) {
       MissionStatus.waitingCandidates ||
-      MissionStatus.candidateReceived ||
-      MissionStatus.prestaChosen => 0,
+      MissionStatus.candidateReceived => 0,
       MissionStatus.confirmed => 1,
       MissionStatus.onTheWay => 2,
       MissionStatus.inProgress => 3,

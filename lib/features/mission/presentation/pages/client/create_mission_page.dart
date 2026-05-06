@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../../core/design/app_design_system.dart';
@@ -13,7 +12,8 @@ import 'create_mission/step_details.dart';
 import 'create_mission/step_budget_type.dart';
 import 'create_mission/step_tarif.dart';
 import 'create_mission/step_summary.dart';
-import '../../../../profile/data/services/payment_service.dart';
+import '../../../../profile/presentation/pages/widgets/shared/payment_common_widgets.dart';
+import '../../../../profile/presentation/payment_methods_provider.dart';
 
 /// ─────────────────────────────────────────────────────────────
 /// 📝 Post Mission Flow — style BlaBlaCar
@@ -492,30 +492,370 @@ class _PostMissionFlowState extends State<PostMissionFlow> {
     if (!mounted) return;
 
     if (!isEdit && hasPreAssignedFreelancer) {
-      try {
-        await PaymentService.payMissionWithSheet(mission.id);
-      } on StripeException catch (e) {
-        if (e.error.code != FailureCode.Canceled && mounted) {
-          showAppSnackBar(
-            context,
-            e.error.localizedMessage ?? 'Erreur paiement',
-            type: SnackBarType.error,
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          final msg = e.toString().replaceAll('Exception: ', '');
-          showAppSnackBar(
-            context,
-            msg.isNotEmpty ? msg : 'Erreur paiement',
-            type: SnackBarType.error,
-          );
-        }
+      final paid = await showAppBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        wrapWithSurface: false,
+        child: _MissionPaymentSheet(
+          freelancerName: widget.preAssignedFreelancerName ?? '',
+          freelancerAvatar: widget.preAssignedFreelancerAvatar ?? '',
+          missionTitle: mission.title,
+          amount: mission.budget.amount ?? _totalBudget,
+        ),
+      );
+      if (paid != true || !mounted) {
+        setState(() => _submitted = false);
+        return;
       }
     }
 
     if (!mounted) return;
     final title = mission.title;
     Navigator.pop(context, isEdit && !isPublishingDraft ? null : 'published:${mission.id}:$title');
+  }
+}
+
+// ─── Payment sheet (même flux que CandidatesPage) ────────────────────────────
+
+class _MissionPaymentSheet extends StatefulWidget {
+  final String freelancerName;
+  final String freelancerAvatar;
+  final String missionTitle;
+  final double amount;
+
+  const _MissionPaymentSheet({
+    required this.freelancerName,
+    required this.freelancerAvatar,
+    required this.missionTitle,
+    required this.amount,
+  });
+
+  @override
+  State<_MissionPaymentSheet> createState() => _MissionPaymentSheetState();
+}
+
+class _MissionPaymentSheetState extends State<_MissionPaymentSheet> {
+  bool _isProcessing = false;
+  int? _selectedCardIdx;
+
+  double get _presta => widget.amount * 0.9;
+  double get _cigale => widget.amount * 0.1;
+
+  void _showAddCardDialog() {
+    showAppBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      wrapWithSurface: false,
+      child: AddCardSheet(
+        onCardAdded: (brand, last4, expiry) {
+          context.read<PaymentMethodsProvider>().addCard(
+                brand: brand,
+                last4: last4,
+                expiry: expiry,
+              );
+          final cards = context.read<PaymentMethodsProvider>().cards;
+          setState(() => _selectedCardIdx = cards.length - 1);
+        },
+      ),
+    );
+  }
+
+  Future<void> _pay() async {
+    setState(() => _isProcessing = true);
+    await Future.delayed(const Duration(milliseconds: 1400));
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = context.watch<PaymentMethodsProvider>().cards;
+    final defaultIdx = cards.indexWhere((c) => c.isDefault);
+    final selectedIdx = (_selectedCardIdx ?? defaultIdx).clamp(0, cards.isEmpty ? 0 : cards.length - 1);
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.sheetBg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.colors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Text(
+            'Finaliser le paiement',
+            style: context.text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          AppGap.h2,
+          Text(
+            widget.missionTitle,
+            style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          AppGap.h16,
+          // ─── Freelancer ───
+          Container(
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(11),
+                    border: Border.all(color: context.colors.border),
+                  ),
+                  child: widget.freelancerAvatar.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(widget.freelancerAvatar, fit: BoxFit.cover),
+                        )
+                      : Center(
+                          child: Text(
+                            widget.freelancerName.isNotEmpty
+                                ? widget.freelancerName[0].toUpperCase()
+                                : '?',
+                            style: context.text.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                ),
+                AppGap.w12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.freelancerName,
+                        style: context.text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textPrimary,
+                        ),
+                      ),
+                      AppGap.h2,
+                      Text(
+                        'Prestataire sélectionné',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${widget.amount.round()} €',
+                      style: context.text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      'Total TTC',
+                      style: context.text.labelSmall?.copyWith(
+                        color: context.colors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          AppGap.h16,
+          // ─── Répartition ───
+          const PaymentSectionLabel('RÉPARTITION'),
+          AppGap.h8,
+          Container(
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Column(
+              children: [
+                _PayRow(
+                  icon: Icons.handyman_outlined,
+                  label: 'Prestataire (90 %)',
+                  amount: '${_presta.round()} €',
+                  amountColor: AppColors.ink,
+                ),
+                Divider(height: 1, indent: 68, color: context.colors.divider),
+                _PayRow(
+                  icon: Icons.percent_rounded,
+                  label: 'Commission (10 %)',
+                  amount: '${_cigale.round()} €',
+                  amountColor: context.colors.textTertiary,
+                ),
+              ],
+            ),
+          ),
+          AppGap.h16,
+          // ─── Cartes ───
+          const PaymentSectionLabel('CARTE DE PAIEMENT'),
+          AppGap.h8,
+          Container(
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Column(
+              children: [
+                ...cards.asMap().entries.expand((entry) => [
+                  InkWell(
+                    onTap: () => setState(() => _selectedCardIdx = entry.key),
+                    borderRadius: BorderRadius.circular(18),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: context.colors.surfaceAlt,
+                              borderRadius: BorderRadius.circular(11),
+                              border: Border.all(color: context.colors.border),
+                            ),
+                            child: const Icon(Icons.credit_card_rounded, size: 18, color: AppColors.textSecondary),
+                          ),
+                          AppGap.w12,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${entry.value.brand} •••• ${entry.value.last4}',
+                                  style: context.text.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.textPrimary,
+                                  ),
+                                ),
+                                AppGap.h2,
+                                Text(
+                                  'Expire ${entry.value.expiry}',
+                                  style: context.text.bodySmall?.copyWith(color: context.colors.textTertiary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (selectedIdx == entry.key)
+                            const Icon(Icons.check_circle_rounded, size: 18, color: AppColors.ink)
+                          else
+                            Icon(Icons.radio_button_unchecked, size: 18, color: context.colors.textHint),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (entry.key < cards.length - 1)
+                    Divider(height: 1, indent: 68, color: context.colors.divider),
+                ]),
+              ],
+            ),
+          ),
+          AppGap.h8,
+          PaymentAddButton(label: 'Ajouter une carte', onTap: _showAddCardDialog),
+          AppGap.h12,
+          const PaymentInfoNote(
+            icon: Icons.shield_outlined,
+            body: 'Montant bloqué — libéré au prestataire uniquement après votre validation.',
+          ),
+          AppGap.h20,
+          AppButton(
+            label: 'Payer ${widget.amount.round()} €',
+            variant: ButtonVariant.black,
+            isLoading: _isProcessing,
+            onPressed: _isProcessing ? null : _pay,
+          ),
+          AppGap.h10,
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 12, color: context.colors.textHint),
+                AppGap.w4,
+                Text(
+                  'Paiement sécurisé',
+                  style: context.text.labelSmall?.copyWith(color: context.colors.textHint),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PayRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String amount;
+  final Color amountColor;
+
+  const _PayRow({
+    required this.icon,
+    required this.label,
+    required this.amount,
+    required this.amountColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: context.colors.surfaceAlt,
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Icon(icon, size: 18, color: context.colors.textSecondary),
+          ),
+          AppGap.w12,
+          Expanded(
+            child: Text(
+              label,
+              style: context.text.bodyMedium?.copyWith(color: context.colors.textPrimary),
+            ),
+          ),
+          Text(
+            amount,
+            style: context.text.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

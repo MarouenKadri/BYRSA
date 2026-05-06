@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,6 +50,12 @@ void main() async {
     ),
   );
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+
+  final stripeKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  if (stripeKey.isNotEmpty && !stripeKey.contains('your-stripe')) {
+    Stripe.publishableKey = stripeKey;
+  }
+
   runApp(const MyApp());
 }
 

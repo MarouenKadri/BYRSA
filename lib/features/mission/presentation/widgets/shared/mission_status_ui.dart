@@ -7,16 +7,14 @@ class MissionStatusUi {
   /// Vérifie si une mission (avec sa date) appartient à un tab donné.
   ///
   /// Règle de promotion automatique :
-  ///   Une mission `prestaChosen` ou `confirmed` dont la date est aujourd'hui
+  ///   Une mission `confirmed` dont la date est aujourd'hui
   ///   ou passée est promue dans "En cours" et retirée de "Confirmées".
   static bool missionBelongsToTab({
     required Mission mission,
     required MissionUiRole role,
     required MissionUiTab tab,
   }) {
-    final isConfirmedStatus =
-        mission.status == MissionStatus.prestaChosen ||
-        mission.status == MissionStatus.confirmed;
+    final isConfirmedStatus = mission.status == MissionStatus.confirmed;
 
     if (isConfirmedStatus && _isScheduledNowOrPast(mission.date)) {
       // Promue → "En cours", disparaît de "Confirmées"
@@ -39,8 +37,7 @@ class MissionStatusUi {
             return status == MissionStatus.waitingCandidates ||
                 status == MissionStatus.candidateReceived;
           case MissionUiTab.confirmed:
-            return status == MissionStatus.prestaChosen ||
-                status == MissionStatus.confirmed;
+            return status == MissionStatus.confirmed;
           case MissionUiTab.inProgress:
             return status == MissionStatus.onTheWay ||
                 status == MissionStatus.inProgress ||
@@ -61,8 +58,7 @@ class MissionStatusUi {
           case MissionUiTab.applied:
             return status == MissionStatus.candidateReceived;
           case MissionUiTab.confirmed:
-            return status == MissionStatus.prestaChosen ||
-                status == MissionStatus.confirmed;
+            return status == MissionStatus.confirmed;
           case MissionUiTab.inProgress:
             return status == MissionStatus.onTheWay ||
                 status == MissionStatus.inProgress ||
@@ -99,7 +95,6 @@ class MissionStatusUi {
           MissionStatus.draft => 'Publiee',
           MissionStatus.waitingCandidates => 'Publiee',
           MissionStatus.candidateReceived => 'Publiee',
-          MissionStatus.prestaChosen => 'Confirmee',
           MissionStatus.confirmed => 'Confirmee',
           MissionStatus.onTheWay => 'En cours',
           MissionStatus.inProgress => 'En cours',
@@ -117,7 +112,6 @@ class MissionStatusUi {
           MissionStatus.draft => 'Postulee',
           MissionStatus.waitingCandidates => 'Postulee',
           MissionStatus.candidateReceived => 'Postulee',
-          MissionStatus.prestaChosen => 'Postulee',
           MissionStatus.confirmed => 'Confirmee',
           MissionStatus.onTheWay => 'En cours',
           MissionStatus.inProgress => 'En cours',

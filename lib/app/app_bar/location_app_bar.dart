@@ -32,11 +32,9 @@ class LocationData {
 
 class AppLocationRoleBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
-  final String locationLabel;
   final int unreadCount;
   final String avatarLabel;
 
-  final VoidCallback onLocationTap;
   final VoidCallback onNotificationsTap;
   final VoidCallback onAvatarTap;
   final Animation<double>? bellScale;
@@ -44,10 +42,8 @@ class AppLocationRoleBar extends StatelessWidget implements PreferredSizeWidget 
   const AppLocationRoleBar({
     super.key,
     this.bottom,
-    required this.locationLabel,
     required this.unreadCount,
     required this.avatarLabel,
-    required this.onLocationTap,
     required this.onNotificationsTap,
     required this.onAvatarTap,
     this.bellScale,
@@ -60,45 +56,9 @@ class AppLocationRoleBar extends StatelessWidget implements PreferredSizeWidget 
 
   @override
   Widget build(BuildContext context) {
-    final resolvedLocation =
-        locationLabel.trim().isEmpty ||
-                locationLabel.trim().toLowerCase() == 'ma position'
-            ? 'Paris, France'
-            : locationLabel;
-
     return AppPageAppBar(
       toolbarHeight: AppBarMetrics.toolbarHeight,
       bottom: bottom,
-      titleWidget: GestureDetector(
-        onTap: onLocationTap,
-        behavior: HitTestBehavior.opaque,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 18,
-              color: context.colors.textSecondary,
-            ),
-            AppGap.w8,
-            ConstrainedBox(
-              constraints:
-                  const BoxConstraints(maxWidth: AppBarMetrics.locationMaxWidth),
-              child: Text(
-                resolvedLocation,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.appBarLocationLabelStyle.copyWith(
-                  fontSize: AppFontSize.body,
-                  fontWeight: FontWeight.w500,
-                  height: 1.1,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
       actions: [
         AppBarActionCircleButton(
           icon: Icons.notifications_none_rounded,
@@ -214,8 +174,6 @@ class _LocationAppBarState extends State<LocationAppBar>
   late final Animation<double> _bellScale;
   int _prevUnread = 0;
 
-  LocationData? _locationData;
-
   @override
   void initState() {
     super.initState();
@@ -236,43 +194,26 @@ class _LocationAppBarState extends State<LocationAppBar>
     super.dispose();
   }
 
-  Future<void> _openLocationSearch(
-      BuildContext context, String? currentAddress) async {
-    final result = await LocationAppBarCoordinator.pickLocation(
-      context,
-      currentAddress: currentAddress,
-      selectedLocation: _locationData,
-    );
-    if (!mounted || result == null) return;
-    setState(() => _locationData = result);
-  }
-
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().profile;
     final unread = context.watch<NotificationProvider>().unreadCount;
     final auth = context.watch<AuthProvider>();
     final isClient = auth.currentRole == UserRole.client;
-    final address = profile?.address;
     final firstName = profile?.firstName ?? '';
     final avatarUrl = profile?.avatarUrl ?? '';
     final avatarLabel = firstName.isNotEmpty
         ? firstName[0].toUpperCase()
         : (isClient ? 'C' : 'F');
 
-    final locLabel =
-        _locationData?.label ?? LocationAppBarCoordinator.parseCity(address);
-
     if (unread > _prevUnread) _bellCtrl.forward(from: 0);
     _prevUnread = unread;
 
     return AppLocationRoleBar(
       bottom: widget.bottom,
-      locationLabel: locLabel,
       unreadCount: unread,
       avatarLabel: avatarLabel,
       bellScale: _bellScale,
-      onLocationTap: () => _openLocationSearch(context, address),
       onNotificationsTap: () =>
           LocationAppBarCoordinator.openNotifications(context),
       onAvatarTap: () => LocationAppBarCoordinator.openRoleSheet(

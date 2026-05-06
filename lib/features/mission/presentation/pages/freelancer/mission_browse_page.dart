@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../core/design/app_design_system.dart';
-import '../../../../../features/story/story.dart';
-import '../../../../../features/story/presentation/widgets/stories_section.dart';
-import '../../../../../features/client/presentation/pages/freelancer_profile_view.dart';
-import '../../../data/models/mission.dart';
-import '../../mission_provider.dart';
-import '../../widgets/shared/mission_shared_widgets.dart';
-import '../../widgets/cards/variants/mission_browse_card.dart';
-import 'freelancer_mission_detail_page.dart';
 import '../../../../../app/app_bar/app_section_bar.dart';
+import '../../../../../core/design/app_design_system.dart';
 import '../../../../../core/design/tokens/app_colors.dart';
+import '../../../../../features/client/presentation/pages/freelancer_profile_view.dart';
+import '../../../../../features/story/presentation/widgets/stories_section.dart';
+import '../../../../../features/story/story.dart';
+import '../../../data/models/mission.dart';
+import '../../../data/models/service_category.dart';
+import '../../mission_provider.dart';
+import '../../widgets/cards/variants/mission_browse_card.dart';
+import '../../widgets/shared/mission_shared_widgets.dart';
+import 'freelancer_mission_detail_page.dart';
 
 /// ═══════════════════════════════════════════════════════════════════════════
 /// 🔍 Inkern - Page Explorer Missions (Freelancer)
@@ -23,6 +24,7 @@ class MissionBrowsePage extends StatefulWidget {
   final bool showAppBar;
   final String? locationLabel;
   final VoidCallback? onLocationTap;
+  final String? initialCategoryId;
 
   const MissionBrowsePage({
     super.key,
@@ -30,27 +32,38 @@ class MissionBrowsePage extends StatefulWidget {
     this.showAppBar = false,
     this.locationLabel,
     this.onLocationTap,
+    this.initialCategoryId,
   });
 
   @override
   State<MissionBrowsePage> createState() => _MissionBrowsePageState();
 }
 
+enum _MissionDateFilter { all, today, thisWeek, thisMonth }
+
+enum _MissionBudgetFilter { all, under50, from50To150, from150To300, over300, quote }
+
+enum _MissionPublisherFilter { all, individual, agency }
+
 class _MissionBrowsePageState extends State<MissionBrowsePage> {
   bool _isLoading = true;
-  String? _selectedCategoryId;
+  late String? _selectedCategoryId;
+  bool _showAppliedOnly = false;
+  _MissionDateFilter _selectedDateFilter = _MissionDateFilter.all;
+  _MissionBudgetFilter _selectedBudgetFilter = _MissionBudgetFilter.all;
+  _MissionPublisherFilter _selectedPublisherFilter =
+      _MissionPublisherFilter.all;
 
   @override
   void initState() {
     super.initState();
+    _selectedCategoryId = widget.initialCategoryId;
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) setState(() => _isLoading = false);
     });
   }
 
-  // ─── Filtrage & tri ────────────────────────────────────────────────────────
-
-  List<Mission> _filtered(List<Mission> all) {
+  List<Mission> _filtered(List<Mission> all, Set<String> appliedIds) {
     var list = all
         .where((m) =>
             m.status == MissionStatus.waitingCandidates ||
@@ -61,63 +74,148 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
       list = list.where((m) => m.categoryId == _selectedCategoryId).toList();
     }
 
-    // Tri : aujourd'hui en premier (urgent), puis futur proche, puis passé
+    if (_showAppliedOnly) {
+      list = list.where((m) => appliedIds.contains(m.id)).toList();
+    }
+
+    if (_selectedPublisherFilter != _MissionPublisherFilter.all) {
+      list = list.where(_matchesPublisherFilter).toList();
+    }
+
+    if (_selectedDateFilter != _MissionDateFilter.all) {
+      list = list.where(_matchesDateFilter).toList();
+    }
+
+    if (_selectedBudgetFilter != _MissionBudgetFilter.all) {
+      list = list.where(_matchesBudgetFilter).toList();
+    }
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    int _rank(Mission m) {
-      final d = DateTime(m.date.year, m.date.month, m.date.day);
-      if (d == today) return 0;          // aujourd'hui
-      if (d.isAfter(today)) return 1;    // futur
-      return 2;                          // passé
+    int rank(Mission mission) {
+      final day = DateTime(mission.date.year, mission.date.month, mission.date.day);
+      if (day == today) return 0;
+      if (day.isAfter(today)) return 1;
+      return 2;
     }
 
     list.sort((a, b) {
-      final rankCmp = _rank(a).compareTo(_rank(b));
+      final rankCmp = rank(a).compareTo(rank(b));
       if (rankCmp != 0) return rankCmp;
-      // Même groupe : futur → le plus proche en premier ; passé → le plus récent en premier
-      return _rank(a) == 1
-          ? a.date.compareTo(b.date)
-          : b.date.compareTo(a.date);
+      return rank(a) == 1 ? a.date.compareTo(b.date) : b.date.compareTo(a.date);
     });
 
     return list;
   }
 
+  bool _matchesDateFilter(Mission mission) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final missionDay = DateTime(
+      mission.date.year,
+      mission.date.month,
+      mission.date.day,
+    );
+
+    return switch (_selectedDateFilter) {
+      _MissionDateFilter.all => true,
+      _MissionDateFilter.today => missionDay == today,
+      _MissionDateFilter.thisWeek =>
+        !missionDay.isBefore(today) &&
+        missionDay.difference(today).inDays <= 7,
+      _MissionDateFilter.thisMonth =>
+        missionDay.year == today.year && missionDay.month == today.month,
+    };
+  }
+
+  bool _matchesBudgetFilter(Mission mission) {
+    final amount = mission.budget.totalAmount;
+    return switch (_selectedBudgetFilter) {
+      _MissionBudgetFilter.all => true,
+      _MissionBudgetFilter.quote => mission.budget.type == BudgetType.quote,
+      _MissionBudgetFilter.under50 => amount > 0 && amount < 50,
+      _MissionBudgetFilter.from50To150 => amount >= 50 && amount <= 150,
+      _MissionBudgetFilter.from150To300 => amount > 150 && amount <= 300,
+      _MissionBudgetFilter.over300 => amount > 300,
+    };
+  }
+
+  bool _matchesPublisherFilter(Mission mission) {
+    final kind = _publisherKindForMission(mission);
+    return switch (_selectedPublisherFilter) {
+      _MissionPublisherFilter.all => true,
+      _MissionPublisherFilter.individual =>
+        kind == _MissionPublisherFilter.individual,
+      _MissionPublisherFilter.agency => kind == _MissionPublisherFilter.agency,
+    };
+  }
+
+  _MissionPublisherFilter _publisherKindForMission(Mission mission) {
+    final rawName = mission.client?.name.trim().toLowerCase() ?? '';
+    const agencyTokens = [
+      'agence',
+      'agency',
+      'sarl',
+      'sas',
+      'sasu',
+      'eurl',
+      'entreprise',
+      'societe',
+      'société',
+      'groupe',
+      'holding',
+      'studio',
+      'cabinet',
+      'immobilier',
+    ];
+    final looksLikeAgency = agencyTokens.any(rawName.contains);
+    return looksLikeAgency
+        ? _MissionPublisherFilter.agency
+        : _MissionPublisherFilter.individual;
+  }
 
   Future<void> _refresh() async {
     await context.read<MissionProvider>().refresh();
   }
 
-  // ─── Build ─────────────────────────────────────────────────────────────────
+  void _resetFilters() {
+    _selectedCategoryId = widget.initialCategoryId;
+    _showAppliedOnly = false;
+    _selectedDateFilter = _MissionDateFilter.all;
+    _selectedBudgetFilter = _MissionBudgetFilter.all;
+    _selectedPublisherFilter = _MissionPublisherFilter.all;
+  }
+
+  bool get _hasActiveFilters =>
+      _selectedCategoryId != null ||
+      _showAppliedOnly ||
+      _selectedDateFilter != _MissionDateFilter.all ||
+      _selectedBudgetFilter != _MissionBudgetFilter.all ||
+      _selectedPublisherFilter != _MissionPublisherFilter.all;
 
   @override
   Widget build(BuildContext context) {
     final allMissions = context.watch<MissionProvider>().publicMissions;
-    final filtered = _filtered(allMissions);
     final appliedIds = context
         .watch<MissionProvider>()
         .freelancerMissions
         .map((m) => m.id)
         .toSet();
+    final filtered = _filtered(allMissions, appliedIds);
     final storyGroups = context.watch<StoryProvider>().storyGroups;
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    bool _isToday(Mission m) {
-      final d = DateTime(m.date.year, m.date.month, m.date.day);
-      return d == today;
+    bool isToday(Mission mission) {
+      final day = DateTime(mission.date.year, mission.date.month, mission.date.day);
+      return day == today;
     }
 
-    final todayMissions = filtered.where(_isToday).toList();
-    final otherMissions = filtered.where((m) => !_isToday(m)).toList();
-
-    // Construit la liste fusionnée : [header?, ...missions]
-    final List<Object> items = [
-      if (todayMissions.isNotEmpty) ...[
-        'Aujourd\'hui',
-        ...todayMissions,
-      ],
+    final todayMissions = filtered.where(isToday).toList();
+    final otherMissions = filtered.where((m) => !isToday(m)).toList();
+    final items = <Object>[
+      if (todayMissions.isNotEmpty) ...['Aujourd\'hui', ...todayMissions],
       if (otherMissions.isNotEmpty) ...[
         if (todayMissions.isNotEmpty) 'À venir',
         ...otherMissions,
@@ -128,7 +226,12 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
       resizeToAvoidBottomInset: false,
       backgroundColor: context.colors.background,
       appBar: widget.showAppBar
-          ? const AppSectionBar(pageTitle: 'Missions')
+          ? AppSectionBar(
+              pageTitle: widget.initialCategoryId != null
+                  ? (ServiceCategory.findById(widget.initialCategoryId!)?.name ??
+                      'Missions')
+                  : 'Missions',
+            )
           : null,
       body: SafeArea(
         child: RefreshIndicator(
@@ -137,25 +240,29 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(
-                child: StoriesSection(
-                  storyGroups: storyGroups,
-                  isFreelancer: true,
-                  onProfileTap: (group) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FreelancerProfileView(
-                        freelancerId: group.groupId,
-                        freelancerName: group.groupName,
-                        freelancerAvatar: group.avatarUrl,
+              if (widget.initialCategoryId == null)
+                SliverToBoxAdapter(
+                  child: StoriesSection(
+                    storyGroups: storyGroups,
+                    isFreelancer: true,
+                    onProfileTap: (group) => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FreelancerProfileView(
+                          freelancerId: group.groupId,
+                          freelancerName: group.groupName,
+                          freelancerAvatar: group.avatarUrl,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(child: _buildHeader()),
+              if (widget.initialCategoryId == null)
+                SliverToBoxAdapter(child: _buildTopFilterBar(appliedIds.length)),
+              if (widget.initialCategoryId != null)
+                SliverToBoxAdapter(child: _buildHeader()),
               if (_isLoading)
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(height: 380, child: SkeletonList()),
                 )
               else if (filtered.isEmpty)
@@ -164,9 +271,12 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                     height: 260,
                     child: EmptyState(
                       icon: Icons.search_off_rounded,
-                      title: 'Aucune mission trouvée',
-                      subtitle:
-                          'Revenez plus tard pour découvrir de nouvelles missions',
+                      title: _showAppliedOnly
+                          ? 'Aucune mission postulée'
+                          : 'Aucune mission trouvée',
+                      subtitle: _showAppliedOnly
+                          ? 'Vous n avez pas encore postulé à une mission dans cette liste.'
+                          : 'Ajustez vos filtres ou revenez plus tard pour découvrir de nouvelles missions.',
                     ),
                   ),
                 )
@@ -177,18 +287,16 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];
-
-                      // En-tête de section
                       if (item is String) {
-                        final isToday = item == 'Aujourd\'hui';
+                        final isTodayLabel = item == 'Aujourd\'hui';
                         return Padding(
                           padding: const EdgeInsets.only(top: 12, bottom: 8),
-                          child: Row(
-                            children: [
-                              if (isToday) ...[
-                                Container(
+                          child: isTodayLabel
+                              ? Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.inkDark,
                                     borderRadius: BorderRadius.circular(999),
@@ -196,8 +304,11 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                                   child: const Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.bolt_rounded,
-                                          size: 13, color: Colors.white),
+                                      Icon(
+                                        Icons.bolt_rounded,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
                                       SizedBox(width: 4),
                                       Text(
                                         'Aujourd\'hui',
@@ -209,9 +320,8 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ] else ...[
-                                Text(
+                                )
+                              : Text(
                                   item,
                                   style: TextStyle(
                                     fontSize: 13,
@@ -219,13 +329,9 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
                                     color: AppColors.gray600,
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
                         );
                       }
 
-                      // Carte mission
                       final mission = item as Mission;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
@@ -251,24 +357,59 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
     );
   }
 
-  // ─── Sous-widgets locaux ───────────────────────────────────────────────────
-
-  Widget _buildHeader() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+  Widget _buildTopFilterBar(int appliedCount) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
       child: Row(
         children: [
-          Text(
-            'Explorer',
-            style: context.text.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: context.colors.textPrimary,
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _PublisherTabPill(
+                    label: 'Particulier',
+                    selected:
+                        _selectedPublisherFilter ==
+                        _MissionPublisherFilter.individual,
+                    onTap: () {
+                      setState(() {
+                        _selectedPublisherFilter =
+                            _selectedPublisherFilter ==
+                                    _MissionPublisherFilter.individual
+                                ? _MissionPublisherFilter.all
+                                : _MissionPublisherFilter.individual;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  _PublisherTabPill(
+                    label: 'Agence',
+                    selected:
+                        _selectedPublisherFilter ==
+                        _MissionPublisherFilter.agency,
+                    onTap: () {
+                      setState(() {
+                        _selectedPublisherFilter =
+                            _selectedPublisherFilter ==
+                                    _MissionPublisherFilter.agency
+                                ? _MissionPublisherFilter.all
+                                : _MissionPublisherFilter.agency;
+                      });
+                    },
+                  ),
+                  if (_showAppliedOnly) ...[
+                    const SizedBox(width: 10),
+                    _InfoPill(
+                      label:
+                          '$appliedCount postulée${appliedCount > 1 ? 's' : ''}',
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
-          const Spacer(),
-          // Filter button
+          const SizedBox(width: 12),
           GestureDetector(
             onTap: _showFilterSheet,
             child: AnimatedContainer(
@@ -276,12 +417,10 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _selectedCategoryId != null
-                    ? AppColors.inkDark
-                    : Colors.white,
+                color: _hasActiveFilters ? AppColors.inkDark : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: _selectedCategoryId != null
+                  color: _hasActiveFilters
                       ? AppColors.inkDark
                       : context.colors.border,
                 ),
@@ -296,7 +435,67 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
               child: Icon(
                 Icons.tune_rounded,
                 size: 20,
-                color: _selectedCategoryId != null
+                color: _hasActiveFilters
+                    ? Colors.white
+                    : context.colors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final category = widget.initialCategoryId != null
+        ? ServiceCategory.findById(widget.initialCategoryId!)
+        : null;
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(8, 8, 20, 8),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+            color: context.colors.textPrimary,
+            onPressed: () => Navigator.pop(context),
+          ),
+          Text(
+            category?.name ?? 'Explorer',
+            style: context.text.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              color: context.colors.textPrimary,
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: _showFilterSheet,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _hasActiveFilters ? AppColors.inkDark : Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _hasActiveFilters
+                      ? AppColors.inkDark
+                      : context.colors.border,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 16,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.tune_rounded,
+                size: 20,
+                color: _hasActiveFilters
                     ? Colors.white
                     : context.colors.textSecondary,
               ),
@@ -317,85 +516,363 @@ class _MissionBrowsePageState extends State<MissionBrowsePage> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheet) => Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colors.border,
-                    borderRadius: BorderRadius.circular(2),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: context.colors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Catégorie',
-                    style: context.text.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  if (_selectedCategoryId != null)
-                    GestureDetector(
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Filtres missions',
+                      style: context.text.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    if (_hasActiveFilters)
+                      GestureDetector(
+                        onTap: () {
+                          setState(_resetFilters);
+                          setSheet(() {});
+                        },
+                        child: Text(
+                          'Réinitialiser',
+                          style: context.text.labelMedium?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildFilterSectionTitle(context, 'Affichage'),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FilterPill(
+                      label: 'Toutes',
+                      selected: !_showAppliedOnly,
+                      onTap: () {
+                        setState(() => _showAppliedOnly = false);
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: 'Déjà postulé',
+                      icon: Icons.task_alt_rounded,
+                      selected: _showAppliedOnly,
+                      onTap: () {
+                        setState(() => _showAppliedOnly = true);
+                        setSheet(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildFilterSectionTitle(context, 'Publication'),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FilterPill(
+                      label: 'Toutes',
+                      selected:
+                          _selectedPublisherFilter == _MissionPublisherFilter.all,
+                      onTap: () {
+                        setState(() {
+                          _selectedPublisherFilter = _MissionPublisherFilter.all;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: 'Particulier',
+                      selected:
+                          _selectedPublisherFilter ==
+                          _MissionPublisherFilter.individual,
+                      onTap: () {
+                        setState(() {
+                          _selectedPublisherFilter =
+                              _MissionPublisherFilter.individual;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: 'Agence',
+                      selected:
+                          _selectedPublisherFilter ==
+                          _MissionPublisherFilter.agency,
+                      onTap: () {
+                        setState(() {
+                          _selectedPublisherFilter =
+                              _MissionPublisherFilter.agency;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildFilterSectionTitle(context, 'Type de service'),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FilterPill(
+                      label: 'Tous',
+                      selected: _selectedCategoryId == null,
                       onTap: () {
                         setState(() => _selectedCategoryId = null);
                         setSheet(() {});
-                        Navigator.pop(ctx);
                       },
-                      child: Text(
-                        'Réinitialiser',
-                        style: context.text.labelMedium?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    ...ServiceCategory.all.map(
+                      (category) => _FilterPill(
+                        label: category.name,
+                        icon: category.icon,
+                        color: category.color,
+                        selected: _selectedCategoryId == category.id,
+                        onTap: () {
+                          setState(() => _selectedCategoryId = category.id);
+                          setSheet(() {});
+                        },
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _FilterPill(
-                    label: 'Toutes',
-                    selected: _selectedCategoryId == null,
-                    onTap: () {
-                      setState(() => _selectedCategoryId = null);
-                      setSheet(() {});
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  ...ServiceCategory.all.map(
-                    (cat) => _FilterPill(
-                      label: cat.name,
-                      icon: cat.icon,
-                      color: cat.color,
-                      selected: _selectedCategoryId == cat.id,
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildFilterSectionTitle(context, 'Date'),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FilterPill(
+                      label: 'Toutes',
+                      selected: _selectedDateFilter == _MissionDateFilter.all,
                       onTap: () {
-                        setState(() => _selectedCategoryId = cat.id);
+                        setState(() {
+                          _selectedDateFilter = _MissionDateFilter.all;
+                        });
                         setSheet(() {});
-                        Navigator.pop(ctx);
                       },
                     ),
+                    _FilterPill(
+                      label: 'Aujourd hui',
+                      selected: _selectedDateFilter == _MissionDateFilter.today,
+                      onTap: () {
+                        setState(() {
+                          _selectedDateFilter = _MissionDateFilter.today;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: '7 jours',
+                      selected:
+                          _selectedDateFilter == _MissionDateFilter.thisWeek,
+                      onTap: () {
+                        setState(() {
+                          _selectedDateFilter = _MissionDateFilter.thisWeek;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: 'Ce mois',
+                      selected:
+                          _selectedDateFilter == _MissionDateFilter.thisMonth,
+                      onTap: () {
+                        setState(() {
+                          _selectedDateFilter = _MissionDateFilter.thisMonth;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildFilterSectionTitle(context, 'Tarif'),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FilterPill(
+                      label: 'Tous',
+                      selected: _selectedBudgetFilter == _MissionBudgetFilter.all,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter = _MissionBudgetFilter.all;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: '< 50€',
+                      selected:
+                          _selectedBudgetFilter == _MissionBudgetFilter.under50,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter =
+                              _MissionBudgetFilter.under50;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: '50€ - 150€',
+                      selected:
+                          _selectedBudgetFilter ==
+                          _MissionBudgetFilter.from50To150,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter =
+                              _MissionBudgetFilter.from50To150;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: '150€ - 300€',
+                      selected:
+                          _selectedBudgetFilter ==
+                          _MissionBudgetFilter.from150To300,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter =
+                              _MissionBudgetFilter.from150To300;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: '> 300€',
+                      selected:
+                          _selectedBudgetFilter == _MissionBudgetFilter.over300,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter =
+                              _MissionBudgetFilter.over300;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                    _FilterPill(
+                      label: 'Sur devis',
+                      selected:
+                          _selectedBudgetFilter == _MissionBudgetFilter.quote,
+                      onTap: () {
+                        setState(() {
+                          _selectedBudgetFilter = _MissionBudgetFilter.quote;
+                        });
+                        setSheet(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    label: 'Appliquer',
+                    variant: ButtonVariant.black,
+                    onPressed: () => Navigator.pop(ctx),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  Widget _buildFilterSectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+    );
+  }
 }
 
-// ─── Pill de filtre (bottom sheet) ────────────────────────────────────────────
+class _PublisherTabPill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PublisherTabPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.inkDark : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? AppColors.inkDark : context.colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: context.text.labelMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : context.colors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  final String label;
+
+  const _InfoPill({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.inkDark.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: context.text.labelMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: context.colors.textPrimary,
+        ),
+      ),
+    );
+  }
+}
 
 class _FilterPill extends StatelessWidget {
   final String label;

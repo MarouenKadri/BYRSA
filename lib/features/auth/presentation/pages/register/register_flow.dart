@@ -9,6 +9,7 @@ import '../../../../../app/navigation/root_nav.dart';
 import '../../../../../core/design/app_design_system.dart';
 import '../../../data/models/registration_data.dart';
 import '../../../data/models/user_type.dart';
+import '../../utils/auth_formatters.dart';
 import '../../widgets/country_picker.dart';
 import '../../widgets/photo_picker.dart';
 
@@ -964,15 +965,7 @@ class _StrengthBar extends StatelessWidget {
   final String password;
   const _StrengthBar({required this.password});
 
-  int get _strength {
-    if (password.length < 4) return 0;
-    int s = 0;
-    if (password.length >= 8) s++;
-    if (password.contains(RegExp(r'[A-Z]'))) s++;
-    if (password.contains(RegExp(r'[0-9]'))) s++;
-    if (password.contains(RegExp(r'[!@#\$%^&*]'))) s++;
-    return s;
-  }
+  int get _strength => passwordStrength(password);
 
   Color get _color {
     switch (_strength) {

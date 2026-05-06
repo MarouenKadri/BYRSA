@@ -47,7 +47,6 @@ class _FreelancerMissionDetailPageState
   // ─── Computed flags ─────────────────────────────────────────────────────────
 
   bool get _isAccepted => const {
-    MissionStatus.prestaChosen,
     MissionStatus.confirmed,
     MissionStatus.onTheWay,
     MissionStatus.inProgress,
@@ -147,7 +146,7 @@ class _FreelancerMissionDetailPageState
   @override
   StatusBannerConfig? resolveBanner() {
     switch (mission.status) {
-      case MissionStatus.prestaChosen:
+      case MissionStatus.confirmed:
         return StatusBannerConfig(
           color: AppColors.primary,
           icon: Icons.celebration_rounded,

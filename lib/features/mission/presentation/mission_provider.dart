@@ -157,12 +157,10 @@ class MissionProvider extends ChangeNotifier {
       if (m.id != missionId) return m;
       final p = m.assignedPresta;
       final samePresta = p != null && p.id == presta.id;
-      // Utilise prestaChosen : client a choisi, mission confirmée côté client.
-      // Les deux statuts prestaChosen + confirmed apparaissent dans l'onglet "Confirmées".
-      final sameStatus = m.status == MissionStatus.prestaChosen;
+      final sameStatus = m.status == MissionStatus.confirmed;
       if (sameStatus && samePresta) return m;
       changed = true;
-      return m.copyWith(status: MissionStatus.prestaChosen, assignedPresta: presta);
+      return m.copyWith(status: MissionStatus.confirmed, assignedPresta: presta);
     }
 
     _clientMissions = _clientMissions.map(update).toList();
@@ -287,8 +285,7 @@ class MissionProvider extends ChangeNotifier {
   Future<bool> unlockMissionStart(String missionId, String code) async {
     final mission = _findMissionById(missionId);
     if (mission == null) return false;
-    if (mission.status != MissionStatus.prestaChosen &&
-        mission.status != MissionStatus.confirmed &&
+    if (mission.status != MissionStatus.confirmed &&
         mission.status != MissionStatus.onTheWay) {
       return false;
     }
